@@ -1,0 +1,82 @@
+# Xcode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/
+
+# SwiftLint
+.swiftlint.yml
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Firebase
+GoogleService-Info.plist
+
+# API Keys and Secrets
+.env
+.env.local
+.env.production
+.env.staging
+
+# Build artifacts
+*.app
+*.ipa
+*.dSYM
+*.framework
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Test artifacts
+*.profraw
+*.xcresult
+
+# Archive
+*.xcarchive
+
+# Swift Package Manager artifacts
+Package.resolved
+
+# Local development
+local.properties
