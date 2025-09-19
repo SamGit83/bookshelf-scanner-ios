@@ -20,11 +20,7 @@ let package = Package(
                 .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
             ],
-            path: "Sources/BookshelfScannerApp",
-            infoPlist: .file(path: "../Resources/Info.plist"),
-            resources: [
-                .copy("../Resources/GoogleService-Info.plist")
-            ]
+            path: "Sources/BookshelfScannerApp"
         )
     ]
 )
