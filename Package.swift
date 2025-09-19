@@ -21,14 +21,7 @@ let package = Package(
                 .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
             ],
-            path: "Sources",
-            exclude: ["ios_bookshelf_scannerApp.swift"]
-        ),
-        .executableTarget(
-            name: "ios-bookshelf-scanner-app",
-            dependencies: ["ios-bookshelf-scanner"],
-            path: "Sources",
-            sources: ["ios_bookshelf_scannerApp.swift"]
+            path: "Sources"
         )
     ]
 )
