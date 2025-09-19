@@ -1,5 +1,8 @@
 import SwiftUI
 import FirebaseCore
+#if canImport(UIKit)
+import UIKit
+#endif
 
 @main
 struct ios_bookshelf_scannerApp: App {
@@ -8,7 +11,6 @@ struct ios_bookshelf_scannerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.dark) // Liquid Glass works best in dark mode
         }
     }
 }
@@ -18,12 +20,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Configure Firebase
         FirebaseApp.configure()
 
-        // Customize navigation bar appearance for Liquid Glass theme
+        // Customize navigation bar appearance
         let appearance = UINavigationBarAppearance()
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = UIColor(white: 0, alpha: 0.1)
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+        appearance.configureWithDefaultBackground()
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.label]
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.label]
 
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
@@ -31,7 +32,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         // Customize tab bar appearance
         let tabAppearance = UITabBarAppearance()
-        tabAppearance.configureWithTransparentBackground()
+        tabAppearance.configureWithDefaultBackground()
         UITabBar.appearance().standardAppearance = tabAppearance
         UITabBar.appearance().scrollEdgeAppearance = tabAppearance
 
