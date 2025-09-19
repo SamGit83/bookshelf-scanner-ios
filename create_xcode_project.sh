@@ -22,8 +22,7 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 		OBJ_1 /* BookshelfScannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* BookshelfScannerApp.swift */; };
 		OBJ_2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_7 /* AppDelegate.swift */; };
 		OBJ_3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_8 /* ContentView.swift */; };
-		OBJ_4 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Info.plist */; };
-		OBJ_5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* GoogleService-Info.plist */; };
+		OBJ_4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,10 +31,11 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 		OBJ_8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		OBJ_9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		OBJ_10 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = GoogleService-Info.plist; sourceTree = "<group>"; };
+		OBJ_11 /* BookshelfScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookshelfScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		OBJ_11 /* Frameworks */ = {
+		OBJ_12 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -45,26 +45,26 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		OBJ_12 /* BookshelfScanner */ = {
+		OBJ_13 /* BookshelfScanner */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_13 /* Sources */,
-				OBJ_14 /* Resources */,
-				OBJ_15 /* Products */,
+				OBJ_14 /* Sources */,
+				OBJ_15 /* Resources */,
+				OBJ_16 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		OBJ_13 /* Sources */ = {
+		OBJ_14 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* BookshelfScannerApp.swift */,
 				OBJ_7 /* AppDelegate.swift */,
 				OBJ_8 /* ContentView.swift */,
 			);
-			path = Sources;
+			path = Sources/BookshelfScannerApp;
 			sourceTree = "<group>";
 		};
-		OBJ_14 /* Resources */ = {
+		OBJ_15 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* Info.plist */,
@@ -73,10 +73,10 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		OBJ_15 /* Products */ = {
+		OBJ_16 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_16 /* BookshelfScanner.app */,
+				OBJ_11 /* BookshelfScanner.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -98,7 +98,7 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 			);
 			name = BookshelfScanner;
 			productName = BookshelfScanner;
-			productReference = OBJ_16 /* BookshelfScanner.app */;
+			productReference = OBJ_11 /* BookshelfScanner.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -124,8 +124,8 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 				en,
 				Base,
 			);
-			mainGroup = OBJ_12;
-			productRefGroup = OBJ_15 /* Products */;
+			mainGroup = OBJ_13;
+			productRefGroup = OBJ_16 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -139,8 +139,7 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				OBJ_4 /* Info.plist in Resources */,
-				OBJ_5 /* GoogleService-Info.plist in Resources */,
+				OBJ_4 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +242,7 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
@@ -283,7 +283,6 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BookshelfScanner/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -316,7 +315,6 @@ cat > BookshelfScanner.xcodeproj/project.pbxproj << 'EOF'
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BookshelfScanner/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -372,6 +370,7 @@ EOF
 echo "✅ Fresh Xcode project created!"
 echo ""
 echo "📋 Next Steps:"
+echo ""
 echo "1. Open BookshelfScanner.xcodeproj in Xcode"
 echo "2. Add Firebase packages (File → Add Packages)"
 echo "3. Set environment variables for API keys"

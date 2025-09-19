@@ -10,61 +10,20 @@
 		OBJ_1 /* BookshelfScannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* BookshelfScannerApp.swift */; };
 		OBJ_2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_7 /* AppDelegate.swift */; };
 		OBJ_3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_8 /* ContentView.swift */; };
-		OBJ_4 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* AuthService.swift */; };
-		OBJ_5 /* BookViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* BookViewModel.swift */; };
-		OBJ_6 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* CameraView.swift */; };
-		OBJ_7 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* LoginView.swift */; };
-		OBJ_8 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* LibraryView.swift */; };
-		OBJ_9 /* RecommendationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* RecommendationsView.swift */; };
-		OBJ_10 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* ProfileView.swift */; };
-		OBJ_11 /* GeminiAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* GeminiAPIService.swift */; };
-		OBJ_12 /* GoogleBooksAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* GoogleBooksAPIService.swift */; };
-		OBJ_13 /* FirebaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* FirebaseConfig.swift */; };
-		OBJ_14 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Book.swift */; };
-		OBJ_15 /* SecureConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* SecureConfig.swift */; };
-		OBJ_16 /* AddBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* AddBookView.swift */; };
-		OBJ_17 /* CurrentlyReadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* CurrentlyReadingView.swift */; };
-		OBJ_18 /* EditBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* EditBookView.swift */; };
-		OBJ_19 /* ErrorHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ErrorHandling.swift */; };
-		OBJ_20 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* OfflineCache.swift */; };
-		OBJ_21 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* OnboardingView.swift */; };
-		OBJ_22 /* ReadingProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* ReadingProgressView.swift */; };
-		OBJ_23 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* SearchView.swift */; };
-		OBJ_24 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* Info.plist */; };
-		OBJ_25 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* GoogleService-Info.plist */; };
+		OBJ_4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		OBJ_6 /* BookshelfScannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookshelfScannerApp.swift; sourceTree = "<group>"; };
 		OBJ_7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		OBJ_8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		OBJ_9 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
-		OBJ_10 /* BookViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookViewModel.swift; sourceTree = "<group>"; };
-		OBJ_11 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
-		OBJ_12 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		OBJ_13 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
-		OBJ_14 /* RecommendationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsView.swift; sourceTree = "<group>"; };
-		OBJ_15 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		OBJ_16 /* GeminiAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiAPIService.swift; sourceTree = "<group>"; };
-		OBJ_17 /* GoogleBooksAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleBooksAPIService.swift; sourceTree = "<group>"; };
-		OBJ_18 /* FirebaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseConfig.swift; sourceTree = "<group>"; };
-		OBJ_19 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
-		OBJ_20 /* SecureConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureConfig.swift; sourceTree = "<group>"; };
-		OBJ_21 /* AddBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBookView.swift; sourceTree = "<group>"; };
-		OBJ_22 /* CurrentlyReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentlyReadingView.swift; sourceTree = "<group>"; };
-		OBJ_23 /* EditBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookView.swift; sourceTree = "<group>"; };
-		OBJ_24 /* ErrorHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandling.swift; sourceTree = "<group>"; };
-		OBJ_25 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
-		OBJ_26 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		OBJ_27 /* ReadingProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingProgressView.swift; sourceTree = "<group>"; };
-		OBJ_28 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
-		OBJ_29 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		OBJ_30 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = GoogleService-Info.plist; sourceTree = "<group>"; };
-		OBJ_31 /* BookshelfScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookshelfScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		OBJ_9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		OBJ_10 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = GoogleService-Info.plist; sourceTree = "<group>"; };
+		OBJ_11 /* BookshelfScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookshelfScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		OBJ_32 /* Frameworks */ = {
+		OBJ_12 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -74,58 +33,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		OBJ_33 /* BookshelfScanner */ = {
+		OBJ_13 /* BookshelfScanner */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_34 /* Sources */,
-				OBJ_35 /* Resources */,
-				OBJ_36 /* Products */,
+				OBJ_14 /* Sources */,
+				OBJ_15 /* Resources */,
+				OBJ_16 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		OBJ_34 /* Sources */ = {
+		OBJ_14 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* BookshelfScannerApp.swift */,
 				OBJ_7 /* AppDelegate.swift */,
 				OBJ_8 /* ContentView.swift */,
-				OBJ_9 /* AuthService.swift */,
-				OBJ_10 /* BookViewModel.swift */,
-				OBJ_11 /* CameraView.swift */,
-				OBJ_12 /* LoginView.swift */,
-				OBJ_13 /* LibraryView.swift */,
-				OBJ_14 /* RecommendationsView.swift */,
-				OBJ_15 /* ProfileView.swift */,
-				OBJ_16 /* GeminiAPIService.swift */,
-				OBJ_17 /* GoogleBooksAPIService.swift */,
-				OBJ_18 /* FirebaseConfig.swift */,
-				OBJ_19 /* Book.swift */,
-				OBJ_20 /* SecureConfig.swift */,
-				OBJ_21 /* AddBookView.swift */,
-				OBJ_22 /* CurrentlyReadingView.swift */,
-				OBJ_23 /* EditBookView.swift */,
-				OBJ_24 /* ErrorHandling.swift */,
-				OBJ_25 /* OfflineCache.swift */,
-				OBJ_26 /* OnboardingView.swift */,
-				OBJ_27 /* ReadingProgressView.swift */,
-				OBJ_28 /* SearchView.swift */,
 			);
-			path = Sources;
+			path = Sources/BookshelfScannerApp;
 			sourceTree = "<group>";
 		};
-		OBJ_35 /* Resources */ = {
+		OBJ_15 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_29 /* Info.plist */,
-				OBJ_30 /* GoogleService-Info.plist */,
+				OBJ_9 /* Info.plist */,
+				OBJ_10 /* GoogleService-Info.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		OBJ_36 /* Products */ = {
+		OBJ_16 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_31 /* BookshelfScanner.app */,
+				OBJ_11 /* BookshelfScanner.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -133,13 +72,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		OBJ_37 /* BookshelfScanner */ = {
+		OBJ_17 /* BookshelfScanner */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_38 /* Build configuration list for PBXNativeTarget "BookshelfScanner" */;
+			buildConfigurationList = OBJ_18 /* Build configuration list for PBXNativeTarget "BookshelfScanner" */;
 			buildPhases = (
-				OBJ_39 /* Sources */,
-				OBJ_40 /* Frameworks */,
-				OBJ_41 /* Resources */,
+				OBJ_19 /* Sources */,
+				OBJ_20 /* Frameworks */,
+				OBJ_21 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -147,25 +86,25 @@
 			);
 			name = BookshelfScanner;
 			productName = BookshelfScanner;
-			productReference = OBJ_31 /* BookshelfScanner.app */;
+			productReference = OBJ_11 /* BookshelfScanner.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		OBJ_42 /* Project object */ = {
+		OBJ_22 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					OBJ_37 = {
+					OBJ_17 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = OBJ_43 /* Build configuration list for PBXProject "BookshelfScanner" */;
+			buildConfigurationList = OBJ_23 /* Build configuration list for PBXProject "BookshelfScanner" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -173,63 +112,42 @@
 				en,
 				Base,
 			);
-			mainGroup = OBJ_33;
-			productRefGroup = OBJ_36 /* Products */;
+			mainGroup = OBJ_13;
+			productRefGroup = OBJ_16 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				OBJ_37 /* BookshelfScanner */,
+				OBJ_17 /* BookshelfScanner */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		OBJ_41 /* Resources */ = {
+		OBJ_21 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				OBJ_24 /* Info.plist in Resources */,
-				OBJ_25 /* GoogleService-Info.plist in Resources */,
+				OBJ_4 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		OBJ_39 /* Sources */ = {
+		OBJ_19 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				OBJ_1 /* BookshelfScannerApp.swift in Sources */,
 				OBJ_2 /* AppDelegate.swift in Sources */,
 				OBJ_3 /* ContentView.swift in Sources */,
-				OBJ_4 /* AuthService.swift in Sources */,
-				OBJ_5 /* BookViewModel.swift in Sources */,
-				OBJ_6 /* CameraView.swift in Sources */,
-				OBJ_7 /* LoginView.swift in Sources */,
-				OBJ_8 /* LibraryView.swift in Sources */,
-				OBJ_9 /* RecommendationsView.swift in Sources */,
-				OBJ_10 /* ProfileView.swift in Sources */,
-				OBJ_11 /* GeminiAPIService.swift in Sources */,
-				OBJ_12 /* GoogleBooksAPIService.swift in Sources */,
-				OBJ_13 /* FirebaseConfig.swift in Sources */,
-				OBJ_14 /* Book.swift in Sources */,
-				OBJ_15 /* SecureConfig.swift in Sources */,
-				OBJ_16 /* AddBookView.swift in Sources */,
-				OBJ_17 /* CurrentlyReadingView.swift in Sources */,
-				OBJ_18 /* EditBookView.swift in Sources */,
-				OBJ_19 /* ErrorHandling.swift in Sources */,
-				OBJ_20 /* OfflineCache.swift in Sources */,
-				OBJ_21 /* OnboardingView.swift in Sources */,
-				OBJ_22 /* ReadingProgressView.swift in Sources */,
-				OBJ_23 /* SearchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		OBJ_44 /* Debug */ = {
+		OBJ_24 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -290,7 +208,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_45 /* Release */ = {
+		OBJ_25 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -311,6 +229,7 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
@@ -345,14 +264,13 @@
 			};
 			name = Release;
 		};
-		OBJ_46 /* Debug */ = {
+		OBJ_26 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BookshelfScanner/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -378,14 +296,13 @@
 			};
 			name = Debug;
 		};
-		OBJ_47 /* Release */ = {
+		OBJ_27 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"BookshelfScanner/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -398,7 +315,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bookshelfscanner.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -415,25 +331,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		OBJ_38 /* Build configuration list for PBXNativeTarget "BookshelfScanner" */ = {
+		OBJ_18 /* Build configuration list for PBXNativeTarget "BookshelfScanner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_46 /* Debug */,
-				OBJ_47 /* Release */,
+				OBJ_26 /* Debug */,
+				OBJ_27 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_43 /* Build configuration list for PBXProject "BookshelfScanner" */ = {
+		OBJ_23 /* Build configuration list for PBXProject "BookshelfScanner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_44 /* Debug */,
-				OBJ_45 /* Release */,
+				OBJ_24 /* Debug */,
+				OBJ_25 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = OBJ_42 /* Project object */;
+	rootObject = OBJ_22 /* Project object */;
 }

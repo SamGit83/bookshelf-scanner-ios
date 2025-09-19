@@ -22,7 +22,8 @@ let package = Package(
             ],
             path: "Sources/BookshelfScannerApp",
             resources: [
-                .copy("Resources")
+                .copy("../Resources/Info.plist"),
+                .copy("../Resources/GoogleService-Info.plist")
             ]
         )
     ]
