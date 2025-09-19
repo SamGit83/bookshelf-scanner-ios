@@ -118,12 +118,37 @@ class BookViewModel: ObservableObject {
                 }
 
                 let loadedBooks = documents.compactMap { document in
-                    do {
-                        return try document.data(as: Book.self)
-                    } catch {
-                        print("Error decoding book: \(error)")
+                    let data = document.data()
+                    guard
+                        let title = data["title"] as? String,
+                        let author = data["author"] as? String
+                    else {
                         return nil
                     }
+
+                    let isbn = data["isbn"] as? String
+                    let genre = data["genre"] as? String
+
+                    let statusRaw = (data["status"] as? String) ?? BookStatus.library.rawValue
+                    let status = BookStatus(rawValue: statusRaw) ?? .library
+
+                    var dateAdded = Date()
+                    if let ts = data["dateAdded"] as? Timestamp {
+                        dateAdded = ts.dateValue()
+                    } else if let d = data["dateAdded"] as? Date {
+                        dateAdded = d
+                    }
+
+                    let coverData = data["coverImageData"] as? Data
+
+                    // Build Book
+                    var book = Book(title: title, author: author, isbn: isbn, genre: genre, status: status, coverImageData: coverData)
+                    // Assign id (from stored id or documentID) and date
+                    if let idString = data["id"] as? String, let uuid = UUID(uuidString: idString) {
+                        book.id = uuid
+                    }
+                    book.dateAdded = dateAdded
+                    return book
                 }
 
                 self?.books = loadedBooks
@@ -140,13 +165,23 @@ class BookViewModel: ObservableObject {
 
         do {
             let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
-            try bookRef.setData(from: book) { error in
+            let data: [String: Any] = [
+                "id": book.id.uuidString,
+                "title": book.title,
+                "author": book.author,
+                "isbn": book.isbn as Any,
+                "genre": book.genre as Any,
+                "status": book.status.rawValue,
+                "dateAdded": Timestamp(date: book.dateAdded),
+                "coverImageData": book.coverImageData as Any
+            ]
+            bookRef.setData(data) { error in
                 if let error = error {
                     self.errorMessage = "Failed to save book: \(error.localizedDescription)"
                 }
             }
         } catch {
-            errorMessage = "Failed to encode book: \(error.localizedDescription)"
+            self.errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
     }
 
