@@ -3,7 +3,6 @@ import SwiftUI
 import UIKit
 #endif
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 struct EditBookView: View {
     @Environment(\.presentationMode) var presentationMode
