@@ -1,5 +1,4 @@
 import SwiftUI
-import BookshelfScannerApp
 
 struct BookshelfWrapperView: View {
     @StateObject private var authService = AuthService()
