@@ -127,7 +127,7 @@ class OfflineCache {
                 }
                 return fileSize
             }
-            totalSize = fileSizes.reduce(0 as Int64, +)
+            totalSize = fileSizes.reduce(Int64(0), +)
         } else {
             totalSize = 0
         }
