@@ -7,12 +7,20 @@ let package = Package(
         .iOS(.v15)
     ],
     products: [
-        .library(name: "ios-bookshelf-scanner", targets: ["ios-bookshelf-scanner"])
+        .executable(name: "BookshelfScanner", targets: ["BookshelfScannerApp"])
     ],
     dependencies: [
         .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "10.0.0"))
     ],
     targets: [
+        .executableTarget(
+            name: "BookshelfScannerApp",
+            dependencies: [
+                .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
+            ]
+        ),
         .target(
             name: "ios-bookshelf-scanner",
             dependencies: [
@@ -20,7 +28,8 @@ let package = Package(
                 .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
             ],
-            path: "Sources"
+            path: "Sources",
+            exclude: ["BookshelfScannerApp.swift", "AppDelegate.swift"]
         )
     ]
 )

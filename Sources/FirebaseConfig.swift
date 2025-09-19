@@ -6,8 +6,7 @@ class FirebaseConfig {
     static let shared = FirebaseConfig()
 
     private init() {
-        // Configure Firebase
-        FirebaseApp.configure()
+        // Firebase is now configured in AppDelegate
     }
 
     // Firestore database reference

@@ -19,8 +19,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Initialize Firebase
-            _ = FirebaseConfig.shared
+            // Firebase is initialized in AppDelegate
         }
         .onChange(of: authService.isAuthenticated) { isAuthenticated in
             if isAuthenticated {
