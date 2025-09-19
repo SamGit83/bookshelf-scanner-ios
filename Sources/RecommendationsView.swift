@@ -161,8 +161,8 @@ struct RecommendationRowView: View {
                     .font(.subheadline)
                     .foregroundColor(.gray)
 
-                if let genre = recommendation.genre {
-                    Text(genre)
+                if !recommendation.genre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && recommendation.genre.lowercased() != "unknown" {
+                    Text(recommendation.genre)
                         .font(.caption)
                         .foregroundColor(.blue)
                         .padding(.horizontal, 6)
@@ -171,7 +171,7 @@ struct RecommendationRowView: View {
                         .cornerRadius(4)
                 }
 
-                if let description = recommendation.description {
+                if let description = recommendation.description, !description.isEmpty {
                     Text(recommendation.displayDescription)
                         .font(.caption)
                         .foregroundColor(.gray)
