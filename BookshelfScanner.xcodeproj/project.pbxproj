@@ -119,7 +119,7 @@
 				OBJ_9 /* Info.plist */,
 				OBJ_10 /* GoogleService-Info.plist */,
 			);
-			path = Sources/BookshelfScannerApp/Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		OBJ_16 /* Products */ = {
@@ -354,7 +354,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Sources/BookshelfScannerApp/Resources/Info.plist;
+				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BookshelfScanner;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access to scan bookshelves";

@@ -21,8 +21,9 @@ let package = Package(
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
             ],
             path: "Sources/BookshelfScannerApp",
+            infoPlist: .file("../Resources/Info.plist"),
             resources: [
-                .copy("Resources/GoogleService-Info.plist")
+                .copy("../Resources/GoogleService-Info.plist")
             ]
         )
     ]
