@@ -1,5 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#endif
 
 struct ContentView: View {
     @StateObject private var authService = AuthService()
@@ -7,18 +9,13 @@ struct ContentView: View {
     @State private var capturedImage: UIImage?
     @State private var isShowingCamera = false
     @State private var selectedTab = 0
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     var body: some View {
-        ErrorBoundary {
-            Group {
-                if !hasCompletedOnboarding {
-                    OnboardingView()
-                } else if authService.isAuthenticated {
-                    authenticatedView
-                } else {
-                    LoginView()
-                }
+        Group {
+            if authService.isAuthenticated {
+                authenticatedView
+            } else {
+                LoginView()
             }
         }
         .onAppear {
@@ -26,17 +23,14 @@ struct ContentView: View {
             _ = FirebaseConfig.shared
         }
         .onChange(of: authService.isAuthenticated) { isAuthenticated in
-            withAnimation(.spring()) {
-                if isAuthenticated {
-                    // User signed in, refresh data
-                    viewModel.refreshData()
-                } else {
-                    // User signed out, clear local data
-                    viewModel.books = []
-                }
+            if isAuthenticated {
+                // User signed in, refresh data
+                viewModel.refreshData()
+            } else {
+                // User signed out, clear local data
+                viewModel.books = []
             }
         }
-        .animation(.spring(), value: authService.isAuthenticated)
     }
 
     private var authenticatedView: some View {
@@ -65,7 +59,6 @@ struct ContentView: View {
                 }
                 .tag(3)
         }
-        .accentColor(.blue)
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
         }
@@ -75,18 +68,7 @@ struct ContentView: View {
                 capturedImage = nil
             }
         }
-        .alert(item: Binding(
-            get: { viewModel.errorMessage.map { ErrorWrapper(error: $0) } },
-            set: { _ in viewModel.errorMessage = nil }
-        )) { errorWrapper in
-            Alert(title: Text("Error"), message: Text(errorWrapper.error), dismissButton: .default(Text("OK")))
-        }
     }
-}
-
-struct ErrorWrapper: Identifiable {
-    let id = UUID()
-    let error: String
 }
 
 struct ContentView_Previews: PreviewProvider {
