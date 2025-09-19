@@ -3,6 +3,14 @@ import Foundation
 class GoogleBooksAPIService {
     private let baseURL = "https://www.googleapis.com/books/v1/volumes"
 
+    private var apiKey: String {
+        // Try environment variable first, fallback to SecureConfig
+        if let envKey = ProcessInfo.processInfo.environment["GOOGLE_BOOKS_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
+        return SecureConfig.shared.googleBooksAPIKey
+    }
+
     func searchBooks(query: String, maxResults: Int = 10, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
         guard var urlComponents = URLComponents(string: baseURL) else {
             completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
@@ -12,7 +20,7 @@ class GoogleBooksAPIService {
         urlComponents.queryItems = [
             URLQueryItem(name: "q", value: query),
             URLQueryItem(name: "maxResults", value: String(maxResults)),
-            URLQueryItem(name: "key", value: SecureConfig.shared.googleBooksAPIKey)
+            URLQueryItem(name: "key", value: apiKey)
         ]
 
         guard let url = urlComponents.url else {

@@ -21,6 +21,10 @@ import UIKit
  */
 class GeminiAPIService {
     private var apiKey: String {
+        // Try environment variable first, fallback to SecureConfig
+        if let envKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
         return SecureConfig.shared.geminiAPIKey
     }
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
