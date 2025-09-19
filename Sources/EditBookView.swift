@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import FirebaseFirestoreSwift
 
 struct EditBookView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -211,8 +212,12 @@ struct EditBookView: View {
         updatedBook.isbn = isbn.isEmpty ? nil : isbn
         updatedBook.genre = genre.isEmpty ? nil : genre
 
-        // Update in Firestore
-        let bookRef = viewModel.db.collection("users").document(FirebaseConfig.shared.currentUserId ?? "").collection("books").document(book.id.uuidString)
+        // Update in Firestore (access db via FirebaseConfig since viewModel.db is private)
+        let bookRef = FirebaseConfig.shared.db
+            .collection("users")
+            .document(FirebaseConfig.shared.currentUserId ?? "")
+            .collection("books")
+            .document(book.id.uuidString)
 
         do {
             try bookRef.setData(from: updatedBook) { error in
