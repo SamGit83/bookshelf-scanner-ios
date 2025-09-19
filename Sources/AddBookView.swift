@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct AddBookView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -340,8 +343,9 @@ struct BookSearchResultView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
-                if let genre = book.genre {
-                    Text(genre)
+                // BookRecommendation.genre is non-optional (String). Show only if non-empty and not "Unknown".
+                if !book.genre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && book.genre.lowercased() != "unknown" {
+                    Text(book.genre)
                         .font(.caption)
                         .foregroundColor(.blue)
                 }
