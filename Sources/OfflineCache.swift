@@ -120,7 +120,7 @@ class OfflineCache {
 
         let totalSize = cacheContents?.compactMap { url -> Int64? in
             (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
-        }.reduce(0, +) ?? 0
+        }.reduce(0 as Int64, +) ?? 0
 
         return ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file)
     }
