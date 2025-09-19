@@ -3,6 +3,7 @@ import SwiftUI
 import UIKit
 #endif
 import FirebaseFirestore
+import FirebaseFirestoreSwift
 
 struct EditBookView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -219,28 +220,24 @@ struct EditBookView: View {
             .collection("books")
             .document(book.id.uuidString)
 
-        let data: [String: Any] = [
-            "id": updatedBook.id.uuidString,
-            "title": updatedBook.title,
-            "author": updatedBook.author,
-            "isbn": updatedBook.isbn as Any,
-            "genre": updatedBook.genre as Any,
-            "status": updatedBook.status.rawValue,
-            "dateAdded": Timestamp(date: updatedBook.dateAdded),
-            "coverImageData": updatedBook.coverImageData as Any
-        ]
-        bookRef.setData(data) { error in
-            DispatchQueue.main.async {
-                isLoading = false
-                if let error = error {
-                    errorMessage = "Failed to save changes: \(error.localizedDescription)"
-                } else {
-                    if updatedBook.status != selectedStatus {
-                        viewModel.moveBook(updatedBook, to: selectedStatus)
+        do {
+            try bookRef.setData(from: updatedBook) { error in
+                DispatchQueue.main.async {
+                    isLoading = false
+                    if let error = error {
+                        errorMessage = "Failed to save changes: \(error.localizedDescription)"
+                    } else {
+                        // If status changed, update it separately
+                        if updatedBook.status != selectedStatus {
+                            viewModel.moveBook(updatedBook, to: selectedStatus)
+                        }
+                        presentationMode.wrappedValue.dismiss()
                     }
-                    presentationMode.wrappedValue.dismiss()
                 }
             }
+        } catch {
+            isLoading = false
+            errorMessage = "Failed to encode book data: \(error.localizedDescription)"
         }
     }
 }

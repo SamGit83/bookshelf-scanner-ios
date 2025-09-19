@@ -117,7 +117,7 @@ class BookViewModel: ObservableObject {
                     return
                 }
 
-                let loadedBooks = documents.compactMap { document in
+                let loadedBooks: [Book] = documents.compactMap { document in
                     let data = document.data()
                     guard
                         let title = data["title"] as? String,
@@ -163,25 +163,21 @@ class BookViewModel: ObservableObject {
             return
         }
 
-        do {
-            let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
-            let data: [String: Any] = [
-                "id": book.id.uuidString,
-                "title": book.title,
-                "author": book.author,
-                "isbn": book.isbn as Any,
-                "genre": book.genre as Any,
-                "status": book.status.rawValue,
-                "dateAdded": Timestamp(date: book.dateAdded),
-                "coverImageData": book.coverImageData as Any
-            ]
-            bookRef.setData(data) { error in
-                if let error = error {
-                    self.errorMessage = "Failed to save book: \(error.localizedDescription)"
-                }
+        let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
+        let data: [String: Any] = [
+            "id": book.id.uuidString,
+            "title": book.title,
+            "author": book.author,
+            "isbn": book.isbn as Any,
+            "genre": book.genre as Any,
+            "status": book.status.rawValue,
+            "dateAdded": Timestamp(date: book.dateAdded),
+            "coverImageData": book.coverImageData as Any
+        ]
+        bookRef.setData(data) { error in
+            if let error = error {
+                self.errorMessage = "Failed to save book: \(error.localizedDescription)"
             }
-        } catch {
-            self.errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
     }
 
