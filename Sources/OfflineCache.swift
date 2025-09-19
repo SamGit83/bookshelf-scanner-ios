@@ -118,9 +118,15 @@ class OfflineCache {
     func cacheSize() -> String {
         let cacheContents = try? FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: [.fileSizeKey])
 
-        let totalSize = cacheContents?.compactMap { url -> Int64? in
-            (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
-        }.reduce(0 as Int64, +) ?? 0
+        let totalSize: Int64
+        if let contents = cacheContents {
+            let fileSizes = contents.compactMap { url -> Int64? in
+                (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
+            }
+            totalSize = fileSizes.reduce(0, +)
+        } else {
+            totalSize = 0
+        }
 
         return ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file)
     }
