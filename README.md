@@ -163,12 +163,20 @@ Firestore Database:
 
 ## Requirements
 
-- iOS 15.0+
+- iOS 15.0+ (tested on iPhone 13 with iOS 18.6)
 - Xcode 13.0+
 - Swift 5.5+
 - Valid Gemini API key
 - Valid Google Books API key
 - Firebase project with Auth and Firestore enabled
+
+## iOS 15+ Compatibility
+
+✅ **Fully compatible** with iOS 15.0 and later
+- All iOS 17+ specific APIs have been replaced with iOS 15+ alternatives
+- `.symbolEffect()` replaced with `.scaleEffect()` animation
+- Standard SwiftUI components throughout
+- No deprecated APIs or features
 
 ## License
 

@@ -6,6 +6,7 @@ let package = Package(
     platforms: [
         .iOS(.v15)
     ],
+    swiftLanguageVersions: [.v5],
     products: [
         .library(name: "ios-bookshelf-scanner", targets: ["ios-bookshelf-scanner"])
     ],

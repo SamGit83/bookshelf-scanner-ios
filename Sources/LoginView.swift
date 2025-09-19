@@ -60,7 +60,8 @@ struct LoginView: View {
                                 Image(systemName: "books.vertical.fill")
                                     .font(.system(size: 48))
                                     .foregroundColor(.white)
-                                    .symbolEffect(.bounce, value: animateForm)
+                                    .scaleEffect(animateForm ? 1.0 : 0.8)
+                                    .animation(.spring().delay(0.3), value: animateForm)
                             }
 
                             Text("Bookshelf Scanner")
