@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
@@ -6,12 +6,11 @@ let package = Package(
     platforms: [
         .iOS(.v15)
     ],
-    swiftLanguageVersions: [.v5],
     products: [
         .library(name: "ios-bookshelf-scanner", targets: ["ios-bookshelf-scanner"])
     ],
     dependencies: [
-        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "11.0.0"))
+        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", .upToNextMajor(from: "10.0.0"))
     ],
     targets: [
         .target(
