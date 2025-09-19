@@ -1,9 +1,7 @@
 import SwiftUI
-#if canImport(UIKit)
-import UIKit
-#endif
+import BookshelfScannerApp
 
-struct ContentView: View {
+struct BookshelfWrapperView: View {
     @StateObject private var authService = AuthService()
     @StateObject private var viewModel = BookViewModel()
     @State private var capturedImage: UIImage?
@@ -18,15 +16,10 @@ struct ContentView: View {
                 LoginView()
             }
         }
-        .onAppear {
-            // Firebase is initialized in AppDelegate
-        }
         .onChange(of: authService.isAuthenticated) { isAuthenticated in
             if isAuthenticated {
-                // User signed in, refresh data
                 viewModel.refreshData()
             } else {
-                // User signed out, clear local data
                 viewModel.books = []
             }
         }
@@ -70,8 +63,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct BookshelfWrapperView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        BookshelfWrapperView()
     }
 }
