@@ -6,13 +6,19 @@ class AuthService: ObservableObject {
     @Published var currentUser: User?
     @Published var errorMessage: String?
 
-    private var cancellables = Set<AnyCancellable>()
+    private var authStateListener: AuthStateDidChangeListenerHandle?
 
     init() {
         // Listen to authentication state changes
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             self?.isAuthenticated = user != nil
             self?.currentUser = user
+        }
+    }
+
+    deinit {
+        if let listener = authStateListener {
+            Auth.auth().removeStateDidChangeListener(listener)
         }
     }
 

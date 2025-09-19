@@ -19,27 +19,49 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LiquidGlass.primary.opacity(0.05)
+                Color(.systemBackground)
                     .ignoresSafeArea()
 
-                VStack(spacing: LiquidGlass.Spacing.space16) {
+                VStack(spacing: 16) {
                     // Search Header
-                    VStack(spacing: LiquidGlass.Spacing.space16) {
+                    VStack(spacing: 16) {
                         HStack {
-                            LiquidGlassSearchBar(text: $searchText, placeholder: "Search your library...")
-                                .onChange(of: searchText) { newValue in
-                                    performSearch(query: newValue)
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.gray)
+                                    .font(.system(size: 16))
+
+                                TextField("Search your library...", text: $searchText)
+                                    .foregroundColor(.primary)
+                                    .autocapitalization(.none)
+                                    .disableAutocorrection(true)
+
+                                if !searchText.isEmpty {
+                                    Button(action: {
+                                        searchText = ""
+                                    }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.gray)
+                                            .font(.system(size: 16))
+                                    }
                                 }
+                            }
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .onChange(of: searchText) { newValue in
+                                performSearch(query: newValue)
+                            }
 
                             Button(action: {
                                 presentationMode.wrappedValue.dismiss()
                             }) {
                                 Text("Cancel")
-                                    .foregroundColor(LiquidGlass.accent)
+                                    .foregroundColor(.blue)
                                     .font(.system(size: 16, weight: .medium))
                             }
                         }
-                        .padding(.horizontal, LiquidGlass.Spacing.space16)
+                        .padding(.horizontal, 16)
 
                         // Filter Picker
                         Picker("Filter", selection: $selectedFilter) {
@@ -48,7 +70,7 @@ struct SearchView: View {
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal, LiquidGlass.Spacing.space16)
+                        .padding(.horizontal, 16)
                         .onChange(of: selectedFilter) { _ in
                             if !searchText.isEmpty {
                                 performSearch(query: searchText)
@@ -59,73 +81,76 @@ struct SearchView: View {
                     // Search Results
                     if searchText.isEmpty {
                         // Empty State
-                        VStack(spacing: LiquidGlass.Spacing.space20) {
+                        VStack(spacing: 20) {
                             ZStack {
                                 Circle()
-                                    .fill(LiquidGlass.secondary.opacity(0.2))
+                                    .fill(Color.blue.opacity(0.2))
                                     .frame(width: 100, height: 100)
                                     .blur(radius: 10)
 
                                 Image(systemName: "magnifyingglass")
                                     .font(.system(size: 40))
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(.gray)
                             }
 
                             Text("Search Your Library")
-                                .font(LiquidGlass.Typography.headlineLarge)
-                                .foregroundColor(.white)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
 
                             Text("Find books by title, author, genre, or ISBN")
-                                .font(LiquidGlass.Typography.bodyMedium)
-                                .foregroundColor(.white.opacity(0.7))
+                                .font(.body)
+                                .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, LiquidGlass.Spacing.space32)
+                                .padding(.horizontal, 32)
                         }
-                        .padding(.top, LiquidGlass.Spacing.space64)
+                        .padding(.top, 64)
                     } else if isSearching {
                         // Loading State
-                        VStack(spacing: LiquidGlass.Spacing.space20) {
-                            LiquidSpinner()
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .scaleEffect(1.5)
                             Text("Searching...")
-                                .font(LiquidGlass.Typography.bodyMedium)
-                                .foregroundColor(.white.opacity(0.7))
+                                .font(.body)
+                                .foregroundColor(.secondary)
                         }
-                        .padding(.top, LiquidGlass.Spacing.space64)
+                        .padding(.top, 64)
                     } else if searchResults.isEmpty {
                         // No Results
-                        VStack(spacing: LiquidGlass.Spacing.space20) {
+                        VStack(spacing: 20) {
                             ZStack {
                                 Circle()
-                                    .fill(LiquidGlass.secondary.opacity(0.2))
+                                    .fill(Color.gray.opacity(0.2))
                                     .frame(width: 100, height: 100)
                                     .blur(radius: 10)
 
                                 Image(systemName: "book.closed")
                                     .font(.system(size: 40))
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(.gray)
                             }
 
                             Text("No books found")
-                                .font(LiquidGlass.Typography.headlineLarge)
-                                .foregroundColor(.white)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
 
                             Text("Try different keywords or check spelling")
-                                .font(LiquidGlass.Typography.bodyMedium)
-                                .foregroundColor(.white.opacity(0.7))
+                                .font(.body)
+                                .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, LiquidGlass.Spacing.space32)
+                                .padding(.horizontal, 32)
                         }
-                        .padding(.top, LiquidGlass.Spacing.space64)
+                        .padding(.top, 64)
                     } else {
                         // Results List
                         ScrollView {
-                            LazyVStack(spacing: LiquidGlass.Spacing.space16) {
+                            LazyVStack(spacing: 16) {
                                 ForEach(searchResults) { book in
                                     SearchResultRow(book: book, viewModel: viewModel)
-                                        .padding(.horizontal, LiquidGlass.Spacing.space16)
+                                        .padding(.horizontal, 16)
                                 }
                             }
-                            .padding(.vertical, LiquidGlass.Spacing.space16)
+                            .padding(.vertical, 16)
                         }
                     }
 
@@ -183,89 +208,90 @@ struct SearchResultRow: View {
     @State private var showActionSheet = false
 
     var body: some View {
-        LiquidGlassCard {
-            HStack(spacing: LiquidGlass.Spacing.space16) {
-                // Book Cover
-                ZStack {
-                    RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
-                        .fill(LiquidGlass.glassBackground)
-                        .frame(width: 50, height: 70)
+        HStack(spacing: 16) {
+            // Book Cover
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.systemGray6))
+                    .frame(width: 50, height: 70)
 
-                    if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 46, height: 66)
-                            .cornerRadius(LiquidGlass.CornerRadius.small)
-                    } else {
-                        Image(systemName: "book.fill")
-                            .resizable()
-                            .frame(width: 24, height: 30)
-                            .foregroundColor(.white.opacity(0.7))
-                    }
-                }
-
-                // Book Details
-                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space4) {
-                    Text(book.title)
-                        .font(LiquidGlass.Typography.headlineSmall)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-
-                    Text(book.author)
-                        .font(LiquidGlass.Typography.bodySmall)
-                        .foregroundColor(.white.opacity(0.8))
-
-                    if let genre = book.genre {
-                        Text(genre)
-                            .font(LiquidGlass.Typography.captionSmall)
-                            .foregroundColor(LiquidGlass.accent)
-                    }
-
-                    // Status indicator
-                    Text(book.status.rawValue)
-                        .font(LiquidGlass.Typography.captionSmall)
-                        .foregroundColor(.white.opacity(0.6))
-                        .padding(.horizontal, LiquidGlass.Spacing.space8)
-                        .padding(.vertical, LiquidGlass.Spacing.space2)
-                        .background(
-                            book.status == .currentlyReading ?
-                                LiquidGlass.accent.opacity(0.2) :
-                                LiquidGlass.secondary.opacity(0.2)
-                        )
-                        .cornerRadius(LiquidGlass.CornerRadius.small)
-                }
-
-                Spacer()
-
-                // Action Button
-                Button(action: {
-                    showActionSheet = true
-                }) {
-                    Image(systemName: "ellipsis.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.white.opacity(0.8))
-                        .liquidInteraction()
+                if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 46, height: 66)
+                        .cornerRadius(6)
+                } else {
+                    Image(systemName: "book.fill")
+                        .resizable()
+                        .frame(width: 24, height: 30)
+                        .foregroundColor(.gray)
                 }
             }
+
+            // Book Details
+            VStack(alignment: .leading, spacing: 4) {
+                Text(book.title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+
+                Text(book.author)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                if let genre = book.genre {
+                    Text(genre)
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
+
+                // Status indicator
+                Text(book.status.rawValue)
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(
+                        book.status == .currentlyReading ?
+                            Color.blue.opacity(0.8) :
+                            Color.gray.opacity(0.8)
+                    )
+                    .cornerRadius(4)
+            }
+
+            Spacer()
+
+            // Action Button
+            Button(action: {
+                showActionSheet = true
+            }) {
+                Image(systemName: "ellipsis.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.gray)
+            }
         }
+        .padding(16)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 1)
         .actionSheet(isPresented: $showActionSheet) {
             ActionSheet(
                 title: Text(book.title),
                 message: Text("Choose an action"),
                 buttons: [
                     .default(Text("Move to Currently Reading")) {
-                        withAnimation(LiquidGlass.Animation.spring) {
+                        withAnimation(.spring()) {
                             viewModel.moveBook(book, to: .currentlyReading)
                         }
                     },
                     .default(Text("Move to Library")) {
-                        withAnimation(LiquidGlass.Animation.spring) {
+                        withAnimation(.spring()) {
                             viewModel.moveBook(book, to: .library)
                         }
                     },
                     .destructive(Text("Delete Book")) {
-                        withAnimation(LiquidGlass.Animation.spring) {
+                        withAnimation(.spring()) {
                             viewModel.deleteBook(book)
                         }
                     },
@@ -273,45 +299,5 @@ struct SearchResultRow: View {
                 ]
             )
         }
-        .liquidInteraction()
-    }
-}
-
-// Custom Search Bar Component
-struct LiquidGlassSearchBar: View {
-    @Binding var text: String
-    let placeholder: String
-
-    var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.white.opacity(0.7))
-                .font(.system(size: 16))
-
-            TextField(placeholder, text: $text)
-                .foregroundColor(.white)
-                .font(LiquidGlass.Typography.bodyMedium)
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-
-            if !text.isEmpty {
-                Button(action: {
-                    text = ""
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.white.opacity(0.5))
-                        .font(.system(size: 16))
-                }
-            }
-        }
-        .padding(LiquidGlass.Spacing.space12)
-        .background(
-            RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
-                .fill(LiquidGlass.glassBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                )
-        )
     }
 }

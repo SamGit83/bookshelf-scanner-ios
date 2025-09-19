@@ -1,5 +1,7 @@
 import Foundation
-import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Offline caching system for books and user data
 class OfflineCache {
@@ -117,7 +119,7 @@ class OfflineCache {
         let cacheContents = try? FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: [.fileSizeKey])
 
         let totalSize = cacheContents?.compactMap { url -> Int64? in
-            try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize
+            (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
         }.reduce(0, +) ?? 0
 
         return ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file)
@@ -176,12 +178,12 @@ extension OfflineCache {
     }
 }
 
-// MARK: - Observable Cache Status
+// MARK: - Cache Status (Non-Observable for iOS 15+ compatibility)
 
-class CacheManager: ObservableObject {
-    @Published var isOnline = true
-    @Published var cacheSize = "0 KB"
-    @Published var lastSyncDate: Date?
+class CacheManager {
+    var isOnline = true
+    var cacheSize = "0 KB"
+    var lastSyncDate: Date?
 
     static let shared = CacheManager()
 

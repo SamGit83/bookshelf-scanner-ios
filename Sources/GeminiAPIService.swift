@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /**
  * GeminiAPIService - AI-Powered Book Recognition

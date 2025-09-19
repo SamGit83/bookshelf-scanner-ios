@@ -10,84 +10,93 @@ struct LibraryView: View {
         NavigationView {
             VStack {
                 if viewModel.libraryBooks.isEmpty {
-                    LiquidGlassCard {
-                        VStack(spacing: LiquidGlass.Spacing.space20) {
-                            ZStack {
-                                Circle()
-                                    .fill(LiquidGlass.primary.opacity(0.2))
-                                    .frame(width: 100, height: 100)
-                                    .blur(radius: 10)
+                    VStack(spacing: 20) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .frame(width: 100, height: 100)
+                                .blur(radius: 10)
 
-                                Image(systemName: "books.vertical.fill")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.white.opacity(0.8))
-                            }
-
-                            Text("No books in library")
-                                .font(LiquidGlass.Typography.headlineLarge)
-                                .foregroundColor(.white)
-
-                            Text("Scan a bookshelf to get started!")
-                                .font(LiquidGlass.Typography.bodyMedium)
-                                .foregroundColor(.white.opacity(0.7))
-                                .multilineTextAlignment(.center)
+                            Image(systemName: "books.vertical.fill")
+                                .font(.system(size: 48))
+                                .foregroundColor(.gray)
                         }
+
+                        Text("No books in library")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+
+                        Text("Scan a bookshelf to get started!")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
                     }
-                    .padding(.horizontal, LiquidGlass.Spacing.space32)
+                    .padding(.horizontal, 32)
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: LiquidGlass.Spacing.space16) {
+                        LazyVStack(spacing: 16) {
                             ForEach(viewModel.libraryBooks) { book in
-                                LiquidBookCard(book: book, viewModel: viewModel)
-                                    .padding(.horizontal, LiquidGlass.Spacing.space16)
+                                BookCard(book: book, viewModel: viewModel)
+                                    .padding(.horizontal, 16)
                             }
                         }
-                        .padding(.vertical, LiquidGlass.Spacing.space16)
+                        .padding(.vertical, 16)
                     }
                 }
 
                 Spacer()
 
-                HStack(spacing: LiquidGlass.Spacing.space16) {
-                    LiquidGlassButton(
-                        title: "Scan Bookshelf",
-                        style: .primary,
-                        isLoading: false
-                    ) {
+                HStack(spacing: 16) {
+                    Button(action: {
                         isShowingCamera = true
+                    }) {
+                        Text("Scan Bookshelf")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .font(.headline)
                     }
 
-                    LiquidGlassButton(
-                        title: "Add Manually",
-                        style: .secondary,
-                        isLoading: false
-                    ) {
+                    Button(action: {
                         isShowingAddBook = true
+                    }) {
+                        Text("Add Manually")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .font(.headline)
                     }
                 }
-                .padding(.horizontal, LiquidGlass.Spacing.space32)
-                .padding(.bottom, LiquidGlass.Spacing.space16)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 16)
             }
             .navigationTitle("Library")
             .navigationBarItems(trailing: Button(action: {
                 isShowingSearch = true
             }) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .font(.system(size: 16, weight: .medium))
             })
             .overlay(
                 Group {
                     if viewModel.isLoading {
-                        LiquidGlassCard {
-                            HStack(spacing: LiquidGlass.Spacing.space12) {
-                                LiquidSpinner()
-                                Text("Analyzing image...")
-                                    .font(LiquidGlass.Typography.bodyMedium)
-                                    .foregroundColor(.white)
-                            }
+                        HStack(spacing: 12) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            Text("Analyzing image...")
+                                .font(.body)
+                                .foregroundColor(.white)
                         }
-                        .padding(.horizontal, LiquidGlass.Spacing.space32)
+                        .padding(16)
+                        .background(Color.black.opacity(0.8))
+                        .cornerRadius(8)
+                        .padding(.horizontal, 32)
                         .transition(.scale.combined(with: .opacity))
                     }
                 }
@@ -102,7 +111,7 @@ struct LibraryView: View {
     }
 }
 
-struct LiquidBookCard: View {
+struct LibraryBookCard: View {
     let book: Book
     @ObservedObject var viewModel: BookViewModel
     @State private var showActionSheet = false
@@ -110,79 +119,77 @@ struct LiquidBookCard: View {
     @State private var showProgressView = false
 
     var body: some View {
-        LiquidGlassCard {
-            HStack(spacing: LiquidGlass.Spacing.space16) {
-                // Book Cover with Liquid Glass effect
-                ZStack {
-                    RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
-                        .fill(LiquidGlass.glassBackground)
-                        .frame(width: 60, height: 90)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                        )
+        HStack(spacing: 16) {
+            // Book Cover
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.systemGray6))
+                    .frame(width: 60, height: 90)
 
-                    if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 56, height: 86)
-                            .cornerRadius(LiquidGlass.CornerRadius.small)
-                    } else {
-                        Image(systemName: "book.fill")
-                            .resizable()
-                            .frame(width: 32, height: 40)
-                            .foregroundColor(.white.opacity(0.7))
-                    }
-                }
-                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-
-                // Book Details
-                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                    Text(book.title)
-                        .font(LiquidGlass.Typography.headlineMedium)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-
-                    Text(book.author)
-                        .font(LiquidGlass.Typography.bodyMedium)
-                        .foregroundColor(.white.opacity(0.8))
-
-                    if let genre = book.genre {
-                        Text(genre)
-                            .font(LiquidGlass.Typography.captionMedium)
-                            .foregroundColor(LiquidGlass.accent)
-                            .padding(.horizontal, LiquidGlass.Spacing.space8)
-                            .padding(.vertical, LiquidGlass.Spacing.space4)
-                            .background(LiquidGlass.accent.opacity(0.2))
-                            .cornerRadius(LiquidGlass.CornerRadius.small)
-                    }
-
-                    // Reading status indicator
-                    HStack(spacing: LiquidGlass.Spacing.space4) {
-                        Circle()
-                            .fill(book.status == .currentlyReading ? LiquidGlass.accent : LiquidGlass.secondary)
-                            .frame(width: 8, height: 8)
-
-                        Text(book.status.rawValue)
-                            .font(LiquidGlass.Typography.captionSmall)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                }
-
-                Spacer()
-
-                // Action Menu
-                Button(action: {
-                    showActionSheet = true
-                }) {
-                    Image(systemName: "ellipsis.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.white.opacity(0.8))
-                        .liquidInteraction()
+                if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 56, height: 86)
+                        .cornerRadius(6)
+                } else {
+                    Image(systemName: "book.fill")
+                        .resizable()
+                        .frame(width: 32, height: 40)
+                        .foregroundColor(.gray)
                 }
             }
+            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+
+            // Book Details
+            VStack(alignment: .leading, spacing: 8) {
+                Text(book.title)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+
+                Text(book.author)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+
+                if let genre = book.genre {
+                    Text(genre)
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(4)
+                }
+
+                // Reading status indicator
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
+                        .frame(width: 8, height: 8)
+
+                    Text(book.status.rawValue)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer()
+
+            // Action Menu
+            Button(action: {
+                showActionSheet = true
+            }) {
+                Image(systemName: "ellipsis.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.gray)
+            }
         }
+        .padding(16)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 2)
         .actionSheet(isPresented: $showActionSheet) {
             ActionSheet(
                 title: Text(book.title),
@@ -195,17 +202,17 @@ struct LiquidBookCard: View {
                         showEditView = true
                     },
                     .default(Text("Move to Currently Reading")) {
-                        withAnimation(LiquidGlass.Animation.spring) {
+                        withAnimation(.spring()) {
                             viewModel.moveBook(book, to: .currentlyReading)
                         }
                     },
                     .default(Text("Move to Library")) {
-                        withAnimation(LiquidGlass.Animation.spring) {
+                        withAnimation(.spring()) {
                             viewModel.moveBook(book, to: .library)
                         }
                     },
                     .destructive(Text("Delete Book")) {
-                        withAnimation(LiquidGlass.Animation.spring) {
+                        withAnimation(.spring()) {
                             viewModel.deleteBook(book)
                         }
                     },
@@ -219,6 +226,5 @@ struct LiquidBookCard: View {
         .sheet(isPresented: $showProgressView) {
             ReadingProgressView(book: book, viewModel: viewModel)
         }
-        .liquidInteraction()
     }
 }

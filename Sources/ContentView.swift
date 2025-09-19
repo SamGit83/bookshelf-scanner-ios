@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     @StateObject private var authService = AuthService()
@@ -25,7 +26,7 @@ struct ContentView: View {
             _ = FirebaseConfig.shared
         }
         .onChange(of: authService.isAuthenticated) { isAuthenticated in
-            withAnimation(LiquidGlass.Animation.spring) {
+            withAnimation(.spring()) {
                 if isAuthenticated {
                     // User signed in, refresh data
                     viewModel.refreshData()
@@ -35,47 +36,36 @@ struct ContentView: View {
                 }
             }
         }
-        .animation(LiquidGlass.Animation.spring, value: authService.isAuthenticated)
+        .animation(.spring(), value: authService.isAuthenticated)
     }
 
     private var authenticatedView: some View {
-        ZStack(alignment: .bottom) {
-            // Main content with blur background
-            TabView(selection: $selectedTab) {
-                LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-                    .tag(0)
-
-                CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-                    .tag(1)
-
-                RecommendationsView(viewModel: viewModel)
-                    .tag(2)
-
-                ProfileView(authService: authService)
-                    .tag(3)
-            }
-            .background(
-                // Dynamic background based on selected tab
-                Group {
-                    switch selectedTab {
-                    case 0:
-                        LiquidGlass.primary.opacity(0.1)
-                    case 1:
-                        LiquidGlass.secondary.opacity(0.1)
-                    case 2:
-                        LiquidGlass.accent.opacity(0.1)
-                    case 3:
-                        LiquidGlass.success.opacity(0.1)
-                    default:
-                        LiquidGlass.primary.opacity(0.1)
-                    }
+        TabView(selection: $selectedTab) {
+            LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+                .tabItem {
+                    Label("Library", systemImage: "books.vertical")
                 }
-                .ignoresSafeArea()
-            )
+                .tag(0)
 
-            // Custom Liquid Glass Tab Bar
-            LiquidGlassTabBarWithIndicator(selectedTab: $selectedTab)
+            CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+                .tabItem {
+                    Label("Reading", systemImage: "book")
+                }
+                .tag(1)
+
+            RecommendationsView(viewModel: viewModel)
+                .tabItem {
+                    Label("Discover", systemImage: "sparkles")
+                }
+                .tag(2)
+
+            ProfileView(authService: authService)
+                .tabItem {
+                    Label("Profile", systemImage: "person.circle")
+                }
+                .tag(3)
         }
+        .accentColor(.blue)
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
         }

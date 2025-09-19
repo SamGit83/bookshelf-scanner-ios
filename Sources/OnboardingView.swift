@@ -62,15 +62,15 @@ struct OnboardingView: View {
                 Spacer()
 
                 // Page Content
-                VStack(spacing: LiquidGlass.Spacing.space32) {
+                VStack(spacing: 32) {
                     // Page Indicator
-                    HStack(spacing: LiquidGlass.Spacing.space8) {
+                    HStack(spacing: 8) {
                         ForEach(0..<pages.count, id: \.self) { index in
                             Circle()
                                 .fill(index == currentPage ? pages[currentPage].color : Color.white.opacity(0.3))
                                 .frame(width: 8, height: 8)
                                 .scaleEffect(index == currentPage ? 1.2 : 1.0)
-                                .animation(LiquidGlass.Animation.spring, value: currentPage)
+                                .animation(.spring(), value: currentPage)
                         }
                     }
 
@@ -85,66 +85,76 @@ struct OnboardingView: View {
                             .font(.system(size: 60))
                             .foregroundColor(.white)
                             .scaleEffect(currentPage == 0 ? 1.0 : 0.8)
-                            .animation(LiquidGlass.Animation.spring.delay(0.2), value: currentPage)
+                            .animation(.spring().delay(0.2), value: currentPage)
                     }
 
                     // Text Content
-                    VStack(spacing: LiquidGlass.Spacing.space16) {
+                    VStack(spacing: 16) {
                         Text(pages[currentPage].title)
-                            .font(LiquidGlass.Typography.headlineLarge)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
-                            .animation(LiquidGlass.Animation.spring.delay(0.1), value: currentPage)
+                            .animation(.spring().delay(0.1), value: currentPage)
 
                         Text(pages[currentPage].description)
-                            .font(LiquidGlass.Typography.bodyLarge)
+                            .font(.body)
                             .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal, LiquidGlass.Spacing.space32)
-                            .animation(LiquidGlass.Animation.spring.delay(0.3), value: currentPage)
+                            .padding(.horizontal, 32)
+                            .animation(.spring().delay(0.3), value: currentPage)
                     }
                 }
 
                 Spacer()
 
                 // Navigation Buttons
-                HStack(spacing: LiquidGlass.Spacing.space16) {
+                HStack(spacing: 16) {
                     if currentPage > 0 {
-                        LiquidGlassButton(
-                            title: "Previous",
-                            style: .secondary,
-                            isLoading: false
-                        ) {
-                            withAnimation(LiquidGlass.Animation.spring) {
+                        Button(action: {
+                            withAnimation(.spring()) {
                                 currentPage -= 1
                             }
+                        }) {
+                            Text("Previous")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.white.opacity(0.2))
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
                         }
                     }
 
                     Spacer()
 
                     if currentPage < pages.count - 1 {
-                        LiquidGlassButton(
-                            title: "Next",
-                            style: .primary,
-                            isLoading: false
-                        ) {
-                            withAnimation(LiquidGlass.Animation.spring) {
+                        Button(action: {
+                            withAnimation(.spring()) {
                                 currentPage += 1
                             }
+                        }) {
+                            Text("Next")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.white)
+                                .foregroundColor(pages[currentPage].color)
+                                .cornerRadius(10)
                         }
                     } else {
-                        LiquidGlassButton(
-                            title: "Get Started",
-                            style: .primary,
-                            isLoading: false
-                        ) {
+                        Button(action: {
                             completeOnboarding()
+                        }) {
+                            Text("Get Started")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.white)
+                                .foregroundColor(pages[currentPage].color)
+                                .cornerRadius(10)
                         }
                     }
                 }
-                .padding(.horizontal, LiquidGlass.Spacing.space32)
-                .padding(.bottom, LiquidGlass.Spacing.space32)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 32)
             }
         }
         .fullScreenCover(isPresented: $showMainApp) {
@@ -154,7 +164,7 @@ struct OnboardingView: View {
 
     private func completeOnboarding() {
         hasCompletedOnboarding = true
-        withAnimation(LiquidGlass.Animation.spring) {
+        withAnimation(.spring()) {
             showMainApp = true
         }
     }

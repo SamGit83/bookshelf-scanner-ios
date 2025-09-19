@@ -14,9 +14,9 @@ struct LoginView: View {
             // Dynamic Gradient Background
             LinearGradient(
                 colors: [
-                    LiquidGlass.primary.opacity(0.8),
-                    LiquidGlass.secondary.opacity(0.6),
-                    LiquidGlass.accent.opacity(0.4)
+                    Color.blue.opacity(0.8),
+                    Color.purple.opacity(0.6),
+                    Color.pink.opacity(0.4)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -26,28 +26,34 @@ struct LoginView: View {
             // Subtle animated overlay
             GeometryReader { geometry in
                 Circle()
-                    .fill(LiquidGlass.secondary.opacity(0.1))
+                    .fill(Color.purple.opacity(0.1))
                     .frame(width: geometry.size.width * 0.8)
                     .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.2)
                     .blur(radius: 40)
 
                 Circle()
-                    .fill(LiquidGlass.accent.opacity(0.1))
+                    .fill(Color.pink.opacity(0.1))
                     .frame(width: geometry.size.width * 0.6)
                     .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.8)
                     .blur(radius: 30)
             }
 
             ScrollView {
-                VStack(spacing: LiquidGlass.Spacing.space32) {
-                    Spacer(minLength: LiquidGlass.Spacing.space64)
+                VStack(spacing: 32) {
+                    Spacer(minLength: 64)
 
-                    // App Logo/Title with Liquid Glass effect
-                    LiquidGlassCard {
-                        VStack(spacing: LiquidGlass.Spacing.space16) {
+                    // App Logo/Title with glass effect
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.white.opacity(0.1))
+                            .blur(radius: 1)
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.white.opacity(0.05))
+
+                        VStack(spacing: 16) {
                             ZStack {
                                 Circle()
-                                    .fill(LiquidGlass.primary.opacity(0.2))
+                                    .fill(Color.blue.opacity(0.2))
                                     .frame(width: 100, height: 100)
                                     .blur(radius: 10)
 
@@ -58,79 +64,104 @@ struct LoginView: View {
                             }
 
                             Text("Bookshelf Scanner")
-                                .font(LiquidGlass.Typography.displayMedium)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
                                 .foregroundColor(.white)
 
                             Text("Digitize your library with AI")
-                                .font(LiquidGlass.Typography.bodyMedium)
+                                .font(.body)
                                 .foregroundColor(.white.opacity(0.8))
                         }
+                        .padding(24)
                     }
-                    .padding(.horizontal, LiquidGlass.Spacing.space32)
+                    .padding(.horizontal, 32)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
-                    .animation(LiquidGlass.Animation.spring.delay(0.2), value: animateForm)
+                    .animation(.spring().delay(0.2), value: animateForm)
 
-                    // Login/Signup Form with Liquid Glass
-                    LiquidGlassCard(padding: LiquidGlass.Spacing.space24) {
-                        VStack(spacing: LiquidGlass.Spacing.space20) {
+                    // Login/Signup Form
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.white.opacity(0.1))
+                            .blur(radius: 1)
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.white.opacity(0.05))
+
+                        VStack(spacing: 20) {
                             // Form Header
-                            VStack(spacing: LiquidGlass.Spacing.space8) {
+                            VStack(spacing: 8) {
                                 Text(isSignUp ? "Create Account" : "Welcome Back")
-                                    .font(LiquidGlass.Typography.headlineLarge)
+                                    .font(.title)
+                                    .fontWeight(.bold)
                                     .foregroundColor(.white)
 
                                 Text(isSignUp ? "Join our reading community" : "Sign in to your account")
-                                    .font(LiquidGlass.Typography.bodySmall)
+                                    .font(.subheadline)
                                     .foregroundColor(.white.opacity(0.7))
                             }
 
                             // Email Field
-                            VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
+                            VStack(alignment: .leading, spacing: 8) {
                                 Text("Email")
-                                    .font(LiquidGlass.Typography.captionLarge)
+                                    .font(.headline)
                                     .foregroundColor(.white.opacity(0.8))
 
                                 TextField("", text: $email)
-                                    .textFieldStyle(LiquidTextFieldStyle())
+                                    .padding()
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(8)
+                                    .foregroundColor(.white)
                                     .keyboardType(.emailAddress)
                                     .autocapitalization(.none)
                                     .textContentType(.emailAddress)
                             }
 
                             // Password Field
-                            VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
+                            VStack(alignment: .leading, spacing: 8) {
                                 Text("Password")
-                                    .font(LiquidGlass.Typography.captionLarge)
+                                    .font(.headline)
                                     .foregroundColor(.white.opacity(0.8))
 
                                 SecureField("", text: $password)
-                                    .textFieldStyle(LiquidTextFieldStyle())
+                                    .padding()
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(8)
+                                    .foregroundColor(.white)
                                     .textContentType(isSignUp ? .newPassword : .password)
                             }
 
                             // Sign In/Sign Up Button
-                            LiquidGlassButton(
-                                title: isSignUp ? "Create Account" : "Sign In",
-                                style: .primary,
-                                isLoading: isLoading
-                            ) {
+                            Button(action: {
                                 if isSignUp {
                                     signUp()
                                 } else {
                                     signIn()
                                 }
+                            }) {
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text(isSignUp ? "Create Account" : "Sign In")
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.white)
+                                        .foregroundColor(Color.blue)
+                                        .cornerRadius(10)
+                                        .font(.headline)
+                                }
                             }
+                            .disabled(isLoading)
 
                             // Toggle between login and signup
                             Button(action: {
-                                withAnimation(LiquidGlass.Animation.spring) {
+                                withAnimation(.spring()) {
                                     isSignUp.toggle()
                                 }
                             }) {
                                 Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
-                                    .font(LiquidGlass.Typography.bodySmall)
-                                    .foregroundColor(LiquidGlass.accent)
+                                    .font(.subheadline)
+                                    .foregroundColor(Color.pink)
                             }
 
                             // Forgot password
@@ -139,46 +170,54 @@ struct LoginView: View {
                                     showPasswordReset = true
                                 }) {
                                     Text("Forgot Password?")
-                                        .font(LiquidGlass.Typography.captionMedium)
+                                        .font(.caption)
                                         .foregroundColor(.white.opacity(0.6))
                                 }
                             }
                         }
+                        .padding(24)
                     }
-                    .padding(.horizontal, LiquidGlass.Spacing.space32)
+                    .padding(.horizontal, 32)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
-                    .animation(LiquidGlass.Animation.spring.delay(0.4), value: animateForm)
+                    .animation(.spring().delay(0.4), value: animateForm)
 
-                    // Error message with Liquid Glass
+                    // Error message
                     if let error = authService.errorMessage {
-                        LiquidGlassCard(padding: LiquidGlass.Spacing.space16) {
-                            HStack(spacing: LiquidGlass.Spacing.space12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.red.opacity(0.1))
+                                .blur(radius: 1)
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.red.opacity(0.05))
+
+                            HStack(spacing: 12) {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundColor(LiquidGlass.error)
+                                    .foregroundColor(.red)
                                     .font(.system(size: 20))
 
                                 Text(error)
-                                    .font(LiquidGlass.Typography.bodySmall)
+                                    .font(.subheadline)
                                     .foregroundColor(.white)
                                     .multilineTextAlignment(.leading)
                             }
+                            .padding(16)
                         }
-                        .padding(.horizontal, LiquidGlass.Spacing.space32)
+                        .padding(.horizontal, 32)
                         .transition(.scale.combined(with: .opacity))
                     }
 
-                    Spacer(minLength: LiquidGlass.Spacing.space64)
+                    Spacer(minLength: 64)
                 }
             }
         }
         .onAppear {
-            withAnimation(LiquidGlass.Animation.spring.delay(0.1)) {
+            withAnimation(.spring().delay(0.1)) {
                 animateForm = true
             }
         }
         .sheet(isPresented: $showPasswordReset) {
-            LiquidPasswordResetView()
+            PasswordResetView()
         }
     }
 
@@ -213,7 +252,7 @@ struct LoginView: View {
     }
 }
 
-struct LiquidPasswordResetView: View {
+struct PasswordResetView: View {
     @State private var email = ""
     @State private var isLoading = false
     @State private var message = ""
@@ -225,16 +264,16 @@ struct LiquidPasswordResetView: View {
             // Background matching login view
             LinearGradient(
                 colors: [
-                    LiquidGlass.primary.opacity(0.8),
-                    LiquidGlass.secondary.opacity(0.6),
-                    LiquidGlass.accent.opacity(0.4)
+                    Color.blue.opacity(0.8),
+                    Color.purple.opacity(0.6),
+                    Color.pink.opacity(0.4)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
 
-            VStack(spacing: LiquidGlass.Spacing.space32) {
+            VStack(spacing: 32) {
                 Spacer()
 
                 // Header with close button
@@ -246,19 +285,24 @@ struct LiquidPasswordResetView: View {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
                             .foregroundColor(.white.opacity(0.8))
-                            .liquidInteraction()
                     }
                 }
-                .padding(.horizontal, LiquidGlass.Spacing.space24)
+                .padding(.horizontal, 24)
 
                 // Main content card
-                LiquidGlassCard(padding: LiquidGlass.Spacing.space24) {
-                    VStack(spacing: LiquidGlass.Spacing.space24) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white.opacity(0.1))
+                        .blur(radius: 1)
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white.opacity(0.05))
+
+                    VStack(spacing: 24) {
                         // Icon and title
-                        VStack(spacing: LiquidGlass.Spacing.space16) {
+                        VStack(spacing: 16) {
                             ZStack {
                                 Circle()
-                                    .fill(LiquidGlass.warning.opacity(0.2))
+                                    .fill(Color.orange.opacity(0.2))
                                     .frame(width: 80, height: 80)
                                     .blur(radius: 8)
 
@@ -268,66 +312,87 @@ struct LiquidPasswordResetView: View {
                             }
 
                             Text("Reset Password")
-                                .font(LiquidGlass.Typography.headlineLarge)
+                                .font(.title)
+                                .fontWeight(.bold)
                                 .foregroundColor(.white)
 
                             Text("Enter your email address and we'll send you a link to reset your password.")
-                                .font(LiquidGlass.Typography.bodySmall)
+                                .font(.subheadline)
                                 .foregroundColor(.white.opacity(0.7))
                                 .multilineTextAlignment(.center)
                         }
 
                         // Email field
-                        VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
+                        VStack(alignment: .leading, spacing: 8) {
                             Text("Email")
-                                .font(LiquidGlass.Typography.captionLarge)
+                                .font(.headline)
                                 .foregroundColor(.white.opacity(0.8))
 
                             TextField("", text: $email)
-                                .textFieldStyle(LiquidTextFieldStyle())
+                                .padding()
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(8)
+                                .foregroundColor(.white)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
                                 .textContentType(.emailAddress)
                         }
 
                         // Send reset link button
-                        LiquidGlassButton(
-                            title: "Send Reset Link",
-                            style: .accent,
-                            isLoading: isLoading
-                        ) {
+                        Button(action: {
                             resetPassword()
+                        }) {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Send Reset Link")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.white)
+                                    .foregroundColor(Color.orange)
+                                    .cornerRadius(10)
+                                    .font(.headline)
+                            }
                         }
                         .disabled(email.isEmpty || isLoading)
 
                         // Success/error message
                         if !message.isEmpty {
-                            LiquidGlassCard(padding: LiquidGlass.Spacing.space16) {
-                                HStack(spacing: LiquidGlass.Spacing.space12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(message.contains("sent") ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+                                    .blur(radius: 1)
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(message.contains("sent") ? Color.green.opacity(0.05) : Color.red.opacity(0.05))
+
+                                HStack(spacing: 12) {
                                     Image(systemName: message.contains("sent") ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                                        .foregroundColor(message.contains("sent") ? LiquidGlass.success : LiquidGlass.error)
+                                        .foregroundColor(message.contains("sent") ? .green : .red)
                                         .font(.system(size: 20))
 
                                     Text(message)
-                                        .font(LiquidGlass.Typography.bodySmall)
+                                        .font(.subheadline)
                                         .foregroundColor(.white)
                                         .multilineTextAlignment(.leading)
                                 }
+                                .padding(16)
                             }
                             .transition(.scale.combined(with: .opacity))
                         }
                     }
+                    .padding(24)
                 }
-                .padding(.horizontal, LiquidGlass.Spacing.space32)
+                .padding(.horizontal, 32)
                 .offset(y: animateContent ? 0 : 50)
                 .opacity(animateContent ? 1 : 0)
-                .animation(LiquidGlass.Animation.spring.delay(0.2), value: animateContent)
+                .animation(.spring().delay(0.2), value: animateContent)
 
                 Spacer()
             }
         }
         .onAppear {
-            withAnimation(LiquidGlass.Animation.spring.delay(0.1)) {
+            withAnimation(.spring().delay(0.1)) {
                 animateContent = true
             }
         }
@@ -337,7 +402,7 @@ struct LiquidPasswordResetView: View {
         isLoading = true
         AuthService().resetPassword(email: email) { result in
             isLoading = false
-            withAnimation(LiquidGlass.Animation.spring) {
+            withAnimation(.spring()) {
                 switch result {
                 case .success:
                     message = "Password reset email sent! Check your inbox."

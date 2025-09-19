@@ -16,156 +16,191 @@ struct AddBookView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LiquidGlass.primary.opacity(0.05)
+                Color(.systemBackground)
                     .ignoresSafeArea()
 
-                VStack(spacing: LiquidGlass.Spacing.space24) {
+                VStack(spacing: 24) {
                     // Header
-                    VStack(spacing: LiquidGlass.Spacing.space16) {
+                    VStack(spacing: 16) {
                         ZStack {
                             Circle()
-                                .fill(LiquidGlass.primary.opacity(0.2))
+                                .fill(Color.blue.opacity(0.2))
                                 .frame(width: 80, height: 80)
                                 .blur(radius: 10)
 
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 40))
-                                .foregroundColor(.white)
+                                .foregroundColor(.blue)
                         }
 
                         Text("Add New Book")
-                            .font(LiquidGlass.Typography.headlineLarge)
-                            .foregroundColor(.white)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
 
                         Text("Search by ISBN or enter details manually")
-                            .font(LiquidGlass.Typography.bodyMedium)
-                            .foregroundColor(.white.opacity(0.7))
+                            .font(.body)
+                            .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.horizontal, LiquidGlass.Spacing.space32)
+                    .padding(.horizontal, 32)
 
                     if !showManualEntry {
                         // ISBN Search Section
-                        LiquidGlassCard {
-                            VStack(spacing: LiquidGlass.Spacing.space16) {
-                                Text("Search by ISBN")
-                                    .font(LiquidGlass.Typography.headlineMedium)
-                                    .foregroundColor(.white)
+                        VStack(spacing: 16) {
+                            Text("Search by ISBN")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
 
-                                TextField("Enter ISBN (10 or 13 digits)", text: $isbn)
-                                    .textFieldStyle(LiquidTextFieldStyle())
-                                    .keyboardType(.numberPad)
+                            TextField("Enter ISBN (10 or 13 digits)", text: $isbn)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                                .keyboardType(.numberPad)
 
-                                LiquidGlassButton(
-                                    title: "Search Book",
-                                    style: .primary,
-                                    isLoading: isLoading
-                                ) {
-                                    searchByISBN()
-                                }
-                                .disabled(isbn.isEmpty || isLoading)
-
-                                Button(action: {
-                                    withAnimation(LiquidGlass.Animation.spring) {
-                                        showManualEntry = true
-                                    }
-                                }) {
-                                    Text("Enter Manually")
-                                        .font(LiquidGlass.Typography.bodyMedium)
-                                        .foregroundColor(LiquidGlass.accent)
+                            Button(action: {
+                                searchByISBN()
+                            }) {
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text("Search Book")
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                        .font(.headline)
                                 }
                             }
+                            .disabled(isbn.isEmpty || isLoading)
+
+                            Button(action: {
+                                withAnimation(.spring()) {
+                                    showManualEntry = true
+                                }
+                            }) {
+                                Text("Enter Manually")
+                                    .font(.body)
+                                    .foregroundColor(.blue)
+                            }
                         }
-                        .padding(.horizontal, LiquidGlass.Spacing.space32)
+                        .padding(24)
+                        .background(Color(.systemBackground))
+                        .cornerRadius(16)
+                        .shadow(radius: 2)
+                        .padding(.horizontal, 32)
 
                         // Search Results
                         if !searchResults.isEmpty {
                             ScrollView {
-                                LazyVStack(spacing: LiquidGlass.Spacing.space16) {
+                                LazyVStack(spacing: 16) {
                                     ForEach(searchResults) { book in
                                         BookSearchResultView(book: book, isSelected: selectedBook?.id == book.id) {
                                             selectedBook = book
                                         }
                                     }
                                 }
-                                .padding(.horizontal, LiquidGlass.Spacing.space32)
-                                .padding(.vertical, LiquidGlass.Spacing.space16)
+                                .padding(.horizontal, 32)
+                                .padding(.vertical, 16)
                             }
                         }
                     } else {
                         // Manual Entry Form
                         ScrollView {
-                            VStack(spacing: LiquidGlass.Spacing.space20) {
-                                LiquidGlassCard {
-                                    VStack(spacing: LiquidGlass.Spacing.space16) {
-                                        Text("Manual Entry")
-                                            .font(LiquidGlass.Typography.headlineMedium)
-                                            .foregroundColor(.white)
+                            VStack(spacing: 20) {
+                                VStack(spacing: 16) {
+                                    Text("Manual Entry")
+                                        .font(.title2)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.primary)
 
-                                        VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                            Text("Title *")
-                                                .font(LiquidGlass.Typography.captionLarge)
-                                                .foregroundColor(.white.opacity(0.8))
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Title *")
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
 
-                                            TextField("Book Title", text: $title)
-                                                .textFieldStyle(LiquidTextFieldStyle())
-                                        }
+                                        TextField("Book Title", text: $title)
+                                            .padding()
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
+                                    }
 
-                                        VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                            Text("Author *")
-                                                .font(LiquidGlass.Typography.captionLarge)
-                                                .foregroundColor(.white.opacity(0.8))
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Author *")
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
 
-                                            TextField("Author Name", text: $author)
-                                                .textFieldStyle(LiquidTextFieldStyle())
-                                        }
+                                        TextField("Author Name", text: $author)
+                                            .padding()
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
+                                    }
 
-                                        VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                            Text("ISBN (Optional)")
-                                                .font(LiquidGlass.Typography.captionLarge)
-                                                .foregroundColor(.white.opacity(0.8))
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("ISBN (Optional)")
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
 
-                                            TextField("ISBN", text: $isbn)
-                                                .textFieldStyle(LiquidTextFieldStyle())
-                                                .keyboardType(.numberPad)
-                                        }
+                                        TextField("ISBN", text: $isbn)
+                                            .padding()
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
+                                            .keyboardType(.numberPad)
+                                    }
 
-                                        VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                            Text("Genre (Optional)")
-                                                .font(LiquidGlass.Typography.captionLarge)
-                                                .foregroundColor(.white.opacity(0.8))
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Genre (Optional)")
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
 
-                                            TextField("Genre", text: $genre)
-                                                .textFieldStyle(LiquidTextFieldStyle())
-                                        }
+                                        TextField("Genre", text: $genre)
+                                            .padding()
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
+                                    }
 
-                                        HStack(spacing: LiquidGlass.Spacing.space12) {
-                                            LiquidGlassButton(
-                                                title: "Add Book",
-                                                style: .primary,
-                                                isLoading: isLoading
-                                            ) {
-                                                addBookManually()
+                                    HStack(spacing: 12) {
+                                        Button(action: {
+                                            addBookManually()
+                                        }) {
+                                            if isLoading {
+                                                ProgressView()
+                                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                            } else {
+                                                Text("Add Book")
+                                                    .frame(maxWidth: .infinity)
+                                                    .padding()
+                                                    .background(Color.blue)
+                                                    .foregroundColor(.white)
+                                                    .cornerRadius(10)
+                                                    .font(.headline)
                                             }
-                                            .disabled(title.isEmpty || author.isEmpty || isLoading)
+                                        }
+                                        .disabled(title.isEmpty || author.isEmpty || isLoading)
 
-                                            Button(action: {
-                                                withAnimation(LiquidGlass.Animation.spring) {
-                                                    showManualEntry = false
-                                                }
-                                            }) {
-                                                Text("Search ISBN")
-                                                    .font(LiquidGlass.Typography.bodyMedium)
-                                                    .foregroundColor(LiquidGlass.accent)
-                                                    .padding(.horizontal, LiquidGlass.Spacing.space16)
-                                                    .padding(.vertical, LiquidGlass.Spacing.space12)
+                                        Button(action: {
+                                            withAnimation(.spring()) {
+                                                showManualEntry = false
                                             }
+                                        }) {
+                                            Text("Search ISBN")
+                                                .font(.body)
+                                                .foregroundColor(.blue)
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 12)
                                         }
                                     }
                                 }
-                                .padding(.horizontal, LiquidGlass.Spacing.space32)
+                                .padding(24)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(16)
+                                .shadow(radius: 2)
+                                .padding(.horizontal, 32)
                             }
-                            .padding(.vertical, LiquidGlass.Spacing.space16)
+                            .padding(.vertical, 16)
                         }
                     }
 
@@ -177,14 +212,14 @@ struct AddBookView: View {
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .font(.system(size: 16, weight: .medium))
                 },
                 trailing: selectedBook != nil ? Button(action: {
                     addSelectedBook()
                 }) {
                     Text("Add")
-                        .foregroundColor(LiquidGlass.accent)
+                        .foregroundColor(.blue)
                         .font(.system(size: 16, weight: .medium))
                 } : nil
             )
@@ -257,81 +292,83 @@ struct BookSearchResultView: View {
     let onSelect: () -> Void
 
     var body: some View {
-        LiquidGlassCard {
-            HStack(spacing: LiquidGlass.Spacing.space16) {
-                // Book Cover
-                ZStack {
-                    RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
-                        .fill(LiquidGlass.glassBackground)
-                        .frame(width: 50, height: 70)
+        HStack(spacing: 16) {
+            // Book Cover
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.systemGray6))
+                    .frame(width: 50, height: 70)
 
-                    if let thumbnailURL = book.thumbnailURL,
-                       let url = URL(string: thumbnailURL) {
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .empty:
-                                ProgressView()
-                                    .frame(width: 30, height: 30)
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 46, height: 66)
-                                    .cornerRadius(LiquidGlass.CornerRadius.small)
-                            case .failure:
-                                Image(systemName: "book")
-                                    .resizable()
-                                    .frame(width: 24, height: 30)
-                                    .foregroundColor(.white.opacity(0.7))
-                            @unknown default:
-                                EmptyView()
-                            }
+                if let thumbnailURL = book.thumbnailURL,
+                   let url = URL(string: thumbnailURL) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .frame(width: 30, height: 30)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 46, height: 66)
+                                .cornerRadius(6)
+                        case .failure:
+                            Image(systemName: "book")
+                                .resizable()
+                                .frame(width: 24, height: 30)
+                                .foregroundColor(.gray)
+                        @unknown default:
+                            EmptyView()
                         }
-                    } else {
-                        Image(systemName: "book")
-                            .resizable()
-                            .frame(width: 24, height: 30)
-                            .foregroundColor(.white.opacity(0.7))
                     }
+                } else {
+                    Image(systemName: "book")
+                        .resizable()
+                        .frame(width: 24, height: 30)
+                        .foregroundColor(.gray)
                 }
+            }
 
-                // Book Details
-                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space4) {
-                    Text(book.title)
-                        .font(LiquidGlass.Typography.headlineSmall)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
+            // Book Details
+            VStack(alignment: .leading, spacing: 4) {
+                Text(book.title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
 
-                    Text(book.author)
-                        .font(LiquidGlass.Typography.bodySmall)
-                        .foregroundColor(.white.opacity(0.8))
+                Text(book.author)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
 
-                    if let genre = book.genre {
-                        Text(genre)
-                            .font(LiquidGlass.Typography.captionSmall)
-                            .foregroundColor(LiquidGlass.accent)
-                    }
+                if let genre = book.genre {
+                    Text(genre)
+                        .font(.caption)
+                        .foregroundColor(.blue)
                 }
+            }
 
-                Spacer()
+            Spacer()
 
-                // Selection Indicator
-                ZStack {
+            // Selection Indicator
+            ZStack {
+                Circle()
+                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: 2)
+                    .frame(width: 24, height: 24)
+
+                if isSelected {
                     Circle()
-                        .stroke(isSelected ? LiquidGlass.accent : Color.white.opacity(0.3), lineWidth: 2)
-                        .frame(width: 24, height: 24)
-
-                    if isSelected {
-                        Circle()
-                            .fill(LiquidGlass.accent)
-                            .frame(width: 16, height: 16)
-                    }
+                        .fill(Color.blue)
+                        .frame(width: 16, height: 16)
                 }
             }
         }
+        .padding(16)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 1)
         .opacity(isSelected ? 1.0 : 0.8)
         .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(LiquidGlass.Animation.spring, value: isSelected)
+        .animation(.spring(), value: isSelected)
         .onTapGesture {
             onSelect()
         }
