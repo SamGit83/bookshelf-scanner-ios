@@ -120,8 +120,12 @@ class OfflineCache {
 
         let totalSize: Int64
         if let contents = cacheContents {
-            let fileSizes = contents.compactMap { url -> Int64? in
-                (try? url.resourceValues(forKeys: [.fileSizeKey]))?.fileSize
+            let fileSizes: [Int64] = contents.compactMap { url in
+                guard let resourceValues = try? url.resourceValues(forKeys: [.fileSizeKey]),
+                      let fileSize = resourceValues.fileSize else {
+                    return nil
+                }
+                return fileSize
             }
             totalSize = fileSizes.reduce(0, +)
         } else {
