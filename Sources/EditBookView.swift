@@ -25,142 +25,153 @@ struct EditBookView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LiquidGlass.primary.opacity(0.05)
+                Color(.systemBackground)
                     .ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: LiquidGlass.Spacing.space24) {
+                    VStack(spacing: 24) {
                         // Header
-                        VStack(spacing: LiquidGlass.Spacing.space16) {
+                        VStack(spacing: 16) {
                             ZStack {
                                 Circle()
-                                    .fill(LiquidGlass.secondary.opacity(0.2))
+                                    .fill(Color.blue.opacity(0.2))
                                     .frame(width: 80, height: 80)
                                     .blur(radius: 10)
 
                                 Image(systemName: "pencil.circle.fill")
                                     .font(.system(size: 40))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                             }
 
                             Text("Edit Book")
-                                .font(LiquidGlass.Typography.headlineLarge)
-                                .foregroundColor(.white)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
 
                             Text("Update book details and status")
-                                .font(LiquidGlass.Typography.bodyMedium)
-                                .foregroundColor(.white.opacity(0.7))
+                                .font(.body)
+                                .foregroundColor(.secondary)
                         }
-                        .padding(.horizontal, LiquidGlass.Spacing.space32)
+                        .padding(.horizontal, 32)
 
                         // Book Cover Preview
                         if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
                             ZStack {
-                                RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.large)
-                                    .fill(LiquidGlass.glassBackground)
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.systemGray6))
                                     .frame(width: 120, height: 160)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.large)
-                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                     )
 
                                 Image(uiImage: uiImage)
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
                                     .frame(width: 112, height: 152)
-                                    .cornerRadius(LiquidGlass.CornerRadius.medium)
+                                    .cornerRadius(8)
                             }
                             .shadow(color: Color.black.opacity(0.2), radius: 12, x: 0, y: 6)
-                            .padding(.horizontal, LiquidGlass.Spacing.space32)
+                            .padding(.horizontal, 32)
                         }
 
                         // Edit Form
-                        LiquidGlassCard {
-                            VStack(spacing: LiquidGlass.Spacing.space20) {
-                                // Title Field
-                                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                    Text("Title *")
-                                        .font(LiquidGlass.Typography.captionLarge)
-                                        .foregroundColor(.white.opacity(0.8))
+                        VStack(spacing: 20) {
+                            // Title Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Title *")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
 
-                                    TextField("Book Title", text: $title)
-                                        .textFieldStyle(LiquidTextFieldStyle())
-                                }
+                                TextField("Book Title", text: $title)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
 
-                                // Author Field
-                                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                    Text("Author *")
-                                        .font(LiquidGlass.Typography.captionLarge)
-                                        .foregroundColor(.white.opacity(0.8))
+                            // Author Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Author *")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
 
-                                    TextField("Author Name", text: $author)
-                                        .textFieldStyle(LiquidTextFieldStyle())
-                                }
+                                TextField("Author Name", text: $author)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
 
-                                // ISBN Field
-                                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                    Text("ISBN")
-                                        .font(LiquidGlass.Typography.captionLarge)
-                                        .foregroundColor(.white.opacity(0.8))
+                            // ISBN Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("ISBN")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
 
-                                    TextField("ISBN (Optional)", text: $isbn)
-                                        .textFieldStyle(LiquidTextFieldStyle())
-                                        .keyboardType(.numberPad)
-                                }
+                                TextField("ISBN (Optional)", text: $isbn)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                            }
 
-                                // Genre Field
-                                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
-                                    Text("Genre")
-                                        .font(LiquidGlass.Typography.captionLarge)
-                                        .foregroundColor(.white.opacity(0.8))
+                            // Genre Field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Genre")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
 
-                                    TextField("Genre (Optional)", text: $genre)
-                                        .textFieldStyle(LiquidTextFieldStyle())
-                                }
+                                TextField("Genre (Optional)", text: $genre)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
 
-                                // Reading Status
-                                VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space12) {
-                                    Text("Reading Status")
-                                        .font(LiquidGlass.Typography.captionLarge)
-                                        .foregroundColor(.white.opacity(0.8))
+                            // Reading Status
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Reading Status")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
 
-                                    Picker("Status", selection: $selectedStatus) {
-                                        ForEach(BookStatus.allCases, id: \.self) { status in
-                                            Text(status.rawValue)
-                                                .tag(status)
-                                        }
+                                Picker("Status", selection: $selectedStatus) {
+                                    ForEach(BookStatus.allCases, id: \.self) { status in
+                                        Text(status.rawValue)
+                                            .tag(status)
                                     }
-                                    .pickerStyle(SegmentedPickerStyle())
-                                    .background(LiquidGlass.glassBackground.opacity(0.5))
-                                    .cornerRadius(LiquidGlass.CornerRadius.medium)
+                                }
+                                .pickerStyle(SegmentedPickerStyle())
+                            }
+
+                            // Action Buttons
+                            HStack(spacing: 12) {
+                                Button(action: {
+                                    presentationMode.wrappedValue.dismiss()
+                                }) {
+                                    Text("Cancel")
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.gray)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(8)
                                 }
 
-                                // Action Buttons
-                                HStack(spacing: LiquidGlass.Spacing.space12) {
-                                    LiquidGlassButton(
-                                        title: "Cancel",
-                                        style: .secondary,
-                                        isLoading: false
-                                    ) {
-                                        presentationMode.wrappedValue.dismiss()
+                                Button(action: {
+                                    saveChanges()
+                                }) {
+                                    if isLoading {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    } else {
+                                        Text("Save Changes")
                                     }
-
-                                    LiquidGlassButton(
-                                        title: "Save Changes",
-                                        style: .primary,
-                                        isLoading: isLoading
-                                    ) {
-                                        saveChanges()
-                                    }
-                                    .disabled(title.isEmpty || author.isEmpty || isLoading)
                                 }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                                .disabled(title.isEmpty || author.isEmpty || isLoading)
                             }
                         }
-                        .padding(.horizontal, LiquidGlass.Spacing.space32)
+                        .padding(16)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal, 32)
 
-                        Spacer(minLength: LiquidGlass.Spacing.space32)
+                        Spacer(minLength: 32)
                     }
-                    .padding(.vertical, LiquidGlass.Spacing.space16)
+                    .padding(.vertical, 16)
                 }
             }
             .navigationBarItems(
@@ -168,7 +179,7 @@ struct EditBookView: View {
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .font(.system(size: 16, weight: .medium))
                 }
             )

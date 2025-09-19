@@ -171,60 +171,60 @@ struct ErrorAlertView: View {
 
     var body: some View {
         if errorHandler.showError, let error = errorHandler.currentError {
-            VStack(spacing: LiquidGlass.Spacing.space16) {
-                HStack(spacing: LiquidGlass.Spacing.space12) {
+            VStack(spacing: 16) {
+                HStack(spacing: 12) {
                     Image(systemName: error.iconName)
                         .foregroundColor(error.severity.color)
                         .font(.system(size: 24))
 
-                    VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space4) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("Error")
-                            .font(LiquidGlass.Typography.headlineSmall)
-                            .foregroundColor(.white)
+                            .font(.headline)
+                            .foregroundColor(.primary)
 
                         Text(error.localizedDescription)
-                            .font(LiquidGlass.Typography.bodySmall)
-                            .foregroundColor(.white.opacity(0.8))
+                            .font(.body)
+                            .foregroundColor(.secondary)
                             .lineLimit(2)
                     }
 
                     Spacer()
 
                     Button(action: {
-                        withAnimation(LiquidGlass.Animation.spring) {
+                        withAnimation(.spring()) {
                             showDetails.toggle()
                         }
                     }) {
                         Image(systemName: showDetails ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.secondary)
                     }
                 }
 
                 if showDetails {
-                    VStack(alignment: .leading, spacing: LiquidGlass.Spacing.space8) {
+                    VStack(alignment: .leading, spacing: 8) {
                         if let suggestion = error.recoverySuggestion {
                             Text("💡 Suggestion")
-                                .font(LiquidGlass.Typography.captionLarge)
-                                .foregroundColor(LiquidGlass.accent)
+                                .font(.caption)
+                                .foregroundColor(.blue)
 
                             Text(suggestion)
-                                .font(LiquidGlass.Typography.bodySmall)
-                                .foregroundColor(.white.opacity(0.8))
+                                .font(.body)
+                                .foregroundColor(.secondary)
                         }
 
-                        HStack(spacing: LiquidGlass.Spacing.space12) {
+                        HStack(spacing: 12) {
                             Spacer()
 
                             Button(action: {
                                 errorHandler.dismissError()
                             }) {
                                 Text("Dismiss")
-                                    .font(LiquidGlass.Typography.bodySmall)
-                                    .foregroundColor(.white.opacity(0.6))
-                                    .padding(.horizontal, LiquidGlass.Spacing.space12)
-                                    .padding(.vertical, LiquidGlass.Spacing.space6)
-                                    .background(Color.white.opacity(0.1))
-                                    .cornerRadius(LiquidGlass.CornerRadius.small)
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(8)
                             }
 
                             Button(action: {
@@ -232,28 +232,28 @@ struct ErrorAlertView: View {
                                 errorHandler.dismissError()
                             }) {
                                 Text("Retry")
-                                    .font(LiquidGlass.Typography.bodySmall)
+                                    .font(.body)
                                     .foregroundColor(.white)
-                                    .padding(.horizontal, LiquidGlass.Spacing.space12)
-                                    .padding(.vertical, LiquidGlass.Spacing.space6)
-                                    .background(LiquidGlass.accent.opacity(0.8))
-                                    .cornerRadius(LiquidGlass.CornerRadius.small)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.blue)
+                                    .cornerRadius(8)
                             }
                         }
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
-            .padding(LiquidGlass.Spacing.space16)
+            .padding(16)
             .background(
-                RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
+                RoundedRectangle(cornerRadius: 12)
                     .fill(Color.red.opacity(0.1))
                     .overlay(
-                        RoundedRectangle(cornerRadius: LiquidGlass.CornerRadius.medium)
+                        RoundedRectangle(cornerRadius: 12)
                             .stroke(error.severity.color.opacity(0.3), lineWidth: 1)
                     )
             )
-            .padding(.horizontal, LiquidGlass.Spacing.space16)
+            .padding(.horizontal, 16)
             .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
@@ -281,7 +281,7 @@ struct ErrorBoundary<Content: View>: View {
                         .transition(.move(edge: .bottom))
                 }
             }
-            .animation(LiquidGlass.Animation.spring, value: errorHandler.showError)
+            .animation(.spring(), value: errorHandler.showError)
         }
     }
 }
