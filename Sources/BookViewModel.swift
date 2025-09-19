@@ -1,6 +1,9 @@
 import SwiftUI
 import Combine
 import FirebaseFirestore
+#if canImport(UIKit)
+import UIKit
+#endif
 
 class BookViewModel: ObservableObject {
     @Published var books: [Book] = []

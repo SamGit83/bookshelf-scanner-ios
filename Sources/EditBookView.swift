@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct EditBookView: View {
     @Environment(\.presentationMode) var presentationMode

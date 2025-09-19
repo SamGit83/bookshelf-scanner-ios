@@ -125,7 +125,7 @@ class OfflineCache {
                       let fileSize = resourceValues.fileSize else {
                     return nil
                 }
-                return fileSize
+                return Int64(fileSize)
             }
             totalSize = fileSizes.reduce(Int64(0), +)
         } else {
