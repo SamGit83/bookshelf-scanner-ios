@@ -19,17 +19,8 @@ let package = Package(
                 .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
-            ]
-        ),
-        .target(
-            name: "ios-bookshelf-scanner",
-            dependencies: [
-                .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
-                .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
-                .product(name: "FirebaseStorage", package: "firebase-ios-sdk")
             ],
-            path: "Sources",
-            exclude: ["BookshelfScannerApp.swift", "AppDelegate.swift"]
+            path: "Sources/BookshelfScannerApp"
         )
     ]
 )
