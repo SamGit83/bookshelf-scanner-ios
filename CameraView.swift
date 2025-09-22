@@ -7,10 +7,26 @@ struct CameraView: UIViewControllerRepresentable {
     @Binding var isShowingCamera: Bool
 
     func makeUIViewController(context: Context) -> UIViewController {
+        print("DEBUG CameraView: makeUIViewController called")
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        print("DEBUG CameraView: Camera authorization status: \(status.rawValue)")
+        if status == .notDetermined {
+            print("DEBUG CameraView: Requesting camera access")
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    print("DEBUG CameraView: Camera access \(granted ? "granted" : "denied")")
+                }
+            }
+        }
+
         let viewController = UIViewController()
         let captureSession = AVCaptureSession()
 
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return viewController }
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+            print("DEBUG CameraView: No video capture device available")
+            return viewController
+        }
+        print("DEBUG CameraView: Video capture device found")
         let videoInput: AVCaptureDeviceInput
 
         do {
@@ -21,8 +37,20 @@ struct CameraView: UIViewControllerRepresentable {
 
         if captureSession.canAddInput(videoInput) {
             captureSession.addInput(videoInput)
+            print("DEBUG CameraView: Added video input to session")
         } else {
+            print("DEBUG CameraView: Cannot add video input to session")
             return viewController
+        }
+
+        // Add photo output
+        let photoOutput = AVCapturePhotoOutput()
+        if captureSession.canAddOutput(photoOutput) {
+            captureSession.addOutput(photoOutput)
+            context.coordinator.photoOutput = photoOutput
+            print("DEBUG CameraView: Added photo output to session")
+        } else {
+            print("DEBUG CameraView: Cannot add photo output to session")
         }
 
         let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
@@ -31,6 +59,7 @@ struct CameraView: UIViewControllerRepresentable {
         viewController.view.layer.addSublayer(previewLayer)
 
         captureSession.startRunning()
+        print("DEBUG CameraView: Capture session started")
 
         // Add capture button
         // Add Liquid Glass overlay
@@ -100,28 +129,29 @@ struct CameraView: UIViewControllerRepresentable {
         init(_ parent: CameraView) {
             self.parent = parent
             super.init()
-
-            // Add photo output
-            photoOutput = AVCapturePhotoOutput()
-            if let photoOutput = photoOutput, let captureSession = captureSession, captureSession.canAddOutput(photoOutput) {
-                captureSession.addOutput(photoOutput)
-            }
+            print("DEBUG Coordinator: Initialized")
         }
 
         @objc func capturePhoto() {
+            print("DEBUG Coordinator: capturePhoto called")
             let settings = AVCapturePhotoSettings()
             photoOutput?.capturePhoto(with: settings, delegate: self)
         }
 
         @objc func cancelCapture() {
+            print("DEBUG Coordinator: cancelCapture called")
             parent.isShowingCamera = false
         }
 
         func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+            print("DEBUG Coordinator: photoOutput didFinishProcessingPhoto, error: \(error?.localizedDescription ?? "none")")
             if let imageData = photo.fileDataRepresentation(),
                let image = UIImage(data: imageData) {
+                print("DEBUG Coordinator: Image captured successfully")
                 parent.capturedImage = image
                 parent.isShowingCamera = false
+            } else {
+                print("DEBUG Coordinator: Failed to create image from photo data")
             }
         }
     }
