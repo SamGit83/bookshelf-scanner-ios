@@ -398,10 +398,7 @@ struct ButtonStyles {
 }
 
 // MARK: - Card Style System
-protocol CardStyling: ViewModifier {}
-
-// MARK: - Card Style System
-struct CardStyle: CardStyling {
+struct CardStyle: ViewModifier {
     let background: LinearGradient
     let cornerRadius: CGFloat
     let padding: CGFloat
