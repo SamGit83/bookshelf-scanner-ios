@@ -310,7 +310,7 @@ struct AnimationTiming {
 
 // MARK: - Button Style System
 struct ButtonStyleModifier: ViewModifier {
-    associatedtype Content = View
+    typealias Body = some View
     let background: LinearGradient
     let foregroundColor: Color
     let cornerRadius: CGFloat
@@ -397,7 +397,7 @@ struct ButtonStyles {
 
 // MARK: - Card Style System
 struct CardStyleModifier: ViewModifier {
-    associatedtype Content = View
+    typealias Body = some View
     let background: LinearGradient
     let cornerRadius: CGFloat
     let padding: CGFloat
