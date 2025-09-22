@@ -398,12 +398,10 @@ struct ButtonStyles {
 }
 
 // MARK: - Card Style System
-protocol CardStyling {
-    @ViewBuilder func makeBody(content: some View) -> some View
-}
+protocol CardStyling: ViewModifier {}
 
 // MARK: - Card Style System
-struct CardStyle: CardStyling {
+struct CardStyle: ViewModifier {
     let background: LinearGradient
     let cornerRadius: CGFloat
     let padding: CGFloat
@@ -411,8 +409,7 @@ struct CardStyle: CardStyling {
     let border: (color: Color, width: CGFloat)?
     let blur: CGFloat?
 
-    @ViewBuilder
-    func makeBody(content: some View) -> some View {
+    func body(content: Content) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
         let shadowColor = shadow?.color ?? Color.clear
@@ -478,14 +475,6 @@ struct CardStyles {
         )
     }
 
-struct CardStyleModifierView<Style: CardStyling, Content: View>: View {
-    let style: Style
-    let content: Content
-
-    var body: some View {
-        style.makeBody(content: content)
-    }
-}
 
 // MARK: - Enhanced Animated Background
 struct AnimatedBackground: View {
@@ -748,20 +737,17 @@ extension View {
     }
     
     func bookCardStyle() -> some View {
-        self.cardStyle(CardStyles.bookCard())
+        self.modifier(CardStyles.bookCard())
     }
 
     func featureCardStyle() -> some View {
-        self.cardStyle(CardStyles.featureCard())
-    }
-    
-    func recommendationCardStyle() -> some View {
-        self.cardStyle(CardStyles.recommendationCard())
+        self.modifier(CardStyles.featureCard())
     }
 
-    func cardStyle<Style: CardStyling>(_ style: Style) -> CardStyleModifierView<Style, Self> {
-        CardStyleModifierView(style: style, content: self)
+    func recommendationCardStyle() -> some View {
+        self.modifier(CardStyles.recommendationCard())
     }
+
 
     func vibrantBackground(_ gradient: LinearGradient) -> some View {
         self.background(gradient.ignoresSafeArea())
