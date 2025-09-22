@@ -201,27 +201,44 @@ struct LibraryBookCard: View {
                             .font(.body)
                             .foregroundColor(.secondary)
 
-                        // Create a more symmetrical badge layout
-                        let availableBadges = [
-                            book.subGenre != nil ? ("subGenre", book.subGenre!, Color.green) : nil,
-                            book.estimatedReadingTime != nil ? ("time", "~ \(book.estimatedReadingTime!)", Color.orange) : nil,
-                            book.pageCount != nil ? ("pages", "\(book.pageCount!) pages", Color.purple) : nil
-                        ].compactMap { $0 }
+                        // Badge layout: time and pages in one row, subGenre in next
+                        let timeBadge = book.estimatedReadingTime != nil ? ("time", "~ \(book.estimatedReadingTime!)", Color.orange) : nil
+                        let pagesBadge = book.pageCount != nil ? ("pages", "\(book.pageCount!) pages", Color.purple) : nil
+                        let subGenreBadge = book.subGenre != nil ? ("subGenre", book.subGenre!, Color.green) : nil
                         
-                        if !availableBadges.isEmpty {
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: min(availableBadges.count, 3)), spacing: 4) {
-                                ForEach(Array(availableBadges.enumerated()), id: \.offset) { index, badge in
-                                    Text(badge.1)
+                        VStack(spacing: 4) {
+                            HStack(spacing: 4) {
+                                if let timeBadge = timeBadge {
+                                    Text(timeBadge.1)
                                         .font(.caption)
-                                        .foregroundColor(badge.2)
+                                        .foregroundColor(timeBadge.2)
                                         .padding(.horizontal, 6)
                                         .padding(.vertical, 3)
-                                        .background(badge.2.opacity(0.1))
+                                        .background(timeBadge.2.opacity(0.1))
                                         .cornerRadius(4)
-                                        .frame(maxWidth: .infinity)
                                         .multilineTextAlignment(.center)
-                                        .lineLimit(1)
                                 }
+                                if let pagesBadge = pagesBadge {
+                                    Text(pagesBadge.1)
+                                        .font(.caption)
+                                        .foregroundColor(pagesBadge.2)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 3)
+                                        .background(pagesBadge.2.opacity(0.1))
+                                        .cornerRadius(4)
+                                        .multilineTextAlignment(.center)
+                                }
+                            }
+                            if let subGenreBadge = subGenreBadge {
+                                Text(subGenreBadge.1)
+                                    .font(.caption)
+                                    .foregroundColor(subGenreBadge.2)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
+                                    .background(subGenreBadge.2.opacity(0.1))
+                                    .cornerRadius(4)
+                                    .frame(maxWidth: .infinity)
+                                    .multilineTextAlignment(.center)
                             }
                         }
 
