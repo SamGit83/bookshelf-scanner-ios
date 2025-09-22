@@ -64,10 +64,10 @@ struct ContentView: View {
         let initials = userInitials
         print("DEBUG ContentView tabs: userInitials = '\(initials)'")
         return [
-            TabItem(icon: Image(systemName: "books.vertical"), label: "Library", tag: 0),
-            TabItem(icon: Image(systemName: "book"), label: "Reading", tag: 1),
-            TabItem(icon: Image(systemName: "sparkles"), label: "Discover", tag: 2),
-            TabItem(icon: ProfileInitialsView(initials: initials), label: "Profile", tag: 3)
+            TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
+            TabItem(icon: AnyView(Image(systemName: "book")), label: "Reading", tag: 1),
+            TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
+            TabItem(icon: AnyView(ProfileInitialsView(initials: initials)), label: "Profile", tag: 3)
         ]
     }
 
