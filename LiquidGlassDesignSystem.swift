@@ -398,7 +398,13 @@ struct ButtonStyles {
 }
 
 // MARK: - Card Style System
-struct CardStyleModifier: ViewModifier {
+protocol CardStyling {
+    associatedtype Body: View
+    @ViewBuilder func makeBody(content: some View) -> Body
+}
+
+// MARK: - Card Style System
+struct CardStyle: CardStyling {
     let background: LinearGradient
     let cornerRadius: CGFloat
     let padding: CGFloat
@@ -406,7 +412,7 @@ struct CardStyleModifier: ViewModifier {
     let border: (color: Color, width: CGFloat)?
     let blur: CGFloat?
 
-    func body(content: Content) -> some View {
+    func makeBody(content: some View) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
         let shadowColor = shadow?.color ?? Color.clear
@@ -430,8 +436,8 @@ struct CardStyleModifier: ViewModifier {
 
 struct CardStyles {
     // Book Card Style
-    static func bookCard() -> CardStyleModifier {
-        return CardStyleModifier(
+    static func bookCard() -> CardStyle {
+        return CardStyle(
             background: UIGradients.cardBackground,
             cornerRadius: 20,
             padding: 16,
@@ -442,8 +448,8 @@ struct CardStyles {
     }
     
     // Feature Card Style
-    static func featureCard() -> CardStyleModifier {
-        return CardStyleModifier(
+    static func featureCard() -> CardStyle {
+        return CardStyle(
             background: UIGradients.glassEffect,
             cornerRadius: 24,
             padding: 20,
@@ -454,8 +460,8 @@ struct CardStyles {
     }
     
     // Recommendation Card Style
-    static func recommendationCard() -> CardStyleModifier {
-        return CardStyleModifier(
+    static func recommendationCard() -> CardStyle {
+        return CardStyle(
             background: LinearGradient(
                 colors: [
                     Color(hex: "FF2D92").opacity(0.1),
@@ -470,6 +476,14 @@ struct CardStyles {
             border: (color: Color(hex: "FF2D92").opacity(0.3), width: 1),
             blur: 0
         )
+    }
+
+struct CardStyleModifierView<Style: CardStyling, Content: View>: View {
+    let style: Style
+    let content: Content
+
+    var body: some View {
+        style.makeBody(content: content)
     }
 }
 
@@ -734,17 +748,21 @@ extension View {
     }
     
     func bookCardStyle() -> some View {
-        self.modifier(CardStyles.bookCard())
+        self.cardStyle(CardStyles.bookCard())
     }
-    
+
     func featureCardStyle() -> some View {
-        self.modifier(CardStyles.featureCard())
+        self.cardStyle(CardStyles.featureCard())
     }
     
     func recommendationCardStyle() -> some View {
-        self.modifier(CardStyles.recommendationCard())
+        self.cardStyle(CardStyles.recommendationCard())
     }
-    
+
+    func cardStyle<Style: CardStyling>(_ style: Style) -> CardStyleModifierView<Style, Self> {
+        CardStyleModifierView(style: style, content: self)
+    }
+
     func vibrantBackground(_ gradient: LinearGradient) -> some View {
         self.background(gradient.ignoresSafeArea())
     }
@@ -768,7 +786,7 @@ struct HomePageColors {
 }
 
 struct LibraryColors {
-    static let bookCardBackground = CardStyles.bookCard()
+    static let bookCardBackground = UIGradients.cardBackground
     static let searchBarFocus = Color(hex: "FF2D92")
     static let filterButtons = UIGradients.secondaryButton
     static let scanButton = UIGradients.primaryButton
@@ -813,7 +831,14 @@ struct ReadingProgressColors {
 }
 
 struct DiscoverColors {
-    static let recommendationCard = CardStyles.recommendationCard()
+    static let recommendationCard = LinearGradient(
+        colors: [
+            Color(hex: "FF2D92").opacity(0.1),
+            Color(hex: "5856D6").opacity(0.05)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
     static let categoryFilters = UIGradients.secondaryButton
     static let trendingAccent = AccentColors.hotMagenta
     static let personalizedTint = PrimaryColors.vibrantPurple.opacity(0.1)
