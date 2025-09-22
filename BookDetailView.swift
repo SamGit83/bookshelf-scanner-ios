@@ -165,7 +165,6 @@ struct BookDetailView: View {
                             .padding()
                         }
                     } else {
-                        print("DEBUG BookDetailView: Book teaser is nil or empty for book: \(book.title ?? "Unknown")")
                         if isLoadingTeaser {
                             GlassCard {
                                 VStack(alignment: .leading, spacing: 12) {
@@ -197,7 +196,6 @@ struct BookDetailView: View {
                             .padding()
                         }
                     } else {
-                        print("DEBUG BookDetailView: Author bio is nil or empty for book: \(book.title ?? "Unknown") by \(book.author ?? "Unknown")")
                         if isLoadingBio {
                             GlassCard {
                                 VStack(alignment: .leading, spacing: 12) {
