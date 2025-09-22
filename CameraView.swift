@@ -70,9 +70,18 @@ struct CameraView: UIViewControllerRepresentable {
         let topBar = UIView(frame: CGRect(x: 0, y: 0, width: viewController.view.bounds.width, height: 100))
         topBar.backgroundColor = UIColor(white: 0, alpha: 0.3)
         overlayView.addSubview(topBar)
-
+        
+        // Close button in top bar
+        let closeButton = UIButton(frame: CGRect(x: 20, y: topBar.frame.height / 2 - 15, width: 60, height: 30))
+        closeButton.setTitle("Close", for: .normal)
+        closeButton.setTitleColor(.white, for: .normal)
+        closeButton.backgroundColor = UIColor.white.withAlphaComponent(0.2)
+        closeButton.layer.cornerRadius = 15
+        closeButton.addTarget(context.coordinator, action: #selector(Coordinator.cancelCapture), for: .touchUpInside)
+        topBar.addSubview(closeButton)
+        
         // Bottom control bar
-        let bottomBar = UIView(frame: CGRect(x: 0, y: viewController.view.bounds.height - 100, width: viewController.view.bounds.width, height: 100))
+        let bottomBar = UIView(frame: CGRect(x: 0, y: viewController.view.bounds.height - 150, width: viewController.view.bounds.width, height: 100))
         bottomBar.backgroundColor = UIColor(white: 0, alpha: 0.4)
         overlayView.addSubview(bottomBar)
 
