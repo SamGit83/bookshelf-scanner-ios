@@ -334,6 +334,8 @@ class BookViewModel: ObservableObject {
             "teaser": book.teaser as Any,
             "authorBio": book.authorBio as Any
         ]
+        print("DEBUG BookViewModel: saveBookToFirestore data keys: \(data.keys.sorted())")
+        print("DEBUG BookViewModel: saveBookToFirestore pageCount value: \(String(describing: book.pageCount))")
         bookRef.setData(data) { error in
             if let error = error {
                 print("DEBUG BookViewModel: Failed to save book to Firestore: \(error.localizedDescription)")
