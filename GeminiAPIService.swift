@@ -30,10 +30,13 @@ class GeminiAPIService {
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
 
     func analyzeImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
+        print("DEBUG GeminiAPIService: analyzeImage called, image size: \(image.size)")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            print("DEBUG GeminiAPIService: jpegData returned nil")
             completion(.failure(NSError(domain: "ImageConversion", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])))
             return
         }
+        print("DEBUG GeminiAPIService: jpegData successful, size: \(imageData.count) bytes")
 
         let url = URL(string: "\(baseURL)?key=\(apiKey)")!
         var request = URLRequest(url: url)
@@ -97,7 +100,9 @@ class GeminiAPIService {
 
         request.httpBody = body
 
+        print("DEBUG GeminiAPIService: Sending request to Gemini API")
         URLSession.shared.dataTask(with: request) { data, response, error in
+            print("DEBUG GeminiAPIService: Received response, error: \(error?.localizedDescription ?? "none"), data count: \(data?.count ?? 0)")
             if let error = error {
                 completion(.failure(error))
                 return
@@ -110,12 +115,16 @@ class GeminiAPIService {
 
             do {
                 let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
+                print("DEBUG GeminiAPIService: Decoded response successfully")
                 if let text = geminiResponse.candidates.first?.content.parts.first?.text {
+                    print("DEBUG GeminiAPIService: Extracted text, length: \(text.count)")
                     completion(.success(text))
                 } else {
+                    print("DEBUG GeminiAPIService: No text in response")
                     completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])))
                 }
             } catch {
+                print("DEBUG GeminiAPIService: JSON decode error: \(error)")
                 completion(.failure(error))
             }
         }.resume()

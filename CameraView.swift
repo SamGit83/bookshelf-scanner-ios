@@ -154,13 +154,17 @@ struct CameraView: UIViewControllerRepresentable {
 
         func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
             print("DEBUG Coordinator: photoOutput didFinishProcessingPhoto, error: \(error?.localizedDescription ?? "none")")
-            if let imageData = photo.fileDataRepresentation(),
-               let image = UIImage(data: imageData) {
-                print("DEBUG Coordinator: Image captured successfully")
-                parent.capturedImage = image
-                parent.isShowingCamera = false
+            if let imageData = photo.fileDataRepresentation() {
+                print("DEBUG Coordinator: imageData count: \(imageData.count)")
+                if let image = UIImage(data: imageData) {
+                    print("DEBUG Coordinator: Image captured successfully, size: \(image.size)")
+                    parent.capturedImage = image
+                    parent.isShowingCamera = false
+                } else {
+                    print("DEBUG Coordinator: Failed to create UIImage from imageData")
+                }
             } else {
-                print("DEBUG Coordinator: Failed to create image from photo data")
+                print("DEBUG Coordinator: fileDataRepresentation returned nil")
             }
         }
     }
