@@ -44,10 +44,19 @@ class BookViewModel: ObservableObject {
 
     private func parseAndAddBooks(from responseText: String) {
         print("DEBUG BookViewModel: parseAndAddBooks called, responseText: \(responseText)")
+        // Extract JSON from markdown code block if present
+        var jsonString = responseText
+        if let jsonStart = responseText.range(of: "```json\n"), let jsonEnd = responseText.range(of: "\n```", options: .backwards) {
+            jsonString = String(responseText[jsonStart.upperBound..<jsonEnd.lowerBound])
+            print("DEBUG BookViewModel: Extracted JSON from markdown: \(jsonString)")
+        } else {
+            print("DEBUG BookViewModel: No markdown found, using full responseText")
+        }
+
         // Simple parsing - in a real app, you'd use more robust JSON parsing
         // Assuming the response is a JSON string that can be decoded
         do {
-            if let data = responseText.data(using: .utf8) {
+            if let data = jsonString.data(using: .utf8) {
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
                 print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
                 for book in decodedBooks {
@@ -55,7 +64,7 @@ class BookViewModel: ObservableObject {
                     saveBookToFirestore(book)
                 }
             } else {
-                print("DEBUG BookViewModel: Failed to convert responseText to data")
+                print("DEBUG BookViewModel: Failed to convert jsonString to data")
                 errorMessage = "Failed to parse book data. Please try again."
             }
         } catch {
