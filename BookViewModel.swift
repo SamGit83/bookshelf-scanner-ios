@@ -62,16 +62,15 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
 
                 // Check for duplicates based on title and author (case-insensitive)
-                let existingTitlesAndAuthors = Set(self.books.map { (
-                    $0.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
-                    $0.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                ) })
+                let existingTitlesAndAuthors = Set(self.books.map {
+                    $0.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) + "|" + $0.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                })
 
                 for book in decodedBooks {
                     let normalizedTitle = book.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
                     let normalizedAuthor = book.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
 
-                    if existingTitlesAndAuthors.contains((normalizedTitle, normalizedAuthor)) {
+                    if existingTitlesAndAuthors.contains(normalizedTitle + "|" + normalizedAuthor) {
                         print("DEBUG BookViewModel: Skipping duplicate book: \(book.title) by \(book.author)")
                         continue
                     }
