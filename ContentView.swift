@@ -11,6 +11,20 @@ struct ContentView: View {
      @State private var selectedTab = 0
      @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
+     private var userInitials: String {
+         let name = authService.currentUser?.displayName ?? authService.currentUser?.email ?? "?"
+         if name == "?" { return "?" }
+         let components = name.split(separator: " ")
+         if components.count >= 2 {
+             let firstInitial = components.first?.first?.uppercased() ?? ""
+             let lastInitial = components.last?.first?.uppercased() ?? ""
+             return firstInitial + lastInitial
+         } else if let first = components.first?.first?.uppercased() {
+             return first
+         }
+         return "?"
+     }
+
      var body: some View {
          Group {
              if authService.isAuthenticated {
@@ -61,7 +75,12 @@ struct ContentView: View {
 
             ProfileView(authService: authService)
                 .tabItem {
-                    Label("Profile", systemImage: "person.circle")
+                    VStack {
+                        Text(userInitials)
+                            .font(.system(size: 16, weight: .semibold))
+                        Text("Profile")
+                            .font(.caption2)
+                    }
                 }
                 .tag(3)
         }

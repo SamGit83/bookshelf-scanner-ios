@@ -102,6 +102,7 @@ struct ProfileView: View {
 
 struct ProfilePictureView: View {
     @ObservedObject var authService: AuthService
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedImage: UIImage?
     @State private var selectedItem: PhotosPickerItem?
     @State private var showImagePicker = false
@@ -111,6 +112,10 @@ struct ProfilePictureView: View {
     init(authService: AuthService) {
         self._authService = ObservedObject(wrappedValue: authService)
         _selectedImage = State(initialValue: loadImageFromUserDefaults())
+    }
+
+    private var initialsTextColor: Color {
+        colorScheme == .dark ? .white : .black
     }
 
     var body: some View {
@@ -128,7 +133,7 @@ struct ProfilePictureView: View {
                         .frame(width: 100, height: 100)
                     Text(initials)
                         .font(.system(size: 40, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(initialsTextColor)
                 }
             }
 
