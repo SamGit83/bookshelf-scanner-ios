@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TabItem: Identifiable {
     let id = UUID()
-    let icon: any View
+    let icon: AnyView
     let label: String
     let tag: Int
 }
