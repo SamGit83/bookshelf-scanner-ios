@@ -113,8 +113,8 @@ struct TranslucentOverlay<Content: View>: View {
             }
         }
         .animation(.spring(), value: isVisible)
-}
     }
+}
 // Animated Background for dynamic visual effects
 struct AnimatedBackground: View {
     @State private var animate = false
