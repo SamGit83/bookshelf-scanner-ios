@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TabItem: Identifiable {
     let id = UUID()
-    let icon: AnyView
+    let icon: any View
     let label: String
     let tag: Int
 }
@@ -57,9 +57,15 @@ struct LiquidGlassTabBar: View {
 
 struct ProfileInitialsView: View {
     let initials: String
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var textColor: Color {
+        colorScheme == .dark ? .white : .black
+    }
 
     var body: some View {
-        ZStack {
+        print("DEBUG ProfileInitialsView: initials = '\(initials)'")
+        return ZStack {
             Circle()
                 .fill(Color.blue.opacity(0.2))
                 .frame(width: 24, height: 24)
@@ -69,7 +75,7 @@ struct ProfileInitialsView: View {
                 )
             Text(initials)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.blue)
+                .foregroundColor(textColor)
         }
     }
 }

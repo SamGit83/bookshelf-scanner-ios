@@ -12,16 +12,23 @@ struct ContentView: View {
      @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
      private var userInitials: String {
-         let name = authService.currentUser?.displayName ?? authService.currentUser?.email ?? "?"
+         let displayName = authService.currentUser?.displayName
+         let email = authService.currentUser?.email
+         let name = displayName ?? email ?? "?"
+         print("DEBUG ContentView userInitials: currentUser exists: \(authService.currentUser != nil), displayName: \(displayName ?? "nil"), email: \(email ?? "nil"), name: \(name)")
          if name == "?" { return "?" }
          let components = name.split(separator: " ")
          if components.count >= 2 {
              let firstInitial = components.first?.first?.uppercased() ?? ""
              let lastInitial = components.last?.first?.uppercased() ?? ""
-             return firstInitial + lastInitial
+             let initials = firstInitial + lastInitial
+             print("DEBUG ContentView userInitials: two components, initials: \(initials)")
+             return initials
          } else if let first = components.first?.first?.uppercased() {
+             print("DEBUG ContentView userInitials: one component, initials: \(first)")
              return first
          }
+         print("DEBUG ContentView userInitials: fallback to ?")
          return "?"
      }
 
@@ -54,11 +61,13 @@ struct ContentView: View {
     }
 
     private var tabs: [TabItem] {
-        [
-            TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
-            TabItem(icon: AnyView(Image(systemName: "book")), label: "Reading", tag: 1),
-            TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
-            TabItem(icon: AnyView(ProfileInitialsView(initials: userInitials)), label: "Profile", tag: 3)
+        let initials = userInitials
+        print("DEBUG ContentView tabs: userInitials = '\(initials)'")
+        return [
+            TabItem(icon: Image(systemName: "books.vertical"), label: "Library", tag: 0),
+            TabItem(icon: Image(systemName: "book"), label: "Reading", tag: 1),
+            TabItem(icon: Image(systemName: "sparkles"), label: "Discover", tag: 2),
+            TabItem(icon: ProfileInitialsView(initials: initials), label: "Profile", tag: 3)
         ]
     }
 
