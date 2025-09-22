@@ -35,21 +35,14 @@ struct BookDetailView: View {
                                     .frame(width: 150, height: 200)
 
                                 if let coverURL = book.coverImageURL ?? bookDetails?.thumbnailURL, let url = URL(string: coverURL) {
-                                    AsyncImage(url: url) { phase in
-                                        if case .empty = phase {
-                                            ProgressView()
-                                        } else if case .success(let image) = phase {
-                                            image
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fill)
-                                                .frame(width: 140, height: 190)
-                                                .cornerRadius(10)
-                                        } else {
-                                            Image(systemName: "book.fill")
-                                                .resizable()
-                                                .frame(width: 60, height: 80)
-                                                .foregroundColor(.gray)
-                                        }
+                                    AsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 140, height: 190)
+                                            .cornerRadius(10)
+                                    } placeholder: {
+                                        ProgressView()
                                     }
                                 } else if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
                                     Image(uiImage: uiImage)
@@ -337,7 +330,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadBookDetails() {
+    func loadBookDetails() {
         isLoadingDetails = true
         let apiService = GoogleBooksAPIService()
         apiService.fetchBookDetails(isbn: currentBook.isbn, title: currentBook.title, author: currentBook.author) { result in
@@ -372,7 +365,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadAuthorBiography(author: String) {
+    func loadAuthorBiography(author: String) {
         isLoadingBio = true
         let grokService = GrokAPIService()
         grokService.fetchAuthorBiography(author: author) { result in
@@ -388,7 +381,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadBookTeaser(title: String, author: String) {
+    func loadBookTeaser(title: String, author: String) {
         isLoadingTeaser = true
         let grokService = GrokAPIService()
         grokService.fetchBookSummary(title: title, author: author) { result in
@@ -404,7 +397,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadRecommendations() {
+    func loadRecommendations() {
         isLoadingRecommendations = true
         viewModel.generateRecommendations(for: currentBook) { result in
             DispatchQueue.main.async {
@@ -432,21 +425,14 @@ struct RecommendationCard: View {
                     .frame(width: 80, height: 120)
 
                 if let thumbnailURL = recommendation.thumbnailURL, let url = URL(string: thumbnailURL) {
-                    AsyncImage(url: url) { phase in
-                        if case .empty = phase {
-                            ProgressView()
-                        } else if case .success(let image) = phase {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 76, height: 116)
-                                .cornerRadius(6)
-                        } else {
-                            Image(systemName: "book.fill")
-                                .resizable()
-                                .frame(width: 30, height: 40)
-                                .foregroundColor(.gray)
-                        }
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 76, height: 116)
+                            .cornerRadius(6)
+                    } placeholder: {
+                        ProgressView()
                     }
                 } else {
                     Image(systemName: "book.fill")
