@@ -335,7 +335,14 @@ struct ButtonStyleModifier: ViewModifier {
     }
     
     func body(content: Content) -> some View {
-        content
+        let borderColor = border?.color ?? Color.clear
+        let borderWidth = border?.width ?? 0
+        let shadowColor = shadow?.color ?? Color.clear
+        let shadowRadius = shadow?.radius ?? 0
+        let shadowX = shadow?.x ?? 0
+        let shadowY = shadow?.y ?? 0
+        
+        return content
             .font(font)
             .foregroundColor(foregroundColor)
             .padding(padding)
@@ -343,12 +350,9 @@ struct ButtonStyleModifier: ViewModifier {
             .cornerRadius(cornerRadius)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(border?.color ?? Color.clear, lineWidth: border?.width ?? 0)
+                    .stroke(borderColor, lineWidth: borderWidth)
             )
-            .shadow(color: shadow?.color ?? Color.clear, 
-                   radius: shadow?.radius ?? 0, 
-                   x: shadow?.x ?? 0, 
-                   y: shadow?.y ?? 0)
+            .shadow(color: shadowColor, radius: shadowRadius, x: shadowX, y: shadowY)
     }
 }
 
@@ -400,19 +404,24 @@ struct CardStyleModifier: ViewModifier {
     let blur: CGFloat?
     
     func body(content: Content) -> some View {
-        content
+        let borderColor = border?.color ?? Color.clear
+        let borderWidth = border?.width ?? 0
+        let shadowColor = shadow?.color ?? Color.clear
+        let shadowRadius = shadow?.radius ?? 0
+        let shadowX = shadow?.x ?? 0
+        let shadowY = shadow?.y ?? 0
+        let blurRadius = blur ?? 0
+        
+        return content
             .padding(padding)
             .background(background)
             .cornerRadius(cornerRadius)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(border?.color ?? Color.clear, lineWidth: border?.width ?? 0)
+                    .stroke(borderColor, lineWidth: borderWidth)
             )
-            .shadow(color: shadow?.color ?? Color.clear, 
-                   radius: shadow?.radius ?? 0, 
-                   x: shadow?.x ?? 0, 
-                   y: shadow?.y ?? 0)
-            .blur(radius: blur ?? 0)
+            .shadow(color: shadowColor, radius: shadowRadius, x: shadowX, y: shadowY)
+            .blur(radius: blurRadius)
     }
 }
 

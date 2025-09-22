@@ -18,7 +18,15 @@ struct OnboardingView: View {
             description: "Point your camera at your bookshelf and watch as our AI identifies your books automatically.",
             imageName: "camera.fill",
             color: PrimaryColors.freshGreen,
-            gradient: BackgroundGradients.cameraGradient
+            gradient: LinearGradient(
+                colors: [
+                    Color(hex: "FF9500").opacity(0.8),
+                    Color(hex: "FF2D92").opacity(0.6),
+                    Color.black.opacity(0.4)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
         ),
         OnboardingPage(
             title: "Build Your Library",
