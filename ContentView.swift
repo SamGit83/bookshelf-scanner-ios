@@ -4,32 +4,39 @@ import UIKit
 #endif
 
 struct ContentView: View {
-    @StateObject private var authService = AuthService()
-    @StateObject private var viewModel = BookViewModel()
-    @State private var capturedImage: UIImage?
-    @State private var isShowingCamera = false
-    @State private var selectedTab = 0
+     @ObservedObject private var authService = AuthService.shared
+     @StateObject private var viewModel = BookViewModel()
+     @State private var capturedImage: UIImage?
+     @State private var isShowingCamera = false
+     @State private var selectedTab = 0
+     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
-    var body: some View {
-        Group {
-            if authService.isAuthenticated {
-                authenticatedView
-            } else {
-                LoginView()
-            }
-        }
-        .onAppear {
-            // Firebase is initialized in AppDelegate
-        }
-        .onChange(of: authService.isAuthenticated) { isAuthenticated in
-            if isAuthenticated {
-                // User signed in, refresh data
-                viewModel.refreshData()
-            } else {
-                // User signed out, clear local data
-                viewModel.books = []
-            }
-        }
+     var body: some View {
+         Group {
+             if authService.isAuthenticated {
+                 if hasCompletedOnboarding {
+                     authenticatedView
+                 } else {
+                     OnboardingView()
+                 }
+             } else {
+                 HomeView()
+             }
+         }
+         .onAppear {
+             // Firebase is initialized in AppDelegate
+             print("ContentView: onAppear - isAuthenticated: \(authService.isAuthenticated), hasCompletedOnboarding: \(hasCompletedOnboarding)")
+         }
+         .onChange(of: authService.isAuthenticated) { isAuthenticated in
+             print("ContentView: Auth state changed to \(isAuthenticated), hasCompletedOnboarding: \(hasCompletedOnboarding)")
+             if isAuthenticated {
+                 // User signed in, refresh data
+                 viewModel.refreshData()
+             } else {
+                 // User signed out, clear local data
+                 viewModel.books = []
+             }
+         }
     }
 
     public var authenticatedView: some View {

@@ -11,56 +11,56 @@
 		OBJ_2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_7 /* AppDelegate.swift */; };
 		OBJ_3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_8 /* ContentView.swift */; };
 		OBJ_4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* GoogleService-Info.plist */; };
-		OBJ_28 /* AddBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* AddBookView.swift */; };
-		OBJ_29 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* AuthService.swift */; };
-		OBJ_30 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* Book.swift */; };
-		OBJ_31 /* BookViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* BookViewModel.swift */; };
-		OBJ_32 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* CameraView.swift */; };
-		OBJ_33 /* CurrentlyReadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* CurrentlyReadingView.swift */; };
-		OBJ_34 /* EditBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_34 /* EditBookView.swift */; };
-		OBJ_35 /* ErrorHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* ErrorHandling.swift */; };
-		OBJ_36 /* FirebaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* FirebaseConfig.swift */; };
-		OBJ_37 /* GeminiAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* GeminiAPIService.swift */; };
-		OBJ_38 /* GoogleBooksAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* GoogleBooksAPIService.swift */; };
-		OBJ_39 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* LibraryView.swift */; };
-		OBJ_40 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* LoginView.swift */; };
-		OBJ_41 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* OfflineCache.swift */; };
-		OBJ_42 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* OnboardingView.swift */; };
-		OBJ_43 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* ProfileView.swift */; };
-		OBJ_44 /* ReadingProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_44 /* ReadingProgressView.swift */; };
-		OBJ_45 /* RecommendationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* RecommendationsView.swift */; };
-		OBJ_46 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* SearchView.swift */; };
-		OBJ_47 /* SecureConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* SecureConfig.swift */; };
+		OBJ_28 /* AddBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* AddBookView.swift */; };
+		OBJ_29 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* AuthService.swift */; };
+		OBJ_30 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* Book.swift */; };
+		OBJ_31 /* BookViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* BookViewModel.swift */; };
+		OBJ_32 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* CameraView.swift */; };
+		OBJ_33 /* CurrentlyReadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_53 /* CurrentlyReadingView.swift */; };
+		OBJ_34 /* EditBookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* EditBookView.swift */; };
+		OBJ_35 /* ErrorHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_55 /* ErrorHandling.swift */; };
+		OBJ_36 /* FirebaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* FirebaseConfig.swift */; };
+		OBJ_37 /* GeminiAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_57 /* GeminiAPIService.swift */; };
+		OBJ_38 /* GoogleBooksAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_58 /* GoogleBooksAPIService.swift */; };
+		OBJ_39 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* LibraryView.swift */; };
+		OBJ_40 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* LoginView.swift */; };
+		OBJ_41 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_61 /* OfflineCache.swift */; };
+		OBJ_42 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* OnboardingView.swift */; };
+		OBJ_43 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* ProfileView.swift */; };
+		OBJ_44 /* ReadingProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_64 /* ReadingProgressView.swift */; };
+		OBJ_45 /* RecommendationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* RecommendationsView.swift */; };
+		OBJ_46 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* SearchView.swift */; };
+		OBJ_47 /* SecureConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* SecureConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		OBJ_6 /* BookshelfScannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookshelfScannerApp.swift; sourceTree = "<group>"; };
+		OBJ_6 /* BookshelfScannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		OBJ_7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		OBJ_8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		OBJ_9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		OBJ_10 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = GoogleService-Info.plist; sourceTree = "<group>"; };
 		OBJ_11 /* BookshelfScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookshelfScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 
-		OBJ_28 /* AddBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBookView.swift; sourceTree = "<group>"; };
-		OBJ_29 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
-		OBJ_30 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
-		OBJ_31 /* BookViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookViewModel.swift; sourceTree = "<group>"; };
-		OBJ_32 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
-		OBJ_33 /* CurrentlyReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentlyReadingView.swift; sourceTree = "<group>"; };
-		OBJ_34 /* EditBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookView.swift; sourceTree = "<group>"; };
-		OBJ_35 /* ErrorHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandling.swift; sourceTree = "<group>"; };
-		OBJ_36 /* FirebaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseConfig.swift; sourceTree = "<group>"; };
-		OBJ_37 /* GeminiAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiAPIService.swift; sourceTree = "<group>"; };
-		OBJ_38 /* GoogleBooksAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleBooksAPIService.swift; sourceTree = "<group>"; };
-		OBJ_39 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
-		OBJ_40 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		OBJ_41 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
-		OBJ_42 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		OBJ_43 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		OBJ_44 /* ReadingProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingProgressView.swift; sourceTree = "<group>"; };
-		OBJ_45 /* RecommendationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsView.swift; sourceTree = "<group>"; };
-		OBJ_46 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
-		OBJ_47 /* SecureConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureConfig.swift; sourceTree = "<group>"; };
+		OBJ_48 /* AddBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBookView.swift; sourceTree = "<group>"; };
+		OBJ_49 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		OBJ_50 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
+		OBJ_51 /* BookViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookViewModel.swift; sourceTree = "<group>"; };
+		OBJ_52 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		OBJ_53 /* CurrentlyReadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentlyReadingView.swift; sourceTree = "<group>"; };
+		OBJ_54 /* EditBookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookView.swift; sourceTree = "<group>"; };
+		OBJ_55 /* ErrorHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandling.swift; sourceTree = "<group>"; };
+		OBJ_56 /* FirebaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseConfig.swift; sourceTree = "<group>"; };
+		OBJ_57 /* GeminiAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiAPIService.swift; sourceTree = "<group>"; };
+		OBJ_58 /* GoogleBooksAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleBooksAPIService.swift; sourceTree = "<group>"; };
+		OBJ_59 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		OBJ_60 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		OBJ_61 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
+		OBJ_62 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		OBJ_63 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		OBJ_64 /* ReadingProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingProgressView.swift; sourceTree = "<group>"; };
+		OBJ_65 /* RecommendationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsView.swift; sourceTree = "<group>"; };
+		OBJ_66 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		OBJ_67 /* SecureConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureConfig.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,28 +89,27 @@
 				OBJ_6 /* BookshelfScannerApp.swift */,
 				OBJ_7 /* AppDelegate.swift */,
 				OBJ_8 /* ContentView.swift */,
-				OBJ_28 /* AddBookView.swift */,
-				OBJ_29 /* AuthService.swift */,
-				OBJ_30 /* Book.swift */,
-				OBJ_31 /* BookViewModel.swift */,
-				OBJ_32 /* CameraView.swift */,
-				OBJ_33 /* CurrentlyReadingView.swift */,
-				OBJ_34 /* EditBookView.swift */,
-				OBJ_35 /* ErrorHandling.swift */,
-				OBJ_36 /* FirebaseConfig.swift */,
-				OBJ_37 /* GeminiAPIService.swift */,
-				OBJ_38 /* GoogleBooksAPIService.swift */,
-				OBJ_39 /* LibraryView.swift */,
-				OBJ_40 /* LoginView.swift */,
-				OBJ_41 /* OfflineCache.swift */,
-				OBJ_42 /* OnboardingView.swift */,
-				OBJ_43 /* ProfileView.swift */,
-				OBJ_44 /* ReadingProgressView.swift */,
-				OBJ_45 /* RecommendationsView.swift */,
-				OBJ_46 /* SearchView.swift */,
-				OBJ_47 /* SecureConfig.swift */,
+				OBJ_48 /* AddBookView.swift */,
+				OBJ_49 /* AuthService.swift */,
+				OBJ_50 /* Book.swift */,
+				OBJ_51 /* BookViewModel.swift */,
+				OBJ_52 /* CameraView.swift */,
+				OBJ_53 /* CurrentlyReadingView.swift */,
+				OBJ_54 /* EditBookView.swift */,
+				OBJ_55 /* ErrorHandling.swift */,
+				OBJ_56 /* FirebaseConfig.swift */,
+				OBJ_57 /* GeminiAPIService.swift */,
+				OBJ_58 /* GoogleBooksAPIService.swift */,
+				OBJ_59 /* LibraryView.swift */,
+				OBJ_60 /* LoginView.swift */,
+				OBJ_61 /* OfflineCache.swift */,
+				OBJ_62 /* OnboardingView.swift */,
+				OBJ_63 /* ProfileView.swift */,
+				OBJ_64 /* ReadingProgressView.swift */,
+				OBJ_65 /* RecommendationsView.swift */,
+				OBJ_66 /* SearchView.swift */,
+				OBJ_67 /* SecureConfig.swift */,
 			);
-			path = Sources/BookshelfScannerApp;
 			sourceTree = "<group>";
 		};
 		OBJ_15 /* Resources */ = {

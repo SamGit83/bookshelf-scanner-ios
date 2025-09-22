@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct BookshelfWrapperView: View {
-    @StateObject private var authService = AuthService()
+    @ObservedObject private var authService = AuthService.shared
     @StateObject private var viewModel = BookViewModel()
     @State private var capturedImage: UIImage?
     @State private var isShowingCamera = false

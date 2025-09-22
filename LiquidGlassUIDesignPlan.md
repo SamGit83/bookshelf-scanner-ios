@@ -163,6 +163,78 @@ struct GlassCard<Content: View>: View {
 - **Animations**: Smooth entrance animations for form elements
 - **Micro-interactions**: Button press feedback with scale effects
 
+#### Sign-Up Form Specification
+
+##### Field Requirements
+- **Mandatory Fields** (with red asterisk *):
+  - Email*
+  - Password*
+  - First Name*
+  - Last Name*
+  - Date of Birth*
+- **Optional Fields**:
+  - Gender (displayed initially)
+  - Phone Number (in Show More overlay)
+  - Country (in Show More overlay)
+
+##### Layout and Flow
+- **Initial Display**: All mandatory fields + Gender field
+- **Show More Functionality**:
+  - "Show More" button positioned below Gender field
+  - Reveals Phone Number and Country in translucent overlay
+  - Overlay uses glassmorphism with blur effect
+  - Smooth spring animation for overlay presentation
+
+##### Field Specifications
+- **Email Field**:
+  - Keyboard type: emailAddress
+  - Autocapitalization: none
+  - Text content type: emailAddress
+  - Validation: Required, valid email format
+
+- **Password Field**:
+  - Secure text entry
+  - Text content type: newPassword (sign-up) / password (login)
+  - Validation: Required, minimum 6 characters
+
+- **First Name Field**:
+  - Text content type: givenName
+  - Validation: Required, non-empty
+
+- **Last Name Field**:
+  - Text content type: familyName
+  - Validation: Required, non-empty
+
+- **Date of Birth Field**:
+  - Date picker component with glass styling
+  - Validation: Required, user must be 13+ years old
+
+- **Gender Field**:
+  - Segmented picker with options: Male, Female, Non-binary, Prefer not to say
+  - Optional field, displayed initially
+
+- **Phone Number Field** (Optional, in overlay):
+  - Keyboard type: phonePad
+  - Text content type: telephoneNumber
+  - Country code prefix support
+
+- **Country Field** (Optional, in overlay):
+  - Picker or text field with country list
+  - ISO country codes for consistency
+
+##### Validation Rules
+- Real-time validation feedback
+- Visual indicators for required fields (red asterisks)
+- Error messages displayed in glass-styled error panels
+- Form submission blocked until all mandatory fields are valid
+
+##### Component Changes Required
+- Add GlassDatePicker component for date of birth
+- Add GlassSegmentedPicker component for gender selection
+- Add TranslucentOverlay component for Show More functionality
+- Update GlassFieldModifier for consistent styling
+- Add phone number and country input components
+
 #### Visual Design
 ```
 ┌─────────────────────────────────┐
@@ -170,14 +242,38 @@ struct GlassCard<Content: View>: View {
 │  ┌─────────────────────────┐   │
 │  │    Glass Login Panel     │   │
 │  │  ┌───────────────────┐   │   │
-│  │  │  Email Field      │   │   │
+│  │  │  Email*           │   │   │
 │  │  └───────────────────┘   │   │
 │  │  ┌───────────────────┐   │   │
-│  │  │  Password Field   │   │   │
+│  │  │  Password*        │   │   │
 │  │  └───────────────────┘   │   │
 │  │  ┌───────────────────┐   │   │
-│  │  │   Sign In Button  │   │   │
+│  │  │  First Name*      │   │   │
 │  │  └───────────────────┘   │   │
+│  │  ┌───────────────────┐   │   │
+│  │  │  Last Name*       │   │   │
+│  │  └───────────────────┘   │   │
+│  │  ┌───────────────────┐   │   │
+│  │  │  Date of Birth*   │   │   │
+│  │  └───────────────────┘   │   │
+│  │  ┌───────────────────┐   │   │
+│  │  │  Gender           │   │   │
+│  │  └───────────────────┘   │   │
+│  │  [Show More Button]      │   │
+│  │  ┌───────────────────┐   │   │
+│  │  │   Sign Up Button  │   │   │
+│  │  └───────────────────┘   │   │
+│  └─────────────────────────┘   │
+│                                 │
+│  ┌─────────────────────────┐   │
+│  │   Translucent Overlay   │   │
+│  │  ┌───────────────────┐   │   │
+│  │  │  Phone Number     │   │   │
+│  │  └───────────────────┘   │   │
+│  │  ┌───────────────────┐   │   │
+│  │  │  Country          │   │   │
+│  │  └───────────────────┘   │   │
+│  │  [Done Button]           │   │
 │  └─────────────────────────┘   │
 └─────────────────────────────────┘
 ```

@@ -1,13 +1,30 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var authService = AuthService()
+    @ObservedObject private var authService = AuthService.shared
     @State private var email = ""
     @State private var password = ""
-    @State private var isSignUp = false
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var dateOfBirth: Date = Date()
+    @State private var gender = "Prefer not to say"
+    @State private var phone = ""
+    @State private var country = ""
+    @State private var city = ""
+    @State private var favoriteBookGenre = ""
+    @State private var showAdditionalFields = false
+    @State private var isSignUp: Bool
     @State private var isLoading = false
     @State private var showPasswordReset = false
     @State private var animateForm = false
+    @State private var showMoreOverlay = false
+    @State private var hasShownAdditionalFields = false
+
+    init(isSignUp: Bool = false) {
+        _isSignUp = State(initialValue: isSignUp)
+    }
+
+    private let genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"]
 
     var body: some View {
         ZStack {
@@ -103,32 +120,116 @@ struct LoginView: View {
 
                             // Email Field
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Email")
-                                    .font(.headline)
-                                    .foregroundColor(.white.opacity(0.8))
+                                HStack {
+                                    Text("Email")
+                                        .font(.headline)
+                                        .foregroundColor(.white.opacity(0.8))
+                                    Text("*")
+                                        .foregroundColor(.red)
+                                        .font(.headline)
+                                }
 
                                 TextField("", text: $email)
-                                    .padding()
-                                    .background(Color.white.opacity(0.1))
-                                    .cornerRadius(8)
-                                    .foregroundColor(.white)
+                                    .modifier(GlassFieldModifier())
                                     .keyboardType(.emailAddress)
                                     .autocapitalization(.none)
                                     .textContentType(.emailAddress)
                             }
 
+                            if isSignUp {
+                                // First Name Field
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Text("First Name")
+                                            .font(.headline)
+                                            .foregroundColor(.white.opacity(0.8))
+                                        Text("*")
+                                            .foregroundColor(.red)
+                                            .font(.headline)
+                                    }
+
+                                    TextField("", text: $firstName)
+                                        .modifier(GlassFieldModifier())
+                                        .textContentType(.givenName)
+                                }
+
+                                // Last Name Field
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Text("Last Name")
+                                            .font(.headline)
+                                            .foregroundColor(.white.opacity(0.8))
+                                        Text("*")
+                                            .foregroundColor(.red)
+                                            .font(.headline)
+                                    }
+
+                                    TextField("", text: $lastName)
+                                        .modifier(GlassFieldModifier())
+                                        .textContentType(.familyName)
+                                }
+
+                                // Date of Birth Field
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Text("Date of Birth")
+                                            .font(.headline)
+                                            .foregroundColor(.white.opacity(0.8))
+                                        Text("*")
+                                            .foregroundColor(.red)
+                                            .font(.headline)
+                                    }
+
+                                    GlassDatePicker(title: "", date: $dateOfBirth)
+                                }
+
+                                // Gender Field
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Gender")
+                                        .font(.headline)
+                                        .foregroundColor(.white.opacity(0.8))
+
+                                    GlassSegmentedPicker(
+                                        title: "",
+                                        selection: $gender,
+                                        options: genderOptions,
+                                        displayText: { $0 }
+                                    )
+                                }
+                            }
+
                             // Password Field
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Password")
-                                    .font(.headline)
-                                    .foregroundColor(.white.opacity(0.8))
+                                HStack {
+                                    Text("Password")
+                                        .font(.headline)
+                                        .foregroundColor(.white.opacity(0.8))
+                                    if isSignUp {
+                                        Text("*")
+                                            .foregroundColor(.red)
+                                            .font(.headline)
+                                    }
+                                }
 
                                 SecureField("", text: $password)
-                                    .padding()
-                                    .background(Color.white.opacity(0.1))
-                                    .cornerRadius(8)
-                                    .foregroundColor(.white)
+                                    .modifier(GlassFieldModifier())
                                     .textContentType(isSignUp ? .newPassword : .password)
+                            }
+
+                            if isSignUp {
+                                // Show More Button
+                                Button(action: {
+                                    print("DEBUG: Show More button tapped")
+                                    withAnimation(.spring()) {
+                                        showMoreOverlay = true
+                                        hasShownAdditionalFields = true
+                                    }
+                                }) {
+                                    Text("Show More Options")
+                                        .font(.subheadline)
+                                        .foregroundColor(Color.blue)
+                                }
+                                .padding(.top, 8)
                             }
 
                             // Sign In/Sign Up Button
@@ -212,6 +313,88 @@ struct LoginView: View {
                 }
             }
         }
+        .overlay(
+            TranslucentOverlay(isVisible: showMoreOverlay) {
+                VStack(spacing: 20) {
+                    Text("Additional Information")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+
+                    // Phone Number Field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Phone Number")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.8))
+
+                        TextField("", text: $phone)
+                            .modifier(GlassFieldModifier())
+                            .keyboardType(.phonePad)
+                            .textContentType(.telephoneNumber)
+                    }
+
+                    // Country Field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Country")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.8))
+
+                        TextField("", text: $country)
+                            .modifier(GlassFieldModifier())
+                            .textContentType(.countryName)
+                    }
+
+                    // City Field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("City")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.8))
+
+                        TextField("", text: $city)
+                            .modifier(GlassFieldModifier())
+                            .textContentType(.addressCity)
+                    }
+
+                    // Favorite Book Genre Field
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Favorite Book Genre")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.8))
+
+                        TextField("", text: $favoriteBookGenre)
+                            .modifier(GlassFieldModifier())
+                    }
+
+                    Button(action: {
+                        withAnimation(.spring()) {
+                            showMoreOverlay = false
+                        }
+                    }) {
+                        Text("Done")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.white)
+                            .foregroundColor(Color.blue)
+                            .cornerRadius(10)
+                            .font(.headline)
+                    }
+                }
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white.opacity(0.1))
+                        .blur(radius: 1)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                )
+                .padding(.horizontal, 32)
+            }
+            .onAppear {
+                print("DEBUG: Additional fields overlay appeared")
+            }
+        )
         .onAppear {
             withAnimation(.spring().delay(0.1)) {
                 animateForm = true
@@ -223,14 +406,17 @@ struct LoginView: View {
     }
 
     private func signIn() {
+        print("LoginView: Sign in started for email: \(email)")
         isLoading = true
         authService.signIn(email: email, password: password) { result in
             isLoading = false
             switch result {
             case .success:
+                print("LoginView: Sign in success")
                 // Navigation will be handled by the parent view
                 break
             case .failure:
+                print("LoginView: Sign in failure")
                 // Error is handled by the auth service
                 break
             }
@@ -238,14 +424,59 @@ struct LoginView: View {
     }
 
     private func signUp() {
+        print("DEBUG: Sign up button tapped")
+        // Validation
+        guard !email.isEmpty else {
+            print("DEBUG: Validation failed - email empty")
+            authService.errorMessage = "Email is required"
+            return
+        }
+        guard !password.isEmpty else {
+            print("DEBUG: Validation failed - password empty")
+            authService.errorMessage = "Password is required"
+            return
+        }
+        guard !firstName.isEmpty else {
+            print("DEBUG: Validation failed - first name empty")
+            authService.errorMessage = "First name is required"
+            return
+        }
+        guard !lastName.isEmpty else {
+            print("DEBUG: Validation failed - last name empty")
+            authService.errorMessage = "Last name is required"
+            return
+        }
+        // Date of birth is required and must be in the past
+        print("DEBUG: Validating dateOfBirth: \(dateOfBirth)")
+        if dateOfBirth >= Date() {
+            print("DEBUG: Date of birth validation failed - date is not in the past")
+            authService.errorMessage = "Date of birth must be in the past"
+            return
+        }
+
+        print("DEBUG: All validations passed")
         isLoading = true
-        authService.signUp(email: email, password: password) { result in
+        print("LoginView: Starting sign up for email: \(email)")
+        authService.signUp(
+            email: email,
+            password: password,
+            firstName: firstName.isEmpty ? nil : firstName,
+            lastName: lastName.isEmpty ? nil : lastName,
+            dateOfBirth: dateOfBirth,
+            gender: gender == "Prefer not to say" ? nil : gender,
+            phone: phone.isEmpty ? nil : phone,
+            country: country.isEmpty ? nil : country,
+            city: city.isEmpty ? nil : city,
+            favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre
+        ) { result in
             isLoading = false
             switch result {
             case .success:
+                print("LoginView: Sign up success")
                 // Navigation will be handled by the parent view
                 break
             case .failure:
+                print("LoginView: Sign up failure")
                 // Error is handled by the auth service
                 break
             }
@@ -401,7 +632,7 @@ struct PasswordResetView: View {
 
     private func resetPassword() {
         isLoading = true
-        AuthService().resetPassword(email: email) { result in
+        AuthService.shared.resetPassword(email: email) { result in
             isLoading = false
             withAnimation(.spring()) {
                 switch result {
