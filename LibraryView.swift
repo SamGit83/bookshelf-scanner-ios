@@ -40,7 +40,7 @@ struct LibraryView: View {
                     ScrollView {
                         LazyVStack(spacing: 16) {
                             ForEach(viewModel.libraryBooks) { book in
-                                BookCard(book: book, viewModel: viewModel)
+                                LibraryBookCard(book: book, viewModel: viewModel)
                                     .padding(.horizontal, 16)
                             }
                         }
@@ -122,77 +122,115 @@ struct LibraryBookCard: View {
     @State private var showProgressView = false
 
     var body: some View {
-        HStack(spacing: 16) {
-            // Book Cover
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray6))
-                    .frame(width: 60, height: 90)
+        ZStack {
+            NavigationLink(destination: BookDetailView(book: book, viewModel: viewModel)) {
+                HStack(spacing: 16) {
+                    // Book Cover
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray6))
+                            .frame(width: 60, height: 90)
 
-                if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 56, height: 86)
-                        .cornerRadius(6)
-                } else {
-                    Image(systemName: "book.fill")
-                        .resizable()
-                        .frame(width: 32, height: 40)
-                        .foregroundColor(.gray)
+                        if let coverURL = book.coverImageURL, let url = URL(string: coverURL) {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 56, height: 86)
+                                        .cornerRadius(6)
+                                case .failure:
+                                    Image(systemName: "book.fill")
+                                        .resizable()
+                                        .frame(width: 32, height: 40)
+                                        .foregroundColor(.gray)
+                                @unknown default:
+                                    Image(systemName: "book.fill")
+                                        .resizable()
+                                        .frame(width: 32, height: 40)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                        } else if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 56, height: 86)
+                                .cornerRadius(6)
+                        } else {
+                            Image(systemName: "book.fill")
+                                .resizable()
+                                .frame(width: 32, height: 40)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+
+                    // Book Details
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(book.title)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+
+                        Text(book.author)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+
+                        if let genre = book.genre {
+                            Text(genre)
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(4)
+                        }
+
+                        // Reading status indicator
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
+                                .frame(width: 8, height: 8)
+
+                            Text(book.status.rawValue)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Spacer()
                 }
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                .shadow(radius: 2)
             }
-            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+            .buttonStyle(PlainButtonStyle()) // Prevents NavigationLink from styling as button
 
-            // Book Details
-            VStack(alignment: .leading, spacing: 8) {
-                Text(book.title)
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-
-                Text(book.author)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
-                if let genre = book.genre {
-                    Text(genre)
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(4)
+            // Action Menu Button (overlay)
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showActionSheet = true
+                    }) {
+                        Image(systemName: "ellipsis.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                            .padding(8)
+                            .background(Color(.systemBackground).opacity(0.8))
+                            .clipShape(Circle())
+                    }
+                    .padding(8)
                 }
-
-                // Reading status indicator
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
-                        .frame(width: 8, height: 8)
-
-                    Text(book.status.rawValue)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            Spacer()
-
-            // Action Menu
-            Button(action: {
-                showActionSheet = true
-            }) {
-                Image(systemName: "ellipsis.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.gray)
+                Spacer()
             }
         }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(radius: 2)
         .actionSheet(isPresented: $showActionSheet) {
             ActionSheet(
                 title: Text(book.title),
@@ -204,14 +242,9 @@ struct LibraryBookCard: View {
                     .default(Text("Edit Book")) {
                         showEditView = true
                     },
-                    .default(Text("Move to Currently Reading")) {
+                    .default(Text("Add to Currently Reading")) {
                         withAnimation(.spring()) {
                             viewModel.moveBook(book, to: .currentlyReading)
-                        }
-                    },
-                    .default(Text("Move to Library")) {
-                        withAnimation(.spring()) {
-                            viewModel.moveBook(book, to: .library)
                         }
                     },
                     .destructive(Text("Delete Book")) {

@@ -13,6 +13,7 @@ struct Book: Identifiable, Codable, Hashable {
     var status: BookStatus
     var dateAdded: Date
     var coverImageData: Data?
+    var coverImageURL: String?
 
     // Reading Progress
     var totalPages: Int?
@@ -22,7 +23,7 @@ struct Book: Identifiable, Codable, Hashable {
     var dateStartedReading: Date?
     var dateFinishedReading: Date?
 
-    init(title: String, author: String, isbn: String? = nil, genre: String? = nil, status: BookStatus = .library, coverImageData: Data? = nil) {
+    init(title: String, author: String, isbn: String? = nil, genre: String? = nil, status: BookStatus = .library, coverImageData: Data? = nil, coverImageURL: String? = nil) {
         self.title = title
         self.author = author
         self.isbn = isbn
@@ -30,6 +31,7 @@ struct Book: Identifiable, Codable, Hashable {
         self.status = status
         self.dateAdded = Date()
         self.coverImageData = coverImageData
+        self.coverImageURL = coverImageURL
     }
 
     // Custom decoder to handle missing 'id', 'status', and 'dateAdded' from Gemini API
@@ -55,6 +57,7 @@ struct Book: Identifiable, Codable, Hashable {
         self.dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
 
         self.coverImageData = try container.decodeIfPresent(Data.self, forKey: .coverImageData)
+        self.coverImageURL = try container.decodeIfPresent(String.self, forKey: .coverImageURL)
 
         // Reading Progress - use defaults
         self.totalPages = try container.decodeIfPresent(Int.self, forKey: .totalPages)

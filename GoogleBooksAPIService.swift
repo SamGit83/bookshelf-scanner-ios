@@ -83,6 +83,40 @@ class GoogleBooksAPIService {
         let query = keywords
         searchBooks(query: query, maxResults: 5, completion: completion)
     }
+
+    func fetchBookDetails(isbn: String?, title: String?, author: String?, completion: @escaping (Result<BookRecommendation?, Error>) -> Void) {
+        var query = ""
+        if let isbn = isbn {
+            query = "isbn:\(isbn)"
+        } else if let title = title, let author = author {
+            query = "intitle:\(title) inauthor:\(author)"
+        } else if let title = title {
+            query = title
+        } else {
+            completion(.success(nil))
+            return
+        }
+
+        searchBooks(query: query, maxResults: 1) { result in
+            switch result {
+            case .success(let recommendations):
+                completion(.success(recommendations.first))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func fetchCoverURL(isbn: String?, title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
+        fetchBookDetails(isbn: isbn, title: title, author: author) { result in
+            switch result {
+            case .success(let book):
+                completion(.success(book?.thumbnailURL))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
 }
 
 // Google Books API Response Models

@@ -60,7 +60,22 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Attempting to decode JSON: \(jsonString)")
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
                 print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
+
+                // Check for duplicates based on title and author (case-insensitive)
+                let existingTitlesAndAuthors = Set(self.books.map { (
+                    $0.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
+                    $0.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                ) })
+
                 for book in decodedBooks {
+                    let normalizedTitle = book.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                    let normalizedAuthor = book.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+
+                    if existingTitlesAndAuthors.contains((normalizedTitle, normalizedAuthor)) {
+                        print("DEBUG BookViewModel: Skipping duplicate book: \(book.title) by \(book.author)")
+                        continue
+                    }
+
                     print("DEBUG BookViewModel: Saving book: \(book.title) by \(book.author)")
                     saveBookToFirestore(book)
                 }
@@ -186,9 +201,10 @@ class BookViewModel: ObservableObject {
                     }
 
                     let coverData = data["coverImageData"] as? Data
+                    let coverImageURL = data["coverImageURL"] as? String
 
                     // Build Book
-                    var book = Book(title: title, author: author, isbn: isbn, genre: genre, status: status, coverImageData: coverData)
+                    var book = Book(title: title, author: author, isbn: isbn, genre: genre, status: status, coverImageData: coverData, coverImageURL: coverImageURL)
                     // Assign id (from stored id or documentID) and date
                     if let idString = data["id"] as? String, let uuid = UUID(uuidString: idString) {
                         book.id = uuid
@@ -223,7 +239,8 @@ class BookViewModel: ObservableObject {
             "genre": book.genre as Any,
             "status": book.status.rawValue,
             "dateAdded": Timestamp(date: book.dateAdded),
-            "coverImageData": book.coverImageData as Any
+            "coverImageData": book.coverImageData as Any,
+            "coverImageURL": book.coverImageURL as Any
         ]
         bookRef.setData(data) { error in
             if let error = error {
