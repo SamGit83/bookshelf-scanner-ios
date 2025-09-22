@@ -36,21 +36,15 @@ struct BookDetailView: View {
 
                                 if let coverURL = book.coverImageURL ?? bookDetails?.thumbnailURL, let url = URL(string: coverURL) {
                                     AsyncImage(url: url) { phase in
-                                        switch phase {
-                                        case .empty:
+                                        if phase == .empty {
                                             ProgressView()
-                                        case .success(let image):
+                                        } else if case .success(let image) = phase {
                                             image
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 140, height: 190)
                                                 .cornerRadius(10)
-                                        case .failure:
-                                            Image(systemName: "book.fill")
-                                                .resizable()
-                                                .frame(width: 60, height: 80)
-                                                .foregroundColor(.gray)
-                                        @unknown default:
+                                        } else {
                                             Image(systemName: "book.fill")
                                                 .resizable()
                                                 .frame(width: 60, height: 80)
@@ -343,7 +337,7 @@ struct BookDetailView: View {
         }
     }
 
-    func loadBookDetails() {
+    private func loadBookDetails() {
         isLoadingDetails = true
         let apiService = GoogleBooksAPIService()
         apiService.fetchBookDetails(isbn: currentBook.isbn, title: currentBook.title, author: currentBook.author) { result in
@@ -378,7 +372,7 @@ struct BookDetailView: View {
         }
     }
 
-    func loadAuthorBiography(author: String) {
+    private func loadAuthorBiography(author: String) {
         isLoadingBio = true
         let grokService = GrokAPIService()
         grokService.fetchAuthorBiography(author: author) { result in
@@ -394,7 +388,7 @@ struct BookDetailView: View {
         }
     }
 
-    func loadBookTeaser(title: String, author: String) {
+    private func loadBookTeaser(title: String, author: String) {
         isLoadingTeaser = true
         let grokService = GrokAPIService()
         grokService.fetchBookSummary(title: title, author: author) { result in
@@ -410,7 +404,7 @@ struct BookDetailView: View {
         }
     }
 
-    func loadRecommendations() {
+    private func loadRecommendations() {
         isLoadingRecommendations = true
         viewModel.generateRecommendations(for: currentBook) { result in
             DispatchQueue.main.async {
@@ -439,21 +433,15 @@ struct RecommendationCard: View {
 
                 if let thumbnailURL = recommendation.thumbnailURL, let url = URL(string: thumbnailURL) {
                     AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
+                        if phase == .empty {
                             ProgressView()
-                        case .success(let image):
+                        } else if case .success(let image) = phase {
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 76, height: 116)
                                 .cornerRadius(6)
-                        case .failure:
-                            Image(systemName: "book.fill")
-                                .resizable()
-                                .frame(width: 30, height: 40)
-                                .foregroundColor(.gray)
-                        @unknown default:
+                        } else {
                             Image(systemName: "book.fill")
                                 .resizable()
                                 .frame(width: 30, height: 40)
