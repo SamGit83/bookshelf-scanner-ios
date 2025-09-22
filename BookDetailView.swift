@@ -34,15 +34,22 @@ struct BookDetailView: View {
                                     .fill(Color.gray.opacity(0.2))
                                     .frame(width: 150, height: 200)
 
-                                if let coverURL = book.coverImageURL ?? bookDetails?.thumbnailURL, let url = URL(string: coverURL) {
-                                    AsyncImage(url: url) { image in
-                                        image
+                                if let coverURL = book.coverImageURL ?? bookDetails?.thumbnailURL {
+                                    if let url = URL(string: coverURL) {
+                                        AsyncImage(url: url) { image in
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 140, height: 190)
+                                                .cornerRadius(10)
+                                        } placeholder: {
+                                            ProgressView()
+                                        }
+                                    } else {
+                                        Image(systemName: "book.fill")
                                             .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 140, height: 190)
-                                            .cornerRadius(10)
-                                    } placeholder: {
-                                        ProgressView()
+                                            .frame(width: 60, height: 80)
+                                            .foregroundColor(.gray)
                                     }
                                 } else if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
                                     Image(uiImage: uiImage)
@@ -424,15 +431,22 @@ struct RecommendationCard: View {
                     .fill(Color.gray.opacity(0.2))
                     .frame(width: 80, height: 120)
 
-                if let thumbnailURL = recommendation.thumbnailURL, let url = URL(string: thumbnailURL) {
-                    AsyncImage(url: url) { image in
-                        image
+                if let thumbnailURL = recommendation.thumbnailURL {
+                    if let url = URL(string: thumbnailURL) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 76, height: 116)
+                                .cornerRadius(6)
+                        } placeholder: {
+                            ProgressView()
+                        }
+                    } else {
+                        Image(systemName: "book.fill")
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 76, height: 116)
-                            .cornerRadius(6)
-                    } placeholder: {
-                        ProgressView()
+                            .frame(width: 30, height: 40)
+                            .foregroundColor(.gray)
                     }
                 } else {
                     Image(systemName: "book.fill")
