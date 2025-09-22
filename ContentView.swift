@@ -53,36 +53,38 @@ struct ContentView: View {
          }
     }
 
+    private var tabs: [TabItem] {
+        [
+            TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
+            TabItem(icon: AnyView(Image(systemName: "book")), label: "Reading", tag: 1),
+            TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
+            TabItem(icon: AnyView(ProfileInitialsView(initials: userInitials)), label: "Profile", tag: 3)
+        ]
+    }
+
+    private var selectedView: some View {
+        Group {
+            switch selectedTab {
+            case 0:
+                LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+            case 1:
+                CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+            case 2:
+                RecommendationsView(viewModel: viewModel)
+            case 3:
+                ProfileView(authService: authService)
+            default:
+                LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+            }
+        }
+    }
+
     public var authenticatedView: some View {
-        TabView(selection: $selectedTab) {
-            LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-                .tabItem {
-                    Label("Library", systemImage: "books.vertical")
-                }
-                .tag(0)
+        ZStack(alignment: .bottom) {
+            selectedView
+                .ignoresSafeArea()
 
-            CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-                .tabItem {
-                    Label("Reading", systemImage: "book")
-                }
-                .tag(1)
-
-            RecommendationsView(viewModel: viewModel)
-                .tabItem {
-                    Label("Discover", systemImage: "sparkles")
-                }
-                .tag(2)
-
-            ProfileView(authService: authService)
-                .tabItem {
-                    VStack {
-                        Text(userInitials)
-                            .font(.system(size: 16, weight: .semibold))
-                        Text("Profile")
-                            .font(.caption2)
-                    }
-                }
-                .tag(3)
+            LiquidGlassTabBar(selectedTab: $selectedTab, tabs: tabs)
         }
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
