@@ -2,7 +2,7 @@ import SwiftUI
 
 // Glass Field Modifier for consistent text field styling
 struct GlassFieldModifier: ViewModifier {
-    associatedtype Content: View
+    var isValid: Bool = true
 
     func body(content: Content) -> some View {
         content
@@ -12,7 +12,7 @@ struct GlassFieldModifier: ViewModifier {
             .foregroundColor(Color.white)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                    .stroke(isValid ? Color.white.opacity(0.2) : Color.red.opacity(0.6), lineWidth: 0.5)
             )
     }
 }
@@ -28,7 +28,7 @@ struct GlassDatePicker: View {
             HStack {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(Color.white.opacity(0.8))
                 if isMandatory {
                     Text("*")
                         .foregroundColor(.red)
@@ -42,12 +42,12 @@ struct GlassDatePicker: View {
                 .padding()
                 .background(Color.white.opacity(0.1))
                 .cornerRadius(8)
-                .foregroundColor(.white)
+                .foregroundColor(Color.white)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
                 )
-                .accentColor(.white)
+                .accentColor(Color.white)
         }
     }
 }
@@ -65,7 +65,7 @@ struct GlassSegmentedPicker<T: Hashable>: View {
             HStack {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(Color.white.opacity(0.8))
                 if isMandatory {
                     Text("*")
                         .foregroundColor(.red)
@@ -76,7 +76,7 @@ struct GlassSegmentedPicker<T: Hashable>: View {
             Picker("", selection: $selection) {
                 ForEach(options, id: \.self) { option in
                     Text(displayText(option))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color.white)
                         .tag(option)
                 }
             }
