@@ -207,8 +207,9 @@ struct BookDetailView: View {
 
                                     ProgressView()
                                         .progressViewStyle(CircularProgressViewStyle())
+                                }
+                                .padding()
                             }
-                            .padding()
                         }
                     }
 
@@ -347,25 +348,29 @@ struct BookDetailView: View {
                 case .success(let details):
                     self.bookDetails = details
                     // Fetch book teaser if not cached
-                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true,
-                        let title = self.currentBook.title, let author = self.currentBook.author {
-                        self.loadBookTeaser(title: title, author: author)
+                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true {
+                        if let title = self.currentBook.title, let author = self.currentBook.author {
+                            self.loadBookTeaser(title: title, author: author)
+                        }
                     }
                     // Fetch author bio if not cached
-                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true,
-                        let author = self.currentBook.author {
-                        self.loadAuthorBiography(author: author)
+                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true {
+                        if let author = self.currentBook.author {
+                            self.loadAuthorBiography(author: author)
+                        }
                     }
                 case .failure(let error):
                     print("Failed to load book details: \(error.localizedDescription)")
                     // Still try to load teaser and bio if details failed and not cached
-                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true,
-                        let title = self.currentBook.title, let author = self.currentBook.author {
-                        self.loadBookTeaser(title: title, author: author)
+                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true {
+                        if let title = self.currentBook.title, let author = self.currentBook.author {
+                            self.loadBookTeaser(title: title, author: author)
+                        }
                     }
-                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true,
-                        let author = self.currentBook.author {
-                        self.loadAuthorBiography(author: author)
+                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true {
+                        if let author = self.currentBook.author {
+                            self.loadAuthorBiography(author: author)
+                        }
                     }
                 }
             }
