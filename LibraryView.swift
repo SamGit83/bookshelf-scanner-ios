@@ -227,6 +227,7 @@ struct LibraryBookCard: View {
                                         .cornerRadius(4)
                                 }
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             if let subGenreBadge = subGenreBadge {
                                 Text(subGenreBadge.1)
                                     .font(.caption)
