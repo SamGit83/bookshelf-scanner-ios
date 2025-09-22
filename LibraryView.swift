@@ -201,49 +201,47 @@ struct LibraryBookCard: View {
                             .font(.body)
                             .foregroundColor(.secondary)
 
-                        if let genre = book.genre {
-                            Text(genre)
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.blue.opacity(0.1))
-                                .cornerRadius(4)
-                        }
+                        Group {
+                            if let genre = book.genre {
+                                Text(genre)
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(4)
+                            }
 
-                        if let subGenre = book.subGenre {
-                            Text(subGenre)
-                                .font(.caption)
-                                .foregroundColor(.green)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.green.opacity(0.1))
-                                .cornerRadius(4)
-                        } else {
-                            print("DEBUG LibraryView: subGenre is nil for book: \(book.title ?? "Unknown")")
-                        }
+                            if let subGenre = book.subGenre {
+                                Text(subGenre)
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.green.opacity(0.1))
+                                    .cornerRadius(4)
+                            }
 
-                        if let estimatedTime = book.estimatedReadingTime {
-                            Text("~ \(estimatedTime)")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.orange.opacity(0.1))
-                                .cornerRadius(4)
-                        } else {
-                            print("DEBUG LibraryView: estimatedReadingTime is nil for book: \(book.title ?? "Unknown")")
-                        }
+                            if let estimatedTime = book.estimatedReadingTime {
+                                Text("~ \(estimatedTime)")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.orange.opacity(0.1))
+                                    .cornerRadius(4)
+                            }
 
-                        // Reading status indicator
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
-                                .frame(width: 8, height: 8)
+                            // Reading status indicator
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
+                                    .frame(width: 8, height: 8)
 
-                            Text(book.status.rawValue)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                Text(book.status.rawValue)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
 
