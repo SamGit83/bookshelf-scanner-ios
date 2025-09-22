@@ -580,7 +580,7 @@ struct PasswordResetView: View {
                         }
                     }
                     .disabled(email.isEmpty || isLoading)
-                    .modifier(LiquidButtonStyle(
+                    .buttonStyle(LiquidButtonStyle(
                         background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
                         foregroundColor: PrimaryColors.dynamicOrange,
                         cornerRadius: 16,
