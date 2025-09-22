@@ -55,7 +55,15 @@ struct Book: Identifiable, Codable, Hashable {
         print("DEBUG Book decoder: Successfully decoded author: \(self.author)")
         self.isbn = try container.decodeIfPresent(String.self, forKey: .isbn)
         self.genre = try container.decodeIfPresent(String.self, forKey: .genre)
-        self.subGenre = try container.decodeIfPresent(String.self, forKey: .subGenre)
+        if let rawSubGenre = try container.decodeIfPresent(String.self, forKey: .subGenre) {
+            if let range = rawSubGenre.range(of: " (") {
+                self.subGenre = String(rawSubGenre[..<range.lowerBound])
+            } else {
+                self.subGenre = rawSubGenre
+            }
+        } else {
+            self.subGenre = nil
+        }
         print("DEBUG Book decoder: subGenre: \(String(describing: self.subGenre))")
         self.publisher = try container.decodeIfPresent(String.self, forKey: .publisher)
         self.publicationYear = try container.decodeIfPresent(String.self, forKey: .publicationYear)

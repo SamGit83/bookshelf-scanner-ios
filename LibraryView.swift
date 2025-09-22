@@ -202,16 +202,6 @@ struct LibraryBookCard: View {
                             .foregroundColor(.secondary)
 
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
-                            if let genre = book.genre {
-                                Text(genre)
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(Color.blue.opacity(0.1))
-                                    .cornerRadius(4)
-                            }
-
                             if let subGenre = book.subGenre {
                                 Text(subGenre)
                                     .font(.caption)
