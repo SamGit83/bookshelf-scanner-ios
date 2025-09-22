@@ -191,13 +191,13 @@ struct LibraryBookCard: View {
 
                     // Book Details
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(book.title)
+                        Text(book.title ?? "Unknown Title")
                             .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
                             .lineLimit(2)
 
-                        Text(book.author)
+                        Text(book.author ?? "Unknown Author")
                             .font(.body)
                             .foregroundColor(.secondary)
 
@@ -283,7 +283,7 @@ struct LibraryBookCard: View {
             buttons.append(.cancel())
 
             return ActionSheet(
-                title: Text(book.title),
+                title: Text(book.title ?? "Unknown Title"),
                 message: Text("Choose an action"),
                 buttons: buttons
             )

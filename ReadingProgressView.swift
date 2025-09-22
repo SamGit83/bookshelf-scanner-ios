@@ -35,13 +35,13 @@ struct ReadingProgressView: View {
                                     .foregroundColor(.primary)
                             }
 
-                            Text(book.title)
+                            Text(book.title ?? "Unknown Title")
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
                                 .foregroundColor(.primary)
                                 .multilineTextAlignment(.center)
 
-                            Text(book.author)
+                            Text(book.author ?? "Unknown Author")
                                 .font(.body)
                                 .foregroundColor(.secondary)
                         }

@@ -67,13 +67,13 @@ struct BookDetailView: View {
 
                             // Title and Author
                             VStack(spacing: 8) {
-                                Text(book.title)
+                                Text(book.title ?? "Unknown Title")
                                     .font(.title)
                                     .fontWeight(.bold)
                                     .foregroundColor(.primary)
                                     .multilineTextAlignment(.center)
 
-                                Text(book.author)
+                                Text(book.author ?? "Unknown Author")
                                     .font(.title2)
                                     .foregroundColor(.secondary)
 
