@@ -23,6 +23,7 @@ class BookViewModel: ObservableObject {
     }
 
     func scanBookshelf(image: UIImage) {
+        print("DEBUG BookViewModel: scanBookshelf called")
         isLoading = true
         errorMessage = nil
 
@@ -31,8 +32,10 @@ class BookViewModel: ObservableObject {
                 self?.isLoading = false
                 switch result {
                 case .success(let responseText):
+                    print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count)")
                     self?.parseAndAddBooks(from: responseText)
                 case .failure(let error):
+                    print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription)")
                     ErrorHandler.shared.handle(error, context: "Image Analysis")
                 }
             }
@@ -40,16 +43,23 @@ class BookViewModel: ObservableObject {
     }
 
     private func parseAndAddBooks(from responseText: String) {
+        print("DEBUG BookViewModel: parseAndAddBooks called, responseText: \(responseText)")
         // Simple parsing - in a real app, you'd use more robust JSON parsing
         // Assuming the response is a JSON string that can be decoded
         do {
             if let data = responseText.data(using: .utf8) {
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
+                print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
                 for book in decodedBooks {
+                    print("DEBUG BookViewModel: Saving book: \(book.title) by \(book.author)")
                     saveBookToFirestore(book)
                 }
+            } else {
+                print("DEBUG BookViewModel: Failed to convert responseText to data")
+                errorMessage = "Failed to parse book data. Please try again."
             }
         } catch {
+            print("DEBUG BookViewModel: JSON decode error: \(error)")
             // Fallback: try to extract basic info with regex or string parsing
             errorMessage = "Failed to parse book data. Please try again."
         }
@@ -91,38 +101,49 @@ class BookViewModel: ObservableObject {
 
     private func setupFirestoreListener() {
         guard let userId = FirebaseConfig.shared.currentUserId else {
+            print("DEBUG BookViewModel: setupFirestoreListener - user not authenticated, loading from cache")
             // Load from cache if offline
             if let cachedBooks = OfflineCache.shared.loadCachedBooks() {
                 self.books = cachedBooks
+                print("DEBUG BookViewModel: Loaded \(cachedBooks.count) books from cache")
+            } else {
+                print("DEBUG BookViewModel: No cached books available")
             }
             return
         }
 
+        print("DEBUG BookViewModel: Setting up Firestore listener for userId=\(userId)")
         listener?.remove()
 
         listener = db.collection("users").document(userId).collection("books")
             .addSnapshotListener { [weak self] snapshot, error in
                 if let error = error {
+                    print("DEBUG BookViewModel: Firestore listener error: \(error.localizedDescription), loading from cache")
                     // Try to load from cache if Firestore fails
                     if let cachedBooks = OfflineCache.shared.loadCachedBooks() {
                         self?.books = cachedBooks
+                        print("DEBUG BookViewModel: Loaded \(cachedBooks.count) books from cache due to error")
                     } else {
+                        print("DEBUG BookViewModel: No cached books, handling error")
                         ErrorHandler.shared.handle(error, context: "Loading Books")
                     }
                     return
                 }
 
                 guard let documents = snapshot?.documents else {
+                    print("DEBUG BookViewModel: No documents in snapshot")
                     self?.books = []
                     return
                 }
 
+                print("DEBUG BookViewModel: Received \(documents.count) documents from Firestore")
                 let loadedBooks: [Book] = documents.compactMap { document in
                     let data = document.data()
                     guard
                         let title = data["title"] as? String,
                         let author = data["author"] as? String
                     else {
+                        print("DEBUG BookViewModel: Document missing title or author: \(document.documentID)")
                         return nil
                     }
 
@@ -151,6 +172,9 @@ class BookViewModel: ObservableObject {
                     return book
                 }
 
+                print("DEBUG BookViewModel: Successfully loaded \(loadedBooks.count) books from Firestore")
+                let libraryBooksCount = loadedBooks.filter { $0.status == .library }.count
+                print("DEBUG BookViewModel: Library books count: \(libraryBooksCount)")
                 self?.books = loadedBooks
                 // Cache the books for offline use
                 OfflineCache.shared.cacheBooks(loadedBooks)
@@ -159,10 +183,12 @@ class BookViewModel: ObservableObject {
 
     func saveBookToFirestore(_ book: Book) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
+            print("DEBUG BookViewModel: saveBookToFirestore failed - user not authenticated")
             errorMessage = "User not authenticated"
             return
         }
 
+        print("DEBUG BookViewModel: Saving book to Firestore: userId=\(userId), bookId=\(book.id.uuidString)")
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
         let data: [String: Any] = [
             "id": book.id.uuidString,
@@ -176,7 +202,10 @@ class BookViewModel: ObservableObject {
         ]
         bookRef.setData(data) { error in
             if let error = error {
+                print("DEBUG BookViewModel: Failed to save book to Firestore: \(error.localizedDescription)")
                 self.errorMessage = "Failed to save book: \(error.localizedDescription)"
+            } else {
+                print("DEBUG BookViewModel: Successfully saved book to Firestore")
             }
         }
     }
