@@ -201,35 +201,26 @@ struct LibraryBookCard: View {
                             .font(.body)
                             .foregroundColor(.secondary)
 
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
-                            if let subGenre = book.subGenre {
-                                Text(subGenre)
-                                    .font(.caption)
-                                    .foregroundColor(.green)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(Color.green.opacity(0.1))
-                                    .cornerRadius(4)
-                            }
-
-                            if let estimatedTime = book.estimatedReadingTime {
-                                Text("~ \(estimatedTime)")
-                                    .font(.caption)
-                                    .foregroundColor(.orange)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(Color.orange.opacity(0.1))
-                                    .cornerRadius(4)
-                            }
-
-                            if book.pageCount != nil {
-                                Text("\(book.pageCount!) pages")
-                                    .font(.caption)
-                                    .foregroundColor(.purple)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(Color.purple.opacity(0.1))
-                                    .cornerRadius(4)
+                        // Create a more symmetrical badge layout
+                        let availableBadges = [
+                            book.subGenre != nil ? ("subGenre", book.subGenre!, Color.green) : nil,
+                            book.estimatedReadingTime != nil ? ("time", "~ \(book.estimatedReadingTime!)", Color.orange) : nil,
+                            book.pageCount != nil ? ("pages", "\(book.pageCount!) pages", Color.purple) : nil
+                        ].compactMap { $0 }
+                        
+                        if !availableBadges.isEmpty {
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: min(availableBadges.count, 3)), spacing: 4) {
+                                ForEach(Array(availableBadges.enumerated()), id: \.offset) { index, badge in
+                                    Text(badge.1)
+                                        .font(.caption)
+                                        .foregroundColor(badge.2)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 3)
+                                        .background(badge.2.opacity(0.1))
+                                        .cornerRadius(4)
+                                        .frame(maxWidth: .infinity)
+                                        .multilineTextAlignment(.center)
+                                }
                             }
                         }
 
