@@ -231,36 +231,34 @@ struct GlassCard<Content: View>: View {
     }
 }
 extension View {
-    @ViewBuilder
-    func glassFieldStyle(isValid: Bool = true) -> some View {
-        GlassFieldStyleModifier(isValid: isValid)
-            .modifier(self)
-    }
-}
+    private struct GlassFieldModifier: ViewModifier {
+        @Environment(\.colorScheme) private var colorScheme
+        let isValid: Bool
 
-struct GlassFieldStyleModifier: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-    let isValid: Bool
-
-    private var backgroundColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
-    }
-
-    private var strokeColor: Color {
-        if !isValid {
-            return Color.red.opacity(0.6)
+        private var backgroundColor: Color {
+            colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
         }
-        return colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+
+        private var strokeColor: Color {
+            if !isValid {
+                return Color.red.opacity(0.6)
+            }
+            return colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+        }
+
+        func body(content: Content) -> some View {
+            content
+                .padding()
+                .background(backgroundColor)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(strokeColor, lineWidth: 0.5)
+                )
+        }
     }
 
-    func body(content: Content) -> some View {
-        content
-            .padding()
-            .background(backgroundColor)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(strokeColor, lineWidth: 0.5)
-            )
+    func glassFieldStyle(isValid: Bool = true) -> some View {
+        modifier(GlassFieldModifier(isValid: isValid))
     }
 }
