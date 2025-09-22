@@ -57,6 +57,7 @@ class BookViewModel: ObservableObject {
         // Assuming the response is a JSON string that can be decoded
         do {
             if let data = jsonString.data(using: .utf8) {
+                print("DEBUG BookViewModel: Attempting to decode JSON: \(jsonString)")
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
                 print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
                 for book in decodedBooks {
@@ -69,6 +70,21 @@ class BookViewModel: ObservableObject {
             }
         } catch {
             print("DEBUG BookViewModel: JSON decode error: \(error)")
+            print("DEBUG BookViewModel: Failed JSON string: \(jsonString)")
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    print("DEBUG BookViewModel: Key '\(key.stringValue)' not found: \(context.debugDescription)")
+                case .typeMismatch(let type, let context):
+                    print("DEBUG BookViewModel: Type mismatch for type \(type): \(context.debugDescription)")
+                case .valueNotFound(let type, let context):
+                    print("DEBUG BookViewModel: Value not found for type \(type): \(context.debugDescription)")
+                case .dataCorrupted(let context):
+                    print("DEBUG BookViewModel: Data corrupted: \(context.debugDescription)")
+                @unknown default:
+                    print("DEBUG BookViewModel: Unknown decoding error")
+                }
+            }
             // Fallback: try to extract basic info with regex or string parsing
             errorMessage = "Failed to parse book data. Please try again."
         }
