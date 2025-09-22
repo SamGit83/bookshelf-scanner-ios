@@ -579,7 +579,7 @@ struct PasswordResetView: View {
                             .frame(maxWidth: .infinity)
                         }
                     }
-                    .modifier(ButtonStyleModifier(
+                    .modifier(LiquidButtonStyle(
                         background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
                         foregroundColor: PrimaryColors.dynamicOrange,
                         cornerRadius: 16,
