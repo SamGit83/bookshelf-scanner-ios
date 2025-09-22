@@ -11,7 +11,7 @@ struct LiquidGlassTabBar: View {
     @Binding var selectedTab: Int
     let tabs: [TabItem]
 
-    var body: some View {
+    private var tabBarContent: some View {
         HStack(spacing: 0) {
             ForEach(tabs) { tab in
                 Button(action: {
@@ -39,19 +39,25 @@ struct LiquidGlassTabBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-                .opacity(0.8)
-                .blur(radius: 1)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                )
-                .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-        )
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+    }
+
+    private var backgroundShape: some View {
+        RoundedRectangle(cornerRadius: 20)
+            .fill(.ultraThinMaterial)
+            .opacity(0.8)
+            .blur(radius: 1)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+    }
+
+    var body: some View {
+        tabBarContent
+            .background(backgroundShape)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
     }
 }
 
