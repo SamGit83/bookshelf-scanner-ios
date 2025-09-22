@@ -72,7 +72,7 @@ struct CameraView: UIViewControllerRepresentable {
         overlayView.addSubview(topBar)
 
         // Bottom control bar
-        let bottomBar = UIView(frame: CGRect(x: 0, y: viewController.view.bounds.height - 120, width: viewController.view.bounds.width, height: 120))
+        let bottomBar = UIView(frame: CGRect(x: 0, y: viewController.view.bounds.height - 100, width: viewController.view.bounds.width, height: 100))
         bottomBar.backgroundColor = UIColor(white: 0, alpha: 0.4)
         overlayView.addSubview(bottomBar)
 
