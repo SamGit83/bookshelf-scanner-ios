@@ -165,8 +165,9 @@ struct ProfilePictureView: View {
     }
 
     private var initials: String {
-        guard let displayName = authService.currentUser?.displayName else { return "?" }
-        let components = displayName.split(separator: " ")
+        let name = authService.currentUser?.displayName ?? authService.currentUser?.email ?? "?"
+        if name == "?" { return "?" }
+        let components = name.split(separator: " ")
         if components.count >= 2 {
             let firstInitial = components.first?.first?.uppercased() ?? ""
             let lastInitial = components.last?.first?.uppercased() ?? ""

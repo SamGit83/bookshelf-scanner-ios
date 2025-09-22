@@ -118,7 +118,7 @@ struct GlassSegmentedPicker<T: Hashable>: View {
                         .tag(option)
                 }
             }
-            .pickerStyle(.menu)
+            .pickerStyle(.segmented)
             .tint(textColor)
             .background(backgroundColor)
             .cornerRadius(8)
