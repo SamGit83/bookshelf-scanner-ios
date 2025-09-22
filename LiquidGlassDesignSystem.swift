@@ -310,7 +310,6 @@ struct AnimationTiming {
 
 // MARK: - Button Style System
 struct ButtonStyleModifier: ViewModifier {
-    typealias Body = AnyView
     let background: LinearGradient
     let foregroundColor: Color
     let cornerRadius: CGFloat
@@ -319,11 +318,11 @@ struct ButtonStyleModifier: ViewModifier {
     let shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat)?
     let border: (color: Color, width: CGFloat)?
     
-    init(background: LinearGradient, 
-         foregroundColor: Color, 
-         cornerRadius: CGFloat, 
-         padding: EdgeInsets, 
-         font: Font, 
+    init(background: LinearGradient,
+         foregroundColor: Color,
+         cornerRadius: CGFloat,
+         padding: EdgeInsets,
+         font: Font,
          shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat)? = nil,
          border: (color: Color, width: CGFloat)? = nil) {
         self.background = background
@@ -335,7 +334,7 @@ struct ButtonStyleModifier: ViewModifier {
         self.border = border
     }
     
-    func body(content: Content) -> Body {
+    func body(content: Content) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
         let shadowColor = shadow?.color ?? Color.clear
@@ -343,19 +342,17 @@ struct ButtonStyleModifier: ViewModifier {
         let shadowX = shadow?.x ?? 0
         let shadowY = shadow?.y ?? 0
         
-        return AnyView(
-            content
-                .font(font)
-                .foregroundColor(foregroundColor)
-                .padding(padding)
-                .background(background)
-                .cornerRadius(cornerRadius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(borderColor, lineWidth: borderWidth)
-                )
-                .shadow(color: shadowColor, radius: shadowRadius, x: shadowX, y: shadowY)
-        )
+        content
+            .font(font)
+            .foregroundColor(foregroundColor)
+            .padding(padding)
+            .background(background)
+            .cornerRadius(cornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(borderColor, lineWidth: borderWidth)
+            )
+            .shadow(color: shadowColor, radius: shadowRadius, x: shadowX, y: shadowY)
     }
 }
 
@@ -399,7 +396,6 @@ struct ButtonStyles {
 
 // MARK: - Card Style System
 struct CardStyleModifier: ViewModifier {
-    typealias Body = AnyView
     let background: LinearGradient
     let cornerRadius: CGFloat
     let padding: CGFloat
@@ -407,7 +403,7 @@ struct CardStyleModifier: ViewModifier {
     let border: (color: Color, width: CGFloat)?
     let blur: CGFloat?
     
-    func body(content: Content) -> Body {
+    func body(content: Content) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
         let shadowColor = shadow?.color ?? Color.clear
@@ -416,18 +412,16 @@ struct CardStyleModifier: ViewModifier {
         let shadowY = shadow?.y ?? 0
         let blurRadius = blur ?? 0
         
-        return AnyView(
-            content
-                .padding(padding)
-                .background(background)
-                .cornerRadius(cornerRadius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(borderColor, lineWidth: borderWidth)
-                )
-                .shadow(color: shadowColor, radius: shadowRadius, x: shadowX, y: shadowY)
-                .blur(radius: blurRadius)
-        )
+        content
+            .padding(padding)
+            .background(background)
+            .cornerRadius(cornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(borderColor, lineWidth: borderWidth)
+            )
+            .shadow(color: shadowColor, radius: shadowRadius, x: shadowX, y: shadowY)
+            .blur(radius: blurRadius)
     }
 }
 
