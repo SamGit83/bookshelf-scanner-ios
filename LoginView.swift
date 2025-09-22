@@ -130,7 +130,7 @@ struct LoginView: View {
                                 }
 
                                 TextField("", text: $email)
-                                    .modifier(GlassFieldModifier())
+                                    .glassFieldStyle()
                                     .keyboardType(.emailAddress)
                                     .autocapitalization(.none)
                                     .textContentType(.emailAddress)
@@ -149,7 +149,7 @@ struct LoginView: View {
                                     }
 
                                     TextField("", text: $firstName)
-                                        .modifier(GlassFieldModifier())
+                                        .glassFieldStyle()
                                         .textContentType(.givenName)
                                 }
 
@@ -165,7 +165,7 @@ struct LoginView: View {
                                     }
 
                                     TextField("", text: $lastName)
-                                        .modifier(GlassFieldModifier())
+                                        .glassFieldStyle()
                                         .textContentType(.familyName)
                                 }
 
@@ -212,7 +212,7 @@ struct LoginView: View {
                                 }
 
                                 SecureField("", text: $password)
-                                    .modifier(GlassFieldModifier())
+                                    .glassFieldStyle()
                                     .textContentType(isSignUp ? .newPassword : .password)
                             }
 
@@ -328,7 +328,7 @@ struct LoginView: View {
                             .foregroundColor(.white.opacity(0.8))
 
                         TextField("", text: $phone)
-                            .modifier(GlassFieldModifier())
+                            .glassFieldStyle()
                             .keyboardType(.phonePad)
                             .textContentType(.telephoneNumber)
                     }
@@ -340,7 +340,7 @@ struct LoginView: View {
                             .foregroundColor(.white.opacity(0.8))
 
                         TextField("", text: $country)
-                            .modifier(GlassFieldModifier())
+                            .glassFieldStyle()
                             .textContentType(.countryName)
                     }
 
@@ -351,7 +351,7 @@ struct LoginView: View {
                             .foregroundColor(.white.opacity(0.8))
 
                         TextField("", text: $city)
-                            .modifier(GlassFieldModifier())
+                            .glassFieldStyle()
                             .textContentType(.addressCity)
                     }
 
@@ -362,7 +362,7 @@ struct LoginView: View {
                             .foregroundColor(.white.opacity(0.8))
 
                         TextField("", text: $favoriteBookGenre)
-                            .modifier(GlassFieldModifier())
+                            .glassFieldStyle()
                     }
 
                     Button(action: {

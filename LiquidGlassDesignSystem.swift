@@ -1,20 +1,5 @@
 import SwiftUI
 
-// Glass Field Modifier for consistent text field styling
-struct GlassFieldModifier: ViewModifier {
-    var isValid: Bool = true
-
-    func body(content: Content) -> some View {
-        content
-            .padding()
-            .background(Color.white.opacity(0.1))
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isValid ? Color.white.opacity(0.2) : Color.red.opacity(0.6), lineWidth: 0.5)
-            )
-    }
-}
 
 // Glass Date Picker component
 struct GlassDatePicker: View {
@@ -179,5 +164,17 @@ struct GlassCard<Content: View>: View {
             RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
         )
+    }
+}
+extension View {
+    func glassFieldStyle(isValid: Bool = true) -> some View {
+        self
+            .padding()
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isValid ? Color.white.opacity(0.2) : Color.red.opacity(0.6), lineWidth: 0.5)
+            )
     }
 }
