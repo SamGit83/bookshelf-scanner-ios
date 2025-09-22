@@ -477,6 +477,7 @@ struct CardStyles {
             blur: 0
         )
     }
+}
 
 
 // MARK: - Enhanced Animated Background
