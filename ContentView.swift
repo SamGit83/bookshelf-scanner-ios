@@ -96,7 +96,6 @@ struct ContentView: View {
             LiquidGlassTabBar(selectedTab: $selectedTab, tabs: tabs)
         }
         .sheet(isPresented: $isShowingCamera) {
-            print("DEBUG: Sheet presented for camera")
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
         }
         .onChange(of: isShowingCamera) { newValue in
