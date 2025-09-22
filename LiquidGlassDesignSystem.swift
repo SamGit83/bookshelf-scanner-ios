@@ -333,7 +333,8 @@ struct ButtonStyleModifier: ViewModifier {
         self.shadow = shadow
         self.border = border
     }
-    
+
+    @ViewBuilder
     func body(content: Content) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
@@ -341,7 +342,7 @@ struct ButtonStyleModifier: ViewModifier {
         let shadowRadius = shadow?.radius ?? 0
         let shadowX = shadow?.x ?? 0
         let shadowY = shadow?.y ?? 0
-        
+
         content
             .font(font)
             .foregroundColor(foregroundColor)
@@ -402,7 +403,8 @@ struct CardStyleModifier: ViewModifier {
     let shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat)?
     let border: (color: Color, width: CGFloat)?
     let blur: CGFloat?
-    
+
+    @ViewBuilder
     func body(content: Content) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
@@ -411,7 +413,7 @@ struct CardStyleModifier: ViewModifier {
         let shadowX = shadow?.x ?? 0
         let shadowY = shadow?.y ?? 0
         let blurRadius = blur ?? 0
-        
+
         content
             .padding(padding)
             .background(background)
