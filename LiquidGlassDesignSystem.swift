@@ -230,35 +230,37 @@ struct GlassCard<Content: View>: View {
         )
     }
 }
-extension View {
-    private struct GlassFieldModifier: ViewModifier {
-        @Environment(\.colorScheme) private var colorScheme
-        let isValid: Bool
+struct GlassFieldStyleView<Content: View>: View {
+    let content: Content
+    let isValid: Bool
 
-        private var backgroundColor: Color {
-            colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
-        }
+    @Environment(\.colorScheme) private var colorScheme
 
-        private var strokeColor: Color {
-            if !isValid {
-                return Color.red.opacity(0.6)
-            }
-            return colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
-        }
-
-        func body(content: Content) -> some View {
-            content
-                .padding()
-                .background(backgroundColor)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(strokeColor, lineWidth: 0.5)
-                )
-        }
+    private var backgroundColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
     }
 
+    private var strokeColor: Color {
+        if !isValid {
+            return Color.red.opacity(0.6)
+        }
+        return colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+    }
+
+    var body: some View {
+        content
+            .padding()
+            .background(backgroundColor)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(strokeColor, lineWidth: 0.5)
+            )
+    }
+}
+
+extension View {
     func glassFieldStyle(isValid: Bool = true) -> some View {
-        modifier(GlassFieldModifier(isValid: isValid))
+        GlassFieldStyleView(content: self, isValid: isValid)
     }
 }
