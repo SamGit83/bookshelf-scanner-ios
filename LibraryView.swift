@@ -2,6 +2,29 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+enum SortOption: String, CaseIterable {
+    case titleAZ = "Title A-Z"
+    case titleZA = "Title Z-A"
+    case dateNewest = "Date Added (Newest)"
+    case dateOldest = "Date Added (Oldest)"
+    case authorAZ = "Author A-Z"
+    
+    var sortFunction: (Book, Book) -> Bool {
+        switch self {
+        case .titleAZ:
+            return { ($0.title ?? "").localizedCaseInsensitiveCompare($1.title ?? "") == .orderedAscending }
+        case .titleZA:
+            return { ($0.title ?? "").localizedCaseInsensitiveCompare($1.title ?? "") == .orderedDescending }
+        case .dateNewest:
+            return { $0.dateAdded > $1.dateAdded }
+        case .dateOldest:
+            return { $0.dateAdded < $1.dateAdded }
+        case .authorAZ:
+            return { ($0.author ?? "").localizedCaseInsensitiveCompare($1.author ?? "") == .orderedAscending }
+        }
+    }
+}
+
 
 struct LibraryView: View {
     @ObservedObject var viewModel: BookViewModel
@@ -9,6 +32,7 @@ struct LibraryView: View {
     @State private var isShowingAddBook = false
     @State private var isShowingSearch = false
     @State private var showingClearConfirmation = false
+    @State private var selectedSort: SortOption = .titleAZ
 
     var body: some View {
         NavigationView {
@@ -40,7 +64,7 @@ struct LibraryView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 16) {
-                            ForEach(viewModel.books) { book in
+                            ForEach(viewModel.books.sorted(by: selectedSort.sortFunction)) { book in
                                 LibraryBookCard(book: book, viewModel: viewModel)
                                     .padding(.horizontal, 16)
                             }
@@ -80,22 +104,37 @@ struct LibraryView: View {
                 .padding(.bottom, 16)
             }
             .navigationTitle("Library (\(viewModel.books.count))")
-            .navigationBarItems(trailing: HStack {
-                Button(action: {
-                    showingClearConfirmation = true
-                }) {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                        .font(.system(size: 16, weight: .medium))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        Button(action: {
+                            showingClearConfirmation = true
+                        }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        Menu {
+                            Picker("Sort by", selection: $selectedSort) {
+                                ForEach(SortOption.allCases, id: \.self) { option in
+                                    Text(option.rawValue).tag(option)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                                .foregroundColor(.primary)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        Button(action: {
+                            isShowingSearch = true
+                        }) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.primary)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                    }
                 }
-                Button(action: {
-                    isShowingSearch = true
-                }) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.primary)
-                        .font(.system(size: 16, weight: .medium))
-                }
-            })
+            }
             .overlay(
                 Group {
                     if viewModel.isLoading {
