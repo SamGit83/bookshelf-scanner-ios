@@ -1,18 +1,59 @@
 import SwiftUI
 
+enum ColorSchemePreference: String, CaseIterable {
+    case light, dark, system
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .light: return .light
+        case .dark: return .dark
+        case .system: return nil
+        }
+    }
+}
+
+class ThemeManager: ObservableObject {
+    static let shared = ThemeManager()
+
+    private let userDefaultsKey = "colorSchemePreference"
+
+    @Published var currentPreference: ColorSchemePreference {
+        didSet {
+            UserDefaults.standard.set(currentPreference.rawValue, forKey: userDefaultsKey)
+        }
+    }
+
+    init() {
+        let rawValue = UserDefaults.standard.string(forKey: userDefaultsKey) ?? ColorSchemePreference.system.rawValue
+        self.currentPreference = ColorSchemePreference(rawValue: rawValue) ?? .system
+    }
+}
 
 // Glass Date Picker component
 struct GlassDatePicker: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     @Binding var date: Date
     let isMandatory: Bool = false
+
+    private var textColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.9) : Color.white.opacity(0.8)
+    }
+
+    private var backgroundColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
+    }
+
+    private var strokeColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(Color.white.opacity(0.8))
+                    .foregroundColor(textColor)
                 if isMandatory {
                     Text("*")
                         .foregroundColor(.red)
@@ -24,32 +65,45 @@ struct GlassDatePicker: View {
                 .datePickerStyle(.compact)
                 .labelsHidden()
                 .padding()
-                .background(Color.white.opacity(0.1))
+                .background(backgroundColor)
                 .cornerRadius(8)
-                .foregroundColor(Color.white)
+                .foregroundColor(textColor)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                        .stroke(strokeColor, lineWidth: 0.5)
                 )
-                .accentColor(Color.white)
+                .accentColor(textColor)
         }
     }
 }
 
 // Glass Segmented Picker component
 struct GlassSegmentedPicker<T: Hashable>: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     @Binding var selection: T
     let options: [T]
     let displayText: (T) -> String
     let isMandatory: Bool = false
 
+    private var textColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.9) : Color.white.opacity(0.8)
+    }
+
+    private var backgroundColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
+    }
+
+    private var strokeColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(Color.white.opacity(0.8))
+                    .foregroundColor(textColor)
                 if isMandatory {
                     Text("*")
                         .foregroundColor(.red)
@@ -60,17 +114,17 @@ struct GlassSegmentedPicker<T: Hashable>: View {
             Picker("", selection: $selection) {
                 ForEach(options, id: \.self) { option in
                     Text(displayText(option))
-                        .foregroundColor(Color.white)
+                        .foregroundColor(textColor)
                         .tag(option)
                 }
             }
             .pickerStyle(.menu)
-            .tint(Color.white)
-            .background(Color.white.opacity(0.1))
+            .tint(textColor)
+            .background(backgroundColor)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                    .stroke(strokeColor, lineWidth: 0.5)
             )
         }
     }
@@ -145,37 +199,68 @@ struct AnimatedBackground: View {
 
 // Glass Card component for consistent card styling
 struct GlassCard<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
     let content: Content
 
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
 
+    private var glassColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.1)
+    }
+
+    private var glassStrokeColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+    }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.1))
+                .fill(glassColor)
                 .blur(radius: 1)
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.05))
+                .fill(glassColor.opacity(0.5))
 
             content
         }
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                .stroke(glassStrokeColor, lineWidth: 0.5)
         )
     }
 }
 extension View {
+    @ViewBuilder
     func glassFieldStyle(isValid: Bool = true) -> some View {
-        self
+        GlassFieldStyleModifier(isValid: isValid)
+            .modifier(self)
+    }
+}
+
+struct GlassFieldStyleModifier: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+    let isValid: Bool
+
+    private var backgroundColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
+    }
+
+    private var strokeColor: Color {
+        if !isValid {
+            return Color.red.opacity(0.6)
+        }
+        return colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+    }
+
+    func body(content: Content) -> some View {
+        content
             .padding()
-            .background(Color.white.opacity(0.1))
+            .background(backgroundColor)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isValid ? Color.white.opacity(0.2) : Color.red.opacity(0.6), lineWidth: 0.5)
+                    .stroke(strokeColor, lineWidth: 0.5)
             )
     }
 }

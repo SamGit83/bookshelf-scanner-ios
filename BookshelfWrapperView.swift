@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BookshelfWrapperView: View {
     @ObservedObject private var authService = AuthService.shared
+    @ObservedObject private var themeManager = ThemeManager.shared
     @StateObject private var viewModel = BookViewModel()
     @State private var capturedImage: UIImage?
     @State private var isShowingCamera = false
@@ -15,6 +16,7 @@ struct BookshelfWrapperView: View {
                 HomeView()
             }
         }
+        .preferredColorScheme(themeManager.currentPreference.colorScheme)
         .onChange(of: authService.isAuthenticated) { isAuthenticated in
             if isAuthenticated {
                 viewModel.refreshData()

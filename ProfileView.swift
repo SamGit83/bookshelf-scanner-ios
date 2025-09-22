@@ -1,7 +1,9 @@
 import SwiftUI
+import PhotosUI
 
 struct ProfileView: View {
     @ObservedObject var authService: AuthService
+    @ObservedObject var themeManager = ThemeManager.shared
     @State private var showSignOutAlert = false
 
     var body: some View {
@@ -11,9 +13,10 @@ struct ProfileView: View {
 
                 // User Info
                 VStack(spacing: 10) {
-                    Image(systemName: "person.circle")
-                        .font(.system(size: 80))
-                        .foregroundColor(.blue)
+                    GlassCard {
+                        ProfilePictureView(authService: authService)
+                            .padding()
+                    }
 
                     if let user = authService.currentUser {
                         Text(user.email ?? "No email")
@@ -46,6 +49,15 @@ struct ProfileView: View {
                                     Text("Reading Statistics")
                                 }
                             }
+                        }
+
+                        Section(header: Text("Appearance")) {
+                            GlassSegmentedPicker(
+                                title: "Theme",
+                                selection: $themeManager.currentPreference,
+                                options: ColorSchemePreference.allCases,
+                                displayText: { $0.rawValue.capitalized }
+                            )
                         }
 
                         Section {
@@ -85,6 +97,98 @@ struct ProfileView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+    }
+}
+
+struct ProfilePictureView: View {
+    @ObservedObject var authService: AuthService
+    @State private var selectedImage: UIImage?
+    @State private var selectedItem: PhotosPickerItem?
+    @State private var showImagePicker = false
+
+    private let userDefaultsKey = "profileImageData"
+
+    init(authService: AuthService) {
+        self._authService = ObservedObject(wrappedValue: authService)
+        _selectedImage = State(initialValue: loadImageFromUserDefaults())
+    }
+
+    var body: some View {
+        ZStack {
+            if let image = selectedImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 100, height: 100)
+                    .clipShape(Circle())
+            } else {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(width: 100, height: 100)
+                    Text(initials)
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+
+            // Overlay button
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        showImagePicker = true
+                    }) {
+                        Image(systemName: "camera.fill")
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
+                    }
+                    .padding(4)
+                }
+            }
+            .frame(width: 100, height: 100)
+        }
+        .frame(width: 100, height: 100)
+        .photosPicker(isPresented: $showImagePicker, selection: $selectedItem, matching: .images)
+        .onChange(of: selectedItem) { newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    selectedImage = uiImage
+                    saveImageToUserDefaults(uiImage)
+                }
+            }
+        }
+    }
+
+    private var initials: String {
+        guard let displayName = authService.currentUser?.displayName else { return "?" }
+        let components = displayName.split(separator: " ")
+        if components.count >= 2 {
+            let firstInitial = components[0].first?.uppercased() ?? ""
+            let lastInitial = components[1].first?.uppercased() ?? ""
+            return firstInitial + lastInitial
+        } else if let first = components.first?.first?.uppercased() {
+            return first
+        }
+        return "?"
+    }
+
+    private func loadImageFromUserDefaults() -> UIImage? {
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+           let image = UIImage(data: data) {
+            return image
+        }
+        return nil
+    }
+
+    private func saveImageToUserDefaults(_ image: UIImage) {
+        if let data = image.jpegData(compressionQuality: 0.8) {
+            UserDefaults.standard.set(data, forKey: userDefaultsKey)
+        }
     }
 }
 
