@@ -1,0 +1,125 @@
+{
+  "" : {
+    "const-values" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookshelfScanner-master.swiftconstvalues",
+    "dependencies" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookshelfScanner-master.d",
+    "diagnostics" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookshelfScanner-master.dia",
+    "emit-module-dependencies" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookshelfScanner-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookshelfScanner-master-emit-module.dia",
+    "swift-dependencies" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookshelfScanner-master.swiftdeps"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/AddBookView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AddBookView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AddBookView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AddBookView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/App.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/App.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/App.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/App.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/AppDelegate.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AppDelegate.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AppDelegate.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AppDelegate.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/AuthService.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AuthService.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AuthService.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/AuthService.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/Book.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/Book.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/Book.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/Book.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/BookViewModel.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookViewModel.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookViewModel.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/BookViewModel.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/CameraView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/CameraView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/CameraView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/CameraView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/ContentView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ContentView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/CurrentlyReadingView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/CurrentlyReadingView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/CurrentlyReadingView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/CurrentlyReadingView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/EditBookView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/EditBookView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/EditBookView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/EditBookView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/ErrorHandling.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ErrorHandling.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ErrorHandling.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ErrorHandling.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/FirebaseConfig.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/FirebaseConfig.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/FirebaseConfig.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/FirebaseConfig.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/GeminiAPIService.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/GeminiAPIService.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/GeminiAPIService.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/GeminiAPIService.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/GoogleBooksAPIService.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/GoogleBooksAPIService.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/GoogleBooksAPIService.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/GoogleBooksAPIService.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/LibraryView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/LibraryView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/LibraryView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/LibraryView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/LoginView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/LoginView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/LoginView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/LoginView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/OfflineCache.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/OfflineCache.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/OfflineCache.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/OfflineCache.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/OnboardingView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/OnboardingView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/OnboardingView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/OnboardingView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/ProfileView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ProfileView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ProfileView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ProfileView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/ReadingProgressView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ReadingProgressView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ReadingProgressView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/ReadingProgressView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/RecommendationsView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/RecommendationsView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/RecommendationsView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/RecommendationsView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/SearchView.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/SearchView.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/SearchView.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/SearchView.o"
+  },
+  "/Users/Shared/ios-bookshelf-scanner/SecureConfig.swift" : {
+    "index-unit-output-path" : "/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/SecureConfig.o",
+    "llvm-bc" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/SecureConfig.bc",
+    "object" : "/Users/Shared/ios-bookshelf-scanner/build/BookshelfScanner.build/Release-iphoneos/BookshelfScanner.build/Objects-normal/arm64/SecureConfig.o"
+  }
+}

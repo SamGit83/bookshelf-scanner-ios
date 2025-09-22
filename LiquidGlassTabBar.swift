@@ -11,6 +11,24 @@ struct LiquidGlassTabBar: View {
     @Binding var selectedTab: Int
     let tabs: [TabItem]
 
+    private func tabButtonContent(for tab: TabItem) -> some View {
+        VStack(spacing: 4) {
+            tab.icon
+                .frame(width: 24, height: 24)
+            Text(tab.label)
+                .font(.caption2)
+                .fontWeight(selectedTab == tab.tag ? .semibold : .regular)
+        }
+        .foregroundColor(selectedTab == tab.tag ? .primary : .secondary)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(selectedTab == tab.tag ? Color.blue.opacity(0.1) : Color.clear)
+                .padding(.horizontal, 8)
+        )
+    }
+
     private var tabBarContent: some View {
         HStack(spacing: 0) {
             ForEach(tabs) { tab in
@@ -19,21 +37,7 @@ struct LiquidGlassTabBar: View {
                         selectedTab = tab.tag
                     }
                 }) {
-                    VStack(spacing: 4) {
-                        tab.icon
-                            .frame(width: 24, height: 24)
-                        Text(tab.label)
-                            .font(.caption2)
-                            .fontWeight(selectedTab == tab.tag ? .semibold : .regular)
-                    }
-                    .foregroundColor(selectedTab == tab.tag ? .primary : .secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(selectedTab == tab.tag ? Color.blue.opacity(0.1) : Color.clear)
-                            .padding(.horizontal, 8)
-                    )
+                    tabButtonContent(for: tab)
                 }
             }
         }
