@@ -337,7 +337,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadBookDetails() {
+    func loadBookDetails() {
         isLoadingDetails = true
         let apiService = GoogleBooksAPIService()
         apiService.fetchBookDetails(isbn: currentBook.isbn, title: currentBook.title, author: currentBook.author) { result in
@@ -372,7 +372,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadAuthorBiography(author: String) {
+    func loadAuthorBiography(author: String) {
         isLoadingBio = true
         let grokService = GrokAPIService()
         grokService.fetchAuthorBiography(author: author) { result in
@@ -388,7 +388,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadBookTeaser(title: String, author: String) {
+    func loadBookTeaser(title: String, author: String) {
         isLoadingTeaser = true
         let grokService = GrokAPIService()
         grokService.fetchBookSummary(title: title, author: author) { result in
@@ -404,7 +404,7 @@ struct BookDetailView: View {
         }
     }
 
-    private func loadRecommendations() {
+    func loadRecommendations() {
         isLoadingRecommendations = true
         viewModel.generateRecommendations(for: currentBook) { result in
             DispatchQueue.main.async {
