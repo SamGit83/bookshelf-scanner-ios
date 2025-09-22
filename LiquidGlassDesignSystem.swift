@@ -2,12 +2,14 @@ import SwiftUI
 
 // Glass Field Modifier for consistent text field styling
 struct GlassFieldModifier: ViewModifier {
+    associatedtype Content: View
+
     func body(content: Content) -> some View {
         content
             .padding()
             .background(Color.white.opacity(0.1))
             .cornerRadius(8)
-            .foregroundColor(.white)
+            .foregroundColor(Color.white)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
