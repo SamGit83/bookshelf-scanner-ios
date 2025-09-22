@@ -334,7 +334,6 @@ struct ButtonStyleModifier: ViewModifier {
         self.border = border
     }
 
-    @ViewBuilder
     func body(content: Content) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
@@ -404,7 +403,6 @@ struct CardStyleModifier: ViewModifier {
     let border: (color: Color, width: CGFloat)?
     let blur: CGFloat?
 
-    @ViewBuilder
     func body(content: Content) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0

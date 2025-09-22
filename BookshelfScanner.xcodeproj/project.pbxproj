@@ -31,6 +31,9 @@
 		OBJ_45 /* RecommendationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* RecommendationsView.swift */; };
 		OBJ_46 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* SearchView.swift */; };
 		OBJ_47 /* SecureConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* SecureConfig.swift */; };
+		OBJ_72 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = OBJ_69 /* FirebaseAuth */; };
+		OBJ_73 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = OBJ_70 /* FirebaseCore */; };
+		OBJ_74 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = OBJ_71 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +71,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				OBJ_72 /* FirebaseAuth in Frameworks */,
+				OBJ_73 /* FirebaseCore in Frameworks */,
+				OBJ_74 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +149,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				OBJ_75 /* PBXTargetDependency */,
+				OBJ_76 /* PBXTargetDependency */,
+				OBJ_77 /* PBXTargetDependency */,
 			);
 			name = BookshelfScanner;
 			productName = BookshelfScanner;
@@ -173,6 +182,9 @@
 				Base,
 			);
 			mainGroup = OBJ_13;
+			packageReferences = (
+				OBJ_68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = OBJ_16 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -430,6 +442,48 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		OBJ_68 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		OBJ_69 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FirebaseAuth;
+		};
+		OBJ_70 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FirebaseCore;
+		};
+		OBJ_71 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin PBXTargetDependency section */
+		OBJ_75 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = OBJ_69 /* FirebaseAuth */;
+		};
+		OBJ_76 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = OBJ_70 /* FirebaseCore */;
+		};
+		OBJ_77 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = OBJ_71 /* FirebaseFirestore */;
+		};
+/* End PBXTargetDependency section */
+
 	};
 	rootObject = OBJ_22 /* Project object */;
 }
