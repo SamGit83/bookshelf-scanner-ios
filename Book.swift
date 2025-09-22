@@ -41,8 +41,12 @@ struct Book: Identifiable, Codable, Hashable {
         // Generate UUID if 'id' is missing
         self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
 
+        print("DEBUG Book decoder: Attempting to decode title")
         self.title = try container.decode(String.self, forKey: .title)
+        print("DEBUG Book decoder: Successfully decoded title: \(self.title)")
+        print("DEBUG Book decoder: Attempting to decode author")
         self.author = try container.decode(String.self, forKey: .author)
+        print("DEBUG Book decoder: Successfully decoded author: \(self.author)")
         self.isbn = try container.decodeIfPresent(String.self, forKey: .isbn)
         self.genre = try container.decodeIfPresent(String.self, forKey: .genre)
         self.publisher = try container.decodeIfPresent(String.self, forKey: .publisher)

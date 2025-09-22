@@ -185,6 +185,9 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Received \(documents.count) documents from Firestore")
                 let loadedBooks: [Book] = documents.compactMap { document in
                     let data = document.data()
+                    print("DEBUG BookViewModel: Processing document \(document.documentID), data keys: \(data.keys.sorted())")
+                    print("DEBUG BookViewModel: title value: \(String(describing: data["title"])), type: \(type(of: data["title"]))")
+                    print("DEBUG BookViewModel: author value: \(String(describing: data["author"])), type: \(type(of: data["author"]))")
                     guard
                         let title = data["title"] as? String,
                         let author = data["author"] as? String
