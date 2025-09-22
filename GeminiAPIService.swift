@@ -38,25 +38,12 @@ class GeminiAPIService {
         }
         print("DEBUG GeminiAPIService: jpegData successful, size: \(imageData.count) bytes")
 
+        let base64Image = imageData.base64EncodedString()
+
         let url = URL(string: "\(baseURL)?key=\(apiKey)")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-
-        let boundary = UUID().uuidString
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-
-        var body = Data()
-
-        // Add image part
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"image\"; filename=\"bookshelf.jpg\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
-        body.append(imageData)
-        body.append("\r\n".data(using: .utf8)!)
-
-        // Add prompt part
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"prompt\"\r\n\r\n".data(using: .utf8)!)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let enhancedPrompt = """
         You are an expert librarian with advanced OCR capabilities analyzing a bookshelf photograph.
@@ -93,12 +80,28 @@ class GeminiAPIService {
         - If image quality is poor, note this in the response
         """
 
-        body.append(enhancedPrompt.data(using: .utf8)!)
-        body.append("\r\n".data(using: .utf8)!)
+        let requestBody: [String: Any] = [
+            "contents": [
+                [
+                    "parts": [
+                        ["text": enhancedPrompt],
+                        [
+                            "inline_data": [
+                                "mime_type": "image/jpeg",
+                                "data": base64Image
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
 
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-
-        request.httpBody = body
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            completion(.failure(error))
+            return
+        }
 
         print("DEBUG GeminiAPIService: Sending request to Gemini API")
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -115,6 +118,13 @@ class GeminiAPIService {
 
             if let responseString = String(data: data, encoding: .utf8) {
                 print("DEBUG GeminiAPIService: Response string: \(responseString)")
+            }
+
+            // First, try to decode as error response
+            if let errorResponse = try? JSONDecoder().decode(GeminiErrorResponse.self, from: data) {
+                print("DEBUG GeminiAPIService: API error: \(errorResponse.error.message)")
+                completion(.failure(NSError(domain: "APIError", code: errorResponse.error.code, userInfo: [NSLocalizedDescriptionKey: errorResponse.error.message])))
+                return
             }
 
             do {
@@ -149,4 +159,14 @@ struct Content: Codable {
 
 struct Part: Codable {
     let text: String
+}
+
+struct GeminiErrorResponse: Codable {
+    let error: GeminiError
+}
+
+struct GeminiError: Codable {
+    let code: Int
+    let message: String
+    let status: String
 }
