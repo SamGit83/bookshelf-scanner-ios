@@ -220,6 +220,7 @@ struct LibraryBookCard: View {
                                         .cornerRadius(4)
                                         .frame(maxWidth: .infinity)
                                         .multilineTextAlignment(.center)
+                                        .lineLimit(1)
                                 }
                             }
                         }
