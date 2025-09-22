@@ -47,10 +47,10 @@ struct HomeNavigationBar: View {
                     }) {
                         Text("Login")
                             .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Color.white.opacity(0.1))
+                            .background(Color.blue)
                             .cornerRadius(8)
                     }
 
