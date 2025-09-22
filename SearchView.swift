@@ -188,14 +188,14 @@ struct SearchView: View {
         return viewModel.books.filter { book in
             switch filter {
             case .all:
-                return book.title.lowercased().contains(query) ||
-                       book.author.lowercased().contains(query) ||
+                return (book.title ?? "").lowercased().contains(query) ||
+                       (book.author ?? "").lowercased().contains(query) ||
                        (book.genre?.lowercased().contains(query) ?? false) ||
                        (book.isbn?.lowercased().contains(query) ?? false)
             case .title:
-                return book.title.lowercased().contains(query)
+                return (book.title ?? "").lowercased().contains(query)
             case .author:
-                return book.author.lowercased().contains(query)
+                return (book.author ?? "").lowercased().contains(query)
             case .genre:
                 return book.genre?.lowercased().contains(query) ?? false
             case .isbn:

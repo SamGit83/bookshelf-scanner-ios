@@ -88,7 +88,16 @@ struct BookDetailView: View {
                                             .cornerRadius(12)
                                     }
 
-                                    if let publishedDate = bookDetails?.publishedDate {
+                                    if let subGenre = book.subGenre {
+                                        Text(subGenre)
+                                            .font(.caption)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.green.opacity(0.2))
+                                            .cornerRadius(12)
+                                    }
+
+                                    if let publishedDate = bookDetails?.publishedDate ?? book.publicationYear {
                                         Text(publishedDate)
                                             .font(.caption)
                                             .foregroundColor(.secondary)
@@ -108,6 +117,47 @@ struct BookDetailView: View {
                                     .foregroundColor(.primary)
 
                                 Text(description)
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .lineSpacing(4)
+                            }
+                            .padding()
+                        }
+                    }
+
+                    // Book Details
+                    if book.pageCount != nil || book.estimatedReadingTime != nil {
+                        GlassCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Book Details")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+
+                                if let pageCount = book.pageCount {
+                                    Text("Page Count: \(pageCount)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                if let readingTime = book.estimatedReadingTime {
+                                    Text("Estimated Reading Time: \(readingTime)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+
+                    // Author Biography
+                    if let bio = book.authorBiography, !bio.isEmpty {
+                        GlassCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("About the Author")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+
+                                Text(bio)
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .lineSpacing(4)
@@ -259,13 +309,13 @@ struct BookDetailView: View {
 
     private func loadRecommendations() {
         isLoadingRecommendations = true
-        viewModel.generateRecommendations { result in
+        viewModel.generateRecommendations(for: book) { result in
             DispatchQueue.main.async {
                 isLoadingRecommendations = false
                 switch result {
                 case .success(let recs):
                     // Filter out the current book
-                    self.recommendations = recs.filter { $0.title != book.title || $0.author != book.author }
+                    self.recommendations = recs.filter { $0.title != (book.title ?? "") || $0.author != (book.author ?? "") }
                 case .failure(let error):
                     print("Failed to load recommendations: \(error.localizedDescription)")
                 }

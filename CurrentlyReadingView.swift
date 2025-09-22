@@ -77,6 +77,8 @@ struct BookCard: View {
     let book: Book
     @ObservedObject var viewModel: BookViewModel
     @State private var showActionSheet = false
+    @State private var showEditView = false
+    @State private var showProgressView = false
 
     var body: some View {
         ZStack {
@@ -193,10 +195,11 @@ struct BookCard: View {
                 title: Text(book.title),
                 message: Text("Choose an action"),
                 buttons: [
-                    .default(Text("Move to Currently Reading")) {
-                        withAnimation(.spring()) {
-                            viewModel.moveBook(book, to: .currentlyReading)
-                        }
+                    .default(Text("Track Progress")) {
+                        showProgressView = true
+                    },
+                    .default(Text("Edit Book")) {
+                        showEditView = true
                     },
                     .default(Text("Move to Library")) {
                         withAnimation(.spring()) {
@@ -211,6 +214,12 @@ struct BookCard: View {
                     .cancel()
                 ]
             )
+        }
+        .sheet(isPresented: $showEditView) {
+            EditBookView(book: book, viewModel: viewModel)
+        }
+        .sheet(isPresented: $showProgressView) {
+            ReadingProgressView(book: book, viewModel: viewModel)
         }
     }
 }

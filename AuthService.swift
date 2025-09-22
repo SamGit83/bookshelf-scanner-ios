@@ -7,6 +7,7 @@ class AuthService: ObservableObject {
 
     @Published var isAuthenticated = false
     @Published var currentUser: User?
+    @Published var hasCompletedOnboarding = false
     @Published var errorMessage: String?
 
     private var authStateListener: AuthStateDidChangeListenerHandle?
@@ -17,6 +18,11 @@ class AuthService: ObservableObject {
             print("Auth state changed: authenticated = \(user != nil), user: \(user?.email ?? "none")")
             self?.isAuthenticated = user != nil
             self?.currentUser = user
+            if let user = user {
+                self?.fetchOnboardingStatus(for: user)
+            } else {
+                self?.hasCompletedOnboarding = false
+            }
         }
     }
 
@@ -102,6 +108,38 @@ class AuthService: ObservableObject {
                 completion(.failure(error))
             } else {
                 completion(.success(()))
+            }
+        }
+    }
+
+    private func fetchOnboardingStatus(for user: User) {
+        let db = Firestore.firestore()
+        let userDoc = db.collection("users").document(user.uid)
+        userDoc.getDocument { [weak self] document, error in
+            if let error = error {
+                print("Error fetching onboarding status: \(error.localizedDescription)")
+                self?.hasCompletedOnboarding = false // Default to false on error
+            } else if let document = document, document.exists {
+                let completed = document.get("hasCompletedOnboarding") as? Bool ?? false
+                print("Fetched hasCompletedOnboarding: \(completed) for user \(user.email ?? "unknown")")
+                self?.hasCompletedOnboarding = completed
+            } else {
+                print("User document does not exist, setting hasCompletedOnboarding to false")
+                self?.hasCompletedOnboarding = false
+            }
+        }
+    }
+
+    func completeOnboarding() {
+        guard let user = currentUser else { return }
+        let db = Firestore.firestore()
+        let userDoc = db.collection("users").document(user.uid)
+        userDoc.updateData(["hasCompletedOnboarding": true]) { [weak self] error in
+            if let error = error {
+                print("Error updating onboarding status: \(error.localizedDescription)")
+            } else {
+                print("Onboarding completed for user \(user.email ?? "unknown")")
+                self?.hasCompletedOnboarding = true
             }
         }
     }

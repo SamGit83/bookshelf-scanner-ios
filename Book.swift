@@ -2,12 +2,16 @@ import Foundation
 
 struct Book: Identifiable, Codable, Hashable {
     var id = UUID()
-    var title: String
-    var author: String
+    var title: String?
+    var author: String?
     var isbn: String?
     var genre: String?
+    var subGenre: String?
     var publisher: String?
     var publicationYear: String?
+    var pageCount: Int?
+    var estimatedReadingTime: String?
+    var authorBiography: String?
     var confidence: Double?
     var position: String?
     var status: BookStatus
@@ -23,9 +27,9 @@ struct Book: Identifiable, Codable, Hashable {
     var dateStartedReading: Date?
     var dateFinishedReading: Date?
 
-    init(title: String, author: String, isbn: String? = nil, genre: String? = nil, status: BookStatus = .library, coverImageData: Data? = nil, coverImageURL: String? = nil) {
-        self.title = title
-        self.author = author
+    init(title: String?, author: String?, isbn: String? = nil, genre: String? = nil, status: BookStatus = .library, coverImageData: Data? = nil, coverImageURL: String? = nil) {
+        self.title = title ?? ""
+        self.author = author ?? ""
         self.isbn = isbn
         self.genre = genre
         self.status = status
@@ -42,15 +46,19 @@ struct Book: Identifiable, Codable, Hashable {
         self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
 
         print("DEBUG Book decoder: Attempting to decode title")
-        self.title = try container.decode(String.self, forKey: .title)
+        self.title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
         print("DEBUG Book decoder: Successfully decoded title: \(self.title)")
         print("DEBUG Book decoder: Attempting to decode author")
-        self.author = try container.decode(String.self, forKey: .author)
+        self.author = try container.decodeIfPresent(String.self, forKey: .author) ?? ""
         print("DEBUG Book decoder: Successfully decoded author: \(self.author)")
         self.isbn = try container.decodeIfPresent(String.self, forKey: .isbn)
         self.genre = try container.decodeIfPresent(String.self, forKey: .genre)
+        self.subGenre = try container.decodeIfPresent(String.self, forKey: .subGenre)
         self.publisher = try container.decodeIfPresent(String.self, forKey: .publisher)
         self.publicationYear = try container.decodeIfPresent(String.self, forKey: .publicationYear)
+        self.pageCount = try container.decodeIfPresent(Int.self, forKey: .pageCount)
+        self.estimatedReadingTime = try container.decodeIfPresent(String.self, forKey: .estimatedReadingTime)
+        self.authorBiography = try container.decodeIfPresent(String.self, forKey: .authorBiography)
         self.confidence = try container.decodeIfPresent(Double.self, forKey: .confidence)
         self.position = try container.decodeIfPresent(String.self, forKey: .position)
 

@@ -11,6 +11,8 @@ class BookViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let apiService = GeminiAPIService()
+    private let grokService = GrokAPIService()
+    private let googleBooksService = GoogleBooksAPIService()
     private let db = FirebaseConfig.shared.db
     private var listener: ListenerRegistration?
 
@@ -63,20 +65,30 @@ class BookViewModel: ObservableObject {
 
                 // Check for duplicates based on title and author (case-insensitive)
                 let existingTitlesAndAuthors = Set(self.books.map {
-                    $0.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) + "|" + $0.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                    ($0.title ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines) + "|" + ($0.author ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
                 })
 
                 for book in decodedBooks {
-                    let normalizedTitle = book.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                    let normalizedAuthor = book.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                    let normalizedTitle = (book.title ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                    let normalizedAuthor = (book.author ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
 
                     if existingTitlesAndAuthors.contains(normalizedTitle + "|" + normalizedAuthor) {
-                        print("DEBUG BookViewModel: Skipping duplicate book: \(book.title) by \(book.author)")
+                        print("DEBUG BookViewModel: Skipping duplicate book: \(book.title ?? "") by \(book.author ?? "")")
                         continue
                     }
 
-                    print("DEBUG BookViewModel: Saving book: \(book.title) by \(book.author)")
-                    saveBookToFirestore(book)
+                    print("DEBUG BookViewModel: Fetching cover for book: \(book.title ?? "") by \(book.author ?? "")")
+                    googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
+                        var updatedBook = book
+                        switch result {
+                        case .success(let url):
+                            updatedBook.coverImageURL = url
+                            print("DEBUG BookViewModel: Fetched cover URL: \(url ?? "nil") for \(book.title ?? "")")
+                        case .failure(let error):
+                            print("DEBUG BookViewModel: Failed to fetch cover for \(book.title ?? ""): \(error.localizedDescription)")
+                        }
+                        self?.saveBookToFirestore(updatedBook)
+                    }
                 }
             } else {
                 print("DEBUG BookViewModel: Failed to convert jsonString to data")
@@ -145,6 +157,12 @@ class BookViewModel: ObservableObject {
         }
     }
 
+    func clearAllBooks() {
+        for book in books {
+            deleteBook(book)
+        }
+    }
+
     private func setupFirestoreListener() {
         guard let userId = FirebaseConfig.shared.currentUserId else {
             print("DEBUG BookViewModel: setupFirestoreListener - user not authenticated, loading from cache")
@@ -188,13 +206,8 @@ class BookViewModel: ObservableObject {
                     print("DEBUG BookViewModel: Processing document \(document.documentID), data keys: \(data.keys.sorted())")
                     print("DEBUG BookViewModel: title value: \(String(describing: data["title"])), type: \(type(of: data["title"]))")
                     print("DEBUG BookViewModel: author value: \(String(describing: data["author"])), type: \(type(of: data["author"]))")
-                    guard
-                        let title = data["title"] as? String,
-                        let author = data["author"] as? String
-                    else {
-                        print("DEBUG BookViewModel: Document missing title or author: \(document.documentID)")
-                        return nil
-                    }
+                    let title = (data["title"] as? String) ?? ""
+                    let author = (data["author"] as? String) ?? ""
 
                     let isbn = data["isbn"] as? String
                     let genre = data["genre"] as? String
@@ -242,8 +255,8 @@ class BookViewModel: ObservableObject {
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
         let data: [String: Any] = [
             "id": book.id.uuidString,
-            "title": book.title,
-            "author": book.author,
+            "title": book.title ?? "",
+            "author": book.author ?? "",
             "isbn": book.isbn as Any,
             "genre": book.genre as Any,
             "status": book.status.rawValue,
@@ -271,67 +284,36 @@ class BookViewModel: ObservableObject {
 
     // MARK: - Recommendations
 
-    private let booksAPIService = GoogleBooksAPIService()
+    func generateRecommendations(for currentBook: Book? = nil, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
+        // Use Grok AI to generate personalized recommendations based on user's entire library
+        grokService.generateRecommendations(userBooks: books, currentBook: currentBook) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let recommendations):
+                    // Remove duplicates and limit to 20 recommendations
+                    let uniqueRecommendations = self.removeDuplicates(from: recommendations)
+                    let limitedRecommendations = Array(uniqueRecommendations.prefix(20))
 
-    func generateRecommendations(completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
-        // Analyze user's reading patterns
-        let favoriteAuthors = getFavoriteAuthors()
-        let favoriteGenres = getFavoriteGenres()
-        let recentBooks = getRecentBooks()
+                    // Cache recommendations for offline use
+                    OfflineCache.shared.cacheRecommendations(limitedRecommendations)
 
-        // Generate recommendations based on patterns
-        var allRecommendations: [BookRecommendation] = []
-
-        let group = DispatchGroup()
-
-        // Get recommendations based on favorite authors
-        if let topAuthor = favoriteAuthors.first {
-            group.enter()
-            booksAPIService.getRecommendationsBasedOnAuthor(topAuthor) { result in
-                if case .success(let recommendations) = result {
-                    allRecommendations.append(contentsOf: recommendations)
+                    completion(.success(limitedRecommendations))
+                case .failure(let error):
+                    print("DEBUG BookViewModel: Grok recommendation failed: \(error.localizedDescription)")
+                    // Fallback to cached recommendations if available
+                    if let cachedRecommendations = OfflineCache.shared.loadCachedRecommendations() {
+                        completion(.success(cachedRecommendations))
+                    } else {
+                        completion(.failure(error))
+                    }
                 }
-                group.leave()
             }
-        }
-
-        // Get recommendations based on favorite genres
-        if let topGenre = favoriteGenres.first {
-            group.enter()
-            booksAPIService.getRecommendationsBasedOnGenre(topGenre) { result in
-                if case .success(let recommendations) = result {
-                    allRecommendations.append(contentsOf: recommendations)
-                }
-                group.leave()
-            }
-        }
-
-        // Get recommendations based on recent books
-        if let recentBook = recentBooks.first {
-            group.enter()
-            booksAPIService.getRecommendationsBasedOnTitle(recentBook.title) { result in
-                if case .success(let recommendations) = result {
-                    allRecommendations.append(contentsOf: recommendations)
-                }
-                group.leave()
-            }
-        }
-
-        group.notify(queue: .main) {
-            // Remove duplicates and limit to 20 recommendations
-            let uniqueRecommendations = self.removeDuplicates(from: allRecommendations)
-            let limitedRecommendations = Array(uniqueRecommendations.prefix(20))
-
-            // Cache recommendations for offline use
-            OfflineCache.shared.cacheRecommendations(limitedRecommendations)
-
-            completion(.success(limitedRecommendations))
         }
     }
 
     private func getFavoriteAuthors() -> [String] {
         let authorCounts = books.reduce(into: [String: Int]()) { counts, book in
-            counts[book.author, default: 0] += 1
+            counts[book.author ?? "", default: 0] += 1
         }
         return authorCounts.sorted { $0.value > $1.value }.map { $0.key }
     }

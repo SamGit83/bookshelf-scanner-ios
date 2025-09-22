@@ -38,6 +38,21 @@ class SecureConfig {
         return "YOUR_GOOGLE_BOOKS_API_KEY_HERE"
     }
 
+    var grokAPIKey: String {
+        // Try environment variable first
+        if let envKey = ProcessInfo.processInfo.environment["GROK_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
+
+        // Try UserDefaults
+        if let storedKey = UserDefaults.standard.string(forKey: "grok_api_key"), !storedKey.isEmpty {
+            return storedKey
+        }
+
+        // Fallback to placeholder
+        return "YOUR_GROK_API_KEY_HERE"
+    }
+
     // MARK: - Configuration Management
 
     func setGeminiAPIKey(_ key: String) {
@@ -50,9 +65,15 @@ class SecureConfig {
         UserDefaults.standard.synchronize()
     }
 
+    func setGrokAPIKey(_ key: String) {
+        UserDefaults.standard.set(key, forKey: "grok_api_key")
+        UserDefaults.standard.synchronize()
+    }
+
     func clearAllKeys() {
         UserDefaults.standard.removeObject(forKey: "gemini_api_key")
         UserDefaults.standard.removeObject(forKey: "google_books_api_key")
+        UserDefaults.standard.removeObject(forKey: "grok_api_key")
         UserDefaults.standard.synchronize()
     }
 
@@ -68,8 +89,13 @@ class SecureConfig {
         return !key.isEmpty && !key.contains("YOUR_") && key.count > 20
     }
 
+    var hasValidGrokKey: Bool {
+        let key = grokAPIKey
+        return !key.isEmpty && !key.contains("YOUR_") && key.count > 20
+    }
+
     var isConfigurationComplete: Bool {
-        return hasValidGeminiKey && hasValidGoogleBooksKey
+        return hasValidGeminiKey && hasValidGoogleBooksKey && hasValidGrokKey
     }
 
     // MARK: - Environment Detection

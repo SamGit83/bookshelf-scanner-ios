@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @ObservedObject private var authService = AuthService.shared
     @State private var currentPage = 0
     @State private var showMainApp = false
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     let pages: [OnboardingPage] = [
         OnboardingPage(
@@ -163,7 +163,7 @@ struct OnboardingView: View {
     }
 
     private func completeOnboarding() {
-        hasCompletedOnboarding = true
+        authService.completeOnboarding()
         withAnimation(.spring()) {
             showMainApp = true
         }

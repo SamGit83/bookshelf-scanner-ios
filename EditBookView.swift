@@ -19,8 +19,8 @@ struct EditBookView: View {
     init(book: Book, viewModel: BookViewModel) {
         self.book = book
         self.viewModel = viewModel
-        _title = State(initialValue: book.title)
-        _author = State(initialValue: book.author)
+        _title = State(initialValue: book.title ?? "")
+        _author = State(initialValue: book.author ?? "")
         _isbn = State(initialValue: book.isbn ?? "")
         _genre = State(initialValue: book.genre ?? "")
         _selectedStatus = State(initialValue: book.status)

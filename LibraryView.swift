@@ -13,7 +13,7 @@ struct LibraryView: View {
     var body: some View {
         NavigationView {
             VStack {
-                if viewModel.libraryBooks.isEmpty {
+                if viewModel.books.isEmpty {
                     VStack(spacing: 20) {
                         ZStack {
                             Circle()
@@ -26,7 +26,7 @@ struct LibraryView: View {
                                 .foregroundColor(.gray)
                         }
 
-                        Text("No books in library")
+                        Text("No books in your collection")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.primary)
@@ -40,7 +40,7 @@ struct LibraryView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 16) {
-                            ForEach(viewModel.libraryBooks) { book in
+                            ForEach(viewModel.books) { book in
                                 LibraryBookCard(book: book, viewModel: viewModel)
                                     .padding(.horizontal, 16)
                             }
@@ -79,7 +79,7 @@ struct LibraryView: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 16)
             }
-            .navigationTitle("Library (\(viewModel.libraryBooks.count))")
+            .navigationTitle("Library (\(viewModel.books.count))")
             .navigationBarItems(trailing: HStack {
                 Button(action: {
                     showingClearConfirmation = true
@@ -123,9 +123,9 @@ struct LibraryView: View {
             .alert(isPresented: $showingClearConfirmation) {
                 Alert(
                     title: Text("Clear All Books"),
-                    message: Text("Are you sure you want to delete all books from your library? This action cannot be undone."),
+                    message: Text("Are you sure you want to delete all books from your collection? This action cannot be undone."),
                     primaryButton: .destructive(Text("Delete All")) {
-                        viewModel.clearAllLibraryBooks()
+                        viewModel.clearAllBooks()
                     },
                     secondaryButton: .cancel()
                 )
@@ -252,28 +252,40 @@ struct LibraryBookCard: View {
             }
         }
         .actionSheet(isPresented: $showActionSheet) {
-            ActionSheet(
+            var buttons: [ActionSheet.Button] = [
+                .default(Text("Track Progress")) {
+                    showProgressView = true
+                },
+                .default(Text("Edit Book")) {
+                    showEditView = true
+                }
+            ]
+
+            if book.status == .library {
+                buttons.append(.default(Text("Start Reading")) {
+                    withAnimation(.spring()) {
+                        viewModel.moveBook(book, to: .currentlyReading)
+                    }
+                })
+            } else if book.status == .currentlyReading {
+                buttons.append(.default(Text("Move to Library")) {
+                    withAnimation(.spring()) {
+                        viewModel.moveBook(book, to: .library)
+                    }
+                })
+            }
+
+            buttons.append(.destructive(Text("Delete Book")) {
+                withAnimation(.spring()) {
+                    viewModel.deleteBook(book)
+                }
+            })
+            buttons.append(.cancel())
+
+            return ActionSheet(
                 title: Text(book.title),
                 message: Text("Choose an action"),
-                buttons: [
-                    .default(Text("Track Progress")) {
-                        showProgressView = true
-                    },
-                    .default(Text("Edit Book")) {
-                        showEditView = true
-                    },
-                    .default(Text("Add to Currently Reading")) {
-                        withAnimation(.spring()) {
-                            viewModel.moveBook(book, to: .currentlyReading)
-                        }
-                    },
-                    .destructive(Text("Delete Book")) {
-                        withAnimation(.spring()) {
-                            viewModel.deleteBook(book)
-                        }
-                    },
-                    .cancel()
-                ]
+                buttons: buttons
             )
         }
         .sheet(isPresented: $showEditView) {

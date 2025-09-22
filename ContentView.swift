@@ -9,7 +9,6 @@ struct ContentView: View {
      @State private var capturedImage: UIImage?
      @State private var isShowingCamera = false
      @State private var selectedTab = 0
-     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
      private var userInitials: String {
          let displayName = authService.currentUser?.displayName
@@ -35,7 +34,7 @@ struct ContentView: View {
      var body: some View {
          Group {
              if authService.isAuthenticated {
-                 if hasCompletedOnboarding {
+                 if authService.hasCompletedOnboarding {
                      authenticatedView
                  } else {
                      OnboardingView()
@@ -46,10 +45,10 @@ struct ContentView: View {
          }
          .onAppear {
              // Firebase is initialized in AppDelegate
-             print("ContentView: onAppear - isAuthenticated: \(authService.isAuthenticated), hasCompletedOnboarding: \(hasCompletedOnboarding)")
+             print("ContentView: onAppear - isAuthenticated: \(authService.isAuthenticated), hasCompletedOnboarding: \(authService.hasCompletedOnboarding)")
          }
          .onChange(of: authService.isAuthenticated) { isAuthenticated in
-             print("ContentView: Auth state changed to \(isAuthenticated), hasCompletedOnboarding: \(hasCompletedOnboarding)")
+             print("ContentView: Auth state changed to \(isAuthenticated), hasCompletedOnboarding: \(authService.hasCompletedOnboarding), user: \(authService.currentUser?.email ?? "none")")
              if isAuthenticated {
                  // User signed in, refresh data
                  viewModel.refreshData()

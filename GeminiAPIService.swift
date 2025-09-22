@@ -57,6 +57,10 @@ class GeminiAPIService {
         4. Quality Assessment: Evaluate image quality and suggest improvements if needed
         5. Book Detection: Identify individual books even in densely packed shelves
         6. Text Recognition: Handle various fonts, sizes, and orientations
+        7. Sub-Genre Classification: Identify specific sub-genres (e.g., Cozy Mystery, Historical Fiction)
+        8. Reading Time Estimation: Estimate reading time based on page count and genre (e.g., "8-10 hours")
+        9. Page Count Inference: Estimate or extract page count from visual cues or knowledge
+        10. Author Information: Provide brief author biography if known from common knowledge
 
         OUTPUT FORMAT: Return a JSON array of books with this exact structure:
         [
@@ -65,8 +69,12 @@ class GeminiAPIService {
             "author": "Author Name (extract from spine or cover)",
             "isbn": "ISBN-13 or ISBN-10 (if visible, even small text)",
             "genre": "Inferred genre (Fiction, Non-Fiction, Mystery, etc.)",
+            "subGenre": "Specific sub-genre (e.g., Cozy Mystery, Historical Fiction)",
             "publisher": "Publisher name (if visible)",
             "publicationYear": "Year (if visible on spine)",
+            "pageCount": 300,
+            "estimatedReadingTime": "Estimated reading time (e.g., 8-10 hours)",
+            "authorBiography": "Brief author biography (if known)",
             "confidence": 0.95,
             "position": "approximate position on shelf (left, center, right)"
           }
