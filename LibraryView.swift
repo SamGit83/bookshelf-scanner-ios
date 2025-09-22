@@ -216,7 +216,6 @@ struct LibraryBookCard: View {
                                         .padding(.vertical, 3)
                                         .background(timeBadge.2.opacity(0.1))
                                         .cornerRadius(4)
-                                        .multilineTextAlignment(.center)
                                 }
                                 if let pagesBadge = pagesBadge {
                                     Text(pagesBadge.1)
@@ -226,7 +225,6 @@ struct LibraryBookCard: View {
                                         .padding(.vertical, 3)
                                         .background(pagesBadge.2.opacity(0.1))
                                         .cornerRadius(4)
-                                        .multilineTextAlignment(.center)
                                 }
                             }
                             if let subGenreBadge = subGenreBadge {
@@ -237,8 +235,6 @@ struct LibraryBookCard: View {
                                     .padding(.vertical, 3)
                                     .background(subGenreBadge.2.opacity(0.1))
                                     .cornerRadius(4)
-                                    .frame(maxWidth: .infinity)
-                                    .multilineTextAlignment(.center)
                             }
                         }
 
