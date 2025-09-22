@@ -3,30 +3,15 @@ import SwiftUI
 // Glass Field Modifier for consistent text field styling
 struct GlassFieldModifier: ViewModifier {
     var isValid: Bool = true
-    var applyForeground: Bool = true  // Optional toggle for text color
-    
+
     func body(content: Content) -> some View {
-        let baseView = content
-            .padding()  // Padding on the content (assumes Content is a View)
-            .foregroundColor(applyForeground ? .white : nil)
+        content
+            .padding()
             .background(Color.white.opacity(0.1))
-
-        let glassView = if #available(iOS 15.0, *) {
-            baseView.background(.ultraThinMaterial)
-        } else {
-            baseView
-        }
-
-        return glassView
-            .clipShape(RoundedRectangle(cornerRadius: 8))  // Modern clip for glass effect
+            .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(isValid ? Color.white.opacity(0.2) : Color.red.opacity(0.6), lineWidth: 0.5)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isValid ? Color.white.opacity(0.4) : Color.red.opacity(0.8), lineWidth: 1)
-                    .blur(radius: 0.5)
             )
     }
 }
