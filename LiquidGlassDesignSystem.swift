@@ -398,7 +398,8 @@ struct ButtonStyles {
 }
 
 // MARK: - Card Style System
-struct CardStyle: ViewModifier {
+struct CardStyle<Content: View>: View {
+    let content: Content
     let background: LinearGradient
     let cornerRadius: CGFloat
     let padding: CGFloat
@@ -406,7 +407,9 @@ struct CardStyle: ViewModifier {
     let border: (color: Color, width: CGFloat)?
     let blur: CGFloat?
 
-    func body(content: Content) -> some View {
+    @State private var animate = false
+
+    var body: some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
         let shadowColor = shadow?.color ?? Color.clear
@@ -415,7 +418,7 @@ struct CardStyle: ViewModifier {
         let shadowY = shadow?.y ?? 0
         let blurRadius = blur ?? 0
 
-        return content
+        content
             .padding(padding)
             .background(background)
             .cornerRadius(cornerRadius)
@@ -430,8 +433,9 @@ struct CardStyle: ViewModifier {
 
 struct CardStyles {
     // Book Card Style
-    static func bookCard() -> CardStyle {
+    static func bookCard<Content: View>(content: Content) -> CardStyle<Content> {
         return CardStyle(
+            content: content,
             background: UIGradients.cardBackground,
             cornerRadius: 20,
             padding: 16,
@@ -442,8 +446,9 @@ struct CardStyles {
     }
     
     // Feature Card Style
-    static func featureCard() -> CardStyle {
+    static func featureCard<Content: View>(content: Content) -> CardStyle<Content> {
         return CardStyle(
+            content: content,
             background: UIGradients.glassEffect,
             cornerRadius: 24,
             padding: 20,
@@ -454,8 +459,9 @@ struct CardStyles {
     }
     
     // Recommendation Card Style
-    static func recommendationCard() -> CardStyle {
+    static func recommendationCard<Content: View>(content: Content) -> CardStyle<Content> {
         return CardStyle(
+            content: content,
             background: LinearGradient(
                 colors: [
                     Color(hex: "FF2D92").opacity(0.1),
@@ -734,15 +740,15 @@ extension View {
     }
     
     func bookCardStyle() -> some View {
-        self.modifier(CardStyles.bookCard())
+        CardStyles.bookCard(content: self)
     }
 
     func featureCardStyle() -> some View {
-        self.modifier(CardStyles.featureCard())
+        CardStyles.featureCard(content: self)
     }
 
     func recommendationCardStyle() -> some View {
-        self.modifier(CardStyles.recommendationCard())
+        CardStyles.recommendationCard(content: self)
     }
 
 
