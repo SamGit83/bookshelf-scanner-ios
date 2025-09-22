@@ -190,7 +190,7 @@ struct LibraryBookCard: View {
                     .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
 
                     // Book Details
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(book.title ?? "Unknown Title")
                             .font(.title3)
                             .fontWeight(.semibold)
@@ -201,13 +201,13 @@ struct LibraryBookCard: View {
                             .font(.body)
                             .foregroundColor(.secondary)
 
-                        Group {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 4) {
                             if let genre = book.genre {
                                 Text(genre)
                                     .font(.caption)
                                     .foregroundColor(.blue)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
                                     .background(Color.blue.opacity(0.1))
                                     .cornerRadius(4)
                             }
@@ -216,8 +216,8 @@ struct LibraryBookCard: View {
                                 Text(subGenre)
                                     .font(.caption)
                                     .foregroundColor(.green)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
                                     .background(Color.green.opacity(0.1))
                                     .cornerRadius(4)
                             }
@@ -226,22 +226,32 @@ struct LibraryBookCard: View {
                                 Text("~ \(estimatedTime)")
                                     .font(.caption)
                                     .foregroundColor(.orange)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
                                     .background(Color.orange.opacity(0.1))
                                     .cornerRadius(4)
                             }
 
-                            // Reading status indicator
-                            HStack(spacing: 4) {
-                                Circle()
-                                    .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
-                                    .frame(width: 8, height: 8)
-
-                                Text(book.status.rawValue)
+                            if book.pageCount != nil {
+                                Text("\(book.pageCount!) pages")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.purple)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
+                                    .background(Color.purple.opacity(0.1))
+                                    .cornerRadius(4)
                             }
+                        }
+
+                        // Reading status indicator
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
+                                .frame(width: 8, height: 8)
+
+                            Text(book.status.rawValue)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                     }
 
