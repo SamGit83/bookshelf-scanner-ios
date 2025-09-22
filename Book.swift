@@ -60,6 +60,7 @@ struct Book: Identifiable, Codable, Hashable {
         self.publisher = try container.decodeIfPresent(String.self, forKey: .publisher)
         self.publicationYear = try container.decodeIfPresent(String.self, forKey: .publicationYear)
         self.pageCount = try container.decodeIfPresent(Int.self, forKey: .pageCount)
+        print("DEBUG Book decoder: pageCount: \(String(describing: self.pageCount))")
         self.estimatedReadingTime = try container.decodeIfPresent(String.self, forKey: .estimatedReadingTime)
         print("DEBUG Book decoder: estimatedReadingTime: \(String(describing: self.estimatedReadingTime))")
         self.authorBiography = try container.decodeIfPresent(String.self, forKey: .authorBiography)
