@@ -31,6 +31,39 @@ struct Book: Identifiable, Codable, Hashable {
         self.dateAdded = Date()
         self.coverImageData = coverImageData
     }
+
+    // Custom decoder to handle missing 'id', 'status', and 'dateAdded' from Gemini API
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Generate UUID if 'id' is missing
+        self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+
+        self.title = try container.decode(String.self, forKey: .title)
+        self.author = try container.decode(String.self, forKey: .author)
+        self.isbn = try container.decodeIfPresent(String.self, forKey: .isbn)
+        self.genre = try container.decodeIfPresent(String.self, forKey: .genre)
+        self.publisher = try container.decodeIfPresent(String.self, forKey: .publisher)
+        self.publicationYear = try container.decodeIfPresent(String.self, forKey: .publicationYear)
+        self.confidence = try container.decodeIfPresent(Double.self, forKey: .confidence)
+        self.position = try container.decodeIfPresent(String.self, forKey: .position)
+
+        // Default to .library if 'status' is missing
+        self.status = try container.decodeIfPresent(BookStatus.self, forKey: .status) ?? .library
+
+        // Default to current date if 'dateAdded' is missing
+        self.dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
+
+        self.coverImageData = try container.decodeIfPresent(Data.self, forKey: .coverImageData)
+
+        // Reading Progress - use defaults
+        self.totalPages = try container.decodeIfPresent(Int.self, forKey: .totalPages)
+        self.currentPage = try container.decodeIfPresent(Int.self, forKey: .currentPage) ?? 0
+        self.readingGoal = try container.decodeIfPresent(ReadingGoal.self, forKey: .readingGoal)
+        self.readingSessions = try container.decodeIfPresent([ReadingSession].self, forKey: .readingSessions) ?? []
+        self.dateStartedReading = try container.decodeIfPresent(Date.self, forKey: .dateStartedReading)
+        self.dateFinishedReading = try container.decodeIfPresent(Date.self, forKey: .dateFinishedReading)
+    }
 }
 
 enum BookStatus: String, Codable, CaseIterable {
