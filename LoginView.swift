@@ -579,6 +579,7 @@ struct PasswordResetView: View {
                             .frame(maxWidth: .infinity)
                         }
                     }
+                    .disabled(email.isEmpty || isLoading)
                     .modifier(LiquidButtonStyle(
                         background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
                         foregroundColor: PrimaryColors.dynamicOrange,
@@ -587,7 +588,6 @@ struct PasswordResetView: View {
                         font: TypographySystem.buttonLarge,
                         shadow: (color: Color.white.opacity(0.3), radius: 12, x: 0, y: 6)
                     ))
-                    .disabled(email.isEmpty || isLoading)
 
                     // Enhanced Success/error message
                     if !message.isEmpty {
