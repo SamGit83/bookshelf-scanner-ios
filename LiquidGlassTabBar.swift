@@ -19,12 +19,12 @@ struct LiquidGlassTabBar: View {
                 .font(.caption2)
                 .fontWeight(selectedTab == tab.tag ? .semibold : .regular)
         }
-        .foregroundColor(selectedTab == tab.tag ? .primary : .secondary)
+        .foregroundColor(selectedTab == tab.tag ? .primary : .primary.opacity(0.6))
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(selectedTab == tab.tag ? Color.blue.opacity(0.1) : Color.clear)
+                .fill(selectedTab == tab.tag ? Color.blue.opacity(0.2) : Color.clear)
                 .padding(.horizontal, 8)
         )
     }
@@ -48,7 +48,7 @@ struct LiquidGlassTabBar: View {
     private var backgroundShape: some View {
         RoundedRectangle(cornerRadius: 20)
             .fill(.ultraThinMaterial)
-            .opacity(0.8)
+            .opacity(0.9)
             .blur(radius: 1)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)

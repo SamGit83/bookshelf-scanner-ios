@@ -23,9 +23,6 @@ struct HomeView: View {
 
                     // Features Section
                     FeaturesSection()
-
-                    // Footer
-                    HomeFooter()
                 }
             }
         }
