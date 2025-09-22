@@ -62,9 +62,6 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Attempting to decode JSON: \(jsonString)")
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
                 print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
-                for book in decodedBooks {
-                    print("DEBUG BookViewModel: Decoded book: \(book.title ?? "") by \(book.author ?? ""), pageCount: \(String(describing: book.pageCount))")
-                }
 
                 // Check for duplicates based on title and author (case-insensitive)
                 let existingTitlesAndAuthors = Set(self.books.map {
@@ -265,7 +262,6 @@ class BookViewModel: ObservableObject {
                     print("DEBUG BookViewModel: Processing document \(document.documentID), data keys: \(data.keys.sorted())")
                     print("DEBUG BookViewModel: title value: \(String(describing: data["title"])), type: \(type(of: data["title"]))")
                     print("DEBUG BookViewModel: author value: \(String(describing: data["author"])), type: \(type(of: data["author"]))")
-                    print("DEBUG BookViewModel: pageCount value: \(String(describing: data["pageCount"])), type: \(type(of: data["pageCount"]))")
                     let title = (data["title"] as? String) ?? ""
                     let author = (data["author"] as? String) ?? ""
 
@@ -302,7 +298,6 @@ class BookViewModel: ObservableObject {
                     book.teaser = teaser
                     book.authorBio = authorBio
                     book.pageCount = pageCount
-                    print("DEBUG BookViewModel: Built book \(book.title ?? "") with pageCount: \(String(describing: book.pageCount))")
                     return book
                 }
 
@@ -322,7 +317,6 @@ class BookViewModel: ObservableObject {
             return
         }
 
-        print("DEBUG BookViewModel: Saving book to Firestore: userId=\(userId), bookId=\(book.id.uuidString), pageCount=\(String(describing: book.pageCount))")
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
         let data: [String: Any] = [
             "id": book.id.uuidString,
