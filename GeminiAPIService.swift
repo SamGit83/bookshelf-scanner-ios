@@ -113,6 +113,10 @@ class GeminiAPIService {
                 return
             }
 
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("DEBUG GeminiAPIService: Response string: \(responseString)")
+            }
+
             do {
                 let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
                 print("DEBUG GeminiAPIService: Decoded response successfully")
