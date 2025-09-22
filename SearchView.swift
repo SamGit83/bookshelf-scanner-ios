@@ -234,12 +234,12 @@ struct SearchResultRow: View {
 
             // Book Details
             VStack(alignment: .leading, spacing: 4) {
-                Text(book.title)
+                Text(book.title ?? "Unknown Title")
                     .font(.headline)
                     .foregroundColor(.primary)
                     .lineLimit(2)
 
-                Text(book.author)
+                Text(book.author ?? "Unknown Author")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -280,7 +280,7 @@ struct SearchResultRow: View {
         .shadow(radius: 1)
         .actionSheet(isPresented: $showActionSheet) {
             ActionSheet(
-                title: Text(book.title),
+                title: Text(book.title ?? "Unknown Title"),
                 message: Text("Choose an action"),
                 buttons: [
                     .default(Text("Move to Currently Reading")) {
