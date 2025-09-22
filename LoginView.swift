@@ -17,7 +17,6 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var showPasswordReset = false
     @State private var animateForm = false
-    @State private var showMoreOverlay = false
     @State private var hasShownAdditionalFields = false
 
     init(isSignUp: Bool = false) {
@@ -196,6 +195,57 @@ struct LoginView: View {
                                         displayText: { $0 }
                                     )
                                 }
+
+                                // Additional Fields (shown when expanded)
+                                if showAdditionalFields {
+                                    // Phone Number Field
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Phone Number")
+                                            .font(.headline)
+                                            .foregroundColor(.white.opacity(0.8))
+
+                                        TextField("", text: $phone)
+                                            .glassFieldStyle()
+                                            .keyboardType(.phonePad)
+                                            .textContentType(.telephoneNumber)
+                                    }
+                                    .transition(.slide.combined(with: .opacity))
+
+                                    // Country Field
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Country")
+                                            .font(.headline)
+                                            .foregroundColor(.white.opacity(0.8))
+
+                                        TextField("", text: $country)
+                                            .glassFieldStyle()
+                                            .textContentType(.countryName)
+                                    }
+                                    .transition(.slide.combined(with: .opacity))
+
+                                    // City Field
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("City")
+                                            .font(.headline)
+                                            .foregroundColor(.white.opacity(0.8))
+
+                                        TextField("", text: $city)
+                                            .glassFieldStyle()
+                                            .textContentType(.addressCity)
+                                    }
+                                    .transition(.slide.combined(with: .opacity))
+
+                                    // Favorite Book Genre Field
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Favorite Book Genre")
+                                            .font(.headline)
+                                            .foregroundColor(.white.opacity(0.8))
+
+                                        TextField("", text: $favoriteBookGenre)
+                                            .glassFieldStyle()
+                                    }
+                                    .transition(.slide.combined(with: .opacity))
+                                }
                             }
 
                             // Password Field
@@ -221,11 +271,13 @@ struct LoginView: View {
                                 Button(action: {
                                     print("DEBUG: Show More button tapped")
                                     withAnimation(.spring()) {
-                                        showMoreOverlay = true
-                                        hasShownAdditionalFields = true
+                                        showAdditionalFields.toggle()
+                                        if showAdditionalFields {
+                                            hasShownAdditionalFields = true
+                                        }
                                     }
                                 }) {
-                                    Text("Show More Options")
+                                    Text(showAdditionalFields ? "Show Less" : "Show More Options")
                                         .font(.subheadline)
                                         .foregroundColor(Color.blue)
                                 }
@@ -313,88 +365,6 @@ struct LoginView: View {
                 }
             }
         }
-        .overlay(
-            TranslucentOverlay(isVisible: showMoreOverlay) {
-                VStack(spacing: 20) {
-                    Text("Additional Information")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-
-                    // Phone Number Field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Phone Number")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
-
-                        TextField("", text: $phone)
-                            .glassFieldStyle()
-                            .keyboardType(.phonePad)
-                            .textContentType(.telephoneNumber)
-                    }
-
-                    // Country Field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Country")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
-
-                        TextField("", text: $country)
-                            .glassFieldStyle()
-                            .textContentType(.countryName)
-                    }
-
-                    // City Field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("City")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
-
-                        TextField("", text: $city)
-                            .glassFieldStyle()
-                            .textContentType(.addressCity)
-                    }
-
-                    // Favorite Book Genre Field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Favorite Book Genre")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
-
-                        TextField("", text: $favoriteBookGenre)
-                            .glassFieldStyle()
-                    }
-
-                    Button(action: {
-                        withAnimation(.spring()) {
-                            showMoreOverlay = false
-                        }
-                    }) {
-                        Text("Done")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.white)
-                            .foregroundColor(Color.blue)
-                            .cornerRadius(10)
-                            .font(.headline)
-                    }
-                }
-                .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white.opacity(0.1))
-                        .blur(radius: 1)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                )
-                .padding(.horizontal, 32)
-            }
-            .onAppear {
-                print("DEBUG: Additional fields overlay appeared")
-            }
-        )
         .onAppear {
             withAnimation(.spring().delay(0.1)) {
                 animateForm = true

@@ -64,7 +64,8 @@ struct GlassSegmentedPicker<T: Hashable>: View {
                         .tag(option)
                 }
             }
-            .pickerStyle(.segmented)
+            .pickerStyle(.menu)
+            .tint(Color.white)
             .background(Color.white.opacity(0.1))
             .cornerRadius(8)
             .overlay(

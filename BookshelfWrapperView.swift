@@ -12,7 +12,7 @@ struct BookshelfWrapperView: View {
             if authService.isAuthenticated {
                 authenticatedView
             } else {
-                LoginView()
+                HomeView()
             }
         }
         .onChange(of: authService.isAuthenticated) { isAuthenticated in
