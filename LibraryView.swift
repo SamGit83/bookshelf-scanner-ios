@@ -235,6 +235,7 @@ struct LibraryBookCard: View {
                                     .padding(.vertical, 3)
                                     .background(subGenreBadge.2.opacity(0.1))
                                     .cornerRadius(4)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
 
