@@ -399,8 +399,7 @@ struct ButtonStyles {
 
 // MARK: - Card Style System
 protocol CardStyling {
-    associatedtype Body: View
-    @ViewBuilder func makeBody(content: some View) -> Body
+    @ViewBuilder func makeBody(content: some View) -> some View
 }
 
 // MARK: - Card Style System
@@ -412,6 +411,7 @@ struct CardStyle: CardStyling {
     let border: (color: Color, width: CGFloat)?
     let blur: CGFloat?
 
+    @ViewBuilder
     func makeBody(content: some View) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
@@ -421,7 +421,7 @@ struct CardStyle: CardStyling {
         let shadowY = shadow?.y ?? 0
         let blurRadius = blur ?? 0
 
-        content
+        return content
             .padding(padding)
             .background(background)
             .cornerRadius(cornerRadius)
