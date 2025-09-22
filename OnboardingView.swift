@@ -180,7 +180,7 @@ struct OnboardingView: View {
                             }
                             .frame(maxWidth: .infinity)
                         }
-                        .modifier(ButtonStyleModifier(
+                        .modifier(LiquidButtonStyle(
                             background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
                             foregroundColor: pages[currentPage].color,
                             cornerRadius: 16,
@@ -200,7 +200,7 @@ struct OnboardingView: View {
                             }
                             .frame(maxWidth: .infinity)
                         }
-                        .modifier(ButtonStyleModifier(
+                        .modifier(LiquidButtonStyle(
                             background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
                             foregroundColor: pages[currentPage].color,
                             cornerRadius: 16,
