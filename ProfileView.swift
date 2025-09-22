@@ -124,7 +124,7 @@ struct ProfilePictureView: View {
             } else {
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.1))
+                        .fill(Color.white.opacity(0.2))
                         .frame(width: 100, height: 100)
                     Text(initials)
                         .font(.system(size: 40, weight: .bold))
@@ -168,8 +168,8 @@ struct ProfilePictureView: View {
         guard let displayName = authService.currentUser?.displayName else { return "?" }
         let components = displayName.split(separator: " ")
         if components.count >= 2 {
-            let firstInitial = components[0].first?.uppercased() ?? ""
-            let lastInitial = components[1].first?.uppercased() ?? ""
+            let firstInitial = components.first?.first?.uppercased() ?? ""
+            let lastInitial = components.last?.first?.uppercased() ?? ""
             return firstInitial + lastInitial
         } else if let first = components.first?.first?.uppercased() {
             return first
