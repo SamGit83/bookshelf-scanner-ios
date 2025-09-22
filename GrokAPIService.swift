@@ -77,7 +77,7 @@ class GrokAPIService {
                     return
                 }
 
-                if let content = grokResponse.choices.first?.message.content {
+                if let choices = grokResponse.choices, let content = choices.first?.message.content {
                     print("DEBUG GrokAPIService: Extracted content, length: \(content.count)")
                     self.parseRecommendations(from: content, completion: completion)
                 } else {
