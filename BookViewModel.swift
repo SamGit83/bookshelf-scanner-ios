@@ -138,6 +138,13 @@ class BookViewModel: ObservableObject {
         }
     }
 
+    func clearAllLibraryBooks() {
+        let libraryBooks = self.libraryBooks
+        for book in libraryBooks {
+            deleteBook(book)
+        }
+    }
+
     private func setupFirestoreListener() {
         guard let userId = FirebaseConfig.shared.currentUserId else {
             print("DEBUG BookViewModel: setupFirestoreListener - user not authenticated, loading from cache")

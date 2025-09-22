@@ -8,6 +8,7 @@ struct LibraryView: View {
     @Binding var isShowingCamera: Bool
     @State private var isShowingAddBook = false
     @State private var isShowingSearch = false
+    @State private var showingClearConfirmation = false
 
     var body: some View {
         NavigationView {
@@ -78,13 +79,22 @@ struct LibraryView: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 16)
             }
-            .navigationTitle("Library")
-            .navigationBarItems(trailing: Button(action: {
-                isShowingSearch = true
-            }) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.primary)
-                    .font(.system(size: 16, weight: .medium))
+            .navigationTitle("Library (\(viewModel.libraryBooks.count))")
+            .navigationBarItems(trailing: HStack {
+                Button(action: {
+                    showingClearConfirmation = true
+                }) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                        .font(.system(size: 16, weight: .medium))
+                }
+                Button(action: {
+                    isShowingSearch = true
+                }) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.primary)
+                        .font(.system(size: 16, weight: .medium))
+                }
             })
             .overlay(
                 Group {
@@ -109,6 +119,16 @@ struct LibraryView: View {
             }
             .sheet(isPresented: $isShowingSearch) {
                 SearchView(viewModel: viewModel)
+            }
+            .alert(isPresented: $showingClearConfirmation) {
+                Alert(
+                    title: Text("Clear All Books"),
+                    message: Text("Are you sure you want to delete all books from your library? This action cannot be undone."),
+                    primaryButton: .destructive(Text("Delete All")) {
+                        viewModel.clearAllLibraryBooks()
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         }
     }
