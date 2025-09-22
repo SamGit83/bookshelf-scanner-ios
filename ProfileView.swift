@@ -8,77 +8,109 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                Spacer()
+            ZStack {
+                // Vibrant profile background gradient
+                BackgroundGradients.profileGradient
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: SpacingSystem.xl) {
+                        // Enhanced User Info Section
+                        VStack(spacing: SpacingSystem.lg) {
+                            // Profile picture with enhanced styling
+                            ProfilePictureView(authService: authService)
+                                .padding(SpacingSystem.md)
+                                .background(
+                                    Circle()
+                                        .fill(AdaptiveColors.glassBackground)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(ProfileColors.avatarBorder, lineWidth: 3)
+                                        )
+                                        .shadow(color: ProfileColors.avatarBorder.opacity(0.3), radius: 20, x: 0, y: 10)
+                                )
 
-                // User Info
-                VStack(spacing: 10) {
-                    GlassCard {
-                        ProfilePictureView(authService: authService)
-                            .padding()
-                    }
+                            if let user = authService.currentUser {
+                                VStack(spacing: SpacingSystem.sm) {
+                                    Text(user.email ?? "No email")
+                                        .font(TypographySystem.displaySmall)
+                                        .foregroundColor(AdaptiveColors.primaryText)
+                                        .multilineTextAlignment(.center)
 
-                    if let user = authService.currentUser {
-                        Text(user.email ?? "No email")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-
-                        Text("Member since \(formattedDate(user.metadata.creationDate))")
-                            .foregroundColor(.gray)
-                    }
-                }
-
-                Spacer()
-
-                // Menu Options
-                VStack(spacing: 0) {
-                    List {
-                        Section {
-                            NavigationLink(destination: AccountSettingsView()) {
-                                HStack {
-                                    Image(systemName: "gear")
-                                        .foregroundColor(.blue)
-                                    Text("Account Settings")
+                                    Text("Member since \(formattedDate(user.metadata.creationDate))")
+                                        .font(TypographySystem.bodyMedium)
+                                        .foregroundColor(AdaptiveColors.secondaryText)
                                 }
-                            }
-
-                            NavigationLink(destination: ReadingStatsView()) {
-                                HStack {
-                                    Image(systemName: "chart.bar")
-                                        .foregroundColor(.green)
-                                    Text("Reading Statistics")
-                                }
+                                .padding(.horizontal, SpacingSystem.lg)
                             }
                         }
+                        .padding(.top, SpacingSystem.xl)
 
-                        Section(header: Text("Appearance")) {
-                            GlassSegmentedPicker(
-                                title: "Theme",
-                                selection: $themeManager.currentPreference,
-                                options: ColorSchemePreference.allCases,
-                                displayText: { $0.rawValue.capitalized }
-                            )
-                        }
+                        // Enhanced Menu Options with Glass Cards
+                        VStack(spacing: SpacingSystem.md) {
+                            // Account Section
+                            VStack(spacing: SpacingSystem.sm) {
+                                NavigationLink(destination: AccountSettingsView()) {
+                                    ProfileMenuRow(
+                                        icon: "gear.circle.fill",
+                                        title: "Account Settings",
+                                        iconColor: PrimaryColors.electricBlue
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
 
-                        Section {
+                                NavigationLink(destination: ReadingStatsView()) {
+                                    ProfileMenuRow(
+                                        icon: "chart.bar.fill",
+                                        title: "Reading Statistics",
+                                        iconColor: PrimaryColors.freshGreen
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+
+                            // Theme Section
+                            VStack(spacing: SpacingSystem.md) {
+                                HStack {
+                                    Text("Appearance")
+                                        .font(TypographySystem.headlineSmall)
+                                        .foregroundColor(AdaptiveColors.primaryText)
+                                    Spacer()
+                                }
+                                .padding(.horizontal, SpacingSystem.md)
+
+                                GlassSegmentedPicker(
+                                    title: "Theme",
+                                    selection: $themeManager.currentPreference,
+                                    options: ColorSchemePreference.allCases,
+                                    displayText: { $0.rawValue.capitalized }
+                                )
+                                .padding(.horizontal, SpacingSystem.md)
+                                .featureCardStyle()
+                            }
+
+                            // Sign Out Section
                             Button(action: {
                                 showSignOutAlert = true
                             }) {
-                                HStack {
-                                    Image(systemName: "arrow.right.square")
-                                        .foregroundColor(.red)
-                                    Text("Sign Out")
-                                        .foregroundColor(.red)
-                                }
+                                ProfileMenuRow(
+                                    icon: "arrow.right.square.fill",
+                                    title: "Sign Out",
+                                    iconColor: ProfileColors.dangerActions,
+                                    textColor: ProfileColors.dangerActions
+                                )
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
+                        .padding(.horizontal, SpacingSystem.md)
+                        
+                        Spacer(minLength: SpacingSystem.xxxl)
                     }
-                    .listStyle(InsetGroupedListStyle())
                 }
-
-                Spacer()
             }
             .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .alert(isPresented: $showSignOutAlert) {
                 Alert(
                     title: Text("Sign Out"),
@@ -100,6 +132,42 @@ struct ProfileView: View {
     }
 }
 
+// Enhanced Profile Menu Row Component
+struct ProfileMenuRow: View {
+    let icon: String
+    let title: String
+    let iconColor: Color
+    let textColor: Color?
+    
+    init(icon: String, title: String, iconColor: Color, textColor: Color? = nil) {
+        self.icon = icon
+        self.title = title
+        self.iconColor = iconColor
+        self.textColor = textColor
+    }
+    
+    var body: some View {
+        HStack(spacing: SpacingSystem.md) {
+            Image(systemName: icon)
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(iconColor)
+                .frame(width: 32, height: 32)
+            
+            Text(title)
+                .font(TypographySystem.bodyLarge)
+                .foregroundColor(textColor ?? AdaptiveColors.primaryText)
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(AdaptiveColors.secondaryText)
+        }
+        .padding(SpacingSystem.md)
+        .featureCardStyle()
+    }
+}
+
 struct ProfilePictureView: View {
     @ObservedObject var authService: AuthService
     @Environment(\.colorScheme) private var colorScheme
@@ -115,7 +183,7 @@ struct ProfilePictureView: View {
     }
 
     private var initialsTextColor: Color {
-        colorScheme == .dark ? .white : .black
+        AdaptiveColors.primaryText
     }
 
     var body: some View {
@@ -124,20 +192,30 @@ struct ProfilePictureView: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 100, height: 100)
+                    .frame(width: 120, height: 120)
                     .clipShape(Circle())
             } else {
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.2))
-                        .frame(width: 100, height: 100)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    PrimaryColors.energeticPink.opacity(0.3),
+                                    PrimaryColors.vibrantPurple.opacity(0.2)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 120, height: 120)
+                    
                     Text(initials)
-                        .font(.system(size: 40, weight: .bold))
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
                         .foregroundColor(initialsTextColor)
                 }
             }
 
-            // Overlay button
+            // Enhanced overlay button
             VStack {
                 Spacer()
                 HStack {
@@ -146,17 +224,23 @@ struct ProfilePictureView: View {
                         showImagePicker = true
                     }) {
                         Image(systemName: "camera.fill")
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.white)
-                            .padding(8)
-                            .background(Color.black.opacity(0.5))
+                            .padding(SpacingSystem.sm)
+                            .background(PrimaryColors.energeticPink)
                             .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white, lineWidth: 2)
+                            )
+                            .shadow(color: PrimaryColors.energeticPink.opacity(0.4), radius: 8, x: 0, y: 4)
                     }
-                    .padding(4)
+                    .padding(SpacingSystem.xs)
                 }
             }
-            .frame(width: 100, height: 100)
+            .frame(width: 120, height: 120)
         }
-        .frame(width: 100, height: 100)
+        .frame(width: 120, height: 120)
         .photosPicker(isPresented: $showImagePicker, selection: $selectedItem, matching: .images)
         .onChange(of: selectedItem) { newItem in
             Task {
@@ -230,78 +314,205 @@ struct AccountSettingsView: View {
 }
 
 struct ReadingStatsView: View {
-    // This would show reading statistics
-    // For now, just a placeholder
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Reading Statistics")
-                .font(.title)
-                .fontWeight(.bold)
+        ZStack {
+            BackgroundGradients.libraryGradient
+                .ignoresSafeArea()
+            
+            VStack(spacing: SpacingSystem.xl) {
+                // Enhanced coming soon message
+                VStack(spacing: SpacingSystem.lg) {
+                    ZStack {
+                        Circle()
+                            .fill(PrimaryColors.vibrantPurple.opacity(0.2))
+                            .frame(width: 120, height: 120)
+                            .blur(radius: 15)
 
-            Text("Coming Soon!")
-                .foregroundColor(.gray)
+                        Image(systemName: "chart.bar.fill")
+                            .font(.system(size: 56, weight: .medium))
+                            .foregroundColor(PrimaryColors.vibrantPurple)
+                    }
 
-            Spacer()
+                    VStack(spacing: SpacingSystem.sm) {
+                        Text("Reading Statistics")
+                            .font(TypographySystem.displayMedium)
+                            .foregroundColor(AdaptiveColors.primaryText)
+
+                        Text("Coming Soon!")
+                            .font(TypographySystem.bodyLarge)
+                            .foregroundColor(AdaptiveColors.secondaryText)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(SpacingSystem.lg)
         }
-        .padding()
         .navigationTitle("Statistics")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 }
 
 struct HelpView: View {
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("How to Use Bookshelf Scanner")
-                    .font(.title)
-                    .fontWeight(.bold)
+        ZStack {
+            BackgroundGradients.heroGradient
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: SpacingSystem.xl) {
+                    VStack(alignment: .leading, spacing: SpacingSystem.lg) {
+                        Text("How to Use Bookshelf Scanner")
+                            .font(TypographySystem.displayMedium)
+                            .foregroundColor(AdaptiveColors.primaryText)
+                            .padding(.horizontal, SpacingSystem.md)
 
-                VStack(alignment: .leading, spacing: 15) {
-                    Text("📷 Scanning Books")
-                        .font(.headline)
-                    Text("Point your camera at a bookshelf and tap the capture button. The app will analyze the image and extract book information.")
+                        VStack(spacing: SpacingSystem.lg) {
+                            HelpSection(
+                                icon: "camera.fill",
+                                title: "Scanning Books",
+                                description: "Point your camera at a bookshelf and tap the capture button. The app will analyze the image and extract book information.",
+                                iconColor: PrimaryColors.energeticPink
+                            )
 
-                    Text("📚 Managing Your Library")
-                        .font(.headline)
-                    Text("Books are automatically added to your library. You can move them to 'Currently Reading' or remove them as needed.")
+                            HelpSection(
+                                icon: "books.vertical.fill",
+                                title: "Managing Your Library",
+                                description: "Books are automatically added to your library. You can move them to 'Currently Reading' or remove them as needed.",
+                                iconColor: PrimaryColors.freshGreen
+                            )
 
-                    Text("🔄 Sync Across Devices")
-                        .font(.headline)
-                    Text("Your library syncs automatically across all your devices when you're signed in.")
+                            HelpSection(
+                                icon: "arrow.triangle.2.circlepath",
+                                title: "Sync Across Devices",
+                                description: "Your library syncs automatically across all your devices when you're signed in.",
+                                iconColor: PrimaryColors.electricBlue
+                            )
+                        }
+                    }
+                    .padding(SpacingSystem.lg)
                 }
-                .padding(.horizontal)
             }
-            .padding()
         }
         .navigationTitle("Help")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.hidden, for: .navigationBar)
+    }
+}
+
+struct HelpSection: View {
+    let icon: String
+    let title: String
+    let description: String
+    let iconColor: Color
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: SpacingSystem.md) {
+            Image(systemName: icon)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundColor(iconColor)
+                .frame(width: 40, height: 40)
+            
+            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                Text(title)
+                    .font(TypographySystem.headlineSmall)
+                    .foregroundColor(AdaptiveColors.primaryText)
+                
+                Text(description)
+                    .font(TypographySystem.bodyMedium)
+                    .foregroundColor(AdaptiveColors.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer()
+        }
+        .padding(SpacingSystem.md)
+        .featureCardStyle()
     }
 }
 
 struct PrivacyView: View {
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Privacy Policy")
-                    .font(.title)
-                    .fontWeight(.bold)
+        ZStack {
+            BackgroundGradients.profileGradient
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: SpacingSystem.xl) {
+                    VStack(alignment: .leading, spacing: SpacingSystem.lg) {
+                        Text("Privacy Policy")
+                            .font(TypographySystem.displayMedium)
+                            .foregroundColor(AdaptiveColors.primaryText)
+                            .padding(.horizontal, SpacingSystem.md)
 
-                Text("We respect your privacy and are committed to protecting your personal information.")
-                    .font(.body)
+                        Text("We respect your privacy and are committed to protecting your personal information.")
+                            .font(TypographySystem.bodyLarge)
+                            .foregroundColor(AdaptiveColors.secondaryText)
+                            .padding(.horizontal, SpacingSystem.md)
+                            .featureCardStyle()
 
-                Text("Data Collection")
-                    .font(.headline)
-                Text("We collect your email address for authentication and book data for your personal library.")
+                        VStack(spacing: SpacingSystem.lg) {
+                            PrivacySection(
+                                icon: "doc.text.fill",
+                                title: "Data Collection",
+                                description: "We collect your email address for authentication and book data for your personal library.",
+                                iconColor: PrimaryColors.electricBlue
+                            )
 
-                Text("Data Usage")
-                    .font(.headline)
-                Text("Your data is used solely to provide the bookshelf scanning service and sync your library across devices.")
+                            PrivacySection(
+                                icon: "gear.circle.fill",
+                                title: "Data Usage",
+                                description: "Your data is used solely to provide the bookshelf scanning service and sync your library across devices.",
+                                iconColor: PrimaryColors.freshGreen
+                            )
 
-                Text("Data Security")
-                    .font(.headline)
-                Text("All data is encrypted and stored securely using Firebase's industry-standard security practices.")
+                            PrivacySection(
+                                icon: "lock.shield.fill",
+                                title: "Data Security",
+                                description: "All data is encrypted and stored securely using Firebase's industry-standard security practices.",
+                                iconColor: PrimaryColors.energeticPink
+                            )
+                        }
+                    }
+                    .padding(SpacingSystem.lg)
+                }
             }
-            .padding()
         }
         .navigationTitle("Privacy")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.hidden, for: .navigationBar)
+    }
+}
+
+struct PrivacySection: View {
+    let icon: String
+    let title: String
+    let description: String
+    let iconColor: Color
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: SpacingSystem.md) {
+            Image(systemName: icon)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundColor(iconColor)
+                .frame(width: 40, height: 40)
+            
+            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                Text(title)
+                    .font(TypographySystem.headlineSmall)
+                    .foregroundColor(AdaptiveColors.primaryText)
+                
+                Text(description)
+                    .font(TypographySystem.bodyMedium)
+                    .foregroundColor(AdaptiveColors.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer()
+        }
+        .padding(SpacingSystem.md)
+        .featureCardStyle()
     }
 }

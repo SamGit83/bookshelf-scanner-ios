@@ -27,338 +27,358 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            // Dynamic Gradient Background
-            LinearGradient(
-                colors: [
-                    Color.blue.opacity(0.8),
-                    Color.purple.opacity(0.6),
-                    Color.pink.opacity(0.4)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            // Enhanced vibrant background gradient
+            BackgroundGradients.heroGradient
+                .ignoresSafeArea()
 
-            // Subtle animated overlay
+            // Enhanced animated floating elements
             GeometryReader { geometry in
                 Circle()
-                    .fill(Color.purple.opacity(0.1))
+                    .fill(Color.white.opacity(0.1))
                     .frame(width: geometry.size.width * 0.8)
                     .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.2)
                     .blur(radius: 40)
+                    .offset(x: animateForm ? 20 : -20)
+                    .animation(.easeInOut(duration: 4).repeatForever(), value: animateForm)
 
                 Circle()
-                    .fill(Color.pink.opacity(0.1))
+                    .fill(Color.white.opacity(0.08))
                     .frame(width: geometry.size.width * 0.6)
                     .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.8)
                     .blur(radius: 30)
+                    .offset(y: animateForm ? -15 : 15)
+                    .animation(.easeInOut(duration: 3).repeatForever(), value: animateForm)
+                
+                Circle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(width: geometry.size.width * 0.4)
+                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                    .blur(radius: 25)
+                    .offset(x: animateForm ? -10 : 10, y: animateForm ? 10 : -10)
+                    .animation(.easeInOut(duration: 5).repeatForever(), value: animateForm)
             }
 
             ScrollView {
                 VStack(spacing: 32) {
                     Spacer(minLength: 64)
 
-                    // App Logo/Title with glass effect
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.1))
-                            .blur(radius: 1)
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.05))
+                    // Enhanced App Logo/Title with vibrant glass effect
+                    VStack(spacing: SpacingSystem.lg) {
+                        ZStack {
+                            Circle()
+                                .fill(PrimaryColors.energeticPink.opacity(0.3))
+                                .frame(width: 120, height: 120)
+                                .blur(radius: 15)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.3), lineWidth: 2)
+                                        .frame(width: 120, height: 120)
+                                )
 
-                        VStack(spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.blue.opacity(0.2))
-                                    .frame(width: 100, height: 100)
-                                    .blur(radius: 10)
-
-                                Image(systemName: "books.vertical.fill")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.white)
-                                    .scaleEffect(animateForm ? 1.0 : 0.8)
-                                    .animation(.spring().delay(0.3), value: animateForm)
-                            }
-
-                            Text("Bookshelf Scanner")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
+                            Image(systemName: "books.vertical.fill")
+                                .font(.system(size: 56, weight: .medium))
                                 .foregroundColor(.white)
+                                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                                .scaleEffect(animateForm ? 1.0 : 0.8)
+                                .animation(AnimationTiming.transition.delay(0.3), value: animateForm)
+                        }
+                        .shadow(color: PrimaryColors.energeticPink.opacity(0.4), radius: 20, x: 0, y: 10)
+
+                        VStack(spacing: SpacingSystem.sm) {
+                            Text("Bookshelf Scanner")
+                                .font(TypographySystem.displayMedium)
+                                .foregroundColor(.white)
+                                .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
 
                             Text("Digitize your library with AI")
-                                .font(.body)
-                                .foregroundColor(.white.opacity(0.8))
+                                .font(TypographySystem.bodyLarge)
+                                .foregroundColor(.white.opacity(0.9))
+                                .shadow(color: Color.black.opacity(0.2), radius: 3, x: 0, y: 1)
                         }
-                        .padding(24)
                     }
-                    .padding(.horizontal, 32)
+                    .padding(SpacingSystem.xl)
+                    .featureCardStyle()
+                    .padding(.horizontal, SpacingSystem.lg)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
-                    .animation(.spring().delay(0.2), value: animateForm)
+                    .animation(AnimationTiming.transition.delay(0.2), value: animateForm)
 
-                    // Login/Signup Form
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.1))
-                            .blur(radius: 1)
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.05))
+                    // Enhanced Login/Signup Form
+                    VStack(spacing: SpacingSystem.lg) {
+                        // Enhanced Form Header
+                        VStack(spacing: SpacingSystem.sm) {
+                            Text(isSignUp ? "Create Account" : "Welcome Back")
+                                .font(TypographySystem.displaySmall)
+                                .foregroundColor(.white)
+                                .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
 
-                        VStack(spacing: 20) {
-                            // Form Header
-                            VStack(spacing: 8) {
-                                Text(isSignUp ? "Create Account" : "Welcome Back")
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                            Text(isSignUp ? "Join our reading community" : "Sign in to your account")
+                                .font(TypographySystem.bodyMedium)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        .padding(.bottom, SpacingSystem.md)
 
-                                Text(isSignUp ? "Join our reading community" : "Sign in to your account")
-                                    .font(.subheadline)
-                                    .foregroundColor(.white.opacity(0.7))
+                        // Enhanced Email Field
+                        VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                            HStack {
+                                Text("Email")
+                                    .font(TypographySystem.headlineSmall)
+                                    .foregroundColor(.white.opacity(0.9))
+                                Text("*")
+                                    .foregroundColor(SemanticColors.errorPrimary)
+                                    .font(TypographySystem.headlineSmall)
                             }
 
-                            // Email Field
-                            VStack(alignment: .leading, spacing: 8) {
+                            TextField("Enter your email", text: $email)
+                                .font(TypographySystem.bodyMedium)
+                                .foregroundColor(AdaptiveColors.primaryText)
+                                .glassFieldStyle(isValid: !email.isEmpty || email.isEmpty)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                                .textContentType(.emailAddress)
+                        }
+
+                        if isSignUp {
+                            // Enhanced First Name Field
+                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
                                 HStack {
-                                    Text("Email")
-                                        .font(.headline)
-                                        .foregroundColor(.white.opacity(0.8))
+                                    Text("First Name")
+                                        .font(TypographySystem.headlineSmall)
+                                        .foregroundColor(.white.opacity(0.9))
                                     Text("*")
-                                        .foregroundColor(.red)
-                                        .font(.headline)
+                                        .foregroundColor(SemanticColors.errorPrimary)
+                                        .font(TypographySystem.headlineSmall)
                                 }
 
-                                TextField("", text: $email)
-                                    .glassFieldStyle()
-                                    .keyboardType(.emailAddress)
-                                    .autocapitalization(.none)
-                                    .textContentType(.emailAddress)
+                                TextField("Enter your first name", text: $firstName)
+                                    .font(TypographySystem.bodyMedium)
+                                    .foregroundColor(AdaptiveColors.primaryText)
+                                    .glassFieldStyle(isValid: !firstName.isEmpty || firstName.isEmpty)
+                                    .textContentType(.givenName)
                             }
 
-                            if isSignUp {
-                                // First Name Field
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack {
-                                        Text("First Name")
-                                            .font(.headline)
-                                            .foregroundColor(.white.opacity(0.8))
-                                        Text("*")
-                                            .foregroundColor(.red)
-                                            .font(.headline)
-                                    }
-
-                                    TextField("", text: $firstName)
-                                        .glassFieldStyle()
-                                        .textContentType(.givenName)
+                            // Enhanced Last Name Field
+                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                                HStack {
+                                    Text("Last Name")
+                                        .font(TypographySystem.headlineSmall)
+                                        .foregroundColor(.white.opacity(0.9))
+                                    Text("*")
+                                        .foregroundColor(SemanticColors.errorPrimary)
+                                        .font(TypographySystem.headlineSmall)
                                 }
 
-                                // Last Name Field
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack {
-                                        Text("Last Name")
-                                            .font(.headline)
-                                            .foregroundColor(.white.opacity(0.8))
-                                        Text("*")
-                                            .foregroundColor(.red)
-                                            .font(.headline)
-                                    }
+                                TextField("Enter your last name", text: $lastName)
+                                    .font(TypographySystem.bodyMedium)
+                                    .foregroundColor(AdaptiveColors.primaryText)
+                                    .glassFieldStyle(isValid: !lastName.isEmpty || lastName.isEmpty)
+                                    .textContentType(.familyName)
+                            }
 
-                                    TextField("", text: $lastName)
-                                        .glassFieldStyle()
-                                        .textContentType(.familyName)
+                            // Enhanced Date of Birth Field
+                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                                HStack {
+                                    Text("Date of Birth")
+                                        .font(TypographySystem.headlineSmall)
+                                        .foregroundColor(.white.opacity(0.9))
+                                    Text("*")
+                                        .foregroundColor(SemanticColors.errorPrimary)
+                                        .font(TypographySystem.headlineSmall)
                                 }
 
-                                // Date of Birth Field
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack {
-                                        Text("Date of Birth")
-                                            .font(.headline)
-                                            .foregroundColor(.white.opacity(0.8))
-                                        Text("*")
-                                            .foregroundColor(.red)
-                                            .font(.headline)
-                                    }
+                                GlassDatePicker(title: "", date: $dateOfBirth, isMandatory: true)
+                            }
 
-                                    GlassDatePicker(title: "", date: $dateOfBirth)
-                                }
+                            // Enhanced Gender Field
+                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                                Text("Gender")
+                                    .font(TypographySystem.headlineSmall)
+                                    .foregroundColor(.white.opacity(0.9))
 
-                                // Gender Field
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Gender")
-                                        .font(.headline)
-                                        .foregroundColor(.white.opacity(0.8))
+                                GlassSegmentedPicker(
+                                    title: "",
+                                    selection: $gender,
+                                    options: genderOptions,
+                                    displayText: { $0 }
+                                )
+                            }
 
-                                    GlassSegmentedPicker(
-                                        title: "",
-                                        selection: $gender,
-                                        options: genderOptions,
-                                        displayText: { $0 }
-                                    )
-                                }
-
-                                // Additional Fields (shown when expanded)
-                                if showAdditionalFields {
+                            // Enhanced Additional Fields (shown when expanded)
+                            if showAdditionalFields {
+                                VStack(spacing: SpacingSystem.md) {
                                     // Phone Number Field
-                                    VStack(alignment: .leading, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
                                         Text("Phone Number")
-                                            .font(.headline)
-                                            .foregroundColor(.white.opacity(0.8))
+                                            .font(TypographySystem.headlineSmall)
+                                            .foregroundColor(.white.opacity(0.9))
 
-                                        TextField("", text: $phone)
+                                        TextField("Enter your phone number", text: $phone)
+                                            .font(TypographySystem.bodyMedium)
+                                            .foregroundColor(AdaptiveColors.primaryText)
                                             .glassFieldStyle()
                                             .keyboardType(.phonePad)
                                             .textContentType(.telephoneNumber)
                                     }
-                                    .transition(.slide.combined(with: .opacity))
 
                                     // Country Field
-                                    VStack(alignment: .leading, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
                                         Text("Country")
-                                            .font(.headline)
-                                            .foregroundColor(.white.opacity(0.8))
+                                            .font(TypographySystem.headlineSmall)
+                                            .foregroundColor(.white.opacity(0.9))
 
-                                        TextField("", text: $country)
+                                        TextField("Enter your country", text: $country)
+                                            .font(TypographySystem.bodyMedium)
+                                            .foregroundColor(AdaptiveColors.primaryText)
                                             .glassFieldStyle()
                                             .textContentType(.countryName)
                                     }
-                                    .transition(.slide.combined(with: .opacity))
 
                                     // City Field
-                                    VStack(alignment: .leading, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
                                         Text("City")
-                                            .font(.headline)
-                                            .foregroundColor(.white.opacity(0.8))
+                                            .font(TypographySystem.headlineSmall)
+                                            .foregroundColor(.white.opacity(0.9))
 
-                                        TextField("", text: $city)
+                                        TextField("Enter your city", text: $city)
+                                            .font(TypographySystem.bodyMedium)
+                                            .foregroundColor(AdaptiveColors.primaryText)
                                             .glassFieldStyle()
                                             .textContentType(.addressCity)
                                     }
-                                    .transition(.slide.combined(with: .opacity))
 
                                     // Favorite Book Genre Field
-                                    VStack(alignment: .leading, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
                                         Text("Favorite Book Genre")
-                                            .font(.headline)
-                                            .foregroundColor(.white.opacity(0.8))
+                                            .font(TypographySystem.headlineSmall)
+                                            .foregroundColor(.white.opacity(0.9))
 
-                                        TextField("", text: $favoriteBookGenre)
+                                        TextField("e.g., Fiction, Mystery, Romance", text: $favoriteBookGenre)
+                                            .font(TypographySystem.bodyMedium)
+                                            .foregroundColor(AdaptiveColors.primaryText)
                                             .glassFieldStyle()
                                     }
-                                    .transition(.slide.combined(with: .opacity))
                                 }
-                            }
-
-                            // Password Field
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Password")
-                                        .font(.headline)
-                                        .foregroundColor(.white.opacity(0.8))
-                                    if isSignUp {
-                                        Text("*")
-                                            .foregroundColor(.red)
-                                            .font(.headline)
-                                    }
-                                }
-
-                                SecureField("", text: $password)
-                                    .glassFieldStyle()
-                                    .textContentType(isSignUp ? .newPassword : .password)
-                            }
-
-                            if isSignUp {
-                                // Show More Button
-                                Button(action: {
-                                    print("DEBUG: Show More button tapped")
-                                    withAnimation(.spring()) {
-                                        showAdditionalFields.toggle()
-                                        if showAdditionalFields {
-                                            hasShownAdditionalFields = true
-                                        }
-                                    }
-                                }) {
-                                    Text(showAdditionalFields ? "Show Less" : "Show More Options")
-                                        .font(.subheadline)
-                                        .foregroundColor(Color.blue)
-                                }
-                                .padding(.top, 8)
-                            }
-
-                            // Sign In/Sign Up Button
-                            Button(action: {
-                                if isSignUp {
-                                    signUp()
-                                } else {
-                                    signIn()
-                                }
-                            }) {
-                                if isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                } else {
-                                    Text(isSignUp ? "Create Account" : "Sign In")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.white)
-                                        .foregroundColor(Color.blue)
-                                        .cornerRadius(10)
-                                        .font(.headline)
-                                }
-                            }
-                            .disabled(isLoading)
-
-                            // Toggle between login and signup
-                            Button(action: {
-                                withAnimation(.spring()) {
-                                    isSignUp.toggle()
-                                }
-                            }) {
-                                Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
-                                    .font(.subheadline)
-                                    .foregroundColor(Color.pink)
-                            }
-
-                            // Forgot password
-                            if !isSignUp {
-                                Button(action: {
-                                    showPasswordReset = true
-                                }) {
-                                    Text("Forgot Password?")
-                                        .font(.caption)
-                                        .foregroundColor(.white.opacity(0.6))
-                                }
+                                .transition(.slide.combined(with: .opacity))
                             }
                         }
-                        .padding(24)
+
+                        // Enhanced Password Field
+                        VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                            HStack {
+                                Text("Password")
+                                    .font(TypographySystem.headlineSmall)
+                                    .foregroundColor(.white.opacity(0.9))
+                                if isSignUp {
+                                    Text("*")
+                                        .foregroundColor(SemanticColors.errorPrimary)
+                                        .font(TypographySystem.headlineSmall)
+                                }
+                            }
+
+                            SecureField("Enter your password", text: $password)
+                                .font(TypographySystem.bodyMedium)
+                                .foregroundColor(AdaptiveColors.primaryText)
+                                .glassFieldStyle(isValid: !password.isEmpty || password.isEmpty)
+                                .textContentType(isSignUp ? .newPassword : .password)
+                        }
+
+                        if isSignUp {
+                            // Enhanced Show More Button
+                            Button(action: {
+                                withAnimation(AnimationTiming.transition) {
+                                    showAdditionalFields.toggle()
+                                    if showAdditionalFields {
+                                        hasShownAdditionalFields = true
+                                    }
+                                }
+                            }) {
+                                HStack(spacing: SpacingSystem.sm) {
+                                    Text(showAdditionalFields ? "Show Less Options" : "Show More Options")
+                                        .font(TypographySystem.bodyMedium)
+                                    Image(systemName: showAdditionalFields ? "chevron.up" : "chevron.down")
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                .foregroundColor(PrimaryColors.electricBlue)
+                            }
+                            .padding(.top, SpacingSystem.sm)
+                        }
+
+                        // Enhanced Sign In/Sign Up Button
+                        Button(action: {
+                            if isSignUp {
+                                signUp()
+                            } else {
+                                signIn()
+                            }
+                        }) {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(1.2)
+                            } else {
+                                HStack(spacing: SpacingSystem.sm) {
+                                    Text(isSignUp ? "Create Account" : "Sign In")
+                                        .font(TypographySystem.buttonLarge)
+                                    Image(systemName: isSignUp ? "person.badge.plus" : "arrow.right.circle.fill")
+                                        .font(.system(size: 18, weight: .semibold))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        .primaryButtonStyle()
+                        .disabled(isLoading)
+
+                        // Enhanced Toggle between login and signup
+                        Button(action: {
+                            withAnimation(AnimationTiming.transition) {
+                                isSignUp.toggle()
+                            }
+                        }) {
+                            Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
+                                .font(TypographySystem.bodyMedium)
+                                .foregroundColor(PrimaryColors.energeticPink)
+                        }
+
+                        // Enhanced Forgot password
+                        if !isSignUp {
+                            Button(action: {
+                                showPasswordReset = true
+                            }) {
+                                Text("Forgot Password?")
+                                    .font(TypographySystem.captionLarge)
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                        }
                     }
-                    .padding(.horizontal, 32)
+                    .padding(SpacingSystem.xl)
+                    .featureCardStyle()
+                    .padding(.horizontal, SpacingSystem.lg)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
-                    .animation(.spring().delay(0.4), value: animateForm)
+                    .animation(AnimationTiming.transition.delay(0.4), value: animateForm)
 
-                    // Error message
+                    // Enhanced Error message
                     if let error = authService.errorMessage {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.red.opacity(0.1))
-                                .blur(radius: 1)
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.red.opacity(0.05))
+                        HStack(spacing: SpacingSystem.md) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(SemanticColors.errorPrimary)
+                                .font(.system(size: 24, weight: .semibold))
 
-                            HStack(spacing: 12) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundColor(.red)
-                                    .font(.system(size: 20))
-
-                                Text(error)
-                                    .font(.subheadline)
-                                    .foregroundColor(.white)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            .padding(16)
+                            Text(error)
+                                .font(TypographySystem.bodyMedium)
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.leading)
                         }
-                        .padding(.horizontal, 32)
+                        .padding(SpacingSystem.md)
+                        .background(SemanticColors.errorSecondary)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(SemanticColors.errorPrimary.opacity(0.5), lineWidth: 1)
+                        )
+                        .cornerRadius(12)
+                        .padding(.horizontal, SpacingSystem.lg)
                         .transition(.scale.combined(with: .opacity))
+                        .animation(AnimationTiming.feedback, value: authService.errorMessage)
                     }
 
                     Spacer(minLength: 64)
@@ -366,7 +386,7 @@ struct LoginView: View {
             }
         }
         .onAppear {
-            withAnimation(.spring().delay(0.1)) {
+            withAnimation(AnimationTiming.transition.delay(0.1)) {
                 animateForm = true
             }
         }
@@ -463,138 +483,147 @@ struct PasswordResetView: View {
 
     var body: some View {
         ZStack {
-            // Background matching login view
-            LinearGradient(
-                colors: [
-                    Color.blue.opacity(0.8),
-                    Color.purple.opacity(0.6),
-                    Color.pink.opacity(0.4)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            // Enhanced background matching login view
+            BackgroundGradients.heroGradient
+                .ignoresSafeArea()
 
-            VStack(spacing: 32) {
+            VStack(spacing: SpacingSystem.xl) {
                 Spacer()
 
-                // Header with close button
+                // Enhanced Header with close button
                 HStack {
                     Spacer()
                     Button(action: {
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
+                            .font(.system(size: 28, weight: .semibold))
                             .foregroundColor(.white.opacity(0.8))
+                            .padding(SpacingSystem.sm)
+                            .background(AdaptiveColors.glassBackground)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                            )
                     }
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, SpacingSystem.lg)
 
-                // Main content card
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white.opacity(0.1))
-                        .blur(radius: 1)
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white.opacity(0.05))
+                // Enhanced Main content card
+                VStack(spacing: SpacingSystem.xl) {
+                    // Enhanced Icon and title
+                    VStack(spacing: SpacingSystem.lg) {
+                        ZStack {
+                            Circle()
+                                .fill(PrimaryColors.dynamicOrange.opacity(0.3))
+                                .frame(width: 100, height: 100)
+                                .blur(radius: 12)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.3), lineWidth: 2)
+                                        .frame(width: 100, height: 100)
+                                )
 
-                    VStack(spacing: 24) {
-                        // Icon and title
-                        VStack(spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.orange.opacity(0.2))
-                                    .frame(width: 80, height: 80)
-                                    .blur(radius: 8)
-
-                                Image(systemName: "key.fill")
-                                    .font(.system(size: 32))
-                                    .foregroundColor(.white)
-                            }
-
-                            Text("Reset Password")
-                                .font(.title)
-                                .fontWeight(.bold)
+                            Image(systemName: "key.fill")
+                                .font(.system(size: 40, weight: .medium))
                                 .foregroundColor(.white)
+                                .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
+                        }
+                        .shadow(color: PrimaryColors.dynamicOrange.opacity(0.4), radius: 16, x: 0, y: 8)
+
+                        VStack(spacing: SpacingSystem.sm) {
+                            Text("Reset Password")
+                                .font(TypographySystem.displaySmall)
+                                .foregroundColor(.white)
+                                .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
 
                             Text("Enter your email address and we'll send you a link to reset your password.")
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.7))
-                                .multilineTextAlignment(.center)
-                        }
-
-                        // Email field
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Email")
-                                .font(.headline)
+                                .font(TypographySystem.bodyMedium)
                                 .foregroundColor(.white.opacity(0.8))
-
-                            TextField("", text: $email)
-                                .padding()
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(8)
-                                .foregroundColor(.white)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                                .textContentType(.emailAddress)
-                        }
-
-                        // Send reset link button
-                        Button(action: {
-                            resetPassword()
-                        }) {
-                            if isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
-                                Text("Send Reset Link")
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.white)
-                                    .foregroundColor(Color.orange)
-                                    .cornerRadius(10)
-                                    .font(.headline)
-                            }
-                        }
-                        .disabled(email.isEmpty || isLoading)
-
-                        // Success/error message
-                        if !message.isEmpty {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(message.contains("sent") ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
-                                    .blur(radius: 1)
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(message.contains("sent") ? Color.green.opacity(0.05) : Color.red.opacity(0.05))
-
-                                HStack(spacing: 12) {
-                                    Image(systemName: message.contains("sent") ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                                        .foregroundColor(message.contains("sent") ? .green : .red)
-                                        .font(.system(size: 20))
-
-                                    Text(message)
-                                        .font(.subheadline)
-                                        .foregroundColor(.white)
-                                        .multilineTextAlignment(.leading)
-                                }
-                                .padding(16)
-                            }
-                            .transition(.scale.combined(with: .opacity))
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(2)
                         }
                     }
-                    .padding(24)
+
+                    // Enhanced Email field
+                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                        Text("Email")
+                            .font(TypographySystem.headlineSmall)
+                            .foregroundColor(.white.opacity(0.9))
+
+                        TextField("Enter your email address", text: $email)
+                            .font(TypographySystem.bodyMedium)
+                            .foregroundColor(AdaptiveColors.primaryText)
+                            .glassFieldStyle(isValid: !email.isEmpty || email.isEmpty)
+                            .keyboardType(.emailAddress)
+                            .autocapitalization(.none)
+                            .textContentType(.emailAddress)
+                    }
+
+                    // Enhanced Send reset link button
+                    Button(action: {
+                        resetPassword()
+                    }) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(1.2)
+                        } else {
+                            HStack(spacing: SpacingSystem.sm) {
+                                Text("Send Reset Link")
+                                    .font(TypographySystem.buttonLarge)
+                                Image(systemName: "paperplane.fill")
+                                    .font(.system(size: 18, weight: .semibold))
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .modifier(ButtonStyleModifier(
+                        background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
+                        foregroundColor: PrimaryColors.dynamicOrange,
+                        cornerRadius: 16,
+                        padding: EdgeInsets(top: 16, leading: 24, bottom: 16, trailing: 24),
+                        font: TypographySystem.buttonLarge,
+                        shadow: (color: Color.white.opacity(0.3), radius: 12, x: 0, y: 6)
+                    ))
+                    .disabled(email.isEmpty || isLoading)
+
+                    // Enhanced Success/error message
+                    if !message.isEmpty {
+                        HStack(spacing: SpacingSystem.md) {
+                            Image(systemName: message.contains("sent") ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                                .foregroundColor(message.contains("sent") ? SemanticColors.successPrimary : SemanticColors.errorPrimary)
+                                .font(.system(size: 24, weight: .semibold))
+
+                            Text(message)
+                                .font(TypographySystem.bodyMedium)
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(SpacingSystem.md)
+                        .background(message.contains("sent") ? SemanticColors.successSecondary : SemanticColors.errorSecondary)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke((message.contains("sent") ? SemanticColors.successPrimary : SemanticColors.errorPrimary).opacity(0.5), lineWidth: 1)
+                        )
+                        .cornerRadius(12)
+                        .transition(.scale.combined(with: .opacity))
+                        .animation(AnimationTiming.feedback, value: message)
+                    }
                 }
-                .padding(.horizontal, 32)
+                .padding(SpacingSystem.xl)
+                .featureCardStyle()
+                .padding(.horizontal, SpacingSystem.lg)
                 .offset(y: animateContent ? 0 : 50)
                 .opacity(animateContent ? 1 : 0)
-                .animation(.spring().delay(0.2), value: animateContent)
+                .animation(AnimationTiming.transition.delay(0.2), value: animateContent)
 
                 Spacer()
             }
         }
         .onAppear {
-            withAnimation(.spring().delay(0.1)) {
+            withAnimation(AnimationTiming.transition.delay(0.1)) {
                 animateContent = true
             }
         }

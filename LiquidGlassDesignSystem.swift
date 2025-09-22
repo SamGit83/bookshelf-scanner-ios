@@ -1,5 +1,6 @@
 import SwiftUI
 
+// MARK: - Theme Management
 enum ColorSchemePreference: String, CaseIterable {
     case light, dark, system
 
@@ -29,85 +30,633 @@ class ThemeManager: ObservableObject {
     }
 }
 
-// Glass Date Picker component
+// MARK: - Color System Extensions
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+    
+    init(light: Color, dark: Color) {
+        self = Color(UIColor { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(dark)
+            default:
+                return UIColor(light)
+            }
+        })
+    }
+}
+
+// MARK: - Vibrant Color Palette
+struct PrimaryColors {
+    static let electricBlue = Color(hex: "007AFF")      // iOS System Blue - Enhanced
+    static let vibrantPurple = Color(hex: "5856D6")     // iOS System Purple
+    static let energeticPink = Color(hex: "FF2D92")     // Hot Pink - Attention grabbing
+    static let dynamicOrange = Color(hex: "FF9500")     // iOS System Orange
+    static let freshGreen = Color(hex: "30D158")        // iOS System Green - Vibrant
+}
+
+struct SecondaryColors {
+    static let deepIndigo = Color(hex: "4C4CDB")        // Rich indigo for depth
+    static let coral = Color(hex: "FF6B6B")             // Warm coral for warmth
+    static let turquoise = Color(hex: "40E0D0")         // Fresh turquoise for highlights
+    static let lavender = Color(hex: "B19CD9")          // Soft lavender for subtlety
+    static let mint = Color(hex: "00F5A0")              // Electric mint for freshness
+}
+
+struct AccentColors {
+    static let neonYellow = Color(hex: "FFFF00")        // High visibility alerts
+    static let electricLime = Color(hex: "32FF32")      // Success states
+    static let hotMagenta = Color(hex: "FF1493")        // Critical actions
+    static let cyberBlue = Color(hex: "00FFFF")         // Information highlights
+    static let sunsetOrange = Color(hex: "FF4500")      // Warning states
+}
+
+struct SemanticColors {
+    // Success States
+    static let successPrimary = Color(hex: "30D158")
+    static let successSecondary = Color(hex: "30D158").opacity(0.1)
+    
+    // Warning States
+    static let warningPrimary = Color(hex: "FF9500")
+    static let warningSecondary = Color(hex: "FF9500").opacity(0.1)
+    
+    // Error States
+    static let errorPrimary = Color(hex: "FF3B30")
+    static let errorSecondary = Color(hex: "FF3B30").opacity(0.1)
+    
+    // Information States
+    static let infoPrimary = Color(hex: "007AFF")
+    static let infoSecondary = Color(hex: "007AFF").opacity(0.1)
+}
+
+// MARK: - Adaptive Colors for Light/Dark Mode
+struct AdaptiveColors {
+    // Background Colors
+    static let primaryBackground = Color(
+        light: Color.white,
+        dark: Color(hex: "000000")
+    )
+    
+    static let secondaryBackground = Color(
+        light: Color(hex: "F2F2F7"),
+        dark: Color(hex: "1C1C1E")
+    )
+    
+    static let tertiaryBackground = Color(
+        light: Color(hex: "FFFFFF"),
+        dark: Color(hex: "2C2C2E")
+    )
+    
+    // Text Colors
+    static let primaryText = Color(
+        light: Color(hex: "000000"),
+        dark: Color(hex: "FFFFFF")
+    )
+    
+    static let secondaryText = Color(
+        light: Color(hex: "3C3C43").opacity(0.6),
+        dark: Color(hex: "EBEBF5").opacity(0.6)
+    )
+    
+    // Glass Effects
+    static let glassBackground = Color(
+        light: Color.white.opacity(0.1),
+        dark: Color.white.opacity(0.05)
+    )
+    
+    static let glassBorder = Color(
+        light: Color.white.opacity(0.2),
+        dark: Color.white.opacity(0.1)
+    )
+    
+    // Vibrant Colors (Consistent across modes)
+    static let vibrantPink = Color(hex: "FF2D92")
+    static let vibrantPurple = Color(hex: "5856D6")
+    static let vibrantBlue = Color(hex: "007AFF")
+    static let vibrantGreen = Color(hex: "30D158")
+    static let vibrantOrange = Color(hex: "FF9500")
+}
+
+// MARK: - Dynamic Gradient System
+struct BackgroundGradients {
+    // Hero Section Gradient
+    static let heroGradient = LinearGradient(
+        colors: [
+            Color(hex: "FF2D92"),  // Hot Pink
+            Color(hex: "5856D6"),  // Purple
+            Color(hex: "007AFF")   // Blue
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    // Library Section Gradient
+    static let libraryGradient = LinearGradient(
+        colors: [
+            Color(hex: "30D158"),  // Green
+            Color(hex: "40E0D0"),  // Turquoise
+            Color(hex: "007AFF")   // Blue
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    
+    // Camera Interface Gradient
+    static let cameraGradient = RadialGradient(
+        colors: [
+            Color(hex: "FF9500").opacity(0.8),  // Orange
+            Color(hex: "FF2D92").opacity(0.6),  // Pink
+            Color.black.opacity(0.4)
+        ],
+        center: .center,
+        startRadius: 50,
+        endRadius: 300
+    )
+    
+    // Profile Section Gradient
+    static let profileGradient = LinearGradient(
+        colors: [
+            Color(hex: "B19CD9"),  // Lavender
+            Color(hex: "FF6B6B"),  // Coral
+            Color(hex: "FF9500")   // Orange
+        ],
+        startPoint: .topTrailing,
+        endPoint: .bottomLeading
+    )
+}
+
+struct UIGradients {
+    // Primary Button Gradient
+    static let primaryButton = LinearGradient(
+        colors: [
+            Color(hex: "FF2D92"),  // Hot Pink
+            Color(hex: "5856D6")   // Purple
+        ],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+    
+    // Secondary Button Gradient
+    static let secondaryButton = LinearGradient(
+        colors: [
+            Color(hex: "40E0D0"),  // Turquoise
+            Color(hex: "30D158")   // Green
+        ],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+    
+    // Card Background Gradient
+    static let cardBackground = LinearGradient(
+        colors: [
+            Color.white.opacity(0.2),
+            Color.white.opacity(0.1)
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    
+    // Glass Effect Gradient
+    static let glassEffect = LinearGradient(
+        colors: [
+            Color.white.opacity(0.25),
+            Color.white.opacity(0.1),
+            Color.white.opacity(0.05)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+}
+
+// MARK: - Typography System
+struct TypographySystem {
+    // Display Typography (Headlines, Hero Text)
+    static let displayLarge = Font.system(size: 34, weight: .bold, design: .rounded)
+    static let displayMedium = Font.system(size: 28, weight: .bold, design: .rounded)
+    static let displaySmall = Font.system(size: 24, weight: .semibold, design: .rounded)
+    
+    // Headline Typography (Section Headers)
+    static let headlineLarge = Font.system(size: 22, weight: .semibold, design: .rounded)
+    static let headlineMedium = Font.system(size: 20, weight: .medium, design: .rounded)
+    static let headlineSmall = Font.system(size: 18, weight: .medium, design: .rounded)
+    
+    // Body Typography (Main Content)
+    static let bodyLarge = Font.system(size: 17, weight: .regular, design: .default)
+    static let bodyMedium = Font.system(size: 15, weight: .regular, design: .default)
+    static let bodySmall = Font.system(size: 13, weight: .regular, design: .default)
+    
+    // Caption Typography (Metadata, Labels)
+    static let captionLarge = Font.system(size: 12, weight: .medium, design: .default)
+    static let captionMedium = Font.system(size: 11, weight: .regular, design: .default)
+    static let captionSmall = Font.system(size: 10, weight: .regular, design: .default)
+    
+    // Button Typography
+    static let buttonLarge = Font.system(size: 17, weight: .semibold, design: .rounded)
+    static let buttonMedium = Font.system(size: 15, weight: .medium, design: .rounded)
+    static let buttonSmall = Font.system(size: 13, weight: .medium, design: .rounded)
+}
+
+// MARK: - Spacing System
+struct SpacingSystem {
+    static let xs: CGFloat = 4      // Tight spacing
+    static let sm: CGFloat = 8      // Small spacing
+    static let md: CGFloat = 16     // Medium spacing (base)
+    static let lg: CGFloat = 24     // Large spacing
+    static let xl: CGFloat = 32     // Extra large spacing
+    static let xxl: CGFloat = 48    // Section spacing
+    static let xxxl: CGFloat = 64   // Page spacing
+}
+
+// MARK: - Animation System
+struct AnimationTiming {
+    // Micro-interactions (button presses, toggles)
+    static let micro = Animation.easeOut(duration: 0.15)
+    
+    // UI transitions (sheet presentations, navigation)
+    static let transition = Animation.spring(response: 0.4, dampingFraction: 0.8)
+    
+    // Loading states and progress indicators
+    static let loading = Animation.linear(duration: 1.0).repeatForever(autoreverses: false)
+    
+    // Success/error feedback
+    static let feedback = Animation.spring(response: 0.3, dampingFraction: 0.6)
+    
+    // Page transitions
+    static let pageTransition = Animation.easeInOut(duration: 0.5)
+}
+
+// MARK: - Button Style System
+struct ButtonStyleModifier: ViewModifier {
+    let background: LinearGradient
+    let foregroundColor: Color
+    let cornerRadius: CGFloat
+    let padding: EdgeInsets
+    let font: Font
+    let shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat)?
+    let border: (color: Color, width: CGFloat)?
+    
+    init(background: LinearGradient, 
+         foregroundColor: Color, 
+         cornerRadius: CGFloat, 
+         padding: EdgeInsets, 
+         font: Font, 
+         shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat)? = nil,
+         border: (color: Color, width: CGFloat)? = nil) {
+        self.background = background
+        self.foregroundColor = foregroundColor
+        self.cornerRadius = cornerRadius
+        self.padding = padding
+        self.font = font
+        self.shadow = shadow
+        self.border = border
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .font(font)
+            .foregroundColor(foregroundColor)
+            .padding(padding)
+            .background(background)
+            .cornerRadius(cornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(border?.color ?? Color.clear, lineWidth: border?.width ?? 0)
+            )
+            .shadow(color: shadow?.color ?? Color.clear, 
+                   radius: shadow?.radius ?? 0, 
+                   x: shadow?.x ?? 0, 
+                   y: shadow?.y ?? 0)
+    }
+}
+
+struct ButtonStyles {
+    // Primary Action Button
+    static func primaryButton() -> ButtonStyleModifier {
+        return ButtonStyleModifier(
+            background: UIGradients.primaryButton,
+            foregroundColor: .white,
+            cornerRadius: 16,
+            padding: EdgeInsets(top: 16, leading: 24, bottom: 16, trailing: 24),
+            font: TypographySystem.buttonLarge,
+            shadow: (color: Color(hex: "FF2D92").opacity(0.3), radius: 8, x: 0, y: 4)
+        )
+    }
+    
+    // Secondary Action Button
+    static func secondaryButton() -> ButtonStyleModifier {
+        return ButtonStyleModifier(
+            background: UIGradients.secondaryButton,
+            foregroundColor: .white,
+            cornerRadius: 16,
+            padding: EdgeInsets(top: 14, leading: 20, bottom: 14, trailing: 20),
+            font: TypographySystem.buttonMedium,
+            shadow: (color: Color(hex: "40E0D0").opacity(0.3), radius: 6, x: 0, y: 3)
+        )
+    }
+    
+    // Ghost Button
+    static func ghostButton() -> ButtonStyleModifier {
+        return ButtonStyleModifier(
+            background: LinearGradient(colors: [Color.clear], startPoint: .leading, endPoint: .trailing),
+            foregroundColor: Color(hex: "FF2D92"),
+            cornerRadius: 16,
+            padding: EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16),
+            font: TypographySystem.buttonMedium,
+            border: (color: Color(hex: "FF2D92"), width: 2)
+        )
+    }
+}
+
+// MARK: - Card Style System
+struct CardStyleModifier: ViewModifier {
+    let background: LinearGradient
+    let cornerRadius: CGFloat
+    let padding: CGFloat
+    let shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat)?
+    let border: (color: Color, width: CGFloat)?
+    let blur: CGFloat?
+    
+    func body(content: Content) -> some View {
+        content
+            .padding(padding)
+            .background(background)
+            .cornerRadius(cornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(border?.color ?? Color.clear, lineWidth: border?.width ?? 0)
+            )
+            .shadow(color: shadow?.color ?? Color.clear, 
+                   radius: shadow?.radius ?? 0, 
+                   x: shadow?.x ?? 0, 
+                   y: shadow?.y ?? 0)
+            .blur(radius: blur ?? 0)
+    }
+}
+
+struct CardStyles {
+    // Book Card Style
+    static func bookCard() -> CardStyleModifier {
+        return CardStyleModifier(
+            background: UIGradients.cardBackground,
+            cornerRadius: 20,
+            padding: 16,
+            shadow: (color: Color.black.opacity(0.1), radius: 12, x: 0, y: 6),
+            border: (color: Color.white.opacity(0.2), width: 1),
+            blur: 0
+        )
+    }
+    
+    // Feature Card Style
+    static func featureCard() -> CardStyleModifier {
+        return CardStyleModifier(
+            background: UIGradients.glassEffect,
+            cornerRadius: 24,
+            padding: 20,
+            shadow: (color: Color.black.opacity(0.15), radius: 16, x: 0, y: 8),
+            border: (color: Color.white.opacity(0.3), width: 1),
+            blur: 0
+        )
+    }
+    
+    // Recommendation Card Style
+    static func recommendationCard() -> CardStyleModifier {
+        return CardStyleModifier(
+            background: LinearGradient(
+                colors: [
+                    Color(hex: "FF2D92").opacity(0.1),
+                    Color(hex: "5856D6").opacity(0.05)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            cornerRadius: 18,
+            padding: 16,
+            shadow: (color: Color(hex: "FF2D92").opacity(0.2), radius: 10, x: 0, y: 5),
+            border: (color: Color(hex: "FF2D92").opacity(0.3), width: 1),
+            blur: 0
+        )
+    }
+}
+
+// MARK: - Enhanced Animated Background
+struct AnimatedBackground: View {
+    @State private var animate = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        ZStack {
+            // Dynamic Gradient Background
+            BackgroundGradients.heroGradient
+                .ignoresSafeArea()
+
+            // Animated floating elements
+            GeometryReader { geometry in
+                // First floating circle
+                Circle()
+                    .fill(Color.white.opacity(colorScheme == .dark ? 0.1 : 0.15))
+                    .frame(width: geometry.size.width * 0.8)
+                    .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.2)
+                    .blur(radius: 40)
+                    .offset(x: animate ? 20 : -20)
+                    .animation(.easeInOut(duration: 4).repeatForever(), value: animate)
+
+                // Second floating circle
+                Circle()
+                    .fill(Color.white.opacity(colorScheme == .dark ? 0.08 : 0.12))
+                    .frame(width: geometry.size.width * 0.6)
+                    .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.8)
+                    .blur(radius: 30)
+                    .offset(y: animate ? -15 : 15)
+                    .animation(.easeInOut(duration: 3).repeatForever(), value: animate)
+                
+                // Third floating circle
+                Circle()
+                    .fill(Color.white.opacity(colorScheme == .dark ? 0.05 : 0.08))
+                    .frame(width: geometry.size.width * 0.4)
+                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                    .blur(radius: 25)
+                    .offset(x: animate ? -10 : 10, y: animate ? 10 : -10)
+                    .animation(.easeInOut(duration: 5).repeatForever(), value: animate)
+            }
+        }
+        .onAppear {
+            animate = true
+        }
+    }
+}
+
+// MARK: - Enhanced Glass Components
+struct GlassCard<Content: View>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    private var glassColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.15)
+    }
+
+    private var glassStrokeColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.2) : Color.white.opacity(0.3)
+    }
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20)
+                .fill(glassColor)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+            
+            content
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(glassStrokeColor, lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+    }
+}
+
+struct GlassFieldStyleView<Content: View>: View {
+    let content: Content
+    let isValid: Bool
+    let isFocused: Bool
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    init(content: Content, isValid: Bool = true, isFocused: Bool = false) {
+        self.content = content
+        self.isValid = isValid
+        self.isFocused = isFocused
+    }
+
+    private var backgroundColor: Color {
+        colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.15)
+    }
+
+    private var strokeColor: Color {
+        if !isValid {
+            return SemanticColors.errorPrimary
+        }
+        if isFocused {
+            return PrimaryColors.energeticPink
+        }
+        return colorScheme == .dark ? Color.white.opacity(0.2) : Color.white.opacity(0.3)
+    }
+
+    var body: some View {
+        content
+            .padding(SpacingSystem.md)
+            .background(backgroundColor)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(strokeColor, lineWidth: isFocused ? 2 : 1)
+            )
+            .animation(AnimationTiming.micro, value: isFocused)
+            .animation(AnimationTiming.micro, value: isValid)
+    }
+}
+
+// MARK: - Enhanced Form Components
 struct GlassDatePicker: View {
     @Environment(\.colorScheme) private var colorScheme
     let title: String
     @Binding var date: Date
-    let isMandatory: Bool = false
+    let isMandatory: Bool
+    @State private var isFocused = false
+
+    init(title: String, date: Binding<Date>, isMandatory: Bool = false) {
+        self.title = title
+        self._date = date
+        self.isMandatory = isMandatory
+    }
 
     private var textColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.9) : Color.white.opacity(0.8)
-    }
-
-    private var backgroundColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
-    }
-
-    private var strokeColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+        AdaptiveColors.primaryText
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: SpacingSystem.sm) {
             HStack {
                 Text(title)
-                    .font(.headline)
+                    .font(TypographySystem.headlineSmall)
                     .foregroundColor(textColor)
                 if isMandatory {
                     Text("*")
-                        .foregroundColor(.red)
-                        .font(.headline)
+                        .foregroundColor(SemanticColors.errorPrimary)
+                        .font(TypographySystem.headlineSmall)
                 }
             }
 
             DatePicker("", selection: $date, displayedComponents: .date)
                 .datePickerStyle(.compact)
                 .labelsHidden()
-                .padding()
-                .background(backgroundColor)
-                .cornerRadius(8)
                 .foregroundColor(textColor)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(strokeColor, lineWidth: 0.5)
-                )
-                .accentColor(textColor)
+                .accentColor(PrimaryColors.energeticPink)
+                .glassFieldStyle(isValid: true, isFocused: isFocused)
+                .onTapGesture {
+                    isFocused.toggle()
+                }
         }
     }
 }
 
-// Glass Segmented Picker component
 struct GlassSegmentedPicker<T: Hashable>: View {
     @Environment(\.colorScheme) private var colorScheme
     let title: String
     @Binding var selection: T
     let options: [T]
     let displayText: (T) -> String
-    let isMandatory: Bool = false
+    let isMandatory: Bool
+
+    init(title: String, selection: Binding<T>, options: [T], displayText: @escaping (T) -> String, isMandatory: Bool = false) {
+        self.title = title
+        self._selection = selection
+        self.options = options
+        self.displayText = displayText
+        self.isMandatory = isMandatory
+    }
 
     private var textColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.9) : Color.white.opacity(0.8)
-    }
-
-    private var backgroundColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
-    }
-
-    private var strokeColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
+        AdaptiveColors.primaryText
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: SpacingSystem.sm) {
             HStack {
                 Text(title)
-                    .font(.headline)
+                    .font(TypographySystem.headlineSmall)
                     .foregroundColor(textColor)
                 if isMandatory {
                     Text("*")
-                        .foregroundColor(.red)
-                        .font(.headline)
+                        .foregroundColor(SemanticColors.errorPrimary)
+                        .font(TypographySystem.headlineSmall)
                 }
             }
 
@@ -119,18 +668,17 @@ struct GlassSegmentedPicker<T: Hashable>: View {
                 }
             }
             .pickerStyle(.segmented)
-            .tint(textColor)
-            .background(backgroundColor)
-            .cornerRadius(8)
+            .background(AdaptiveColors.glassBackground)
+            .cornerRadius(12)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(strokeColor, lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
             )
         }
     }
 }
 
-// Translucent Overlay for showing additional fields
+// MARK: - Translucent Overlay
 struct TranslucentOverlay<Content: View>: View {
     let isVisible: Bool
     let content: Content
@@ -143,7 +691,7 @@ struct TranslucentOverlay<Content: View>: View {
     var body: some View {
         ZStack {
             if isVisible {
-                Color.black.opacity(0.3)
+                Color.black.opacity(0.4)
                     .ignoresSafeArea()
                     .transition(.opacity)
 
@@ -151,116 +699,111 @@ struct TranslucentOverlay<Content: View>: View {
                     .transition(.scale.combined(with: .opacity))
             }
         }
-        .animation(.spring(), value: isVisible)
-    }
-}
-// Animated Background for dynamic visual effects
-struct AnimatedBackground: View {
-    @State private var animate = false
-
-    var body: some View {
-        ZStack {
-            // Dynamic Gradient Background
-            LinearGradient(
-                colors: [
-                    Color.blue.opacity(0.8),
-                    Color.purple.opacity(0.6),
-                    Color.pink.opacity(0.4)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
-            // Subtle animated overlay
-            GeometryReader { geometry in
-                Circle()
-                    .fill(Color.purple.opacity(0.1))
-                    .frame(width: geometry.size.width * 0.8)
-                    .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.2)
-                    .blur(radius: 40)
-                    .offset(x: animate ? 20 : -20)
-                    .animation(.easeInOut(duration: 4).repeatForever(), value: animate)
-
-                Circle()
-                    .fill(Color.pink.opacity(0.1))
-                    .frame(width: geometry.size.width * 0.6)
-                    .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.8)
-                    .blur(radius: 30)
-                    .offset(y: animate ? -15 : 15)
-                    .animation(.easeInOut(duration: 3).repeatForever(), value: animate)
-            }
-        }
-        .onAppear {
-            animate = true
-        }
+        .animation(AnimationTiming.transition, value: isVisible)
     }
 }
 
-// Glass Card component for consistent card styling
-struct GlassCard<Content: View>: View {
-    @Environment(\.colorScheme) private var colorScheme
-    let content: Content
-
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
-    private var glassColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.1)
-    }
-
-    private var glassStrokeColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
-    }
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(glassColor)
-                .blur(radius: 1)
-            RoundedRectangle(cornerRadius: 20)
-                .fill(glassColor.opacity(0.5))
-
-            content
-        }
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(glassStrokeColor, lineWidth: 0.5)
-        )
-    }
-}
-struct GlassFieldStyleView<Content: View>: View {
-    let content: Content
-    let isValid: Bool
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var backgroundColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.1)
-    }
-
-    private var strokeColor: Color {
-        if !isValid {
-            return Color.red.opacity(0.6)
-        }
-        return colorScheme == .dark ? Color.white.opacity(0.3) : Color.white.opacity(0.2)
-    }
-
-    var body: some View {
-        content
-            .padding()
-            .background(backgroundColor)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(strokeColor, lineWidth: 0.5)
-            )
-    }
-}
-
+// MARK: - View Extensions
 extension View {
-    func glassFieldStyle(isValid: Bool = true) -> some View {
-        GlassFieldStyleView(content: self, isValid: isValid)
+    func glassFieldStyle(isValid: Bool = true, isFocused: Bool = false) -> some View {
+        GlassFieldStyleView(content: self, isValid: isValid, isFocused: isFocused)
     }
+    
+    func primaryButtonStyle() -> some View {
+        self.modifier(ButtonStyles.primaryButton())
+    }
+    
+    func secondaryButtonStyle() -> some View {
+        self.modifier(ButtonStyles.secondaryButton())
+    }
+    
+    func ghostButtonStyle() -> some View {
+        self.modifier(ButtonStyles.ghostButton())
+    }
+    
+    func bookCardStyle() -> some View {
+        self.modifier(CardStyles.bookCard())
+    }
+    
+    func featureCardStyle() -> some View {
+        self.modifier(CardStyles.featureCard())
+    }
+    
+    func recommendationCardStyle() -> some View {
+        self.modifier(CardStyles.recommendationCard())
+    }
+    
+    func vibrantBackground(_ gradient: LinearGradient) -> some View {
+        self.background(gradient.ignoresSafeArea())
+    }
+    
+    func glassEffect() -> some View {
+        self.background(UIGradients.glassEffect)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+            )
+    }
+}
+
+// MARK: - Section-Specific Color Applications
+struct HomePageColors {
+    static let heroBackground = BackgroundGradients.heroGradient
+    static let navigationBackground = Color.white.opacity(0.1)
+    static let featureCardBackground = UIGradients.cardBackground
+    static let ctaButton = UIGradients.primaryButton
+    static let accentElements = AccentColors.hotMagenta
+}
+
+struct LibraryColors {
+    static let bookCardBackground = CardStyles.bookCard()
+    static let searchBarFocus = Color(hex: "FF2D92")
+    static let filterButtons = UIGradients.secondaryButton
+    static let scanButton = UIGradients.primaryButton
+    static let sortingAccent = AccentColors.cyberBlue
+}
+
+struct CameraColors {
+    static let overlayBackground = BackgroundGradients.cameraGradient
+    static let captureButton = AccentColors.hotMagenta
+    static let previewFrame = AccentColors.electricLime
+    static let loadingSpinner = [
+        AccentColors.neonYellow,
+        AccentColors.hotMagenta,
+        AccentColors.cyberBlue
+    ]
+    static let successFeedback = SemanticColors.successPrimary
+}
+
+struct ProfileColors {
+    static let headerBackground = BackgroundGradients.profileGradient
+    static let statsCardBackground = UIGradients.cardBackground
+    static let settingsBackground = AdaptiveColors.secondaryBackground
+    static let dangerActions = SemanticColors.errorPrimary
+    static let successActions = SemanticColors.successPrimary
+    static let avatarBorder = AccentColors.hotMagenta
+}
+
+struct ReadingProgressColors {
+    static func progressRingColor(completion: Double) -> Color {
+        switch completion {
+        case 0..<0.25: return AccentColors.sunsetOrange
+        case 0.25..<0.5: return AccentColors.neonYellow
+        case 0.5..<0.75: return AccentColors.cyberBlue
+        case 0.75...1.0: return AccentColors.electricLime
+        default: return Color.gray
+        }
+    }
+    
+    static let bookDetailsBackground = UIGradients.cardBackground
+    static let continueButton = SemanticColors.successPrimary
+    static let statisticsAccent = PrimaryColors.vibrantPurple
+}
+
+struct DiscoverColors {
+    static let recommendationCard = CardStyles.recommendationCard()
+    static let categoryFilters = UIGradients.secondaryButton
+    static let trendingAccent = AccentColors.hotMagenta
+    static let personalizedTint = PrimaryColors.vibrantPurple.opacity(0.1)
+    static let addToLibraryButton = UIGradients.primaryButton
 }

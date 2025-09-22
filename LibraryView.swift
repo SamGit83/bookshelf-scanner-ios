@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+
 enum SortOption: String, CaseIterable {
     case titleAZ = "Title A-Z"
     case titleZA = "Title Z-A"
@@ -25,7 +26,6 @@ enum SortOption: String, CaseIterable {
     }
 }
 
-
 struct LibraryView: View {
     @ObservedObject var viewModel: BookViewModel
     @Binding var isShowingCamera: Bool
@@ -36,84 +36,110 @@ struct LibraryView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                if viewModel.books.isEmpty {
-                    VStack(spacing: 20) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.blue.opacity(0.2))
-                                .frame(width: 100, height: 100)
-                                .blur(radius: 10)
+            ZStack {
+                // Vibrant background gradient
+                BackgroundGradients.libraryGradient
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    if viewModel.books.isEmpty {
+                        Spacer()
+                        
+                        // Enhanced empty state
+                        VStack(spacing: SpacingSystem.lg) {
+                            ZStack {
+                                Circle()
+                                    .fill(PrimaryColors.vibrantPurple.opacity(0.2))
+                                    .frame(width: 120, height: 120)
+                                    .blur(radius: 15)
 
-                            Image(systemName: "books.vertical.fill")
-                                .font(.system(size: 48))
-                                .foregroundColor(.gray)
-                        }
+                                Image(systemName: "books.vertical.fill")
+                                    .font(.system(size: 56, weight: .medium))
+                                    .foregroundColor(AdaptiveColors.primaryText.opacity(0.8))
+                            }
 
-                        Text("No books in your collection")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
+                            VStack(spacing: SpacingSystem.sm) {
+                                Text("No books in your collection")
+                                    .font(TypographySystem.displayMedium)
+                                    .foregroundColor(AdaptiveColors.primaryText)
+                                    .multilineTextAlignment(.center)
 
-                        Text("Scan a bookshelf to get started!")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, 32)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(viewModel.books.sorted(by: selectedSort.sortFunction)) { book in
-                                LibraryBookCard(book: book, viewModel: viewModel)
-                                    .padding(.horizontal, 16)
+                                Text("Scan a bookshelf to get started!")
+                                    .font(TypographySystem.bodyLarge)
+                                    .foregroundColor(AdaptiveColors.secondaryText)
+                                    .multilineTextAlignment(.center)
                             }
                         }
-                        .padding(.vertical, 16)
+                        .padding(.horizontal, SpacingSystem.xl)
+                        
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: SpacingSystem.md) {
+                                ForEach(viewModel.books.sorted(by: selectedSort.sortFunction)) { book in
+                                    LibraryBookCard(book: book, viewModel: viewModel)
+                                        .padding(.horizontal, SpacingSystem.md)
+                                }
+                            }
+                            .padding(.vertical, SpacingSystem.md)
+                        }
                     }
+
+                    // Action buttons with vibrant styling
+                    VStack(spacing: SpacingSystem.md) {
+                        HStack(spacing: SpacingSystem.md) {
+                            Button(action: {
+                                isShowingCamera = true
+                            }) {
+                                HStack(spacing: SpacingSystem.sm) {
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 18, weight: .semibold))
+                                    Text("Scan Bookshelf")
+                                        .font(TypographySystem.buttonLarge)
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .primaryButtonStyle()
+
+                            Button(action: {
+                                isShowingAddBook = true
+                            }) {
+                                HStack(spacing: SpacingSystem.sm) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 18, weight: .semibold))
+                                    Text("Add Manually")
+                                        .font(TypographySystem.buttonLarge)
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                            .secondaryButtonStyle()
+                        }
+                    }
+                    .padding(.horizontal, SpacingSystem.lg)
+                    .padding(.bottom, SpacingSystem.md)
                 }
-
-                Spacer()
-
-                HStack(spacing: 16) {
-                    Button(action: {
-                        isShowingCamera = true
-                    }) {
-                        Text("Scan Bookshelf")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .font(.headline)
-                    }
-
-                    Button(action: {
-                        isShowingAddBook = true
-                    }) {
-                        Text("Add Manually")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .font(.headline)
-                    }
-                }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 16)
             }
             .navigationTitle("Library (\(viewModel.books.count))")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
+                    HStack(spacing: SpacingSystem.sm) {
                         Button(action: {
                             showingClearConfirmation = true
                         }) {
-                            Image(systemName: "trash")
-                                .foregroundColor(.red)
-                                .font(.system(size: 16, weight: .medium))
+                            Image(systemName: "trash.fill")
+                                .foregroundColor(SemanticColors.errorPrimary)
+                                .font(.system(size: 18, weight: .semibold))
+                                .padding(SpacingSystem.sm)
+                                .background(AdaptiveColors.glassBackground)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                                )
                         }
+                        
                         Menu {
                             Picker("Sort by", selection: $selectedSort) {
                                 ForEach(SortOption.allCases, id: \.self) { option in
@@ -122,15 +148,30 @@ struct LibraryView: View {
                             }
                         } label: {
                             Image(systemName: "arrow.up.arrow.down")
-                                .foregroundColor(.primary)
-                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(LibraryColors.sortingAccent)
+                                .font(.system(size: 18, weight: .semibold))
+                                .padding(SpacingSystem.sm)
+                                .background(AdaptiveColors.glassBackground)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                                )
                         }
+                        
                         Button(action: {
                             isShowingSearch = true
                         }) {
                             Image(systemName: "magnifyingglass")
-                                .foregroundColor(.primary)
-                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(PrimaryColors.vibrantPurple)
+                                .font(.system(size: 18, weight: .semibold))
+                                .padding(SpacingSystem.sm)
+                                .background(AdaptiveColors.glassBackground)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                                )
                         }
                     }
                 }
@@ -138,18 +179,27 @@ struct LibraryView: View {
             .overlay(
                 Group {
                     if viewModel.isLoading {
-                        HStack(spacing: 12) {
+                        VStack(spacing: SpacingSystem.md) {
                             ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .progressViewStyle(CircularProgressViewStyle(tint: PrimaryColors.energeticPink))
+                                .scaleEffect(1.2)
+                            
                             Text("Analyzing image...")
-                                .font(.body)
+                                .font(TypographySystem.bodyLarge)
                                 .foregroundColor(.white)
                         }
-                        .padding(16)
-                        .background(Color.black.opacity(0.8))
-                        .cornerRadius(8)
-                        .padding(.horizontal, 32)
+                        .padding(SpacingSystem.lg)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.ultraThinMaterial)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                        .padding(.horizontal, SpacingSystem.xl)
                         .transition(.scale.combined(with: .opacity))
+                        .animation(AnimationTiming.transition, value: viewModel.isLoading)
                     }
                 }
             )
@@ -183,124 +233,127 @@ struct LibraryBookCard: View {
     var body: some View {
         ZStack {
             NavigationLink(destination: BookDetailView(book: book, viewModel: viewModel)) {
-                HStack(spacing: 16) {
-                    // Book Cover
+                HStack(spacing: SpacingSystem.md) {
+                    // Enhanced Book Cover with glass effect
                     ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(.systemGray6))
-                            .frame(width: 60, height: 90)
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(AdaptiveColors.glassBackground)
+                            .frame(width: 70, height: 100)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                            )
 
                         if let coverURL = book.coverImageURL, let url = URL(string: coverURL) {
                             AsyncImage(url: url) { phase in
                                 switch phase {
                                 case .empty:
                                     ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: PrimaryColors.energeticPink))
                                 case .success(let image):
                                     image
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
-                                        .frame(width: 56, height: 86)
-                                        .cornerRadius(6)
+                                        .frame(width: 66, height: 96)
+                                        .cornerRadius(10)
                                 case .failure:
                                     Image(systemName: "book.fill")
                                         .resizable()
-                                        .frame(width: 32, height: 40)
-                                        .foregroundColor(.gray)
+                                        .frame(width: 36, height: 44)
+                                        .foregroundColor(AdaptiveColors.secondaryText)
                                 @unknown default:
                                     Image(systemName: "book.fill")
                                         .resizable()
-                                        .frame(width: 32, height: 40)
-                                        .foregroundColor(.gray)
+                                        .frame(width: 36, height: 44)
+                                        .foregroundColor(AdaptiveColors.secondaryText)
                                 }
                             }
                         } else if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
                             Image(uiImage: uiImage)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 56, height: 86)
-                                .cornerRadius(6)
+                                .frame(width: 66, height: 96)
+                                .cornerRadius(10)
                         } else {
                             Image(systemName: "book.fill")
                                 .resizable()
-                                .frame(width: 32, height: 40)
-                                .foregroundColor(.gray)
+                                .frame(width: 36, height: 44)
+                                .foregroundColor(AdaptiveColors.secondaryText)
                         }
                     }
-                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 6)
 
-                    // Book Details
-                    VStack(alignment: .leading, spacing: 6) {
+                    // Enhanced Book Details
+                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
                         Text(book.title ?? "Unknown Title")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
+                            .font(TypographySystem.headlineSmall)
+                            .foregroundColor(AdaptiveColors.primaryText)
                             .lineLimit(2)
 
                         Text(book.author ?? "Unknown Author")
-                            .font(.body)
-                            .foregroundColor(.secondary)
+                            .font(TypographySystem.bodyMedium)
+                            .foregroundColor(AdaptiveColors.secondaryText)
 
-                        // Badge layout: time and pages in one row, subGenre in next
-                        let timeBadge = book.estimatedReadingTime != nil ? ("time", "~ \(book.estimatedReadingTime!)", Color.orange) : nil
-                        let pagesBadge = book.pageCount != nil ? ("pages", "\(book.pageCount!) pages", Color.purple) : nil
-                        let subGenreBadge = book.subGenre != nil ? ("subGenre", book.subGenre!, Color.green) : nil
+                        // Enhanced badges with vibrant colors
+                        let timeBadge = book.estimatedReadingTime != nil ? ("time", "~ \(book.estimatedReadingTime!)", PrimaryColors.dynamicOrange) : nil
+                        let pagesBadge = book.pageCount != nil ? ("pages", "\(book.pageCount!) pages", PrimaryColors.vibrantPurple) : nil
+                        let subGenreBadge = book.subGenre != nil ? ("subGenre", book.subGenre!, PrimaryColors.freshGreen) : nil
                         
-                        VStack(spacing: 4) {
-                            HStack(spacing: 4) {
+                        VStack(spacing: SpacingSystem.xs) {
+                            HStack(spacing: SpacingSystem.xs) {
                                 if let timeBadge = timeBadge {
                                     Text(timeBadge.1)
-                                        .font(.caption)
-                                        .foregroundColor(timeBadge.2)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 3)
-                                        .background(timeBadge.2.opacity(0.1))
-                                        .cornerRadius(4)
+                                        .font(TypographySystem.captionLarge)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, SpacingSystem.sm)
+                                        .padding(.vertical, SpacingSystem.xs)
+                                        .background(timeBadge.2)
+                                        .cornerRadius(8)
                                 }
                                 if let pagesBadge = pagesBadge {
                                     Text(pagesBadge.1)
-                                        .font(.caption)
-                                        .foregroundColor(pagesBadge.2)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 3)
-                                        .background(pagesBadge.2.opacity(0.1))
-                                        .cornerRadius(4)
+                                        .font(TypographySystem.captionLarge)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, SpacingSystem.sm)
+                                        .padding(.vertical, SpacingSystem.xs)
+                                        .background(pagesBadge.2)
+                                        .cornerRadius(8)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            
                             if let subGenreBadge = subGenreBadge {
                                 Text(subGenreBadge.1)
-                                    .font(.caption)
-                                    .foregroundColor(subGenreBadge.2)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(subGenreBadge.2.opacity(0.1))
-                                    .cornerRadius(4)
+                                    .font(TypographySystem.captionLarge)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, SpacingSystem.sm)
+                                    .padding(.vertical, SpacingSystem.xs)
+                                    .background(subGenreBadge.2)
+                                    .cornerRadius(8)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
 
-                        // Reading status indicator
-                        HStack(spacing: 4) {
+                        // Enhanced reading status indicator
+                        HStack(spacing: SpacingSystem.xs) {
                             Circle()
-                                .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
-                                .frame(width: 8, height: 8)
+                                .fill(book.status == .currentlyReading ? PrimaryColors.electricBlue : AdaptiveColors.secondaryText)
+                                .frame(width: 10, height: 10)
 
                             Text(book.status.rawValue)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(TypographySystem.captionLarge)
+                                .foregroundColor(AdaptiveColors.secondaryText)
                         }
                     }
 
                     Spacer()
                 }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
-                .shadow(radius: 2)
+                .padding(SpacingSystem.md)
             }
-            .buttonStyle(PlainButtonStyle()) // Prevents NavigationLink from styling as button
+            .buttonStyle(PlainButtonStyle())
+            .bookCardStyle()
 
-            // Action Menu Button (overlay)
+            // Enhanced Action Menu Button
             VStack {
                 HStack {
                     Spacer()
@@ -308,13 +361,18 @@ struct LibraryBookCard: View {
                         showActionSheet = true
                     }) {
                         Image(systemName: "ellipsis.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.gray)
-                            .padding(8)
-                            .background(Color(.systemBackground).opacity(0.8))
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(PrimaryColors.energeticPink)
+                            .padding(SpacingSystem.sm)
+                            .background(AdaptiveColors.glassBackground)
                             .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                            )
+                            .shadow(color: PrimaryColors.energeticPink.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
-                    .padding(8)
+                    .padding(SpacingSystem.sm)
                 }
                 Spacer()
             }
