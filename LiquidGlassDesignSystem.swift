@@ -3,7 +3,7 @@ import SwiftUI
 // Glass Field Modifier for consistent text field styling
 struct GlassFieldModifier: ViewModifier {
     var isValid: Bool = true
-
+    
     func body(content: Content) -> some View {
         content
             .padding()
