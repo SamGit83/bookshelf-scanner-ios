@@ -82,12 +82,28 @@ class BookViewModel: ObservableObject {
                         var updatedBook = book
                         switch result {
                         case .success(let url):
-                            updatedBook.coverImageURL = url
-                            print("DEBUG BookViewModel: Fetched cover URL: \(url ?? "nil") for \(book.title ?? "")")
+                            if let urlString = url, let imageURL = URL(string: urlString) {
+                                print("DEBUG BookViewModel: Fetched cover URL: \(urlString) for \(book.title ?? "")")
+                                // Download the image data to store locally (handles http URLs and ATS)
+                                URLSession.shared.dataTask(with: imageURL) { data, response, error in
+                                    DispatchQueue.main.async {
+                                        if let data = data, error == nil {
+                                            updatedBook.coverImageData = data
+                                            print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "")")
+                                        } else {
+                                            print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
+                                        }
+                                        self?.saveBookToFirestore(updatedBook)
+                                    }
+                                }.resume()
+                            } else {
+                                print("DEBUG BookViewModel: Invalid cover URL: \(url ?? "nil") for \(book.title ?? "")")
+                                self?.saveBookToFirestore(updatedBook)
+                            }
                         case .failure(let error):
                             print("DEBUG BookViewModel: Failed to fetch cover for \(book.title ?? ""): \(error.localizedDescription)")
+                            self?.saveBookToFirestore(updatedBook)
                         }
-                        self?.saveBookToFirestore(updatedBook)
                     }
                 }
             } else {
@@ -146,6 +162,46 @@ class BookViewModel: ObservableObject {
         bookRef.delete { error in
             if let error = error {
                 self.errorMessage = "Failed to delete book: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    func updateBookTeaser(_ book: Book, teaser: String) {
+        guard let userId = FirebaseConfig.shared.currentUserId else {
+            errorMessage = "User not authenticated"
+            return
+        }
+
+        let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
+
+        bookRef.updateData(["teaser": teaser]) { error in
+            if let error = error {
+                self.errorMessage = "Failed to update teaser: \(error.localizedDescription)"
+            } else {
+                // Update local book
+                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                    self.books[index].teaser = teaser
+                }
+            }
+        }
+    }
+
+    func updateBookAuthorBio(_ book: Book, authorBio: String) {
+        guard let userId = FirebaseConfig.shared.currentUserId else {
+            errorMessage = "User not authenticated"
+            return
+        }
+
+        let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
+
+        bookRef.updateData(["authorBio": authorBio]) { error in
+            if let error = error {
+                self.errorMessage = "Failed to update author bio: \(error.localizedDescription)"
+            } else {
+                // Update local book
+                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                    self.books[index].authorBio = authorBio
+                }
             }
         }
     }
@@ -211,6 +267,8 @@ class BookViewModel: ObservableObject {
 
                     let isbn = data["isbn"] as? String
                     let genre = data["genre"] as? String
+                    let subGenre = data["subGenre"] as? String
+                    let estimatedReadingTime = data["estimatedReadingTime"] as? String
 
                     let statusRaw = (data["status"] as? String) ?? BookStatus.library.rawValue
                     let status = BookStatus(rawValue: statusRaw) ?? .library
@@ -224,14 +282,20 @@ class BookViewModel: ObservableObject {
 
                     let coverData = data["coverImageData"] as? Data
                     let coverImageURL = data["coverImageURL"] as? String
+                    let teaser = data["teaser"] as? String
+                    let authorBio = data["authorBio"] as? String
 
                     // Build Book
                     var book = Book(title: title, author: author, isbn: isbn, genre: genre, status: status, coverImageData: coverData, coverImageURL: coverImageURL)
+                    book.subGenre = subGenre
+                    book.estimatedReadingTime = estimatedReadingTime
                     // Assign id (from stored id or documentID) and date
                     if let idString = data["id"] as? String, let uuid = UUID(uuidString: idString) {
                         book.id = uuid
                     }
                     book.dateAdded = dateAdded
+                    book.teaser = teaser
+                    book.authorBio = authorBio
                     return book
                 }
 
@@ -259,10 +323,14 @@ class BookViewModel: ObservableObject {
             "author": book.author ?? "",
             "isbn": book.isbn as Any,
             "genre": book.genre as Any,
+            "subGenre": book.subGenre as Any,
+            "estimatedReadingTime": book.estimatedReadingTime as Any,
             "status": book.status.rawValue,
             "dateAdded": Timestamp(date: book.dateAdded),
             "coverImageData": book.coverImageData as Any,
-            "coverImageURL": book.coverImageURL as Any
+            "coverImageURL": book.coverImageURL as Any,
+            "teaser": book.teaser as Any,
+            "authorBio": book.authorBio as Any
         ]
         bookRef.setData(data) { error in
             if let error = error {

@@ -211,6 +211,30 @@ struct LibraryBookCard: View {
                                 .cornerRadius(4)
                         }
 
+                        if let subGenre = book.subGenre {
+                            Text(subGenre)
+                                .font(.caption)
+                                .foregroundColor(.green)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(4)
+                        } else {
+                            print("DEBUG LibraryView: subGenre is nil for book: \(book.title ?? "Unknown")")
+                        }
+
+                        if let estimatedTime = book.estimatedReadingTime {
+                            Text("~ \(estimatedTime)")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.orange.opacity(0.1))
+                                .cornerRadius(4)
+                        } else {
+                            print("DEBUG LibraryView: estimatedReadingTime is nil for book: \(book.title ?? "Unknown")")
+                        }
+
                         // Reading status indicator
                         HStack(spacing: 4) {
                             Circle()

@@ -12,6 +12,8 @@ struct Book: Identifiable, Codable, Hashable {
     var pageCount: Int?
     var estimatedReadingTime: String?
     var authorBiography: String?
+    var teaser: String?
+    var authorBio: String?
     var confidence: Double?
     var position: String?
     var status: BookStatus
@@ -54,11 +56,15 @@ struct Book: Identifiable, Codable, Hashable {
         self.isbn = try container.decodeIfPresent(String.self, forKey: .isbn)
         self.genre = try container.decodeIfPresent(String.self, forKey: .genre)
         self.subGenre = try container.decodeIfPresent(String.self, forKey: .subGenre)
+        print("DEBUG Book decoder: subGenre: \(String(describing: self.subGenre))")
         self.publisher = try container.decodeIfPresent(String.self, forKey: .publisher)
         self.publicationYear = try container.decodeIfPresent(String.self, forKey: .publicationYear)
         self.pageCount = try container.decodeIfPresent(Int.self, forKey: .pageCount)
         self.estimatedReadingTime = try container.decodeIfPresent(String.self, forKey: .estimatedReadingTime)
+        print("DEBUG Book decoder: estimatedReadingTime: \(String(describing: self.estimatedReadingTime))")
         self.authorBiography = try container.decodeIfPresent(String.self, forKey: .authorBiography)
+        self.teaser = try container.decodeIfPresent(String.self, forKey: .teaser)
+        self.authorBio = try container.decodeIfPresent(String.self, forKey: .authorBio)
         self.confidence = try container.decodeIfPresent(Double.self, forKey: .confidence)
         self.position = try container.decodeIfPresent(String.self, forKey: .position)
 

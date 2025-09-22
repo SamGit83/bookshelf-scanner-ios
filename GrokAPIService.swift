@@ -79,6 +79,7 @@ class GrokAPIService {
 
                 if let choices = grokResponse.choices, let content = choices.first?.message.content {
                     print("DEBUG GrokAPIService: Extracted content, length: \(content.count)")
+                    print("DEBUG GrokAPIService: Content: \(content)")
                     self.parseRecommendations(from: content, completion: completion)
                 } else {
                     print("DEBUG GrokAPIService: No content in response")
@@ -142,6 +143,136 @@ class GrokAPIService {
         """
 
         return prompt
+    }
+
+    func fetchAuthorBiography(author: String, completion: @escaping (Result<String, Error>) -> Void) {
+        let prompt = """
+        Provide a concise biography of the author \(author). Include their birth/death dates if applicable, major works, and key achievements. Keep it to 2-3 paragraphs.
+        """
+
+        let requestBody: [String: Any] = [
+            "model": "grok-3-mini",
+            "messages": [
+                [
+                    "role": "user",
+                    "content": prompt
+                ]
+            ],
+            "max_tokens": 500,
+            "temperature": 0.3
+        ]
+
+        guard let url = URL(string: baseURL) else {
+            completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
+                return
+            }
+
+            do {
+                let grokResponse = try JSONDecoder().decode(GrokResponse.self, from: data)
+
+                if let error = grokResponse.error {
+                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
+                    return
+                }
+
+                if let choices = grokResponse.choices, let content = choices.first?.message.content {
+                    print("DEBUG GrokAPIService: Fetched bio/teaser content: \(content)")
+                    completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
+                } else {
+                    print("DEBUG GrokAPIService: No content in bio/teaser response")
+                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    func fetchBookSummary(title: String, author: String, completion: @escaping (Result<String, Error>) -> Void) {
+        let prompt = """
+        Provide a short, engaging summary/teaser for the book "\(title)" by \(author). Keep it to 2-3 sentences that capture the essence of the story without spoilers. Make it enticing and informative.
+        """
+
+        let requestBody: [String: Any] = [
+            "model": "grok-3-mini",
+            "messages": [
+                [
+                    "role": "user",
+                    "content": prompt
+                ]
+            ],
+            "max_tokens": 300,
+            "temperature": 0.5
+        ]
+
+        guard let url = URL(string: baseURL) else {
+            completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
+                return
+            }
+
+            do {
+                let grokResponse = try JSONDecoder().decode(GrokResponse.self, from: data)
+
+                if let error = grokResponse.error {
+                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
+                    return
+                }
+
+                if let choices = grokResponse.choices, let content = choices.first?.message.content {
+                    completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
+                } else {
+                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
     }
 
     private func parseRecommendations(from content: String, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {

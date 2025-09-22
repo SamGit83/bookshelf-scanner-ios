@@ -140,6 +140,7 @@ class GeminiAPIService {
                 print("DEBUG GeminiAPIService: Decoded response successfully")
                 if let text = geminiResponse.candidates.first?.content.parts.first?.text {
                     print("DEBUG GeminiAPIService: Extracted text, length: \(text.count)")
+                    print("DEBUG GeminiAPIService: Response text: \(text)")
                     completion(.success(text))
                 } else {
                     print("DEBUG GeminiAPIService: No text in response")

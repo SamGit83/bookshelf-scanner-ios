@@ -11,45 +11,54 @@ class SecureConfig {
     var geminiAPIKey: String {
         // Try environment variable first (for development/testing)
         if let envKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using Gemini API key from environment variable")
             return envKey
         }
 
         // Try UserDefaults (for production, should be encrypted)
         if let storedKey = UserDefaults.standard.string(forKey: "gemini_api_key"), !storedKey.isEmpty {
+            print("DEBUG SecureConfig: Using Gemini API key from UserDefaults")
             return storedKey
         }
 
         // Fallback to placeholder (should never be used in production)
+        print("DEBUG SecureConfig: Using placeholder Gemini API key - this will cause API failures")
         return "YOUR_GEMINI_API_KEY_HERE"
     }
 
     var googleBooksAPIKey: String {
         // Try environment variable first
         if let envKey = ProcessInfo.processInfo.environment["GOOGLE_BOOKS_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using Google Books API key from environment variable")
             return envKey
         }
 
         // Try UserDefaults
         if let storedKey = UserDefaults.standard.string(forKey: "google_books_api_key"), !storedKey.isEmpty {
+            print("DEBUG SecureConfig: Using Google Books API key from UserDefaults")
             return storedKey
         }
 
         // Fallback to placeholder
+        print("DEBUG SecureConfig: Using placeholder Google Books API key - this will cause API failures")
         return "YOUR_GOOGLE_BOOKS_API_KEY_HERE"
     }
 
     var grokAPIKey: String {
         // Try environment variable first
         if let envKey = ProcessInfo.processInfo.environment["GROK_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using Grok API key from environment variable")
             return envKey
         }
 
         // Try UserDefaults
         if let storedKey = UserDefaults.standard.string(forKey: "grok_api_key"), !storedKey.isEmpty {
+            print("DEBUG SecureConfig: Using Grok API key from UserDefaults")
             return storedKey
         }
 
         // Fallback to placeholder
+        print("DEBUG SecureConfig: Using placeholder Grok API key - this will cause API failures")
         return "YOUR_GROK_API_KEY_HERE"
     }
 

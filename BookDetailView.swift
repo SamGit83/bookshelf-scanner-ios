@@ -6,12 +6,18 @@ import UIKit
 struct BookDetailView: View {
     let book: Book
     @ObservedObject var viewModel: BookViewModel
+
+    private var currentBook: Book {
+        viewModel.books.first(where: { $0.id == book.id }) ?? book
+    }
     @State private var bookDetails: BookRecommendation?
     @State private var isLoadingDetails = false
     @State private var recommendations: [BookRecommendation] = []
     @State private var isLoadingRecommendations = false
     @State private var showProgressView = false
     @State private var showEditView = false
+    @State private var isLoadingBio = false
+    @State private var isLoadingTeaser = false
 
     var body: some View {
         ZStack {
@@ -67,19 +73,19 @@ struct BookDetailView: View {
 
                             // Title and Author
                             VStack(spacing: 8) {
-                                Text(book.title ?? "Unknown Title")
+                                Text(currentBook.title ?? "Unknown Title")
                                     .font(.title)
                                     .fontWeight(.bold)
                                     .foregroundColor(.primary)
                                     .multilineTextAlignment(.center)
 
-                                Text(book.author ?? "Unknown Author")
+                                Text(currentBook.author ?? "Unknown Author")
                                     .font(.title2)
                                     .foregroundColor(.secondary)
 
                                 // Genre and Publication
                                 HStack(spacing: 16) {
-                                    if let genre = book.genre ?? bookDetails?.genre {
+                                    if let genre = currentBook.genre ?? bookDetails?.genre {
                                         Text(genre)
                                             .font(.caption)
                                             .padding(.horizontal, 12)
@@ -88,7 +94,7 @@ struct BookDetailView: View {
                                             .cornerRadius(12)
                                     }
 
-                                    if let subGenre = book.subGenre {
+                                    if let subGenre = currentBook.subGenre {
                                         Text(subGenre)
                                             .font(.caption)
                                             .padding(.horizontal, 12)
@@ -97,7 +103,7 @@ struct BookDetailView: View {
                                             .cornerRadius(12)
                                     }
 
-                                    if let publishedDate = bookDetails?.publishedDate ?? book.publicationYear {
+                                    if let publishedDate = bookDetails?.publishedDate ?? currentBook.publicationYear {
                                         Text(publishedDate)
                                             .font(.caption)
                                             .foregroundColor(.secondary)
@@ -126,20 +132,20 @@ struct BookDetailView: View {
                     }
 
                     // Book Details
-                    if book.pageCount != nil || book.estimatedReadingTime != nil {
+                    if (currentBook.pageCount ?? bookDetails?.pageCount) != nil || currentBook.estimatedReadingTime != nil {
                         GlassCard {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Book Details")
                                     .font(.headline)
                                     .foregroundColor(.primary)
 
-                                if let pageCount = book.pageCount {
+                                if let pageCount = currentBook.pageCount ?? bookDetails?.pageCount {
                                     Text("Page Count: \(pageCount)")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 }
 
-                                if let readingTime = book.estimatedReadingTime {
+                                if let readingTime = currentBook.estimatedReadingTime {
                                     Text("Estimated Reading Time: \(readingTime)")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
@@ -149,8 +155,40 @@ struct BookDetailView: View {
                         }
                     }
 
+                    // Book Teaser
+                    if let teaser = book.teaser, !teaser.isEmpty {
+                        GlassCard {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Book Teaser")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+
+                                Text(teaser)
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .lineSpacing(4)
+                            }
+                            .padding()
+                        }
+                    } else {
+                        print("DEBUG BookDetailView: Book teaser is nil or empty for book: \(book.title ?? "Unknown")")
+                        if isLoadingTeaser {
+                            GlassCard {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Book Teaser")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                }
+                                .padding()
+                            }
+                        }
+                    }
+
                     // Author Biography
-                    if let bio = book.authorBiography, !bio.isEmpty {
+                    if let bio = book.authorBio ?? book.authorBiography, !bio.isEmpty {
                         GlassCard {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("About the Author")
@@ -161,6 +199,20 @@ struct BookDetailView: View {
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .lineSpacing(4)
+                            }
+                            .padding()
+                        }
+                    } else {
+                        print("DEBUG BookDetailView: Author bio is nil or empty for book: \(book.title ?? "Unknown") by \(book.author ?? "Unknown")")
+                        if isLoadingBio {
+                            GlassCard {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("About the Author")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
                             }
                             .padding()
                         }
@@ -175,13 +227,13 @@ struct BookDetailView: View {
 
                             HStack {
                                 VStack(alignment: .leading) {
-                                    Text("Status: \(book.status.rawValue)")
+                                    Text("Status: \(currentBook.status.rawValue)")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
 
-                                    if let totalPages = book.totalPages, totalPages > 0 {
-                                        let progress = Double(book.currentPage) / Double(totalPages)
-                                        Text("Page \(book.currentPage) of \(totalPages)")
+                                    if let totalPages = currentBook.totalPages, totalPages > 0 {
+                                        let progress = Double(currentBook.currentPage) / Double(totalPages)
+                                        Text("Page \(currentBook.currentPage) of \(totalPages)")
                                             .font(.subheadline)
                                             .foregroundColor(.secondary)
 
@@ -208,31 +260,31 @@ struct BookDetailView: View {
                                 .foregroundColor(.primary)
 
                             HStack(spacing: 12) {
-                                if book.status == .library {
+                                if currentBook.status == .library {
                                     Button(action: {
                                         withAnimation(.spring()) {
-                                            viewModel.moveBook(book, to: .currentlyReading)
+                                            viewModel.moveBook(currentBook, to: .currentlyReading)
                                         }
                                     }) {
                                         Text("Start Reading")
-                                            .frame(maxWidth: .infinity)
-                                            .padding()
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                            .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                        .font(.headline)
                                     }
-                                } else if book.status == .currentlyReading {
+                                } else if currentBook.status == .currentlyReading {
                                     Button(action: {
                                         showProgressView = true
                                     }) {
                                         Text("Update Progress")
-                                            .frame(maxWidth: .infinity)
-                                            .padding()
-                                            .background(Color.green)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                            .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.green)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                        .font(.headline)
                                     }
                                 }
 
@@ -240,12 +292,12 @@ struct BookDetailView: View {
                                     showEditView = true
                                 }) {
                                     Text("Edit Book")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.gray.opacity(0.2))
-                                        .foregroundColor(.primary)
-                                        .cornerRadius(10)
-                                        .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.gray.opacity(0.2))
+                                    .foregroundColor(.primary)
+                                    .cornerRadius(10)
+                                    .font(.headline)
                                 }
                             }
                         }
@@ -279,10 +331,10 @@ struct BookDetailView: View {
             .navigationTitle("Book Details")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showProgressView) {
-                ReadingProgressView(book: book, viewModel: viewModel)
+                ReadingProgressView(book: currentBook, viewModel: viewModel)
             }
             .sheet(isPresented: $showEditView) {
-                EditBookView(book: book, viewModel: viewModel)
+                EditBookView(book: currentBook, viewModel: viewModel)
             }
         }
         .onAppear {
@@ -294,14 +346,65 @@ struct BookDetailView: View {
     private func loadBookDetails() {
         isLoadingDetails = true
         let apiService = GoogleBooksAPIService()
-        apiService.fetchBookDetails(isbn: book.isbn, title: book.title, author: book.author) { result in
+        apiService.fetchBookDetails(isbn: currentBook.isbn, title: currentBook.title, author: currentBook.author) { result in
             DispatchQueue.main.async {
-                isLoadingDetails = false
+                self.isLoadingDetails = false
                 switch result {
                 case .success(let details):
                     self.bookDetails = details
+                    // Fetch book teaser if not cached
+                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true,
+                        let title = self.currentBook.title, let author = self.currentBook.author {
+                        self.loadBookTeaser(title: title, author: author)
+                    }
+                    // Fetch author bio if not cached
+                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true,
+                        let author = self.currentBook.author {
+                        self.loadAuthorBiography(author: author)
+                    }
                 case .failure(let error):
                     print("Failed to load book details: \(error.localizedDescription)")
+                    // Still try to load teaser and bio if details failed and not cached
+                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true,
+                        let title = self.currentBook.title, let author = self.currentBook.author {
+                        self.loadBookTeaser(title: title, author: author)
+                    }
+                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true,
+                        let author = self.currentBook.author {
+                        self.loadAuthorBiography(author: author)
+                    }
+                }
+            }
+        }
+    }
+
+    private func loadAuthorBiography(author: String) {
+        isLoadingBio = true
+        let grokService = GrokAPIService()
+        grokService.fetchAuthorBiography(author: author) { result in
+            DispatchQueue.main.async {
+                self.isLoadingBio = false
+                switch result {
+                case .success(let bio):
+                    self.viewModel.updateBookAuthorBio(self.currentBook, authorBio: bio)
+                case .failure(let error):
+                    print("Failed to load author biography: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func loadBookTeaser(title: String, author: String) {
+        isLoadingTeaser = true
+        let grokService = GrokAPIService()
+        grokService.fetchBookSummary(title: title, author: author) { result in
+            DispatchQueue.main.async {
+                self.isLoadingTeaser = false
+                switch result {
+                case .success(let teaser):
+                    self.viewModel.updateBookTeaser(self.currentBook, teaser: teaser)
+                case .failure(let error):
+                    print("Failed to load book teaser: \(error.localizedDescription)")
                 }
             }
         }
@@ -309,13 +412,13 @@ struct BookDetailView: View {
 
     private func loadRecommendations() {
         isLoadingRecommendations = true
-        viewModel.generateRecommendations(for: book) { result in
+        viewModel.generateRecommendations(for: currentBook) { result in
             DispatchQueue.main.async {
                 isLoadingRecommendations = false
                 switch result {
                 case .success(let recs):
                     // Filter out the current book
-                    self.recommendations = recs.filter { $0.title != (book.title ?? "") || $0.author != (book.author ?? "") }
+                    self.recommendations = recs.filter { $0.title != (currentBook.title ?? "") || $0.author != (currentBook.author ?? "") }
                 case .failure(let error):
                     print("Failed to load recommendations: \(error.localizedDescription)")
                 }
