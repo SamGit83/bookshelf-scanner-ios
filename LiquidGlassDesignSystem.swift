@@ -309,7 +309,7 @@ struct AnimationTiming {
 }
 
 // MARK: - Button Style System
-struct ButtonStyleModifier: ViewModifier {
+struct LiquidButtonStyle: ButtonStyle {
     let background: LinearGradient
     let foregroundColor: Color
     let cornerRadius: CGFloat
@@ -317,7 +317,7 @@ struct ButtonStyleModifier: ViewModifier {
     let font: Font
     let shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat)?
     let border: (color: Color, width: CGFloat)?
-    
+
     init(background: LinearGradient,
          foregroundColor: Color,
          cornerRadius: CGFloat,
@@ -334,7 +334,7 @@ struct ButtonStyleModifier: ViewModifier {
         self.border = border
     }
 
-    func body(content: Content) -> some View {
+    func makeBody(configuration: Configuration) -> some View {
         let borderColor = border?.color ?? Color.clear
         let borderWidth = border?.width ?? 0
         let shadowColor = shadow?.color ?? Color.clear
@@ -342,7 +342,7 @@ struct ButtonStyleModifier: ViewModifier {
         let shadowX = shadow?.x ?? 0
         let shadowY = shadow?.y ?? 0
 
-        content
+        configuration.label
             .font(font)
             .foregroundColor(foregroundColor)
             .padding(padding)
@@ -353,13 +353,16 @@ struct ButtonStyleModifier: ViewModifier {
                     .stroke(borderColor, lineWidth: borderWidth)
             )
             .shadow(color: shadowColor, radius: shadowRadius, x: shadowX, y: shadowY)
+            .opacity(configuration.isPressed ? 0.8 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
 struct ButtonStyles {
     // Primary Action Button
-    static func primaryButton() -> ButtonStyleModifier {
-        return ButtonStyleModifier(
+    static func primaryButton() -> LiquidButtonStyle {
+        return LiquidButtonStyle(
             background: UIGradients.primaryButton,
             foregroundColor: .white,
             cornerRadius: 16,
@@ -368,10 +371,10 @@ struct ButtonStyles {
             shadow: (color: Color(hex: "FF2D92").opacity(0.3), radius: 8, x: 0, y: 4)
         )
     }
-    
+
     // Secondary Action Button
-    static func secondaryButton() -> ButtonStyleModifier {
-        return ButtonStyleModifier(
+    static func secondaryButton() -> LiquidButtonStyle {
+        return LiquidButtonStyle(
             background: UIGradients.secondaryButton,
             foregroundColor: .white,
             cornerRadius: 16,
@@ -380,10 +383,10 @@ struct ButtonStyles {
             shadow: (color: Color(hex: "40E0D0").opacity(0.3), radius: 6, x: 0, y: 3)
         )
     }
-    
+
     // Ghost Button
-    static func ghostButton() -> ButtonStyleModifier {
-        return ButtonStyleModifier(
+    static func ghostButton() -> LiquidButtonStyle {
+        return LiquidButtonStyle(
             background: LinearGradient(colors: [Color.clear], startPoint: .leading, endPoint: .trailing),
             foregroundColor: Color(hex: "FF2D92"),
             cornerRadius: 16,
@@ -719,15 +722,15 @@ extension View {
     }
     
     func primaryButtonStyle() -> some View {
-        self.modifier(ButtonStyles.primaryButton())
+        self.buttonStyle(ButtonStyles.primaryButton())
     }
-    
+
     func secondaryButtonStyle() -> some View {
-        self.modifier(ButtonStyles.secondaryButton())
+        self.buttonStyle(ButtonStyles.secondaryButton())
     }
-    
+
     func ghostButtonStyle() -> some View {
-        self.modifier(ButtonStyles.ghostButton())
+        self.buttonStyle(ButtonStyles.ghostButton())
     }
     
     func bookCardStyle() -> some View {
