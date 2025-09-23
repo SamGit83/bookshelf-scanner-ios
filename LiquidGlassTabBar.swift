@@ -10,13 +10,31 @@ struct TabItem: Identifiable {
 struct LiquidGlassTabBar: View {
     @Binding var selectedTab: Int
     @ObservedObject private var accentColorManager = AccentColorManager.shared
+    @ObservedObject private var authService = AuthService.shared
+
+    private var userInitials: String {
+        let displayName = authService.currentUser?.displayName
+        let email = authService.currentUser?.email
+        let name = displayName ?? email ?? "?"
+        if name == "?" { return "?" }
+        let components = name.split(separator: " ")
+        if components.count >= 2 {
+            let firstInitial = components.first?.first?.uppercased() ?? ""
+            let lastInitial = components.last?.first?.uppercased() ?? ""
+            let initials = firstInitial + lastInitial
+            return initials
+        } else if let first = components.first?.first?.uppercased() {
+            return first
+        }
+        return "?"
+    }
 
     private var tabs: [TabItem] {
         return [
             TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
             TabItem(icon: AnyView(Image(systemName: "book.closed")), label: "Reading", tag: 1),
             TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
-            TabItem(icon: AnyView(Image(systemName: "person.circle")), label: "Profile", tag: 3)
+            TabItem(icon: AnyView(ProfileInitialsView(initials: userInitials)), label: "Profile", tag: 3)
         ]
     }
 
@@ -26,7 +44,7 @@ struct LiquidGlassTabBar: View {
                 .frame(width: 24, height: 24)
             Text(tab.label)
                 .font(.caption2)
-                .fontWeight(selectedTab == tab.tag ? .semibold : .regular)
+                .fontWeight(.semibold)
         }
         .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
         .frame(maxWidth: .infinity)
@@ -74,8 +92,7 @@ struct ProfileInitialsView: View {
     }
 
     var body: some View {
-        print("DEBUG ProfileInitialsView: initials = '\(initials)'")
-        return ZStack {
+        ZStack {
             Circle()
                 .fill(Color.blue.opacity(0.2))
                 .frame(width: 24, height: 24)

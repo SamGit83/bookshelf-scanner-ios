@@ -1225,10 +1225,10 @@ public struct AppleBooksBookCard: View {
                         if let pageCount = book.pageCount {
                             Text("\(pageCount) pages")
                                 .font(AppleBooksTypography.caption)
-                                .foregroundColor(AppleBooksColors.accent)
+                                .foregroundColor(AppleBooksColors.promotional)
                                 .padding(.horizontal, AppleBooksSpacing.space6)
                                 .padding(.vertical, AppleBooksSpacing.space2)
-                                .background(AppleBooksColors.accent.opacity(0.1))
+                                .background(AppleBooksColors.promotional.opacity(0.1))
                                 .cornerRadius(4)
                         }
                         if let readingTime = book.estimatedReadingTime {
