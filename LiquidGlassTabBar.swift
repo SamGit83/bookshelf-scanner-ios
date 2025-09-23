@@ -1,5 +1,4 @@
 import SwiftUI
-import LiquidGlassDesignSystem
 
 struct TabItem: Identifiable {
     let id = UUID()
