@@ -370,17 +370,13 @@ struct BookDetailView: View {
                                     title: recommendation.title,
                                     author: recommendation.author,
                                     coverImageURL: recommendation.thumbnailURL,
-                                    genre: nil,
-                                    subGenre: nil,
-                                    publicationYear: nil,
-                                    pageCount: nil,
-                                    estimatedReadingTime: nil,
-                                    isbn: nil,
+                                    genre: nil as String?,
                                     status: .library
                                 ),
                                 onTap: {},
                                 showAddButton: false,
-                                onAddTap: {}
+                                onAddTap: {},
+                                viewModel: viewModel
                             )
                         }
                     }
