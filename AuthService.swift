@@ -8,6 +8,7 @@ class AuthService: ObservableObject {
     @Published var isAuthenticated = false
     @Published var currentUser: User?
     @Published var hasCompletedOnboarding = false
+    @Published var isLoadingOnboardingStatus = false
     @Published var errorMessage: String?
 
     private var authStateListener: AuthStateDidChangeListenerHandle?
@@ -19,9 +20,11 @@ class AuthService: ObservableObject {
             self?.isAuthenticated = user != nil
             self?.currentUser = user
             if let user = user {
+                self?.isLoadingOnboardingStatus = true
                 self?.fetchOnboardingStatus(for: user)
             } else {
                 self?.hasCompletedOnboarding = false
+                self?.isLoadingOnboardingStatus = false
             }
         }
     }
@@ -116,6 +119,9 @@ class AuthService: ObservableObject {
         let db = Firestore.firestore()
         let userDoc = db.collection("users").document(user.uid)
         userDoc.getDocument { [weak self] document, error in
+            defer {
+                self?.isLoadingOnboardingStatus = false
+            }
             if let error = error {
                 print("Error fetching onboarding status: \(error.localizedDescription)")
                 self?.hasCompletedOnboarding = false // Default to false on error

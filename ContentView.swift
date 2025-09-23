@@ -37,7 +37,9 @@ struct ContentView: View {
      var body: some View {
          Group {
              if authService.isAuthenticated {
-                 if authService.hasCompletedOnboarding {
+                 // For authenticated users, assume they have completed onboarding
+                 // unless explicitly marked as not completed
+                 if authService.hasCompletedOnboarding || authService.isLoadingOnboardingStatus {
                      authenticatedView
                  } else {
                      OnboardingView()

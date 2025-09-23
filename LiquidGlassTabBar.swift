@@ -11,27 +11,21 @@ struct LiquidGlassTabBar: View {
     @Binding var selectedTab: Int
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @ObservedObject private var authService = AuthService.shared
-    
-    @State private var cachedInitials: String = "?"
 
-    private func updateInitials() {
+    private var userInitials: String {
         let displayName = authService.currentUser?.displayName
         let email = authService.currentUser?.email
         let name = displayName ?? email ?? "?"
-        if name == "?" {
-            cachedInitials = "?"
-            return
-        }
+        if name == "?" { return "?" }
         let components = name.split(separator: " ")
         if components.count >= 2 {
             let firstInitial = components.first?.first?.uppercased() ?? ""
             let lastInitial = components.last?.first?.uppercased() ?? ""
-            cachedInitials = firstInitial + lastInitial
+            return firstInitial + lastInitial
         } else if let first = components.first?.first?.uppercased() {
-            cachedInitials = first
-        } else {
-            cachedInitials = "?"
+            return first
         }
+        return "?"
     }
 
     private var tabs: [TabItem] {
@@ -45,19 +39,18 @@ struct LiquidGlassTabBar: View {
 
     private func tabButtonContent(for tab: TabItem) -> some View {
         VStack(spacing: 4) {
-            ZStack {
-                if tab.tag == 3 { // Profile tab
-                    ProfileInitialsView(
-                        initials: cachedInitials,
-                        isSelected: selectedTab == tab.tag
-                    )
-                } else {
-                    tab.icon
-                        .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
-                }
+            if tab.tag == 3 { // Profile tab
+                ProfileInitialsView(
+                    initials: userInitials,
+                    isSelected: selectedTab == tab.tag
+                )
+                .frame(width: 24, height: 24)
+            } else {
+                tab.icon
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
             }
-            .frame(width: 24, height: 24)
-            
+
             Text(tab.label)
                 .font(.caption2)
                 .fontWeight(.semibold)
@@ -96,15 +89,6 @@ struct LiquidGlassTabBar: View {
         tabBarContent
             .background(backgroundShape)
             .padding(.top, 8)
-            .onAppear {
-                updateInitials()
-            }
-            .onChange(of: authService.currentUser?.displayName) { _ in
-                updateInitials()
-            }
-            .onChange(of: authService.currentUser?.email) { _ in
-                updateInitials()
-            }
     }
 }
 
