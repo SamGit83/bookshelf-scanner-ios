@@ -1146,14 +1146,25 @@ public struct AppleBooksBookCard: View {
                         .font(AppleBooksTypography.caption)
                         .foregroundColor(AppleBooksColors.textSecondary)
 
-                    if let genre = book.genre {
-                        Text(genre)
-                            .font(AppleBooksTypography.captionBold)
-                            .foregroundColor(AppleBooksColors.accent)
-                            .padding(.horizontal, AppleBooksSpacing.space8)
-                            .padding(.vertical, AppleBooksSpacing.space2)
-                            .background(AppleBooksColors.accent.opacity(0.1))
-                            .cornerRadius(4)
+                    // Row 1: Page count and reading time
+                    HStack(spacing: AppleBooksSpacing.space8) {
+                        if let pageCount = book.pageCount {
+                            Text("\(pageCount) pages")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                        }
+                        if let readingTime = book.estimatedReadingTime {
+                            Text("• \(readingTime)")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                        }
+                    }
+
+                    // Row 2: Sub genre
+                    if let subGenre = book.subGenre {
+                        Text(subGenre)
+                            .font(AppleBooksTypography.caption)
+                            .foregroundColor(AppleBooksColors.textSecondary)
                     }
                 }
 

@@ -181,7 +181,12 @@ struct LibraryView: View {
             }
         }
         .padding(.horizontal, AppleBooksSpacing.space24)
-        .padding(.bottom, AppleBooksSpacing.space24)
+        .padding(.top, AppleBooksSpacing.space24)
+        .padding(.bottom, AppleBooksSpacing.space32)
+        .background(
+            AppleBooksColors.background
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 
     private var loadingOverlay: some View {
@@ -208,21 +213,26 @@ struct LibraryView: View {
     }
 
     var body: some View {
-        ZStack {
-            // Apple Books clean background
-            AppleBooksColors.background
-                .ignoresSafeArea()
+        GeometryReader { geometry in
+            ZStack {
+                // Apple Books clean background
+                AppleBooksColors.background
+                    .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                if viewModel.books.isEmpty {
+                VStack(spacing: 0) {
+                    if viewModel.books.isEmpty {
+                        Spacer()
+                        emptyStateView
+                        Spacer()
+                    } else {
+                        libraryContentView
+                    }
+
                     Spacer()
-                    emptyStateView
-                    Spacer()
-                } else {
-                    libraryContentView
+                    
+                    actionButtonsView
+                        .padding(.bottom, geometry.safeAreaInsets.bottom > 0 ? 0 : AppleBooksSpacing.space16)
                 }
-
-                actionButtonsView
             }
         }
         .overlay(loadingOverlay)
