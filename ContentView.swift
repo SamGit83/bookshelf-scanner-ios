@@ -86,11 +86,15 @@ struct ContentView: View {
     }
 
     public var authenticatedView: some View {
-        selectedView
-            .background(appleBooksBackground)
-            .safeAreaInset(edge: .bottom, spacing: 0) {
+        ZStack {
+            selectedView
+                .background(appleBooksBackground)
+            VStack {
+                Spacer()
                 LiquidGlassTabBar(selectedTab: $selectedTab)
             }
+            .edgesIgnoringSafeArea(.bottom)
+        }
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
         }
