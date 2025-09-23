@@ -997,6 +997,7 @@ public enum AppleBooksShadow {
 
 // Apple Books Components
 public struct AppleBooksSectionHeader: View {
+    @Environment(\.colorScheme) var colorScheme
     let title: String
     let subtitle: String?
     let showSeeAll: Bool
@@ -1023,7 +1024,7 @@ public struct AppleBooksSectionHeader: View {
             if let subtitle = subtitle {
                 Text(subtitle)
                     .font(AppleBooksTypography.caption)
-                    .foregroundColor(AppleBooksColors.textSecondary)
+                    .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
             }
         }
         .padding(.horizontal, AppleBooksSpacing.space24)

@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct ProfileView: View {
+    @Environment(\.colorScheme) var colorScheme
     @ObservedObject var authService: AuthService
     @ObservedObject var themeManager = ThemeManager.shared
     @ObservedObject var accentColorManager = AccentColorManager.shared
@@ -35,11 +36,11 @@ struct ProfileView: View {
 
                                     Text(user.email ?? "")
                                         .font(AppleBooksTypography.bodyMedium)
-                                        .foregroundColor(AppleBooksColors.textSecondary)
+                                        .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
 
                                     Text("Member since \(formattedDate(user.metadata.creationDate))")
                                         .font(AppleBooksTypography.caption)
-                                        .foregroundColor(AppleBooksColors.textTertiary)
+                                        .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
                                 }
                                 .padding(.horizontal, AppleBooksSpacing.space24)
                             }
@@ -170,7 +171,6 @@ struct ProfileView: View {
             }
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarBackground(.hidden, for: .navigationBar)
             .alert(isPresented: $showSignOutAlert) {
                 Alert(
                     title: Text("Sign Out"),
