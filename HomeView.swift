@@ -5,98 +5,38 @@ struct HomeView: View {
     @State private var showLogin = false
     @State private var showSignup = false
 
-    // Sample data - in a real app, this would come from a view model
-    private var currentlyReadingBooks: [Book] {
-        // Placeholder books - replace with actual data
-        [
-            Book(title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Fiction", status: .reading),
-            Book(title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Fiction", status: .reading),
-            Book(title: "1984", author: "George Orwell", genre: "Dystopian", status: .reading)
-        ]
-    }
-
-    private var favoriteBooks: [Book] {
-        [
-            Book(title: "Pride and Prejudice", author: "Jane Austen", genre: "Romance", status: .toRead),
-            Book(title: "The Catcher in the Rye", author: "J.D. Salinger", genre: "Fiction", status: .toRead),
-            Book(title: "Harry Potter", author: "J.K. Rowling", genre: "Fantasy", status: .toRead)
-        ]
-    }
-
-    private var trendingBooks: [Book] {
-        [
-            Book(title: "The Midnight Library", author: "Matt Haig", genre: "Fiction", status: .toRead),
-            Book(title: "Atomic Habits", author: "James Clear", genre: "Self-Help", status: .toRead),
-            Book(title: "Project Hail Mary", author: "Andy Weir", genre: "Sci-Fi", status: .toRead)
-        ]
-    }
-
-    private var promotionalGradient: LinearGradient {
-        LinearGradient(
-            colors: [AppleBooksColors.promotional, AppleBooksColors.promotional.opacity(0.8)],
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-    }
-
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Daily Reading Goals Section
-                ReadingGoalsSection()
+        ZStack {
+            // Animated gradient background
+            AnimatedBackground()
+                .ignoresSafeArea()
 
-                // Currently Reading Collection
-                AppleBooksCollection(
-                    books: currentlyReadingBooks,
-                    title: "Continue Reading",
-                    subtitle: "Pick up where you left off",
-                    onBookTap: { book in
-                        // Handle book tap - navigate to book detail
-                        print("Book tapped: \(book.title ?? "Unknown")")
-                    },
-                    onSeeAllTap: nil,
-                    viewModel: nil
-                )
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Navigation Bar
+                    HomeNavigationBar(showLogin: $showLogin, showSignup: $showSignup)
 
-                // Featured Promotional Banner
-                AppleBooksPromoBanner(
-                    title: "$9.99 Audiobooks",
-                    subtitle: "Limited time offer",
-                    gradient: promotionalGradient
-                ) {
-                    // Handle promo tap
-                    print("Promo banner tapped")
+                    // Hero Section
+                    HeroSection(showSignup: $showSignup)
+
+                    // User Journey Section
+                    UserJourneySection()
+
+                    // Features Section
+                    FeaturesSection()
+
+                    // Footer
+                    HomeFooter()
                 }
-
-                // Customer Favorites
-                AppleBooksCollection(
-                    books: favoriteBooks,
-                    title: "Customer Favorites",
-                    subtitle: "See the books readers love",
-                    onBookTap: { book in
-                        // Handle book tap
-                        print("Book tapped: \(book.title ?? "Unknown")")
-                    },
-                    onSeeAllTap: nil,
-                    viewModel: nil
-                )
-
-                // New & Trending
-                AppleBooksCollection(
-                    books: trendingBooks,
-                    title: "New & Trending",
-                    subtitle: "Explore what's hot in audiobooks",
-                    onBookTap: {
-                        // Handle book tap
-                        print("Book tapped: \($0.title ?? "Unknown")")
-                    },
-                    onSeeAllTap: nil,
-                    viewModel: nil
-                )
             }
         }
-        .background(AppleBooksColors.background)
-        .navigationBarHidden(true)
+        .sheet(isPresented: $showLogin) {
+            LoginView()
+        }
+        .sheet(isPresented: $showSignup) {
+            // For now, show login view - you might want to create a separate signup view
+            LoginView()
+        }
     }
 }
 
