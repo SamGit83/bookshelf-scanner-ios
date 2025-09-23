@@ -11,22 +11,27 @@ struct LiquidGlassTabBar: View {
     @Binding var selectedTab: Int
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @ObservedObject private var authService = AuthService.shared
+    
+    @State private var cachedInitials: String = "?"
 
-    private var userInitials: String {
+    private func updateInitials() {
         let displayName = authService.currentUser?.displayName
         let email = authService.currentUser?.email
         let name = displayName ?? email ?? "?"
-        if name == "?" { return "?" }
+        if name == "?" {
+            cachedInitials = "?"
+            return
+        }
         let components = name.split(separator: " ")
         if components.count >= 2 {
             let firstInitial = components.first?.first?.uppercased() ?? ""
             let lastInitial = components.last?.first?.uppercased() ?? ""
-            let initials = firstInitial + lastInitial
-            return initials
+            cachedInitials = firstInitial + lastInitial
         } else if let first = components.first?.first?.uppercased() {
-            return first
+            cachedInitials = first
+        } else {
+            cachedInitials = "?"
         }
-        return "?"
     }
 
     private var tabs: [TabItem] {
@@ -34,23 +39,25 @@ struct LiquidGlassTabBar: View {
             TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
             TabItem(icon: AnyView(Image(systemName: "book.closed")), label: "Reading", tag: 1),
             TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
-            TabItem(icon: AnyView(EmptyView()), label: "Profile", tag: 3) // Profile handled separately
+            TabItem(icon: AnyView(Image(systemName: "person.circle")), label: "Profile", tag: 3)
         ]
     }
 
     private func tabButtonContent(for tab: TabItem) -> some View {
         VStack(spacing: 4) {
-            if tab.tag == 3 { // Profile tab
-                ProfileInitialsView(
-                    initials: userInitials,
-                    isSelected: selectedTab == tab.tag
-                )
-                .frame(width: 24, height: 24)
-            } else {
-                tab.icon
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
+            ZStack {
+                if tab.tag == 3 { // Profile tab
+                    ProfileInitialsView(
+                        initials: cachedInitials,
+                        isSelected: selectedTab == tab.tag
+                    )
+                } else {
+                    tab.icon
+                        .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
+                }
             }
+            .frame(width: 24, height: 24)
+            
             Text(tab.label)
                 .font(.caption2)
                 .fontWeight(.semibold)
@@ -89,6 +96,15 @@ struct LiquidGlassTabBar: View {
         tabBarContent
             .background(backgroundShape)
             .padding(.top, 8)
+            .onAppear {
+                updateInitials()
+            }
+            .onChange(of: authService.currentUser?.displayName) { _ in
+                updateInitials()
+            }
+            .onChange(of: authService.currentUser?.email) { _ in
+                updateInitials()
+            }
     }
 }
 
