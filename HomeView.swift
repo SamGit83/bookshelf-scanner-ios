@@ -142,10 +142,10 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showLogin) {
-            LoginView()
+            LoginView(isSignUp: false)
         }
         .sheet(isPresented: $showSignup) {
-            LoginView()
+            LoginView(isSignUp: true)
         }
     }
 }

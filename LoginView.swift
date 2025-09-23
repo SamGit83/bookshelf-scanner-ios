@@ -126,6 +126,57 @@ struct LoginView: View {
                                     .textContentType(isSignUp ? .newPassword : .password)
                             }
 
+                            // Required Name Fields (only for signup)
+                            if isSignUp {
+                                HStack(spacing: AppleBooksSpacing.space12) {
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        HStack {
+                                            Text("First Name")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+                                            Text("*")
+                                                .foregroundColor(AppleBooksColors.promotional)
+                                                .font(AppleBooksTypography.headlineSmall)
+                                        }
+
+                                        TextField("Enter first name", text: $firstName)
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .padding(AppleBooksSpacing.space12)
+                                            .background(AppleBooksColors.background)
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                            )
+                                            .textContentType(.givenName)
+                                    }
+
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        HStack {
+                                            Text("Last Name")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+                                            Text("*")
+                                                .foregroundColor(AppleBooksColors.promotional)
+                                                .font(AppleBooksTypography.headlineSmall)
+                                        }
+
+                                        TextField("Enter last name", text: $lastName)
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .padding(AppleBooksSpacing.space12)
+                                            .background(AppleBooksColors.background)
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                            )
+                                            .textContentType(.familyName)
+                                    }
+                                }
+                            }
+
                             // Show More Button (only for signup)
                             if isSignUp {
                                 Button(action: {
@@ -149,44 +200,6 @@ struct LoginView: View {
                             // Additional Fields (shown when expanded)
                             if isSignUp && showMoreFields {
                                 VStack(spacing: AppleBooksSpacing.space16) {
-                                    // First Name & Last Name
-                                    HStack(spacing: AppleBooksSpacing.space12) {
-                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                            Text("First Name")
-                                                .font(AppleBooksTypography.headlineSmall)
-                                                .foregroundColor(AppleBooksColors.text)
-
-                                            TextField("Enter first name", text: $firstName)
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .padding(AppleBooksSpacing.space12)
-                                                .background(AppleBooksColors.background)
-                                                .cornerRadius(8)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                                )
-                                                .textContentType(.givenName)
-                                        }
-
-                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                            Text("Last Name")
-                                                .font(AppleBooksTypography.headlineSmall)
-                                                .foregroundColor(AppleBooksColors.text)
-
-                                            TextField("Enter last name", text: $lastName)
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .padding(AppleBooksSpacing.space12)
-                                                .background(AppleBooksColors.background)
-                                                .cornerRadius(8)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                                )
-                                                .textContentType(.familyName)
-                                        }
-                                    }
 
                                     // Date of Birth
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
@@ -444,6 +457,14 @@ struct LoginView: View {
         }
         guard !password.isEmpty else {
             authService.errorMessage = "Password is required"
+            return
+        }
+        guard !firstName.isEmpty else {
+            authService.errorMessage = "First name is required"
+            return
+        }
+        guard !lastName.isEmpty else {
+            authService.errorMessage = "Last name is required"
             return
         }
 
