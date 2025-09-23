@@ -36,6 +36,164 @@ struct LibraryView: View {
     @State private var selectedBook: Book?
     @State private var isShowingDetail = false
 
+    private var emptyStateView: some View {
+        VStack(spacing: AppleBooksSpacing.space20) {
+            Image(systemName: "books.vertical")
+                .font(.system(size: 72, weight: .light))
+                .foregroundColor(AppleBooksColors.textSecondary)
+
+            VStack(spacing: AppleBooksSpacing.space8) {
+                Text("No books in your library")
+                    .font(AppleBooksTypography.headlineLarge)
+                    .foregroundColor(AppleBooksColors.text)
+                    .multilineTextAlignment(.center)
+
+                Text("Scan a bookshelf or add books manually to get started")
+                    .font(AppleBooksTypography.bodyMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+    }
+
+    private var libraryContentView: some View {
+        ScrollView {
+            VStack(spacing: AppleBooksSpacing.space32) {
+                // Currently Reading Section
+                let currentlyReadingBooks = viewModel.books.filter { $0.status == .currentlyReading }.sorted(by: selectedSort.sortFunction)
+                if !currentlyReadingBooks.isEmpty {
+                    AppleBooksSectionHeader(
+                        title: "Currently Reading",
+                        subtitle: "\(currentlyReadingBooks.count) books",
+                        showSeeAll: false
+                    )
+
+                    LazyVStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(currentlyReadingBooks) { book in
+                            AppleBooksBookCard(
+                                book: book,
+                                onTap: { selectedBook = book; isShowingDetail = true },
+                                showAddButton: false
+                            )
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
+
+                // Library Section
+                let libraryBooks = viewModel.books.filter { $0.status == .library }.sorted(by: selectedSort.sortFunction)
+                if !libraryBooks.isEmpty {
+                    AppleBooksSectionHeader(
+                        title: "Library",
+                        subtitle: "\(libraryBooks.count) books",
+                        showSeeAll: false
+                    )
+
+                    LazyVStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(libraryBooks) { book in
+                            AppleBooksBookCard(
+                                book: book,
+                                onTap: { selectedBook = book; isShowingDetail = true },
+                                showAddButton: false
+                            )
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
+
+                // Other statuses if any
+                let otherBooks = viewModel.books.filter { $0.status != .currentlyReading && $0.status != .library }.sorted(by: selectedSort.sortFunction)
+                if !otherBooks.isEmpty {
+                    AppleBooksSectionHeader(
+                        title: "Other",
+                        subtitle: "\(otherBooks.count) books",
+                        showSeeAll: false
+                    )
+
+                    LazyVStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(otherBooks) { book in
+                            AppleBooksBookCard(
+                                book: book,
+                                onTap: { selectedBook = book; isShowingDetail = true },
+                                showAddButton: false
+                            )
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
+            }
+            .padding(.vertical, AppleBooksSpacing.space24)
+        }
+    }
+
+    private var actionButtonsView: some View {
+        VStack(spacing: AppleBooksSpacing.space16) {
+            HStack(spacing: AppleBooksSpacing.space16) {
+                Button(action: {
+                    isShowingCamera = true
+                }) {
+                    HStack(spacing: AppleBooksSpacing.space8) {
+                        Image(systemName: "camera")
+                            .font(AppleBooksTypography.buttonMedium)
+                        Text("Scan Bookshelf")
+                            .font(AppleBooksTypography.buttonLarge)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppleBooksSpacing.space16)
+                    .background(AppleBooksColors.accent)
+                    .cornerRadius(12)
+                }
+
+                Button(action: {
+                    isShowingAddBook = true
+                }) {
+                    HStack(spacing: AppleBooksSpacing.space8) {
+                        Image(systemName: "plus")
+                            .font(AppleBooksTypography.buttonMedium)
+                        Text("Add Manually")
+                            .font(AppleBooksTypography.buttonLarge)
+                    }
+                    .foregroundColor(AppleBooksColors.accent)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppleBooksSpacing.space16)
+                    .background(AppleBooksColors.card)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(AppleBooksColors.accent, lineWidth: 1)
+                    )
+                }
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+        .padding(.bottom, AppleBooksSpacing.space24)
+    }
+
+    private var loadingOverlay: some View {
+        Group {
+            if viewModel.isLoading {
+                VStack(spacing: AppleBooksSpacing.space16) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: AppleBooksColors.accent))
+                        .scaleEffect(1.2)
+
+                    Text("Analyzing image...")
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                }
+                .padding(AppleBooksSpacing.space20)
+                .background(AppleBooksColors.card)
+                .cornerRadius(16)
+                .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
+                .padding(.horizontal, AppleBooksSpacing.space24)
+                .transition(.scale.combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
+            }
+        }
+    }
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -46,164 +204,16 @@ struct LibraryView: View {
                 VStack(spacing: 0) {
                     if viewModel.books.isEmpty {
                         Spacer()
-
-                        // Apple Books style empty state
-                        VStack(spacing: AppleBooksSpacing.space20) {
-                            Image(systemName: "books.vertical")
-                                .font(.system(size: 72, weight: .light))
-                                .foregroundColor(AppleBooksColors.textSecondary)
-
-                            VStack(spacing: AppleBooksSpacing.space8) {
-                                Text("No books in your library")
-                                    .font(AppleBooksTypography.headlineLarge)
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .multilineTextAlignment(.center)
-
-                                Text("Scan a bookshelf or add books manually to get started")
-                                    .font(AppleBooksTypography.bodyMedium)
-                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                    .multilineTextAlignment(.center)
-                            }
-                        }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-
+                        emptyStateView
                         Spacer()
                     } else {
-                        ScrollView {
-                            VStack(spacing: AppleBooksSpacing.space32) {
-                                // Currently Reading Section
-                                let currentlyReadingBooks = viewModel.books.filter { $0.status == .currentlyReading }.sorted(by: selectedSort.sortFunction)
-                                if !currentlyReadingBooks.isEmpty {
-                                    AppleBooksSectionHeader(
-                                        title: "Currently Reading",
-                                        subtitle: "\(currentlyReadingBooks.count) books",
-                                        showSeeAll: false
-                                    )
-
-                                    LazyVStack(spacing: AppleBooksSpacing.space16) {
-                                        ForEach(currentlyReadingBooks) { book in
-                                            AppleBooksBookCard(
-                                                book: book,
-                                                onTap: { selectedBook = book; isShowingDetail = true },
-                                                showAddButton: false
-                                            )
-                                        }
-                                    }
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
-                                }
-
-                                // Library Section
-                                let libraryBooks = viewModel.books.filter { $0.status == .library }.sorted(by: selectedSort.sortFunction)
-                                if !libraryBooks.isEmpty {
-                                    AppleBooksSectionHeader(
-                                        title: "Library",
-                                        subtitle: "\(libraryBooks.count) books",
-                                        showSeeAll: false
-                                    )
-
-                                    LazyVStack(spacing: AppleBooksSpacing.space16) {
-                                        ForEach(libraryBooks) { book in
-                                            AppleBooksBookCard(
-                                                book: book,
-                                                onTap: { selectedBook = book; isShowingDetail = true },
-                                                showAddButton: false
-                                            )
-                                        }
-                                    }
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
-                                }
-
-                                // Other statuses if any
-                                let otherBooks = viewModel.books.filter { $0.status != .currentlyReading && $0.status != .library }.sorted(by: selectedSort.sortFunction)
-                                if !otherBooks.isEmpty {
-                                    AppleBooksSectionHeader(
-                                        title: "Other",
-                                        subtitle: "\(otherBooks.count) books",
-                                        showSeeAll: false
-                                    )
-
-                                    LazyVStack(spacing: AppleBooksSpacing.space16) {
-                                        ForEach(otherBooks) { book in
-                                            AppleBooksBookCard(
-                                                book: book,
-                                                onTap: { selectedBook = book; isShowingDetail = true },
-                                                showAddButton: false
-                                            )
-                                        }
-                                    }
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
-                                }
-                            }
-                            .padding(.vertical, AppleBooksSpacing.space24)
-                        }
+                        libraryContentView
                     }
 
-                    // Action buttons with Apple Books styling
-                    VStack(spacing: AppleBooksSpacing.space16) {
-                        HStack(spacing: AppleBooksSpacing.space16) {
-                            Button(action: {
-                                isShowingCamera = true
-                            }) {
-                                HStack(spacing: AppleBooksSpacing.space8) {
-                                    Image(systemName: "camera")
-                                        .font(AppleBooksTypography.buttonMedium)
-                                    Text("Scan Bookshelf")
-                                        .font(AppleBooksTypography.buttonLarge)
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppleBooksSpacing.space16)
-                                .background(AppleBooksColors.accent)
-                                .cornerRadius(12)
-                            }
-
-                            Button(action: {
-                                isShowingAddBook = true
-                            }) {
-                                HStack(spacing: AppleBooksSpacing.space8) {
-                                    Image(systemName: "plus")
-                                        .font(AppleBooksTypography.buttonMedium)
-                                    Text("Add Manually")
-                                        .font(AppleBooksTypography.buttonLarge)
-                                }
-                                .foregroundColor(AppleBooksColors.accent)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppleBooksSpacing.space16)
-                                .background(AppleBooksColors.card)
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(AppleBooksColors.accent, lineWidth: 1)
-                                )
-                            }
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                    .padding(.bottom, AppleBooksSpacing.space24)
+                    actionButtonsView
                 }
             }
-            .overlay(
-                Group {
-                    if viewModel.isLoading {
-                        VStack(spacing: AppleBooksSpacing.space16) {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: AppleBooksColors.accent))
-                                .scaleEffect(1.2)
-
-                            Text("Analyzing image...")
-                                .font(AppleBooksTypography.bodyLarge)
-                                .foregroundColor(AppleBooksColors.text)
-                        }
-                        .padding(AppleBooksSpacing.space20)
-                        .background(AppleBooksColors.card)
-                        .cornerRadius(16)
-                        .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                        .transition(.scale.combined(with: .opacity))
-                        .animation(.easeInOut(duration: 0.3), value: viewModel.isLoading)
-                    }
-                }
-            )
+            .overlay(loadingOverlay)
             .background(
                 NavigationLink(destination: BookDetailView(book: selectedBook!, viewModel: viewModel), isActive: Binding(get: { isShowingDetail }, set: { isShowingDetail = $0; if !$0 { selectedBook = nil } }))
             )
