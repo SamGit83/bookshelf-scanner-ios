@@ -24,11 +24,11 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bookshelf Scanner" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jkl-45-678">
-                                <rect key="frame" x="20" y="451" width="353" height="50"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                <color key="textColor" red="1" green="0.5843137255" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+    <rect key="frame" x="20" y="451" width="353" height="50"/>
+    <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+    <color key="textColor" red="1" green="0.5843137255" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+    <nil key="highlightedColor"/>
+</label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="mno-89-012"/>
                         <color key="backgroundColor" red="0.9490196078" green="0.9490196078" blue="0.968627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
