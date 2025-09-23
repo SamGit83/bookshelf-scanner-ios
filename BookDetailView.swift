@@ -19,367 +19,392 @@ struct BookDetailView: View {
     @State private var isLoadingBio = false
     @State private var isLoadingTeaser = false
 
-    var body: some View {
-        ScrollView {
-            VStack(spacing: AppleBooksSpacing.space32) {
-                // Book Cover Section
-                VStack(spacing: AppleBooksSpacing.space20) {
-                    // Large Cover Image
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.gray.opacity(0.1))
-                            .frame(width: 200, height: 300)
-                            .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
+    private var bookCoverSection: some View {
+        VStack(spacing: AppleBooksSpacing.space20) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.gray.opacity(0.1))
+                    .frame(width: 200, height: 300)
+                    .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
 
-                        if let coverURL = book.coverImageURL ?? bookDetails?.thumbnailURL {
-                            if let url = URL(string: coverURL) {
-                                AsyncImage(url: url) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: 190, height: 290)
-                                        .cornerRadius(12)
-                                } placeholder: {
-                                    ProgressView()
-                                }
-                            } else {
-                                Image(systemName: "book.fill")
-                                    .resizable()
-                                    .frame(width: 80, height: 120)
-                                    .foregroundColor(.gray)
-                                }
-                        } else if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
-                            Image(uiImage: uiImage)
+                if let coverURL = book.coverImageURL ?? bookDetails?.thumbnailURL {
+                    if let url = URL(string: coverURL) {
+                        AsyncImage(url: url) { image in
+                            image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 190, height: 290)
                                 .cornerRadius(12)
-                        } else {
-                            Image(systemName: "book.fill")
-                                .resizable()
-                                .frame(width: 80, height: 120)
-                                .foregroundColor(.gray)
+                        } placeholder: {
+                            ProgressView()
                         }
+                    } else {
+                        Image(systemName: "book.fill")
+                            .resizable()
+                            .frame(width: 80, height: 120)
+                            .foregroundColor(.gray)
+                    }
+                } else if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 190, height: 290)
+                        .cornerRadius(12)
+                } else {
+                    Image(systemName: "book.fill")
+                        .resizable()
+                        .frame(width: 80, height: 120)
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+        .padding(.top, AppleBooksSpacing.space32)
+    }
+
+    private var bookMetadataSection: some View {
+        AppleBooksCard {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+                Text(currentBook.title ?? "Unknown Title")
+                    .font(AppleBooksTypography.displayMedium)
+                    .foregroundColor(AppleBooksColors.text)
+                    .multilineTextAlignment(.leading)
+
+                Text(currentBook.author ?? "Unknown Author")
+                    .font(AppleBooksTypography.headlineMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+
+                HStack(spacing: AppleBooksSpacing.space12) {
+                    if let genre = currentBook.genre ?? bookDetails?.genre {
+                        Text(genre)
+                            .font(AppleBooksTypography.captionBold)
+                            .foregroundColor(AppleBooksColors.accent)
+                            .padding(.horizontal, AppleBooksSpacing.space8)
+                            .padding(.vertical, AppleBooksSpacing.space4)
+                            .background(AppleBooksColors.accent.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+
+                    if let subGenre = currentBook.subGenre {
+                        Text(subGenre)
+                            .font(AppleBooksTypography.captionBold)
+                            .foregroundColor(AppleBooksColors.success)
+                            .padding(.horizontal, AppleBooksSpacing.space8)
+                            .padding(.vertical, AppleBooksSpacing.space4)
+                            .background(AppleBooksColors.success.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+
+                    if let publishedDate = bookDetails?.publishedDate ?? currentBook.publicationYear {
+                        Text(publishedDate)
+                            .font(AppleBooksTypography.caption)
+                            .foregroundColor(AppleBooksColors.textTertiary)
                     }
                 }
-                .padding(.horizontal, AppleBooksSpacing.space24)
-                .padding(.top, AppleBooksSpacing.space32)
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+    }
 
-                // Book Metadata Section
+    private var descriptionSection: some View {
+        if let description = bookDetails?.description, !description.isEmpty {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "Description",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+
                 AppleBooksCard {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
-                        // Title
-                        Text(currentBook.title ?? "Unknown Title")
-                            .font(AppleBooksTypography.displayMedium)
-                            .foregroundColor(AppleBooksColors.text)
-                            .multilineTextAlignment(.leading)
-
-                        // Author
-                        Text(currentBook.author ?? "Unknown Author")
-                            .font(AppleBooksTypography.headlineMedium)
-                            .foregroundColor(AppleBooksColors.textSecondary)
-
-                        // Genre and Publication Info
-                        HStack(spacing: AppleBooksSpacing.space12) {
-                            if let genre = currentBook.genre ?? bookDetails?.genre {
-                                Text(genre)
-                                    .font(AppleBooksTypography.captionBold)
-                                    .foregroundColor(AppleBooksColors.accent)
-                                    .padding(.horizontal, AppleBooksSpacing.space8)
-                                    .padding(.vertical, AppleBooksSpacing.space4)
-                                    .background(AppleBooksColors.accent.opacity(0.1))
-                                    .cornerRadius(6)
-                            }
-
-                            if let subGenre = currentBook.subGenre {
-                                Text(subGenre)
-                                    .font(AppleBooksTypography.captionBold)
-                                    .foregroundColor(AppleBooksColors.success)
-                                    .padding(.horizontal, AppleBooksSpacing.space8)
-                                    .padding(.vertical, AppleBooksSpacing.space4)
-                                    .background(AppleBooksColors.success.opacity(0.1))
-                                    .cornerRadius(6)
-                            }
-
-                            if let publishedDate = bookDetails?.publishedDate ?? currentBook.publicationYear {
-                                Text(publishedDate)
-                                    .font(AppleBooksTypography.caption)
-                                    .foregroundColor(AppleBooksColors.textTertiary)
-                            }
-                        }
-                    }
+                    Text(description)
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                        .lineSpacing(6)
                 }
-                .padding(.horizontal, AppleBooksSpacing.space24)
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        } else {
+            EmptyView()
+        }
+    }
 
-                // Description Section
-                if let description = bookDetails?.description, !description.isEmpty {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                        AppleBooksSectionHeader(
-                            title: "Description",
-                            subtitle: nil,
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
+    private var bookDetailsSection: some View {
+        if (currentBook.pageCount ?? bookDetails?.pageCount) != nil || currentBook.estimatedReadingTime != nil {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "Book Details",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
 
-                        AppleBooksCard {
-                            Text(description)
-                                .font(AppleBooksTypography.bodyLarge)
-                                .foregroundColor(AppleBooksColors.text)
-                                .lineSpacing(6)
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                }
-
-                // Book Details Section
-                if (currentBook.pageCount ?? bookDetails?.pageCount) != nil || currentBook.estimatedReadingTime != nil {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                        AppleBooksSectionHeader(
-                            title: "Book Details",
-                            subtitle: nil,
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
-
-                        AppleBooksCard {
-                            VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                if let pageCount = currentBook.pageCount ?? bookDetails?.pageCount {
-                                    HStack {
-                                        Text("Pages")
-                                            .font(AppleBooksTypography.bodyMedium)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                        Spacer()
-                                        Text("\(pageCount)")
-                                            .font(AppleBooksTypography.bodyLarge)
-                                            .foregroundColor(AppleBooksColors.text)
-                                    }
-                                }
-
-                                if let readingTime = currentBook.estimatedReadingTime {
-                                    HStack {
-                                        Text("Reading Time")
-                                            .font(AppleBooksTypography.bodyMedium)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                        Spacer()
-                                        Text(readingTime)
-                                            .font(AppleBooksTypography.bodyLarge)
-                                            .foregroundColor(AppleBooksColors.text)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                }
-
-                // Book Teaser Section
-                if let teaser = book.teaser, !teaser.isEmpty {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                        AppleBooksSectionHeader(
-                            title: "Book Teaser",
-                            subtitle: nil,
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
-
-                        AppleBooksCard {
-                            Text(teaser)
-                                .font(AppleBooksTypography.bodyLarge)
-                                .foregroundColor(AppleBooksColors.text)
-                                .lineSpacing(6)
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                } else if isLoadingTeaser {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                        AppleBooksSectionHeader(
-                            title: "Book Teaser",
-                            subtitle: nil,
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
-
-                        AppleBooksCard {
-                            ProgressView()
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                }
-
-                // Author Biography Section
-                if let bio = book.authorBio ?? book.authorBiography, !bio.isEmpty {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                        AppleBooksSectionHeader(
-                            title: "About the Author",
-                            subtitle: nil,
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
-
-                        AppleBooksCard {
-                            Text(bio)
-                                .font(AppleBooksTypography.bodyLarge)
-                                .foregroundColor(AppleBooksColors.text)
-                                .lineSpacing(6)
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                } else if isLoadingBio {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                        AppleBooksSectionHeader(
-                            title: "About the Author",
-                            subtitle: nil,
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
-
-                        AppleBooksCard {
-                            ProgressView()
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                }
-
-                // Reading Progress Section
-                VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                    AppleBooksSectionHeader(
-                        title: "Reading Progress",
-                        subtitle: nil,
-                        showSeeAll: false,
-                        seeAllAction: nil
-                    )
-
-                    AppleBooksCard {
-                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+                AppleBooksCard {
+                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                        if let pageCount = currentBook.pageCount ?? bookDetails?.pageCount {
                             HStack {
-                                Text("Status")
+                                Text("Pages")
                                     .font(AppleBooksTypography.bodyMedium)
                                     .foregroundColor(AppleBooksColors.textSecondary)
                                 Spacer()
-                                Text(currentBook.status.rawValue)
+                                Text("\(pageCount)")
                                     .font(AppleBooksTypography.bodyLarge)
                                     .foregroundColor(AppleBooksColors.text)
                             }
+                        }
 
-                            if let totalPages = currentBook.totalPages, totalPages > 0 {
-                                let progress = Double(currentBook.currentPage) / Double(totalPages)
-                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                    HStack {
-                                        Text("Progress")
-                                            .font(AppleBooksTypography.bodyMedium)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                        Spacer()
-                                        Text("\(currentBook.currentPage) of \(totalPages) pages")
-                                            .font(AppleBooksTypography.bodyMedium)
-                                            .foregroundColor(AppleBooksColors.text)
-                                    }
-
-                                    ProgressView(value: progress)
-                                        .progressViewStyle(LinearProgressViewStyle(tint: AppleBooksColors.accent))
-                                        .frame(height: 6)
-                                }
-                            } else {
-                                Text("No page information available")
+                        if let readingTime = currentBook.estimatedReadingTime {
+                            HStack {
+                                Text("Reading Time")
                                     .font(AppleBooksTypography.bodyMedium)
                                     .foregroundColor(AppleBooksColors.textSecondary)
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, AppleBooksSpacing.space24)
-
-                // Action Buttons Section
-                VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                    AppleBooksSectionHeader(
-                        title: "Actions",
-                        subtitle: nil,
-                        showSeeAll: false,
-                        seeAllAction: nil
-                    )
-
-                    AppleBooksCard {
-                        VStack(spacing: AppleBooksSpacing.space12) {
-                            if currentBook.status == .library {
-                                Button(action: {
-                                    withAnimation(.spring()) {
-                                        viewModel.moveBook(currentBook, to: .currentlyReading)
-                                    }
-                                }) {
-                                    Text("Start Reading")
-                                        .font(AppleBooksTypography.buttonLarge)
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, AppleBooksSpacing.space16)
-                                        .background(AppleBooksColors.accent)
-                                        .cornerRadius(12)
-                                }
-                            } else if currentBook.status == .currentlyReading {
-                                Button(action: {
-                                    showProgressView = true
-                                }) {
-                                    Text("Update Progress")
-                                        .font(AppleBooksTypography.buttonLarge)
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, AppleBooksSpacing.space16)
-                                        .background(AppleBooksColors.success)
-                                        .cornerRadius(12)
-                                }
-                            }
-
-                            Button(action: {
-                                showEditView = true
-                            }) {
-                                Text("Edit Book")
-                                    .font(AppleBooksTypography.buttonLarge)
+                                Spacer()
+                                Text(readingTime)
+                                    .font(AppleBooksTypography.bodyLarge)
                                     .foregroundColor(AppleBooksColors.text)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, AppleBooksSpacing.space16)
-                                    .background(AppleBooksColors.card.opacity(0.5))
-                                    .cornerRadius(12)
                             }
                         }
                     }
                 }
-                .padding(.horizontal, AppleBooksSpacing.space24)
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        } else {
+            EmptyView()
+        }
+    }
 
-                // Recommendations Section
-                if !recommendations.isEmpty {
-                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                        AppleBooksSectionHeader(
-                            title: "You Might Also Like",
-                            subtitle: nil,
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
+    private var bookTeaserSection: some View {
+        if let teaser = book.teaser, !teaser.isEmpty {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "Book Teaser",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: AppleBooksSpacing.space16) {
-                                ForEach(recommendations.prefix(5)) { recommendation in
-                                    AppleBooksBookCard(
-                                        book: Book(
-                                            title: recommendation.title,
-                                            author: recommendation.author,
-                                            coverImageURL: recommendation.thumbnailURL,
-                                            genre: nil,
-                                            subGenre: nil,
-                                            publicationYear: nil,
-                                            pageCount: nil,
-                                            estimatedReadingTime: nil,
-                                            isbn: nil,
-                                            status: .library
-                                        ),
-                                        onTap: {},
-                                        showAddButton: false,
-                                        onAddTap: nil
-                                    )
-                                }
+                AppleBooksCard {
+                    Text(teaser)
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                        .lineSpacing(6)
+                }
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        } else if isLoadingTeaser {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "Book Teaser",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+
+                AppleBooksCard {
+                    ProgressView()
+                }
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        } else {
+            EmptyView()
+        }
+    }
+
+    private var authorBiographySection: some View {
+        if let bio = book.authorBio ?? book.authorBiography, !bio.isEmpty {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "About the Author",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+
+                AppleBooksCard {
+                    Text(bio)
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                        .lineSpacing(6)
+                }
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        } else if isLoadingBio {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "About the Author",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+
+                AppleBooksCard {
+                    ProgressView()
+                }
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        } else {
+            EmptyView()
+        }
+    }
+
+    private var readingProgressSection: some View {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AppleBooksSectionHeader(
+                title: "Reading Progress",
+                subtitle: nil,
+                showSeeAll: false,
+                seeAllAction: nil
+            )
+
+            AppleBooksCard {
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+                    HStack {
+                        Text("Status")
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                        Spacer()
+                        Text(currentBook.status.rawValue)
+                            .font(AppleBooksTypography.bodyLarge)
+                            .foregroundColor(AppleBooksColors.text)
+                    }
+
+                    if let totalPages = currentBook.totalPages, totalPages > 0 {
+                        let progress = Double(currentBook.currentPage) / Double(totalPages)
+                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                            HStack {
+                                Text("Progress")
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                Spacer()
+                                Text("\(currentBook.currentPage) of \(totalPages) pages")
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.text)
                             }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
+
+                            ProgressView(value: progress)
+                                .progressViewStyle(LinearProgressViewStyle(tint: AppleBooksColors.accent))
+                                .frame(height: 6)
                         }
+                    } else {
+                        Text("No page information available")
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
                     }
                 }
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+    }
 
+    private var actionButtonsSection: some View {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AppleBooksSectionHeader(
+                title: "Actions",
+                subtitle: nil,
+                showSeeAll: false,
+                seeAllAction: nil
+            )
+
+            AppleBooksCard {
+                VStack(spacing: AppleBooksSpacing.space12) {
+                    if currentBook.status == .library {
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                viewModel.moveBook(currentBook, to: .currentlyReading)
+                            }
+                        }) {
+                            Text("Start Reading")
+                                .font(AppleBooksTypography.buttonLarge)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, AppleBooksSpacing.space16)
+                                .background(AppleBooksColors.accent)
+                                .cornerRadius(12)
+                        }
+                    } else if currentBook.status == .currentlyReading {
+                        Button(action: {
+                            showProgressView = true
+                        }) {
+                            Text("Update Progress")
+                                .font(AppleBooksTypography.buttonLarge)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, AppleBooksSpacing.space16)
+                                .background(AppleBooksColors.success)
+                                .cornerRadius(12)
+                        }
+                    }
+
+                    Button(action: {
+                        showEditView = true
+                    }) {
+                        Text("Edit Book")
+                            .font(AppleBooksTypography.buttonLarge)
+                            .foregroundColor(AppleBooksColors.text)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, AppleBooksSpacing.space16)
+                            .background(AppleBooksColors.card.opacity(0.5))
+                            .cornerRadius(12)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+    }
+
+    private var recommendationsSection: some View {
+        if !recommendations.isEmpty {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "You Might Also Like",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(recommendations.prefix(5)) { recommendation in
+                            AppleBooksBookCard(
+                                book: Book(
+                                    title: recommendation.title,
+                                    author: recommendation.author,
+                                    coverImageURL: recommendation.thumbnailURL,
+                                    genre: nil,
+                                    subGenre: nil,
+                                    publicationYear: nil,
+                                    pageCount: nil,
+                                    estimatedReadingTime: nil,
+                                    isbn: nil,
+                                    status: .library
+                                ),
+                                onTap: {},
+                                showAddButton: false,
+                                onAddTap: nil
+                            )
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
+            }
+        } else {
+            EmptyView()
+        }
+    }
+
+    var body: some View {
+    var body: some View {
+        ScrollView {
+            VStack(spacing: AppleBooksSpacing.space32) {
+                bookCoverSection
+                bookMetadataSection
+                descriptionSection
+                bookDetailsSection
+                bookTeaserSection
+                authorBiographySection
+                readingProgressSection
+                actionButtonsSection
+                recommendationsSection
                 Spacer(minLength: AppleBooksSpacing.space64)
             }
             .background(AppleBooksColors.background)
