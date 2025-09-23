@@ -39,6 +39,7 @@ struct SearchView: View {
                                     .foregroundColor(AppleBooksColors.text)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
+                                    .frame(height: 24)
 
                                 if !searchText.isEmpty {
                                     Button(action: {
@@ -50,7 +51,8 @@ struct SearchView: View {
                                     }
                                 }
                             }
-                            .padding(AppleBooksSpacing.space16)
+                            .padding(.vertical, AppleBooksSpacing.space12)
+                            .padding(.horizontal, AppleBooksSpacing.space16)
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
 

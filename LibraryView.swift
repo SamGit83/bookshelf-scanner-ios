@@ -269,10 +269,10 @@ struct LibraryView: View {
                         showingClearConfirmation = true
                     }) {
                         Image(systemName: "trash")
-                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .foregroundColor(Color.red)
                             .font(AppleBooksTypography.buttonMedium)
                             .padding(AppleBooksSpacing.space8)
-                            .background(AppleBooksColors.card)
+                            .background(Color.red.opacity(0.1))
                             .clipShape(Circle())
                     }
 

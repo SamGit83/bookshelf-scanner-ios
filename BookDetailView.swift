@@ -427,30 +427,22 @@ struct BookDetailView: View {
                 switch result {
                 case .success(let details):
                     self.bookDetails = details
-                    // Fetch book teaser if not cached
-                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true {
-                        if let title = self.currentBook.title, let author = self.currentBook.author {
-                            self.loadBookTeaser(title: title, author: author)
-                        }
+                    // Always fetch fresh AI-generated book teaser
+                    if let title = self.currentBook.title, let author = self.currentBook.author {
+                        self.loadBookTeaser(title: title, author: author)
                     }
-                    // Fetch author bio if not cached
-                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true {
-                        if let author = self.currentBook.author {
-                            self.loadAuthorBiography(author: author)
-                        }
+                    // Always fetch fresh AI-generated author bio
+                    if let author = self.currentBook.author {
+                        self.loadAuthorBiography(author: author)
                     }
                 case .failure(let error):
                     print("Failed to load book details: \(error.localizedDescription)")
-                    // Still try to load teaser and bio if details failed and not cached
-                    if self.currentBook.teaser == nil || self.currentBook.teaser?.isEmpty == true {
-                        if let title = self.currentBook.title, let author = self.currentBook.author {
-                            self.loadBookTeaser(title: title, author: author)
-                        }
+                    // Always try to load fresh AI-generated teaser and bio even if details failed
+                    if let title = self.currentBook.title, let author = self.currentBook.author {
+                        self.loadBookTeaser(title: title, author: author)
                     }
-                    if (self.currentBook.authorBio ?? self.currentBook.authorBiography) == nil || (self.currentBook.authorBio ?? self.currentBook.authorBiography)?.isEmpty == true {
-                        if let author = self.currentBook.author {
-                            self.loadAuthorBiography(author: author)
-                        }
+                    if let author = self.currentBook.author {
+                        self.loadAuthorBiography(author: author)
                     }
                 }
             }

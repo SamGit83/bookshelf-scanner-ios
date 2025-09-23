@@ -4,6 +4,7 @@ import PhotosUI
 struct ProfileView: View {
     @ObservedObject var authService: AuthService
     @ObservedObject var themeManager = ThemeManager.shared
+    @ObservedObject var accentColorManager = AccentColorManager.shared
     @State private var showSignOutAlert = false
 
     var body: some View {
@@ -168,6 +169,30 @@ struct ProfileView: View {
                                     }
                                 }
 
+                                // Accent Color Section
+                                AppleBooksCard {
+                                    VStack(spacing: AppleBooksSpacing.space12) {
+                                        HStack {
+                                            Text("Accent Color")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+                                            Spacer()
+                                        }
+
+                                        HStack(spacing: AppleBooksSpacing.space12) {
+                                            ForEach(AccentColorScheme.allCases) { colorScheme in
+                                                AccentColorOption(
+                                                    colorScheme: colorScheme,
+                                                    isSelected: accentColorManager.currentAccentColor == colorScheme
+                                                )
+                                                .onTapGesture {
+                                                    accentColorManager.currentAccentColor = colorScheme
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                                 // Sign Out
                                 Button(action: {
                                     showSignOutAlert = true
@@ -253,6 +278,36 @@ struct ProfileMenuRow: View {
         }
         .padding(SpacingSystem.md)
         .featureCardStyle()
+    }
+}
+
+struct AccentColorOption: View {
+    let colorScheme: AccentColorScheme
+    let isSelected: Bool
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(colorScheme.color)
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white, lineWidth: 2)
+                )
+                .shadow(color: colorScheme.color.opacity(0.3), radius: 4, x: 0, y: 2)
+
+            if isSelected {
+                Circle()
+                    .stroke(Color.white, lineWidth: 3)
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: "checkmark")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                    .shadow(color: Color.black.opacity(0.3), radius: 2, x: 0, y: 1)
+            }
+        }
+        .frame(width: 50, height: 50)
     }
 }
 

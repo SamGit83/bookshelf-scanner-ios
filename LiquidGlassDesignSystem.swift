@@ -835,6 +835,48 @@ struct DiscoverColors {
     static let addToLibraryButton = UIGradients.primaryButton
 }
 
+// MARK: - Accent Color Management
+enum AccentColorScheme: String, CaseIterable, Identifiable {
+    case warmOrange = "Warm Orange"
+    case deepCoral = "Deep Coral"
+    case vibrantPink = "Vibrant Pink"
+    case electricBlue = "Electric Blue"
+    case freshGreen = "Fresh Green"
+    case royalPurple = "Royal Purple"
+
+    var id: String { rawValue }
+
+    var color: Color {
+        switch self {
+        case .warmOrange: return Color(hex: "FF9500")
+        case .deepCoral: return Color(hex: "FF6B6B")
+        case .vibrantPink: return Color(hex: "FF2D92")
+        case .electricBlue: return Color(hex: "007AFF")
+        case .freshGreen: return Color(hex: "30D158")
+        case .royalPurple: return Color(hex: "5856D6")
+        }
+    }
+
+    var displayName: String { rawValue }
+}
+
+class AccentColorManager: ObservableObject {
+    static let shared = AccentColorManager()
+
+    private let userDefaultsKey = "accentColorScheme"
+
+    @Published var currentAccentColor: AccentColorScheme {
+        didSet {
+            UserDefaults.standard.set(currentAccentColor.rawValue, forKey: userDefaultsKey)
+        }
+    }
+
+    init() {
+        let rawValue = UserDefaults.standard.string(forKey: userDefaultsKey) ?? AccentColorScheme.deepCoral.rawValue
+        self.currentAccentColor = AccentColorScheme(rawValue: rawValue) ?? .deepCoral
+    }
+}
+
 // MARK: - Apple Books Design System
 
 // Apple Books Color Palette
@@ -844,7 +886,7 @@ public struct AppleBooksColors {
     static let text = Color.black                   // Primary black text
     static let textSecondary = Color(hex: "3C3C4399") // 60% opacity gray
     static let textTertiary = Color(hex: "3C3C434D")  // 30% opacity gray
-    static let accent = Color(hex: "FF6B6B")       // Deep coral for CTAs
+    static let accent = AccentColorManager.shared.currentAccentColor.color // Dynamic accent color
     static let promotional = Color(hex: "FF3B30")   // Red for promotions
     static let success = Color(hex: "34C759")      // Green for success states
 }
@@ -1138,13 +1180,14 @@ public struct AppleBooksBookCard: View {
                 VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
                     Text(book.title ?? "Unknown Title")
                         .font(AppleBooksTypography.bodyLarge)
+                        .bold()
                         .foregroundColor(AppleBooksColors.text)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
                     Text(book.author ?? "Unknown Author")
                         .font(AppleBooksTypography.caption)
-                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .foregroundColor(AppleBooksColors.text)
 
                     // Row 1: Page count and reading time badges
                     HStack(spacing: AppleBooksSpacing.space6) {

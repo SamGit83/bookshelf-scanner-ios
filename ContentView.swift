@@ -3,17 +3,11 @@ import SwiftUI
 import UIKit
 #endif
 
-// Apple Books Design Colors
-let appleBooksBackground = Color(hex: "F2F2F7")    // Light gray background
-let appleBooksCard = Color.white                   // Pure white cards
-let appleBooksText = Color.black                   // Primary black text
-let appleBooksTextSecondary = Color(hex: "3C3C4399") // 60% opacity gray
-let appleBooksTextTertiary = Color(hex: "3C3C434D")  // 30% opacity gray
-let appleBooksAccent = Color(hex: "FF9F0A")       // Warm orange for CTAs
 
 struct ContentView: View {
      @ObservedObject private var authService = AuthService.shared
      @ObservedObject private var themeManager = ThemeManager.shared
+     @ObservedObject private var accentColorManager = AccentColorManager.shared
      @StateObject private var viewModel = BookViewModel()
      @State private var capturedImage: UIImage?
      @State private var isShowingCamera = false
@@ -91,7 +85,7 @@ struct ContentView: View {
         NavigationView {
             ZStack {
                 selectedView
-                    .background(appleBooksBackground)
+                    .background(AppleBooksColors.background)
                 VStack {
                     Spacer()
                     LiquidGlassTabBar(selectedTab: $selectedTab)
