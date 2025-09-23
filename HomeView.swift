@@ -86,12 +86,13 @@ struct HomeView: View {
                     books: trendingBooks,
                     title: "New & Trending",
                     subtitle: "Explore what's hot in audiobooks",
+                    onBookTap: {
+                        // Handle book tap
+                        print("Book tapped: \($0.title ?? "Unknown")")
+                    },
                     onSeeAllTap: nil,
                     viewModel: nil
-                ) {
-                    // Handle book tap
-                    print("Book tapped: \($0.title ?? "Unknown")")
-                }
+                )
             }
         }
         .background(AppleBooksColors.background)
