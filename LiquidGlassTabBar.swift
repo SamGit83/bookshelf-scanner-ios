@@ -34,19 +34,28 @@ struct LiquidGlassTabBar: View {
             TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
             TabItem(icon: AnyView(Image(systemName: "book.closed")), label: "Reading", tag: 1),
             TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
-            TabItem(icon: AnyView(ProfileInitialsView(initials: userInitials)), label: "Profile", tag: 3)
+            TabItem(icon: AnyView(EmptyView()), label: "Profile", tag: 3) // Profile handled separately
         ]
     }
 
     private func tabButtonContent(for tab: TabItem) -> some View {
         VStack(spacing: 4) {
-            tab.icon
+            if tab.tag == 3 { // Profile tab
+                ProfileInitialsView(
+                    initials: userInitials,
+                    isSelected: selectedTab == tab.tag
+                )
                 .frame(width: 24, height: 24)
+            } else {
+                tab.icon
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
+            }
             Text(tab.label)
                 .font(.caption2)
                 .fontWeight(.semibold)
+                .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
         }
-        .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
     }
@@ -85,23 +94,44 @@ struct LiquidGlassTabBar: View {
 
 struct ProfileInitialsView: View {
     let initials: String
+    let isSelected: Bool
     @Environment(\.colorScheme) private var colorScheme
 
+    private var backgroundColor: Color {
+        if isSelected {
+            return AppleBooksColors.accent.opacity(0.2)
+        } else {
+            return colorScheme == .dark ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2)
+        }
+    }
+    
+    private var borderColor: Color {
+        if isSelected {
+            return AppleBooksColors.accent.opacity(0.4)
+        } else {
+            return colorScheme == .dark ? Color.gray.opacity(0.4) : Color.gray.opacity(0.3)
+        }
+    }
+
     private var textColor: Color {
-        colorScheme == .dark ? .white : .black
+        if isSelected {
+            return AppleBooksColors.accent
+        } else {
+            return AdaptiveColors.secondaryText
+        }
     }
 
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color.blue.opacity(0.2))
+                .fill(backgroundColor)
                 .frame(width: 24, height: 24)
                 .overlay(
                     Circle()
-                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        .stroke(borderColor, lineWidth: 1)
                 )
             Text(initials)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(textColor)
         }
     }
