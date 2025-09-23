@@ -225,90 +225,7 @@ struct LibraryView: View {
                     Spacer()
                     actionButtonsView
                 } else {
-                    ScrollView {
-                        VStack(spacing: AppleBooksSpacing.space32) {
-                            // Reading Section (Currently Reading + Legacy)
-                            let readingBooks = viewModel.books.filter {
-                                $0.status == .reading || $0.status == .currentlyReading
-                            }.sorted(by: selectedSort.sortFunction)
-                            if !readingBooks.isEmpty {
-                                AppleBooksSectionHeader(
-                                    title: "Reading",
-                                    subtitle: "\(readingBooks.count) books",
-                                    showSeeAll: false,
-                                    seeAllAction: nil
-                                )
-
-                                LazyVStack(spacing: AppleBooksSpacing.space16) {
-                                    ForEach(readingBooks) { book in
-                                        AppleBooksBookCard(
-                                            book: book,
-                                            onTap: { selectedBook = book; isShowingDetail = true },
-                                            showAddButton: false,
-                                            onAddTap: nil,
-                                            viewModel: viewModel
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal, AppleBooksSpacing.space24)
-                            }
-
-                            // To Read Section (New books + Legacy Library)
-                            let toReadBooks = viewModel.books.filter {
-                                $0.status == .toRead || $0.status == .library
-                            }.sorted(by: selectedSort.sortFunction)
-                            if !toReadBooks.isEmpty {
-                                AppleBooksSectionHeader(
-                                    title: "To Read",
-                                    subtitle: "\(toReadBooks.count) books",
-                                    showSeeAll: false,
-                                    seeAllAction: nil
-                                )
-
-                                LazyVStack(spacing: AppleBooksSpacing.space16) {
-                                    ForEach(toReadBooks) { book in
-                                        AppleBooksBookCard(
-                                            book: book,
-                                            onTap: { selectedBook = book; isShowingDetail = true },
-                                            showAddButton: false,
-                                            onAddTap: nil,
-                                            viewModel: viewModel
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal, AppleBooksSpacing.space24)
-                            }
-
-                            // Read Section (Completed books)
-                            let readBooks = viewModel.books.filter { $0.status == .read }.sorted(by: selectedSort.sortFunction)
-                            if !readBooks.isEmpty {
-                                AppleBooksSectionHeader(
-                                    title: "Read",
-                                    subtitle: "\(readBooks.count) books",
-                                    showSeeAll: false,
-                                    seeAllAction: nil
-                                )
-
-                                LazyVStack(spacing: AppleBooksSpacing.space16) {
-                                    ForEach(readBooks) { book in
-                                        AppleBooksBookCard(
-                                            book: book,
-                                            onTap: { selectedBook = book; isShowingDetail = true },
-                                            showAddButton: false,
-                                            onAddTap: nil,
-                                            viewModel: viewModel
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal, AppleBooksSpacing.space24)
-                            }
-
-                            // Action buttons at bottom of scroll content
-                            actionButtonsView
-                                .padding(.bottom, AppleBooksSpacing.space80) // Extra space for tab bar
-                        }
-                        .padding(.vertical, AppleBooksSpacing.space24)
-                    }
+                    libraryContentView
                 }
             }
         }
@@ -325,6 +242,29 @@ struct LibraryView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack(spacing: AppleBooksSpacing.space12) {
+                    if !viewModel.books.isEmpty {
+                        Menu {
+                            Button(action: {
+                                isShowingCamera = true
+                            }) {
+                                Label("Scan Bookshelf", systemImage: "camera")
+                            }
+
+                            Button(action: {
+                                isShowingAddBook = true
+                            }) {
+                                Label("Add Manually", systemImage: "plus")
+                            }
+                        } label: {
+                            Image(systemName: "plus")
+                                .foregroundColor(AppleBooksColors.accent)
+                                .font(AppleBooksTypography.buttonMedium)
+                                .padding(AppleBooksSpacing.space8)
+                                .background(AppleBooksColors.accent.opacity(0.1))
+                                .clipShape(Circle())
+                        }
+                    }
+
                     Button(action: {
                         showingClearConfirmation = true
                     }) {
