@@ -833,6 +833,8 @@ struct DiscoverColors {
     static let trendingAccent = AccentColors.hotMagenta
     static let personalizedTint = PrimaryColors.vibrantPurple.opacity(0.1)
     static let addToLibraryButton = UIGradients.primaryButton
+}
+
 // MARK: - Apple Books Design System
 
 // Apple Books Color Palette
