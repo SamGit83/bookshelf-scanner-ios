@@ -105,7 +105,9 @@ struct ProfileView: View {
                         VStack(spacing: AppleBooksSpacing.space16) {
                             AppleBooksSectionHeader(
                                 title: "Settings",
-                                subtitle: "Manage your account and preferences"
+                                subtitle: "Manage your account and preferences",
+                                showSeeAll: false,
+                                seeAllAction: nil
                             )
 
                             VStack(spacing: AppleBooksSpacing.space12) {
