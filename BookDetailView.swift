@@ -106,14 +106,14 @@ struct BookDetailView: View {
         .padding(.horizontal, AppleBooksSpacing.space24)
     }
 
-    private var descriptionSection: some View {
+    private var descriptionSection: AnyView {
         if let description = bookDetails?.description, !description.isEmpty {
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "Description",
                     subtitle: nil,
                     showSeeAll: false,
-                    seeAllAction: nil
+                    seeAllAction: {}
                 )
 
                 AppleBooksCard {
@@ -123,20 +123,20 @@ struct BookDetailView: View {
                         .lineSpacing(6)
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.horizontal, AppleBooksSpacing.space24))
         } else {
-            EmptyView()
+            AnyView(EmptyView())
         }
     }
 
-    private var bookDetailsSection: some View {
+    private var bookDetailsSection: AnyView {
         if (currentBook.pageCount ?? bookDetails?.pageCount) != nil || currentBook.estimatedReadingTime != nil {
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "Book Details",
                     subtitle: nil,
                     showSeeAll: false,
-                    seeAllAction: nil
+                    seeAllAction: {}
                 )
 
                 AppleBooksCard {
@@ -167,20 +167,20 @@ struct BookDetailView: View {
                     }
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.horizontal, AppleBooksSpacing.space24))
         } else {
-            EmptyView()
+            AnyView(EmptyView())
         }
     }
 
-    private var bookTeaserSection: some View {
+    private var bookTeaserSection: AnyView {
         if let teaser = book.teaser, !teaser.isEmpty {
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "Book Teaser",
                     subtitle: nil,
                     showSeeAll: false,
-                    seeAllAction: nil
+                    seeAllAction: {}
                 )
 
                 AppleBooksCard {
@@ -190,34 +190,34 @@ struct BookDetailView: View {
                         .lineSpacing(6)
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.horizontal, AppleBooksSpacing.space24))
         } else if isLoadingTeaser {
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "Book Teaser",
                     subtitle: nil,
                     showSeeAll: false,
-                    seeAllAction: nil
+                    seeAllAction: {}
                 )
 
                 AppleBooksCard {
                     ProgressView()
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.horizontal, AppleBooksSpacing.space24))
         } else {
-            EmptyView()
+            AnyView(EmptyView())
         }
     }
 
-    private var authorBiographySection: some View {
+    private var authorBiographySection: AnyView {
         if let bio = book.authorBio ?? book.authorBiography, !bio.isEmpty {
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "About the Author",
                     subtitle: nil,
                     showSeeAll: false,
-                    seeAllAction: nil
+                    seeAllAction: {}
                 )
 
                 AppleBooksCard {
@@ -227,23 +227,23 @@ struct BookDetailView: View {
                         .lineSpacing(6)
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.horizontal, AppleBooksSpacing.space24))
         } else if isLoadingBio {
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "About the Author",
                     subtitle: nil,
                     showSeeAll: false,
-                    seeAllAction: nil
+                    seeAllAction: {}
                 )
 
                 AppleBooksCard {
                     ProgressView()
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.horizontal, AppleBooksSpacing.space24))
         } else {
-            EmptyView()
+            AnyView(EmptyView())
         }
     }
 
@@ -253,7 +253,7 @@ struct BookDetailView: View {
                 title: "Reading Progress",
                 subtitle: nil,
                 showSeeAll: false,
-                seeAllAction: nil
+                seeAllAction: {}
             )
 
             AppleBooksCard {
@@ -302,7 +302,7 @@ struct BookDetailView: View {
                 title: "Actions",
                 subtitle: nil,
                 showSeeAll: false,
-                seeAllAction: nil
+                seeAllAction: {}
             )
 
             AppleBooksCard {
@@ -352,14 +352,14 @@ struct BookDetailView: View {
         .padding(.horizontal, AppleBooksSpacing.space24)
     }
 
-    private var recommendationsSection: some View {
+    private var recommendationsSection: AnyView {
         if !recommendations.isEmpty {
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "You Might Also Like",
                     subtitle: nil,
                     showSeeAll: false,
-                    seeAllAction: nil
+                    seeAllAction: {}
                 )
 
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -380,19 +380,18 @@ struct BookDetailView: View {
                                 ),
                                 onTap: {},
                                 showAddButton: false,
-                                onAddTap: nil
+                                onAddTap: {}
                             )
                         }
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
                 }
-            }
+            })
         } else {
-            EmptyView()
+            AnyView(EmptyView())
         }
     }
 
-    var body: some View {
     var body: some View {
         ScrollView {
             VStack(spacing: AppleBooksSpacing.space32) {
