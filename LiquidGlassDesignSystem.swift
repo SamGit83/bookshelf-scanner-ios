@@ -998,6 +998,7 @@ public enum AppleBooksShadow {
 // Apple Books Components
 public struct AppleBooksSectionHeader: View {
     @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var accentColorManager = AccentColorManager.shared
     let title: String
     let subtitle: String?
     let showSeeAll: Bool
