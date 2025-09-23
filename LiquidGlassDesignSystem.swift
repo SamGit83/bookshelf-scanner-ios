@@ -1213,13 +1213,16 @@ public struct AppleBooksBookCard: View {
 
                     // Row 2: Sub genre badge
                     if let subGenre = book.subGenre {
-                        Text(subGenre)
-                            .font(AppleBooksTypography.caption)
-                            .foregroundColor(AppleBooksColors.text)
-                            .padding(.horizontal, AppleBooksSpacing.space6)
-                            .padding(.vertical, AppleBooksSpacing.space2)
-                            .background(AppleBooksColors.card.opacity(0.8))
-                            .cornerRadius(4)
+                        HStack(spacing: AppleBooksSpacing.space6) {
+                            Text(subGenre)
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.text)
+                                .padding(.horizontal, AppleBooksSpacing.space6)
+                                .padding(.vertical, AppleBooksSpacing.space2)
+                                .background(AppleBooksColors.card.opacity(0.8))
+                                .cornerRadius(4)
+                            Spacer()
+                        }
                     }
                 }
 

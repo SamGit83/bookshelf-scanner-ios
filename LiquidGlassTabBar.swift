@@ -9,6 +9,7 @@ struct TabItem: Identifiable {
 
 struct LiquidGlassTabBar: View {
     @Binding var selectedTab: Int
+    @ObservedObject private var accentColorManager = AccentColorManager.shared
 
     private var tabs: [TabItem] {
         return [
