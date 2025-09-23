@@ -126,121 +126,142 @@ struct CurrentlyReadingView: View {
         return Array(libraryBooks.suffix(5))
     }
 
+    private var readingGoalsSection: some View {
+        ReadingGoalsSection()
+    }
+
+    private var currentlyReadingSection: some View {
+        Group {
+            if !viewModel.currentlyReadingBooks.isEmpty {
+                AppleBooksSectionHeader(
+                    title: "Continue Reading",
+                    subtitle: "Pick up where you left off",
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(viewModel.currentlyReadingBooks) { book in
+                            CurrentlyReadingBookCard(book: book) {
+                                selectedBook = book
+                            }
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
+            }
+        }
+    }
+
+    private var promoBannerSection: some View {
+        AppleBooksPromoBanner(
+            title: "$9.99 Audiobooks",
+            subtitle: "Limited time offer",
+            gradient: LinearGradient(
+                colors: [AppleBooksColors.promotional, AppleBooksColors.promotional.opacity(0.8)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        ) {
+            // Handle promo tap - could open store
+        }
+    }
+
+    private var favoritesSection: some View {
+        Group {
+            if !favoriteBooks.isEmpty {
+                AppleBooksSectionHeader(
+                    title: "Customer Favorites",
+                    subtitle: "See the books readers love",
+                    showSeeAll: true,
+                    seeAllAction: {
+                        // Handle see all
+                    }
+                )
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(favoriteBooks) { book in
+                            AppleBooksBookCard(book: book, onTap: {
+                                selectedBook = book
+                            }, showAddButton: false, onAddTap: nil, viewModel: viewModel)
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
+            }
+        }
+    }
+
+    private var trendingSection: some View {
+        Group {
+            if !trendingBooks.isEmpty {
+                AppleBooksSectionHeader(
+                    title: "New & Trending",
+                    subtitle: "Explore what's hot in audiobooks",
+                    showSeeAll: true,
+                    seeAllAction: {
+                        // Handle see all
+                    }
+                )
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(trendingBooks) { book in
+                            AppleBooksBookCard(book: book, onTap: {
+                                selectedBook = book
+                            }, showAddButton: true, onAddTap: {
+                                viewModel.saveBookToFirestore(book)
+                            }, viewModel: viewModel)
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
+            }
+        }
+    }
+
+    private var emptyStateSection: some View {
+        Group {
+            if viewModel.currentlyReadingBooks.isEmpty {
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .fill(AppleBooksColors.accent.opacity(0.2))
+                            .frame(width: 100, height: 100)
+                            .blur(radius: 10)
+
+                        Image(systemName: "book.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.gray)
+                    }
+
+                    Text("No books currently reading")
+                        .font(AppleBooksTypography.displayMedium)
+                        .foregroundColor(AppleBooksColors.text)
+
+                    Text("Move books from library or scan new ones!")
+                        .font(AppleBooksTypography.bodyMedium)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, AppleBooksSpacing.space32)
+                .padding(.vertical, AppleBooksSpacing.space64)
+            }
+        }
+    }
+
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 0) {
-                    // Daily Reading Goals Section
-                    ReadingGoalsSection()
-
-                    // Currently Reading Collection
-                    if !viewModel.currentlyReadingBooks.isEmpty {
-                        AppleBooksSectionHeader(
-                            title: "Continue Reading",
-                            subtitle: "Pick up where you left off",
-                            showSeeAll: false,
-                            seeAllAction: nil
-                        )
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: AppleBooksSpacing.space16) {
-                                ForEach(viewModel.currentlyReadingBooks) { book in
-                                    CurrentlyReadingBookCard(book: book) {
-                                        selectedBook = book
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-                        }
-                    }
-
-                    // Featured Promotional Banner
-                    AppleBooksPromoBanner(
-                        title: "$9.99 Audiobooks",
-                        subtitle: "Limited time offer",
-                        gradient: LinearGradient(
-                            colors: [AppleBooksColors.promotional, AppleBooksColors.promotional.opacity(0.8)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    ) {
-                        // Handle promo tap - could open store
-                    }
-
-                    // Customer Favorites
-                    if !favoriteBooks.isEmpty {
-                        AppleBooksSectionHeader(
-                            title: "Customer Favorites",
-                            subtitle: "See the books readers love",
-                            showSeeAll: true,
-                            seeAllAction: {
-                                // Handle see all
-                            }
-                        )
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: AppleBooksSpacing.space16) {
-                                ForEach(favoriteBooks) { book in
-                                    AppleBooksBookCard(book: book, onTap: {
-                                        selectedBook = book
-                                    }, showAddButton: false, onAddTap: nil)
-                                }
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-                        }
-                    }
-
-                    // New & Trending
-                    if !trendingBooks.isEmpty {
-                        AppleBooksSectionHeader(
-                            title: "New & Trending",
-                            subtitle: "Explore what's hot in audiobooks",
-                            showSeeAll: true,
-                            seeAllAction: {
-                                // Handle see all
-                            }
-                        )
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: AppleBooksSpacing.space16) {
-                                ForEach(trendingBooks) { book in
-                                    AppleBooksBookCard(book: book, onTap: {
-                                        selectedBook = book
-                                    }, showAddButton: true, onAddTap: {
-                                        // Handle add to library
-                                    })
-                                }
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-                        }
-                    }
-
-                    // Empty state if no currently reading books
-                    if viewModel.currentlyReadingBooks.isEmpty {
-                        VStack(spacing: 20) {
-                            ZStack {
-                                Circle()
-                                    .fill(AppleBooksColors.accent.opacity(0.2))
-                                    .frame(width: 100, height: 100)
-                                    .blur(radius: 10)
-
-                                Image(systemName: "book.fill")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.gray)
-                            }
-
-                            Text("No books currently reading")
-                                .font(AppleBooksTypography.displayMedium)
-                                .foregroundColor(AppleBooksColors.text)
-
-                            Text("Move books from library or scan new ones!")
-                                .font(AppleBooksTypography.bodyMedium)
-                                .foregroundColor(AppleBooksColors.textSecondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(.horizontal, AppleBooksSpacing.space32)
-                        .padding(.vertical, AppleBooksSpacing.space64)
-                    }
+                    readingGoalsSection
+                    currentlyReadingSection
+                    promoBannerSection
+                    favoritesSection
+                    trendingSection
+                    emptyStateSection
                 }
             }
             .background(AppleBooksColors.background)
