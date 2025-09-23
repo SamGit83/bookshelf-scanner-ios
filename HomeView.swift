@@ -7,26 +7,137 @@ struct HomeView: View {
 
     var body: some View {
         ZStack {
-            // Animated gradient background
-            AnimatedBackground()
+            // Apple Books clean background
+            AppleBooksColors.background
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 0) {
-                    // Navigation Bar
-                    HomeNavigationBar(showLogin: $showLogin, showSignup: $showSignup)
-
+                VStack(spacing: AppleBooksSpacing.space64) {
                     // Hero Section
-                    HeroSection(showSignup: $showSignup)
+                    VStack(spacing: AppleBooksSpacing.space32) {
+                        Spacer(minLength: AppleBooksSpacing.space80)
 
-                    // User Journey Section
-                    UserJourneySection()
+                        // App Icon
+                        Image(systemName: "books.vertical.fill")
+                            .font(.system(size: 80, weight: .light))
+                            .foregroundColor(AppleBooksColors.accent)
+                            .padding(AppleBooksSpacing.space24)
+                            .background(
+                                Circle()
+                                    .fill(AppleBooksColors.accent.opacity(0.1))
+                            )
 
-                    // Features Section
-                    FeaturesSection()
+                        // Title
+                        Text("Bookshelf Scanner")
+                            .font(AppleBooksTypography.displayLarge)
+                            .foregroundColor(AppleBooksColors.text)
+                            .multilineTextAlignment(.center)
 
-                    // Footer
-                    HomeFooter()
+                        // Subtitle
+                        Text("Transform your physical bookshelf into a smart digital library with AI-powered book recognition.")
+                            .font(AppleBooksTypography.bodyLarge)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+
+                        // CTA Buttons
+                        VStack(spacing: AppleBooksSpacing.space16) {
+                            Button(action: {
+                                showSignup = true
+                            }) {
+                                Text("Get Started")
+                                    .font(AppleBooksTypography.buttonLarge)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, AppleBooksSpacing.space16)
+                                    .background(AppleBooksColors.accent)
+                                    .cornerRadius(12)
+                            }
+
+                            Button(action: {
+                                showLogin = true
+                            }) {
+                                Text("Sign In")
+                                    .font(AppleBooksTypography.buttonLarge)
+                                    .foregroundColor(AppleBooksColors.accent)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, AppleBooksSpacing.space16)
+                                    .background(AppleBooksColors.card)
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(AppleBooksColors.accent, lineWidth: 1)
+                                    )
+                            }
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+
+                        Spacer(minLength: AppleBooksSpacing.space40)
+                    }
+
+                    // How It Works Section
+                    VStack(spacing: AppleBooksSpacing.space24) {
+                        Text("How It Works")
+                            .font(AppleBooksTypography.headlineLarge)
+                            .foregroundColor(AppleBooksColors.text)
+
+                        VStack(spacing: AppleBooksSpacing.space20) {
+                            FeatureRow(
+                                icon: "camera.fill",
+                                title: "Scan Your Bookshelf",
+                                description: "Point your camera at your bookshelf and capture a photo"
+                            )
+
+                            FeatureRow(
+                                icon: "sparkles",
+                                title: "AI Recognition",
+                                description: "Our AI instantly identifies books using advanced computer vision"
+                            )
+
+                            FeatureRow(
+                                icon: "books.vertical.fill",
+                                title: "Organize & Track",
+                                description: "Automatically organize your library and track reading progress"
+                            )
+
+                            FeatureRow(
+                                icon: "star.fill",
+                                title: "Discover New Books",
+                                description: "Get personalized recommendations powered by Grok AI"
+                            )
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+                    }
+
+                    // Key Features Section
+                    VStack(spacing: AppleBooksSpacing.space24) {
+                        Text("Key Features")
+                            .font(AppleBooksTypography.headlineLarge)
+                            .foregroundColor(AppleBooksColors.text)
+
+                        VStack(spacing: AppleBooksSpacing.space16) {
+                            FeatureCard(
+                                icon: "wifi.slash",
+                                title: "Offline Access",
+                                description: "Read and manage your library anywhere, even offline"
+                            )
+
+                            FeatureCard(
+                                icon: "chart.bar.fill",
+                                title: "Reading Progress",
+                                description: "Track pages read, set goals, and monitor your reading habits"
+                            )
+
+                            FeatureCard(
+                                icon: "plus.circle.fill",
+                                title: "Manual Entry",
+                                description: "Add books manually with ISBN lookup for complete coverage"
+                            )
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+                    }
+
+                    Spacer(minLength: AppleBooksSpacing.space80)
                 }
             }
         }
@@ -34,8 +145,73 @@ struct HomeView: View {
             LoginView()
         }
         .sheet(isPresented: $showSignup) {
-            // For now, show login view - you might want to create a separate signup view
             LoginView()
+        }
+    }
+}
+
+struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
+
+    var body: some View {
+        HStack(spacing: AppleBooksSpacing.space16) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(AppleBooksColors.accent)
+                .frame(width: 40, height: 40)
+                .background(AppleBooksColors.accent.opacity(0.1))
+                .cornerRadius(8)
+
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                Text(title)
+                    .font(AppleBooksTypography.headlineSmall)
+                    .foregroundColor(AppleBooksColors.text)
+
+                Text(description)
+                    .font(AppleBooksTypography.bodyMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                    .lineLimit(2)
+            }
+
+            Spacer()
+        }
+    }
+}
+
+struct FeatureCard: View {
+    let icon: String
+    let title: String
+    let description: String
+
+    var body: some View {
+        AppleBooksCard(
+            cornerRadius: 12,
+            padding: AppleBooksSpacing.space20,
+            shadowStyle: .subtle
+        ) {
+            HStack(spacing: AppleBooksSpacing.space16) {
+                Image(systemName: icon)
+                    .font(.system(size: 28))
+                    .foregroundColor(AppleBooksColors.accent)
+                    .frame(width: 50, height: 50)
+                    .background(AppleBooksColors.accent.opacity(0.1))
+                    .cornerRadius(10)
+
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                    Text(title)
+                        .font(AppleBooksTypography.headlineMedium)
+                        .foregroundColor(AppleBooksColors.text)
+
+                    Text(description)
+                        .font(AppleBooksTypography.bodyMedium)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+            }
         }
     }
 }
