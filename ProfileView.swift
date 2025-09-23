@@ -50,7 +50,9 @@ struct ProfileView: View {
                         VStack(spacing: AppleBooksSpacing.space16) {
                             AppleBooksSectionHeader(
                                 title: "Reading Statistics",
-                                subtitle: "Your reading progress"
+                                subtitle: "Your reading progress",
+                                showSeeAll: false,
+                                seeAllAction: nil
                             )
 
                             HStack(spacing: AppleBooksSpacing.space16) {

@@ -33,7 +33,7 @@ struct RecommendationsView: View {
                     VStack(spacing: AppleBooksSpacing.space20) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.system(size: 50))
-                            .foregroundColor(AppleBooksColors.warningPrimary)
+                            .foregroundColor(SemanticColors.warningPrimary)
                         Text("Unable to load recommendations")
                             .font(AppleBooksTypography.headlineMedium)
                             .foregroundColor(AppleBooksColors.text)

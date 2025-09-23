@@ -49,7 +49,9 @@ struct HomeView: View {
                 AppleBooksCollection(
                     books: currentlyReadingBooks,
                     title: "Continue Reading",
-                    subtitle: "Pick up where you left off"
+                    subtitle: "Pick up where you left off",
+                    onSeeAllTap: nil,
+                    viewModel: nil
                 ) {
                     // Handle book tap - navigate to book detail
                     print("Book tapped: \($0.title ?? "Unknown")")
@@ -69,7 +71,9 @@ struct HomeView: View {
                 AppleBooksCollection(
                     books: favoriteBooks,
                     title: "Customer Favorites",
-                    subtitle: "See the books readers love"
+                    subtitle: "See the books readers love",
+                    onSeeAllTap: nil,
+                    viewModel: nil
                 ) {
                     // Handle book tap
                     print("Book tapped: \($0.title ?? "Unknown")")
@@ -79,7 +83,9 @@ struct HomeView: View {
                 AppleBooksCollection(
                     books: trendingBooks,
                     title: "New & Trending",
-                    subtitle: "Explore what's hot in audiobooks"
+                    subtitle: "Explore what's hot in audiobooks",
+                    onSeeAllTap: nil,
+                    viewModel: nil
                 ) {
                     // Handle book tap
                     print("Book tapped: \($0.title ?? "Unknown")")
