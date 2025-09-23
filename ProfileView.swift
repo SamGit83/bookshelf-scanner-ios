@@ -7,7 +7,6 @@ struct ProfileView: View {
     @State private var showSignOutAlert = false
 
     var body: some View {
-        NavigationView {
             ZStack {
                 // Apple Books background
                 AppleBooksColors.background
@@ -211,7 +210,6 @@ struct ProfileView: View {
                     secondaryButton: .cancel()
                 )
             }
-        }
     }
 
     private func formattedDate(_ date: Date?) -> String {

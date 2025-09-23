@@ -16,7 +16,7 @@ struct BookshelfScannerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            BookshelfWrapperView()
+            ContentView()
         }
     }
 }

@@ -9,25 +9,25 @@ struct HomeView: View {
     private var currentlyReadingBooks: [Book] {
         // Placeholder books - replace with actual data
         [
-            Book(title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Fiction"),
-            Book(title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Fiction"),
-            Book(title: "1984", author: "George Orwell", genre: "Dystopian")
+            Book(title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Fiction", status: .reading),
+            Book(title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Fiction", status: .reading),
+            Book(title: "1984", author: "George Orwell", genre: "Dystopian", status: .reading)
         ]
     }
 
     private var favoriteBooks: [Book] {
         [
-            Book(title: "Pride and Prejudice", author: "Jane Austen", genre: "Romance"),
-            Book(title: "The Catcher in the Rye", author: "J.D. Salinger", genre: "Fiction"),
-            Book(title: "Harry Potter", author: "J.K. Rowling", genre: "Fantasy")
+            Book(title: "Pride and Prejudice", author: "Jane Austen", genre: "Romance", status: .toRead),
+            Book(title: "The Catcher in the Rye", author: "J.D. Salinger", genre: "Fiction", status: .toRead),
+            Book(title: "Harry Potter", author: "J.K. Rowling", genre: "Fantasy", status: .toRead)
         ]
     }
 
     private var trendingBooks: [Book] {
         [
-            Book(title: "The Midnight Library", author: "Matt Haig", genre: "Fiction"),
-            Book(title: "Atomic Habits", author: "James Clear", genre: "Self-Help"),
-            Book(title: "Project Hail Mary", author: "Andy Weir", genre: "Sci-Fi")
+            Book(title: "The Midnight Library", author: "Matt Haig", genre: "Fiction", status: .toRead),
+            Book(title: "Atomic Habits", author: "James Clear", genre: "Self-Help", status: .toRead),
+            Book(title: "Project Hail Mary", author: "Andy Weir", genre: "Sci-Fi", status: .toRead)
         ]
     }
 

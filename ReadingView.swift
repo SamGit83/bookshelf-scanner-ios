@@ -180,23 +180,21 @@ struct ReadingView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                AppleBooksColors.background
-                    .ignoresSafeArea()
+        ZStack {
+            AppleBooksColors.background
+                .ignoresSafeArea()
 
-                if viewModel.readingBooks.isEmpty {
-                    emptyStateView
-                } else {
-                    readingBooksSection
-                }
+            if viewModel.readingBooks.isEmpty {
+                emptyStateView
+            } else {
+                readingBooksSection
             }
-            .navigationTitle("Reading")
-            .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showingProgressView) {
-                if let book = selectedBook {
-                    ReadingProgressView(book: book, viewModel: viewModel)
-                }
+        }
+        .navigationTitle("Reading")
+        .navigationBarTitleDisplayMode(.large)
+        .sheet(isPresented: $showingProgressView) {
+            if let book = selectedBook {
+                ReadingProgressView(book: book, viewModel: viewModel)
             }
         }
     }

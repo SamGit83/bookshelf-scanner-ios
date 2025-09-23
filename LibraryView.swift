@@ -208,88 +208,86 @@ struct LibraryView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Apple Books clean background
-                AppleBooksColors.background
-                    .ignoresSafeArea()
+        ZStack {
+            // Apple Books clean background
+            AppleBooksColors.background
+                .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    if viewModel.books.isEmpty {
-                        Spacer()
-                        emptyStateView
-                        Spacer()
-                    } else {
-                        libraryContentView
+            VStack(spacing: 0) {
+                if viewModel.books.isEmpty {
+                    Spacer()
+                    emptyStateView
+                    Spacer()
+                } else {
+                    libraryContentView
+                }
+
+                actionButtonsView
+            }
+        }
+        .overlay(loadingOverlay)
+        .background(
+            NavigationLink("", destination: BookDetailView(book: selectedBook!, viewModel: viewModel), isActive: Binding(get: { isShowingDetail }, set: { isShowingDetail = $0; if !$0 { selectedBook = nil } }))
+        )
+        .navigationTitle("Library")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                HStack(spacing: AppleBooksSpacing.space12) {
+                    Button(action: {
+                        showingClearConfirmation = true
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .font(AppleBooksTypography.buttonMedium)
+                            .padding(AppleBooksSpacing.space8)
+                            .background(AppleBooksColors.card)
+                            .clipShape(Circle())
                     }
 
-                    actionButtonsView
-                }
-            }
-            .overlay(loadingOverlay)
-            .background(
-                NavigationLink("", destination: BookDetailView(book: selectedBook!, viewModel: viewModel), isActive: Binding(get: { isShowingDetail }, set: { isShowingDetail = $0; if !$0 { selectedBook = nil } }))
-            )
-            .navigationTitle("Library")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: AppleBooksSpacing.space12) {
-                        Button(action: {
-                            showingClearConfirmation = true
-                        }) {
-                            Image(systemName: "trash")
-                                .foregroundColor(AppleBooksColors.textSecondary)
-                                .font(AppleBooksTypography.buttonMedium)
-                                .padding(AppleBooksSpacing.space8)
-                                .background(AppleBooksColors.card)
-                                .clipShape(Circle())
-                        }
-
-                        Menu {
-                            Picker("Sort by", selection: $selectedSort) {
-                                ForEach(SortOption.allCases, id: \.self) { option in
-                                    Text(option.rawValue).tag(option)
-                                }
+                    Menu {
+                        Picker("Sort by", selection: $selectedSort) {
+                            ForEach(SortOption.allCases, id: \.self) { option in
+                                Text(option.rawValue).tag(option)
                             }
-                        } label: {
-                            Image(systemName: "arrow.up.arrow.down")
-                                .foregroundColor(AppleBooksColors.accent)
-                                .font(AppleBooksTypography.buttonMedium)
-                                .padding(AppleBooksSpacing.space8)
-                                .background(AppleBooksColors.accent.opacity(0.1))
-                                .clipShape(Circle())
                         }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .foregroundColor(AppleBooksColors.accent)
+                            .font(AppleBooksTypography.buttonMedium)
+                            .padding(AppleBooksSpacing.space8)
+                            .background(AppleBooksColors.accent.opacity(0.1))
+                            .clipShape(Circle())
+                    }
 
-                        Button(action: {
-                            isShowingSearch = true
-                        }) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(AppleBooksColors.accent)
-                                .font(AppleBooksTypography.buttonMedium)
-                                .padding(AppleBooksSpacing.space8)
-                                .background(AppleBooksColors.accent.opacity(0.1))
-                                .clipShape(Circle())
-                        }
+                    Button(action: {
+                        isShowingSearch = true
+                    }) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(AppleBooksColors.accent)
+                            .font(AppleBooksTypography.buttonMedium)
+                            .padding(AppleBooksSpacing.space8)
+                            .background(AppleBooksColors.accent.opacity(0.1))
+                            .clipShape(Circle())
                     }
                 }
             }
-            .sheet(isPresented: $isShowingAddBook) {
-                AddBookView()
-            }
-            .sheet(isPresented: $isShowingSearch) {
-                SearchView(viewModel: viewModel)
-            }
-            .alert(isPresented: $showingClearConfirmation) {
-                Alert(
-                    title: Text("Clear All Books"),
-                    message: Text("Are you sure you want to delete all books from your collection? This action cannot be undone."),
-                    primaryButton: .destructive(Text("Delete All")) {
-                        viewModel.clearAllBooks()
-                    },
-                    secondaryButton: .cancel()
-                )
-            }
+        }
+        .sheet(isPresented: $isShowingAddBook) {
+            AddBookView()
+        }
+        .sheet(isPresented: $isShowingSearch) {
+            SearchView(viewModel: viewModel)
+        }
+        .alert(isPresented: $showingClearConfirmation) {
+            Alert(
+                title: Text("Clear All Books"),
+                message: Text("Are you sure you want to delete all books from your collection? This action cannot be undone."),
+                primaryButton: .destructive(Text("Delete All")) {
+                    viewModel.clearAllBooks()
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
 }
