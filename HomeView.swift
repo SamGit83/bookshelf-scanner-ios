@@ -50,12 +50,13 @@ struct HomeView: View {
                     books: currentlyReadingBooks,
                     title: "Continue Reading",
                     subtitle: "Pick up where you left off",
+                    onBookTap: { book in
+                        // Handle book tap - navigate to book detail
+                        print("Book tapped: \(book.title ?? "Unknown")")
+                    },
                     onSeeAllTap: nil,
                     viewModel: nil
-                ) {
-                    // Handle book tap - navigate to book detail
-                    print("Book tapped: \($0.title ?? "Unknown")")
-                }
+                )
 
                 // Featured Promotional Banner
                 AppleBooksPromoBanner(
