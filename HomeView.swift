@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @ObservedObject private var authService = AuthService.shared
+    @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var showLogin = false
     @State private var showSignup = false
 

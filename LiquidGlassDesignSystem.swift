@@ -868,6 +868,10 @@ class AccentColorManager: ObservableObject {
     @Published var currentAccentColor: AccentColorScheme {
         didSet {
             UserDefaults.standard.set(currentAccentColor.rawValue, forKey: userDefaultsKey)
+            // Force UI update by triggering objectWillChange
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
         }
     }
 
@@ -881,12 +885,37 @@ class AccentColorManager: ObservableObject {
 
 // Apple Books Color Palette
 public struct AppleBooksColors {
-    static let background = Color(hex: "F2F2F7")    // Light gray background
-    static let card = Color.white                   // Pure white cards
-    static let text = Color.black                   // Primary black text
-    static let textSecondary = Color(hex: "3C3C4399") // 60% opacity gray
-    static let textTertiary = Color(hex: "3C3C434D")  // 30% opacity gray
-    static let accent = AccentColorManager.shared.currentAccentColor.color // Dynamic accent color
+    // Adaptive background colors that change with dark mode
+    static let background = Color(
+        light: Color(hex: "F2F2F7"),    // Light gray background
+        dark: Color(hex: "000000")      // Pure black background
+    )
+    
+    static let card = Color(
+        light: Color.white,             // Pure white cards
+        dark: Color(hex: "1C1C1E")      // Dark gray cards
+    )
+    
+    static let text = Color(
+        light: Color.black,             // Primary black text
+        dark: Color.white               // Primary white text
+    )
+    
+    static let textSecondary = Color(
+        light: Color(hex: "3C3C4399"),  // 60% opacity gray
+        dark: Color(hex: "EBEBF599")    // 60% opacity light gray
+    )
+    
+    static let textTertiary = Color(
+        light: Color(hex: "3C3C434D"),  // 30% opacity gray
+        dark: Color(hex: "EBEBF54D")    // 30% opacity light gray
+    )
+    
+    // Dynamic accent color that updates when AccentColorManager changes
+    static var accent: Color {
+        AccentColorManager.shared.currentAccentColor.color
+    }
+    
     static let promotional = Color(hex: "FF3B30")   // Red for promotions
     static let success = Color(hex: "34C759")      // Green for success states
 }

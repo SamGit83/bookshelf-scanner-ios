@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DiscoverView: View {
     @ObservedObject var viewModel: BookViewModel
+    @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var recommendations: [BookRecommendation] = []
     @State private var isLoading = false
     @State private var errorMessage: String?

@@ -46,60 +46,6 @@ struct ProfileView: View {
                         }
                         .padding(.top, AppleBooksSpacing.space32)
 
-                        // Reading Statistics Section
-                        VStack(spacing: AppleBooksSpacing.space16) {
-                            AppleBooksSectionHeader(
-                                title: "Reading Statistics",
-                                subtitle: "Your reading progress",
-                                showSeeAll: false,
-                                seeAllAction: nil
-                            )
-
-                            HStack(spacing: AppleBooksSpacing.space16) {
-                                AppleBooksCard {
-                                    VStack(spacing: AppleBooksSpacing.space8) {
-                                        Image(systemName: "book.fill")
-                                            .font(AppleBooksTypography.headlineMedium)
-                                            .foregroundColor(AppleBooksColors.accent)
-                                        Text("12")
-                                            .font(AppleBooksTypography.displayMedium)
-                                            .foregroundColor(AppleBooksColors.text)
-                                        Text("Books Read")
-                                            .font(AppleBooksTypography.caption)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
-                                }
-
-                                AppleBooksCard {
-                                    VStack(spacing: AppleBooksSpacing.space8) {
-                                        Image(systemName: "clock.fill")
-                                            .font(AppleBooksTypography.headlineMedium)
-                                            .foregroundColor(AppleBooksColors.success)
-                                        Text("45h")
-                                            .font(AppleBooksTypography.displayMedium)
-                                            .foregroundColor(AppleBooksColors.text)
-                                        Text("Reading Time")
-                                            .font(AppleBooksTypography.caption)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
-                                }
-
-                                AppleBooksCard {
-                                    VStack(spacing: AppleBooksSpacing.space8) {
-                                        Image(systemName: "star.fill")
-                                            .font(AppleBooksTypography.headlineMedium)
-                                            .foregroundColor(AppleBooksColors.promotional)
-                                        Text("4.8")
-                                            .font(AppleBooksTypography.displayMedium)
-                                            .foregroundColor(AppleBooksColors.text)
-                                        Text("Avg Rating")
-                                            .font(AppleBooksTypography.caption)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-                        }
 
                         // Settings Options Section
                         VStack(spacing: AppleBooksSpacing.space16) {

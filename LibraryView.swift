@@ -28,6 +28,7 @@ enum SortOption: String, CaseIterable {
 
 struct LibraryView: View {
     @ObservedObject var viewModel: BookViewModel
+    @ObservedObject private var accentColorManager = AccentColorManager.shared
     @Binding var isShowingCamera: Bool
     @State private var isShowingAddBook = false
     @State private var isShowingSearch = false

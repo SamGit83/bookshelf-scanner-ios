@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
+    @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var currentPage = 0
     @State private var showMainApp = false
 
