@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import LiquidGlassDesignSystem
 struct SearchView: View {
     @ObservedObject var viewModel: BookViewModel
     @State private var searchText = ""

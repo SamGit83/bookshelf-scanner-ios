@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import LiquidGlassDesignSystem
 
 enum SortOption: String, CaseIterable {
     case titleAZ = "Title A-Z"

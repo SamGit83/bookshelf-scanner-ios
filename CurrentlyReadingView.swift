@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import LiquidGlassDesignSystem
 
 // MARK: - Currently Reading Book Card with Progress
 struct CurrentlyReadingBookCard: View {

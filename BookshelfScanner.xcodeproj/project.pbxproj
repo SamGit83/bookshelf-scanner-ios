@@ -34,6 +34,17 @@
 		OBJ_72 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = OBJ_69 /* FirebaseAuth */; };
 		OBJ_73 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = OBJ_70 /* FirebaseCore */; };
 		OBJ_74 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = OBJ_71 /* FirebaseFirestore */; };
+		OBJ_89 /* BookDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* BookDetailView.swift */; };
+		OBJ_90 /* BookshelfWrapperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_79 /* BookshelfWrapperView.swift */; };
+		OBJ_91 /* FeaturesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_80 /* FeaturesSection.swift */; };
+		OBJ_92 /* GrokAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* GrokAPIService.swift */; };
+		OBJ_93 /* HeroSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_82 /* HeroSection.swift */; };
+		OBJ_94 /* HomeFooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_83 /* HomeFooter.swift */; };
+		OBJ_95 /* HomeNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_84 /* HomeNavigationBar.swift */; };
+		OBJ_96 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_85 /* HomeView.swift */; };
+		OBJ_97 /* LiquidGlassDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_86 /* LiquidGlassDesignSystem.swift */; };
+		OBJ_98 /* LiquidGlassTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_87 /* LiquidGlassTabBar.swift */; };
+		OBJ_99 /* UserJourneySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_88 /* UserJourneySection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +75,17 @@
 		OBJ_65 /* RecommendationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsView.swift; sourceTree = "<group>"; };
 		OBJ_66 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		OBJ_67 /* SecureConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureConfig.swift; sourceTree = "<group>"; };
+		OBJ_78 /* BookDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookDetailView.swift; sourceTree = "<group>"; };
+		OBJ_79 /* BookshelfWrapperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookshelfWrapperView.swift; sourceTree = "<group>"; };
+		OBJ_80 /* FeaturesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeaturesSection.swift; sourceTree = "<group>"; };
+		OBJ_81 /* GrokAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokAPIService.swift; sourceTree = "<group>"; };
+		OBJ_82 /* HeroSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroSection.swift; sourceTree = "<group>"; };
+		OBJ_83 /* HomeFooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFooter.swift; sourceTree = "<group>"; };
+		OBJ_84 /* HomeNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNavigationBar.swift; sourceTree = "<group>"; };
+		OBJ_85 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		OBJ_86 /* LiquidGlassDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassDesignSystem.swift; sourceTree = "<group>"; };
+		OBJ_87 /* LiquidGlassTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassTabBar.swift; sourceTree = "<group>"; };
+		OBJ_88 /* UserJourneySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserJourneySection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +137,17 @@
 				OBJ_65 /* RecommendationsView.swift */,
 				OBJ_66 /* SearchView.swift */,
 				OBJ_67 /* SecureConfig.swift */,
+				OBJ_78 /* BookDetailView.swift */,
+				OBJ_79 /* BookshelfWrapperView.swift */,
+				OBJ_80 /* FeaturesSection.swift */,
+				OBJ_81 /* GrokAPIService.swift */,
+				OBJ_82 /* HeroSection.swift */,
+				OBJ_83 /* HomeFooter.swift */,
+				OBJ_84 /* HomeNavigationBar.swift */,
+				OBJ_85 /* HomeView.swift */,
+				OBJ_86 /* LiquidGlassDesignSystem.swift */,
+				OBJ_87 /* LiquidGlassTabBar.swift */,
+				OBJ_88 /* UserJourneySection.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -233,6 +266,17 @@
 				OBJ_45 /* RecommendationsView.swift in Sources */,
 				OBJ_46 /* SearchView.swift in Sources */,
 				OBJ_47 /* SecureConfig.swift in Sources */,
+				OBJ_89 /* BookDetailView.swift in Sources */,
+				OBJ_90 /* BookshelfWrapperView.swift in Sources */,
+				OBJ_91 /* FeaturesSection.swift in Sources */,
+				OBJ_92 /* GrokAPIService.swift in Sources */,
+				OBJ_93 /* HeroSection.swift in Sources */,
+				OBJ_94 /* HomeFooter.swift in Sources */,
+				OBJ_95 /* HomeNavigationBar.swift in Sources */,
+				OBJ_96 /* HomeView.swift in Sources */,
+				OBJ_97 /* LiquidGlassDesignSystem.swift in Sources */,
+				OBJ_98 /* LiquidGlassTabBar.swift in Sources */,
+				OBJ_99 /* UserJourneySection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

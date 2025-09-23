@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import LiquidGlassDesignSystem
 
 struct ProfileView: View {
     @ObservedObject var authService: AuthService

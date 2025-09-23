@@ -1,4 +1,5 @@
 import SwiftUI
+import LiquidGlassDesignSystem
 
 struct ReadingProgressView: View {
     @ObservedObject var viewModel: BookViewModel
