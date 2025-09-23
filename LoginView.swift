@@ -8,6 +8,17 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var showPasswordReset = false
     @State private var animateForm = false
+    @State private var showMoreFields = false
+
+    // Additional signup fields
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var dateOfBirth: Date = Calendar.current.date(byAdding: .year, value: -18, to: Date()) ?? Date()
+    @State private var gender = ""
+    @State private var phone = ""
+    @State private var country = ""
+    @State private var city = ""
+    @State private var favoriteBookGenre = ""
 
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
@@ -113,6 +124,208 @@ struct LoginView: View {
                                             .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                     )
                                     .textContentType(isSignUp ? .newPassword : .password)
+                            }
+
+                            // Show More Button (only for signup)
+                            if isSignUp {
+                                Button(action: {
+                                    withAnimation(AnimationTiming.transition) {
+                                        showMoreFields.toggle()
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(showMoreFields ? "Show Less" : "Show More")
+                                            .font(AppleBooksTypography.bodyMedium)
+                                            .foregroundColor(AppleBooksColors.accent)
+                                        Image(systemName: showMoreFields ? "chevron.up" : "chevron.down")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(AppleBooksColors.accent)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, AppleBooksSpacing.space8)
+                                }
+                            }
+
+                            // Additional Fields (shown when expanded)
+                            if isSignUp && showMoreFields {
+                                VStack(spacing: AppleBooksSpacing.space16) {
+                                    // First Name & Last Name
+                                    HStack(spacing: AppleBooksSpacing.space12) {
+                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                            Text("First Name")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+
+                                            TextField("Enter first name", text: $firstName)
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.text)
+                                                .padding(AppleBooksSpacing.space12)
+                                                .background(AppleBooksColors.background)
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                                )
+                                                .textContentType(.givenName)
+                                        }
+
+                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                            Text("Last Name")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+
+                                            TextField("Enter last name", text: $lastName)
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.text)
+                                                .padding(AppleBooksSpacing.space12)
+                                                .background(AppleBooksColors.background)
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                                )
+                                                .textContentType(.familyName)
+                                        }
+                                    }
+
+                                    // Date of Birth
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        Text("Date of Birth")
+                                            .font(AppleBooksTypography.headlineSmall)
+                                            .foregroundColor(AppleBooksColors.text)
+
+                                        DatePicker("Select date of birth", selection: $dateOfBirth, displayedComponents: .date)
+                                            .datePickerStyle(.compact)
+                                            .labelsHidden()
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .padding(AppleBooksSpacing.space12)
+                                            .background(AppleBooksColors.background)
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                            )
+                                    }
+
+                                    // Gender
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        Text("Gender")
+                                            .font(AppleBooksTypography.headlineSmall)
+                                            .foregroundColor(AppleBooksColors.text)
+
+                                        Picker("Select gender", selection: $gender) {
+                                            Text("Prefer not to say").tag("")
+                                            Text("Male").tag("Male")
+                                            Text("Female").tag("Female")
+                                            Text("Non-binary").tag("Non-binary")
+                                            Text("Other").tag("Other")
+                                        }
+                                        .pickerStyle(.menu)
+                                        .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+                                        .padding(AppleBooksSpacing.space12)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(AppleBooksColors.background)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                    }
+
+                                    // Phone
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        Text("Phone")
+                                            .font(AppleBooksTypography.headlineSmall)
+                                            .foregroundColor(AppleBooksColors.text)
+
+                                        TextField("Enter phone number", text: $phone)
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .padding(AppleBooksSpacing.space12)
+                                            .background(AppleBooksColors.background)
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                            )
+                                            .keyboardType(.phonePad)
+                                            .textContentType(.telephoneNumber)
+                                    }
+
+                                    // Country & City
+                                    HStack(spacing: AppleBooksSpacing.space12) {
+                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                            Text("Country")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+
+                                            TextField("Enter country", text: $country)
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.text)
+                                                .padding(AppleBooksSpacing.space12)
+                                                .background(AppleBooksColors.background)
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                                )
+                                                .textContentType(.countryName)
+                                        }
+
+                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                            Text("City")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+
+                                            TextField("Enter city", text: $city)
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.text)
+                                                .padding(AppleBooksSpacing.space12)
+                                                .background(AppleBooksColors.background)
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                                )
+                                                .textContentType(.addressCity)
+                                        }
+                                    }
+
+                                    // Favorite Book Genre
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        Text("Favorite Book Genre")
+                                            .font(AppleBooksTypography.headlineSmall)
+                                            .foregroundColor(AppleBooksColors.text)
+
+                                        Picker("Select favorite genre", selection: $favoriteBookGenre) {
+                                            Text("Not specified").tag("")
+                                            Text("Fiction").tag("Fiction")
+                                            Text("Non-Fiction").tag("Non-Fiction")
+                                            Text("Mystery").tag("Mystery")
+                                            Text("Romance").tag("Romance")
+                                            Text("Science Fiction").tag("Science Fiction")
+                                            Text("Fantasy").tag("Fantasy")
+                                            Text("Biography").tag("Biography")
+                                            Text("History").tag("History")
+                                            Text("Self-Help").tag("Self-Help")
+                                            Text("Other").tag("Other")
+                                        }
+                                        .pickerStyle(.menu)
+                                        .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+                                        .padding(AppleBooksSpacing.space12)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(AppleBooksColors.background)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                    }
+                                }
+                                .transition(.slide)
                             }
 
                             // Sign In/Sign Up Button
@@ -224,7 +437,7 @@ struct LoginView: View {
     }
 
     private func signUp() {
-        // Simplified signup with just email and password
+        // Validate required fields
         guard !email.isEmpty else {
             authService.errorMessage = "Email is required"
             return
@@ -238,14 +451,14 @@ struct LoginView: View {
         authService.signUp(
             email: email,
             password: password,
-            firstName: nil,
-            lastName: nil,
-            dateOfBirth: nil,
-            gender: nil,
-            phone: nil,
-            country: nil,
-            city: nil,
-            favoriteBookGenre: nil
+            firstName: firstName.isEmpty ? nil : firstName,
+            lastName: lastName.isEmpty ? nil : lastName,
+            dateOfBirth: showMoreFields ? dateOfBirth : nil,
+            gender: gender.isEmpty ? nil : gender,
+            phone: phone.isEmpty ? nil : phone,
+            country: country.isEmpty ? nil : country,
+            city: city.isEmpty ? nil : city,
+            favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre
         ) { result in
             isLoading = false
             switch result {
