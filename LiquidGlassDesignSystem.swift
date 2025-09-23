@@ -844,7 +844,7 @@ public struct AppleBooksColors {
     static let text = Color.black                   // Primary black text
     static let textSecondary = Color(hex: "3C3C4399") // 60% opacity gray
     static let textTertiary = Color(hex: "3C3C434D")  // 30% opacity gray
-    static let accent = Color(hex: "FF9F0A")       // Warm orange for CTAs
+    static let accent = Color(hex: "FF6B6B")       // Deep coral for CTAs
     static let promotional = Color(hex: "FF3B30")   // Red for promotions
     static let success = Color(hex: "34C759")      // Green for success states
 }
