@@ -9,102 +9,188 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Vibrant profile background gradient
-                BackgroundGradients.profileGradient
+                // Apple Books background
+                AppleBooksColors.background
                     .ignoresSafeArea()
-                
+
                 ScrollView {
-                    VStack(spacing: SpacingSystem.xl) {
-                        // Enhanced User Info Section
-                        VStack(spacing: SpacingSystem.lg) {
-                            // Profile picture with enhanced styling
+                    VStack(spacing: AppleBooksSpacing.space32) {
+                        // User Info Section
+                        VStack(spacing: AppleBooksSpacing.space20) {
+                            // Profile picture
                             ProfilePictureView(authService: authService)
-                                .padding(SpacingSystem.md)
+                                .padding(AppleBooksSpacing.space16)
                                 .background(
                                     Circle()
-                                        .fill(AdaptiveColors.glassBackground)
-                                        .overlay(
-                                            Circle()
-                                                .stroke(ProfileColors.avatarBorder, lineWidth: 3)
-                                        )
-                                        .shadow(color: ProfileColors.avatarBorder.opacity(0.3), radius: 20, x: 0, y: 10)
+                                        .fill(AppleBooksColors.card)
+                                        .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
                                 )
 
                             if let user = authService.currentUser {
-                                VStack(spacing: SpacingSystem.sm) {
-                                    Text(user.email ?? "No email")
-                                        .font(TypographySystem.displaySmall)
-                                        .foregroundColor(AdaptiveColors.primaryText)
+                                VStack(spacing: AppleBooksSpacing.space4) {
+                                    Text(user.displayName ?? user.email ?? "User")
+                                        .font(AppleBooksTypography.headlineLarge)
+                                        .foregroundColor(AppleBooksColors.text)
                                         .multilineTextAlignment(.center)
 
+                                    Text(user.email ?? "")
+                                        .font(AppleBooksTypography.bodyMedium)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+
                                     Text("Member since \(formattedDate(user.metadata.creationDate))")
-                                        .font(TypographySystem.bodyMedium)
-                                        .foregroundColor(AdaptiveColors.secondaryText)
+                                        .font(AppleBooksTypography.caption)
+                                        .foregroundColor(AppleBooksColors.textTertiary)
                                 }
-                                .padding(.horizontal, SpacingSystem.lg)
+                                .padding(.horizontal, AppleBooksSpacing.space24)
                             }
                         }
-                        .padding(.top, SpacingSystem.xl)
+                        .padding(.top, AppleBooksSpacing.space32)
 
-                        // Enhanced Menu Options with Glass Cards
-                        VStack(spacing: SpacingSystem.md) {
-                            // Account Section
-                            VStack(spacing: SpacingSystem.sm) {
+                        // Reading Statistics Section
+                        VStack(spacing: AppleBooksSpacing.space16) {
+                            AppleBooksSectionHeader(
+                                title: "Reading Statistics",
+                                subtitle: "Your reading progress"
+                            )
+
+                            HStack(spacing: AppleBooksSpacing.space16) {
+                                AppleBooksCard {
+                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "book.fill")
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.accent)
+                                        Text("12")
+                                            .font(AppleBooksTypography.displayMedium)
+                                            .foregroundColor(AppleBooksColors.text)
+                                        Text("Books Read")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                }
+
+                                AppleBooksCard {
+                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "clock.fill")
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.success)
+                                        Text("45h")
+                                            .font(AppleBooksTypography.displayMedium)
+                                            .foregroundColor(AppleBooksColors.text)
+                                        Text("Reading Time")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                }
+
+                                AppleBooksCard {
+                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "star.fill")
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.promotional)
+                                        Text("4.8")
+                                            .font(AppleBooksTypography.displayMedium)
+                                            .foregroundColor(AppleBooksColors.text)
+                                        Text("Avg Rating")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+                        }
+
+                        // Settings Options Section
+                        VStack(spacing: AppleBooksSpacing.space16) {
+                            AppleBooksSectionHeader(
+                                title: "Settings",
+                                subtitle: "Manage your account and preferences"
+                            )
+
+                            VStack(spacing: AppleBooksSpacing.space12) {
                                 NavigationLink(destination: AccountSettingsView()) {
-                                    ProfileMenuRow(
-                                        icon: "gear.circle.fill",
-                                        title: "Account Settings",
-                                        iconColor: PrimaryColors.electricBlue
-                                    )
+                                    AppleBooksCard {
+                                        HStack(spacing: AppleBooksSpacing.space12) {
+                                            Image(systemName: "gear")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.accent)
+                                                .frame(width: 24, height: 24)
+                                            Text("Account Settings")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.text)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppleBooksTypography.caption)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                        }
+                                    }
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
                                 NavigationLink(destination: ReadingStatsView()) {
-                                    ProfileMenuRow(
-                                        icon: "chart.bar.fill",
-                                        title: "Reading Statistics",
-                                        iconColor: PrimaryColors.freshGreen
-                                    )
+                                    AppleBooksCard {
+                                        HStack(spacing: AppleBooksSpacing.space12) {
+                                            Image(systemName: "chart.bar.fill")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.success)
+                                                .frame(width: 24, height: 24)
+                                            Text("Detailed Statistics")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.text)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppleBooksTypography.caption)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                        }
+                                    }
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
+                                // Theme Section
+                                AppleBooksCard {
+                                    VStack(spacing: AppleBooksSpacing.space12) {
+                                        HStack {
+                                            Text("Appearance")
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
+                                            Spacer()
+                                        }
+
+                                        GlassSegmentedPicker(
+                                            title: "",
+                                            selection: $themeManager.currentPreference,
+                                            options: ColorSchemePreference.allCases,
+                                            displayText: { $0.rawValue.capitalized },
+                                            isMandatory: false
+                                        )
+                                    }
+                                }
+
+                                // Sign Out
+                                Button(action: {
+                                    showSignOutAlert = true
+                                }) {
+                                    AppleBooksCard {
+                                        HStack(spacing: AppleBooksSpacing.space12) {
+                                            Image(systemName: "arrow.right.square")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.promotional)
+                                                .frame(width: 24, height: 24)
+                                            Text("Sign Out")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.promotional)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppleBooksTypography.caption)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                        }
+                                    }
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
-
-                            // Theme Section
-                            VStack(spacing: SpacingSystem.md) {
-                                HStack {
-                                    Text("Appearance")
-                                        .font(TypographySystem.headlineSmall)
-                                        .foregroundColor(AdaptiveColors.primaryText)
-                                    Spacer()
-                                }
-                                .padding(.horizontal, SpacingSystem.md)
-
-                                GlassSegmentedPicker(
-                                    title: "Theme",
-                                    selection: $themeManager.currentPreference,
-                                    options: ColorSchemePreference.allCases,
-                                    displayText: { $0.rawValue.capitalized }
-                                )
-                                .padding(.horizontal, SpacingSystem.md)
-                                .featureCardStyle()
-                            }
-
-                            // Sign Out Section
-                            Button(action: {
-                                showSignOutAlert = true
-                            }) {
-                                ProfileMenuRow(
-                                    icon: "arrow.right.square.fill",
-                                    title: "Sign Out",
-                                    iconColor: ProfileColors.dangerActions,
-                                    textColor: ProfileColors.dangerActions
-                                )
-                            }
-                            .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal, AppleBooksSpacing.space24)
                         }
-                        .padding(.horizontal, SpacingSystem.md)
-                        
-                        Spacer(minLength: SpacingSystem.xxxl)
+
+                        Spacer(minLength: AppleBooksSpacing.space64)
                     }
                 }
             }
@@ -197,21 +283,13 @@ struct ProfilePictureView: View {
             } else {
                 ZStack {
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    PrimaryColors.energeticPink.opacity(0.3),
-                                    PrimaryColors.vibrantPurple.opacity(0.2)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .fill(AppleBooksColors.card)
                         .frame(width: 120, height: 120)
-                    
+                        .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
+
                     Text(initials)
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(initialsTextColor)
+                        .font(.system(size: 48, weight: .bold, design: .default))
+                        .foregroundColor(AppleBooksColors.text)
                 }
             }
 
@@ -226,14 +304,14 @@ struct ProfilePictureView: View {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.white)
-                            .padding(SpacingSystem.sm)
-                            .background(PrimaryColors.energeticPink)
+                            .padding(AppleBooksSpacing.space6)
+                            .background(AppleBooksColors.accent)
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
-                                    .stroke(Color.white, lineWidth: 2)
+                                    .stroke(AppleBooksColors.card, lineWidth: 2)
                             )
-                            .shadow(color: PrimaryColors.energeticPink.opacity(0.4), radius: 8, x: 0, y: 4)
+                            .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
                     .padding(SpacingSystem.xs)
                 }

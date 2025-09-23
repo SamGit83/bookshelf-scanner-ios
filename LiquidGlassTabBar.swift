@@ -1,4 +1,5 @@
 import SwiftUI
+import LiquidGlassDesignSystem
 
 struct TabItem: Identifiable {
     let id = UUID()
@@ -19,14 +20,9 @@ struct LiquidGlassTabBar: View {
                 .font(.caption2)
                 .fontWeight(selectedTab == tab.tag ? .semibold : .regular)
         }
-        .foregroundColor(selectedTab == tab.tag ? .primary : .primary.opacity(0.6))
+        .foregroundColor(selectedTab == tab.tag ? Color(hex: "FF9F0A") : Color(hex: "3C3C4399"))
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(selectedTab == tab.tag ? Color.blue.opacity(0.2) : Color.clear)
-                .padding(.horizontal, 8)
-        )
     }
 
     private var tabBarContent: some View {
@@ -46,22 +42,18 @@ struct LiquidGlassTabBar: View {
     }
 
     private var backgroundShape: some View {
-        RoundedRectangle(cornerRadius: 20)
-            .fill(.ultraThinMaterial)
-            .opacity(0.9)
-            .blur(radius: 1)
+        Color.white
             .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                Divider()
+                    .padding(.top, 0),
+                alignment: .top
             )
-            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
 
     var body: some View {
         tabBarContent
             .background(backgroundShape)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 8)
+            .padding(.top, 8)
     }
 }
 

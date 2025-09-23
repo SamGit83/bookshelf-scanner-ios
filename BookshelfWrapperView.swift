@@ -27,30 +27,71 @@ struct BookshelfWrapperView: View {
     }
 
     private var authenticatedView: some View {
-        TabView(selection: $selectedTab) {
-            LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-                .tabItem {
-                    Label("Library", systemImage: "books.vertical")
-                }
-                .tag(0)
+        ZStack {
+            AppleBooksColors.background
+                .ignoresSafeArea()
 
-            CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-                .tabItem {
-                    Label("Reading", systemImage: "book")
-                }
-                .tag(1)
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Daily Reading Goals Section
+                    ReadingGoalsSection()
 
-            RecommendationsView(viewModel: viewModel)
-                .tabItem {
-                    Label("Discover", systemImage: "sparkles")
-                }
-                .tag(2)
+                    // Currently Reading Collection
+                    AppleBooksCollection(
+                        books: viewModel.books.filter { $0.status == .currentlyReading },
+                        title: "Continue Reading",
+                        subtitle: "Pick up where you left off",
+                        onBookTap: { book in
+                            // Handle book tap - could navigate to detail view
+                        },
+                        onSeeAllTap: {
+                            // Handle see all
+                        },
+                        viewModel: viewModel
+                    )
 
-            ProfileView(authService: authService)
-                .tabItem {
-                    Label("Profile", systemImage: "person.circle")
+                    // Featured Promotional Banner
+                    AppleBooksPromoBanner(
+                        title: "$9.99 Audiobooks",
+                        subtitle: "Limited time offer",
+                        gradient: LinearGradient(
+                            colors: [AppleBooksColors.promotional, AppleBooksColors.promotional.opacity(0.8)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    ) {
+                        // Handle promo tap
+                    }
+
+                    // Customer Favorites
+                    AppleBooksCollection(
+                        books: Array(viewModel.books.prefix(5)), // Placeholder for favorites
+                        title: "Customer Favorites",
+                        subtitle: "See the books readers love",
+                        onBookTap: { book in
+                            // Handle book tap
+                        },
+                        onSeeAllTap: {
+                            // Handle see all
+                        },
+                        viewModel: viewModel
+                    )
+
+                    // New & Trending
+                    AppleBooksCollection(
+                        books: Array(viewModel.books.suffix(5)), // Placeholder for trending
+                        title: "New & Trending",
+                        subtitle: "Explore what's hot in audiobooks",
+                        onBookTap: { book in
+                            // Handle book tap
+                        },
+                        onSeeAllTap: {
+                            // Handle see all
+                        },
+                        viewModel: viewModel
+                    )
                 }
-                .tag(3)
+            }
         }
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)

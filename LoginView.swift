@@ -4,384 +4,194 @@ struct LoginView: View {
     @ObservedObject private var authService = AuthService.shared
     @State private var email = ""
     @State private var password = ""
-    @State private var firstName = ""
-    @State private var lastName = ""
-    @State private var dateOfBirth: Date = Date()
-    @State private var gender = "Prefer not to say"
-    @State private var phone = ""
-    @State private var country = ""
-    @State private var city = ""
-    @State private var favoriteBookGenre = ""
-    @State private var showAdditionalFields = false
     @State private var isSignUp: Bool
     @State private var isLoading = false
     @State private var showPasswordReset = false
     @State private var animateForm = false
-    @State private var hasShownAdditionalFields = false
 
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
     }
 
-    private let genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"]
-
     var body: some View {
         ZStack {
-            // Enhanced vibrant background gradient
-            BackgroundGradients.heroGradient
+            // Clean Apple Books background
+            AppleBooksColors.background
                 .ignoresSafeArea()
 
-            // Enhanced animated floating elements
-            GeometryReader { geometry in
-                Circle()
-                    .fill(Color.white.opacity(0.1))
-                    .frame(width: geometry.size.width * 0.8)
-                    .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.2)
-                    .blur(radius: 40)
-                    .offset(x: animateForm ? 20 : -20)
-                    .animation(.easeInOut(duration: 4).repeatForever(), value: animateForm)
-
-                Circle()
-                    .fill(Color.white.opacity(0.08))
-                    .frame(width: geometry.size.width * 0.6)
-                    .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.8)
-                    .blur(radius: 30)
-                    .offset(y: animateForm ? -15 : 15)
-                    .animation(.easeInOut(duration: 3).repeatForever(), value: animateForm)
-                
-                Circle()
-                    .fill(Color.white.opacity(0.05))
-                    .frame(width: geometry.size.width * 0.4)
-                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                    .blur(radius: 25)
-                    .offset(x: animateForm ? -10 : 10, y: animateForm ? 10 : -10)
-                    .animation(.easeInOut(duration: 5).repeatForever(), value: animateForm)
-            }
-
             ScrollView {
-                VStack(spacing: 32) {
-                    Spacer(minLength: 64)
+                VStack(spacing: AppleBooksSpacing.space32) {
+                    Spacer(minLength: AppleBooksSpacing.space64)
 
-                    // Enhanced App Logo/Title with vibrant glass effect
-                    VStack(spacing: SpacingSystem.lg) {
-                        ZStack {
-                            Circle()
-                                .fill(PrimaryColors.energeticPink.opacity(0.3))
-                                .frame(width: 120, height: 120)
-                                .blur(radius: 15)
-                                .overlay(
-                                    Circle()
-                                        .stroke(Color.white.opacity(0.3), lineWidth: 2)
-                                        .frame(width: 120, height: 120)
-                                )
+                    // Clean App Logo/Title
+                    VStack(spacing: AppleBooksSpacing.space16) {
+                        Image(systemName: "books.vertical.fill")
+                            .font(.system(size: 56, weight: .medium))
+                            .foregroundColor(AppleBooksColors.text)
+                            .scaleEffect(animateForm ? 1.0 : 0.8)
+                            .animation(AnimationTiming.transition.delay(0.3), value: animateForm)
 
-                            Image(systemName: "books.vertical.fill")
-                                .font(.system(size: 56, weight: .medium))
-                                .foregroundColor(.white)
-                                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-                                .scaleEffect(animateForm ? 1.0 : 0.8)
-                                .animation(AnimationTiming.transition.delay(0.3), value: animateForm)
-                        }
-                        .shadow(color: PrimaryColors.energeticPink.opacity(0.4), radius: 20, x: 0, y: 10)
-
-                        VStack(spacing: SpacingSystem.sm) {
+                        VStack(spacing: AppleBooksSpacing.space8) {
                             Text("Bookshelf Scanner")
-                                .font(TypographySystem.displayMedium)
-                                .foregroundColor(.white)
-                                .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                                .font(AppleBooksTypography.displayMedium)
+                                .foregroundColor(AppleBooksColors.text)
 
                             Text("Digitize your library with AI")
-                                .font(TypographySystem.bodyLarge)
-                                .foregroundColor(.white.opacity(0.9))
-                                .shadow(color: Color.black.opacity(0.2), radius: 3, x: 0, y: 1)
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.textSecondary)
                         }
                     }
-                    .padding(SpacingSystem.xl)
-                    .featureCardStyle()
-                    .padding(.horizontal, SpacingSystem.lg)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.2), value: animateForm)
 
-                    // Enhanced Login/Signup Form
-                    VStack(spacing: SpacingSystem.lg) {
-                        // Enhanced Form Header
-                        VStack(spacing: SpacingSystem.sm) {
-                            Text(isSignUp ? "Create Account" : "Welcome Back")
-                                .font(TypographySystem.displaySmall)
-                                .foregroundColor(.white)
-                                .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                    // Clean Login/Signup Form
+                    AppleBooksCard(
+                        cornerRadius: 16,
+                        padding: AppleBooksSpacing.space24,
+                        shadowStyle: .subtle
+                    ) {
+                        VStack(spacing: AppleBooksSpacing.space20) {
+                            // Form Header
+                            VStack(spacing: AppleBooksSpacing.space8) {
+                                Text(isSignUp ? "Create Account" : "Welcome Back")
+                                    .font(AppleBooksTypography.headlineLarge)
+                                    .foregroundColor(AppleBooksColors.text)
 
-                            Text(isSignUp ? "Join our reading community" : "Sign in to your account")
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                        .padding(.bottom, SpacingSystem.md)
-
-                        // Enhanced Email Field
-                        VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                            HStack {
-                                Text("Email")
-                                    .font(TypographySystem.headlineSmall)
-                                    .foregroundColor(.white.opacity(0.9))
-                                Text("*")
-                                    .foregroundColor(SemanticColors.errorPrimary)
-                                    .font(TypographySystem.headlineSmall)
+                                Text(isSignUp ? "Join our reading community" : "Sign in to your account")
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
                             }
 
-                            TextField("Enter your email", text: $email)
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(AdaptiveColors.primaryText)
-                                .glassFieldStyle(isValid: !email.isEmpty || email.isEmpty)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                                .textContentType(.emailAddress)
-                        }
-
-                        if isSignUp {
-                            // Enhanced First Name Field
-                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                            // Email Field
+                            VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                 HStack {
-                                    Text("First Name")
-                                        .font(TypographySystem.headlineSmall)
-                                        .foregroundColor(.white.opacity(0.9))
+                                    Text("Email")
+                                        .font(AppleBooksTypography.headlineSmall)
+                                        .foregroundColor(AppleBooksColors.text)
                                     Text("*")
-                                        .foregroundColor(SemanticColors.errorPrimary)
-                                        .font(TypographySystem.headlineSmall)
+                                        .foregroundColor(AppleBooksColors.promotional)
+                                        .font(AppleBooksTypography.headlineSmall)
                                 }
 
-                                TextField("Enter your first name", text: $firstName)
-                                    .font(TypographySystem.bodyMedium)
-                                    .foregroundColor(AdaptiveColors.primaryText)
-                                    .glassFieldStyle(isValid: !firstName.isEmpty || firstName.isEmpty)
-                                    .textContentType(.givenName)
+                                TextField("Enter your email", text: $email)
+                                    .font(AppleBooksTypography.bodyLarge)
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .padding(AppleBooksSpacing.space12)
+                                    .background(AppleBooksColors.background)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .keyboardType(.emailAddress)
+                                    .autocapitalization(.none)
+                                    .textContentType(.emailAddress)
                             }
 
-                            // Enhanced Last Name Field
-                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
+                            // Password Field
+                            VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                 HStack {
-                                    Text("Last Name")
-                                        .font(TypographySystem.headlineSmall)
-                                        .foregroundColor(.white.opacity(0.9))
-                                    Text("*")
-                                        .foregroundColor(SemanticColors.errorPrimary)
-                                        .font(TypographySystem.headlineSmall)
-                                }
-
-                                TextField("Enter your last name", text: $lastName)
-                                    .font(TypographySystem.bodyMedium)
-                                    .foregroundColor(AdaptiveColors.primaryText)
-                                    .glassFieldStyle(isValid: !lastName.isEmpty || lastName.isEmpty)
-                                    .textContentType(.familyName)
-                            }
-
-                            // Enhanced Date of Birth Field
-                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                                HStack {
-                                    Text("Date of Birth")
-                                        .font(TypographySystem.headlineSmall)
-                                        .foregroundColor(.white.opacity(0.9))
-                                    Text("*")
-                                        .foregroundColor(SemanticColors.errorPrimary)
-                                        .font(TypographySystem.headlineSmall)
-                                }
-
-                                GlassDatePicker(title: "", date: $dateOfBirth, isMandatory: true)
-                            }
-
-                            // Enhanced Gender Field
-                            VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                                Text("Gender")
-                                    .font(TypographySystem.headlineSmall)
-                                    .foregroundColor(.white.opacity(0.9))
-
-                                GlassSegmentedPicker(
-                                    title: "",
-                                    selection: $gender,
-                                    options: genderOptions,
-                                    displayText: { $0 }
-                                )
-                            }
-
-                            // Enhanced Additional Fields (shown when expanded)
-                            if showAdditionalFields {
-                                VStack(spacing: SpacingSystem.md) {
-                                    // Phone Number Field
-                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                                        Text("Phone Number")
-                                            .font(TypographySystem.headlineSmall)
-                                            .foregroundColor(.white.opacity(0.9))
-
-                                        TextField("Enter your phone number", text: $phone)
-                                            .font(TypographySystem.bodyMedium)
-                                            .foregroundColor(AdaptiveColors.primaryText)
-                                            .glassFieldStyle()
-                                            .keyboardType(.phonePad)
-                                            .textContentType(.telephoneNumber)
-                                    }
-
-                                    // Country Field
-                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                                        Text("Country")
-                                            .font(TypographySystem.headlineSmall)
-                                            .foregroundColor(.white.opacity(0.9))
-
-                                        TextField("Enter your country", text: $country)
-                                            .font(TypographySystem.bodyMedium)
-                                            .foregroundColor(AdaptiveColors.primaryText)
-                                            .glassFieldStyle()
-                                            .textContentType(.countryName)
-                                    }
-
-                                    // City Field
-                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                                        Text("City")
-                                            .font(TypographySystem.headlineSmall)
-                                            .foregroundColor(.white.opacity(0.9))
-
-                                        TextField("Enter your city", text: $city)
-                                            .font(TypographySystem.bodyMedium)
-                                            .foregroundColor(AdaptiveColors.primaryText)
-                                            .glassFieldStyle()
-                                            .textContentType(.addressCity)
-                                    }
-
-                                    // Favorite Book Genre Field
-                                    VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                                        Text("Favorite Book Genre")
-                                            .font(TypographySystem.headlineSmall)
-                                            .foregroundColor(.white.opacity(0.9))
-
-                                        TextField("e.g., Fiction, Mystery, Romance", text: $favoriteBookGenre)
-                                            .font(TypographySystem.bodyMedium)
-                                            .foregroundColor(AdaptiveColors.primaryText)
-                                            .glassFieldStyle()
+                                    Text("Password")
+                                        .font(AppleBooksTypography.headlineSmall)
+                                        .foregroundColor(AppleBooksColors.text)
+                                    if isSignUp {
+                                        Text("*")
+                                            .foregroundColor(AppleBooksColors.promotional)
+                                            .font(AppleBooksTypography.headlineSmall)
                                     }
                                 }
-                                .transition(.slide.combined(with: .opacity))
-                            }
-                        }
 
-                        // Enhanced Password Field
-                        VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                            HStack {
-                                Text("Password")
-                                    .font(TypographySystem.headlineSmall)
-                                    .foregroundColor(.white.opacity(0.9))
+                                SecureField("Enter your password", text: $password)
+                                    .font(AppleBooksTypography.bodyLarge)
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .padding(AppleBooksSpacing.space12)
+                                    .background(AppleBooksColors.background)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .textContentType(isSignUp ? .newPassword : .password)
+                            }
+
+                            // Sign In/Sign Up Button
+                            Button(action: {
                                 if isSignUp {
-                                    Text("*")
-                                        .foregroundColor(SemanticColors.errorPrimary)
-                                        .font(TypographySystem.headlineSmall)
+                                    signUp()
+                                } else {
+                                    signIn()
+                                }
+                            }) {
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: AppleBooksColors.card))
+                                        .scaleEffect(1.2)
+                                } else {
+                                    Text(isSignUp ? "Create Account" : "Sign In")
+                                        .font(AppleBooksTypography.buttonLarge)
+                                        .foregroundColor(AppleBooksColors.card)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(AppleBooksSpacing.space16)
+                                        .background(AppleBooksColors.accent)
+                                        .cornerRadius(12)
                                 }
                             }
+                            .disabled(isLoading)
 
-                            SecureField("Enter your password", text: $password)
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(AdaptiveColors.primaryText)
-                                .glassFieldStyle(isValid: !password.isEmpty || password.isEmpty)
-                                .textContentType(isSignUp ? .newPassword : .password)
-                        }
-
-                        if isSignUp {
-                            // Enhanced Show More Button
+                            // Toggle between login and signup
                             Button(action: {
                                 withAnimation(AnimationTiming.transition) {
-                                    showAdditionalFields.toggle()
-                                    if showAdditionalFields {
-                                        hasShownAdditionalFields = true
-                                    }
+                                    isSignUp.toggle()
                                 }
                             }) {
-                                HStack(spacing: SpacingSystem.sm) {
-                                    Text(showAdditionalFields ? "Show Less Options" : "Show More Options")
-                                        .font(TypographySystem.bodyMedium)
-                                    Image(systemName: showAdditionalFields ? "chevron.up" : "chevron.down")
-                                        .font(.system(size: 14, weight: .semibold))
+                                Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.accent)
+                            }
+
+                            // Forgot password
+                            if !isSignUp {
+                                Button(action: {
+                                    showPasswordReset = true
+                                }) {
+                                    Text("Forgot Password?")
+                                        .font(AppleBooksTypography.caption)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
                                 }
-                                .foregroundColor(PrimaryColors.electricBlue)
-                            }
-                            .padding(.top, SpacingSystem.sm)
-                        }
-
-                        // Enhanced Sign In/Sign Up Button
-                        Button(action: {
-                            if isSignUp {
-                                signUp()
-                            } else {
-                                signIn()
-                            }
-                        }) {
-                            if isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .scaleEffect(1.2)
-                            } else {
-                                HStack(spacing: SpacingSystem.sm) {
-                                    Text(isSignUp ? "Create Account" : "Sign In")
-                                        .font(TypographySystem.buttonLarge)
-                                    Image(systemName: isSignUp ? "person.badge.plus" : "arrow.right.circle.fill")
-                                        .font(.system(size: 18, weight: .semibold))
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
-                        }
-                        .primaryButtonStyle()
-                        .disabled(isLoading)
-
-                        // Enhanced Toggle between login and signup
-                        Button(action: {
-                            withAnimation(AnimationTiming.transition) {
-                                isSignUp.toggle()
-                            }
-                        }) {
-                            Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(PrimaryColors.energeticPink)
-                        }
-
-                        // Enhanced Forgot password
-                        if !isSignUp {
-                            Button(action: {
-                                showPasswordReset = true
-                            }) {
-                                Text("Forgot Password?")
-                                    .font(TypographySystem.captionLarge)
-                                    .foregroundColor(.white.opacity(0.7))
                             }
                         }
                     }
-                    .padding(SpacingSystem.xl)
-                    .featureCardStyle()
-                    .padding(.horizontal, SpacingSystem.lg)
+                    .padding(.horizontal, AppleBooksSpacing.space24)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.4), value: animateForm)
 
-                    // Enhanced Error message
+                    // Error message
                     if let error = authService.errorMessage {
-                        HStack(spacing: SpacingSystem.md) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(SemanticColors.errorPrimary)
-                                .font(.system(size: 24, weight: .semibold))
+                        AppleBooksCard(
+                            cornerRadius: 12,
+                            padding: AppleBooksSpacing.space16,
+                            backgroundColor: AppleBooksColors.promotional.opacity(0.1),
+                            shadowStyle: .subtle
+                        ) {
+                            HStack(spacing: AppleBooksSpacing.space12) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(AppleBooksColors.promotional)
+                                    .font(.system(size: 20, weight: .semibold))
 
-                            Text(error)
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.leading)
+                                Text(error)
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .multilineTextAlignment(.leading)
+                            }
                         }
-                        .padding(SpacingSystem.md)
-                        .background(SemanticColors.errorSecondary)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(SemanticColors.errorPrimary.opacity(0.5), lineWidth: 1)
-                        )
-                        .cornerRadius(12)
-                        .padding(.horizontal, SpacingSystem.lg)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
                         .transition(.scale.combined(with: .opacity))
                         .animation(AnimationTiming.feedback, value: authService.errorMessage)
                     }
 
-                    Spacer(minLength: 64)
+                    Spacer(minLength: AppleBooksSpacing.space64)
                 }
             }
         }
@@ -414,59 +224,35 @@ struct LoginView: View {
     }
 
     private func signUp() {
-        print("DEBUG: Sign up button tapped")
-        // Validation
+        // Simplified signup with just email and password
         guard !email.isEmpty else {
-            print("DEBUG: Validation failed - email empty")
             authService.errorMessage = "Email is required"
             return
         }
         guard !password.isEmpty else {
-            print("DEBUG: Validation failed - password empty")
             authService.errorMessage = "Password is required"
             return
         }
-        guard !firstName.isEmpty else {
-            print("DEBUG: Validation failed - first name empty")
-            authService.errorMessage = "First name is required"
-            return
-        }
-        guard !lastName.isEmpty else {
-            print("DEBUG: Validation failed - last name empty")
-            authService.errorMessage = "Last name is required"
-            return
-        }
-        // Date of birth is required and must be in the past
-        print("DEBUG: Validating dateOfBirth: \(dateOfBirth)")
-        if dateOfBirth >= Date() {
-            print("DEBUG: Date of birth validation failed - date is not in the past")
-            authService.errorMessage = "Date of birth must be in the past"
-            return
-        }
 
-        print("DEBUG: All validations passed")
         isLoading = true
-        print("LoginView: Starting sign up for email: \(email)")
         authService.signUp(
             email: email,
             password: password,
-            firstName: firstName.isEmpty ? nil : firstName,
-            lastName: lastName.isEmpty ? nil : lastName,
-            dateOfBirth: dateOfBirth,
-            gender: gender == "Prefer not to say" ? nil : gender,
-            phone: phone.isEmpty ? nil : phone,
-            country: country.isEmpty ? nil : country,
-            city: city.isEmpty ? nil : city,
-            favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre
+            firstName: nil,
+            lastName: nil,
+            dateOfBirth: nil,
+            gender: nil,
+            phone: nil,
+            country: nil,
+            city: nil,
+            favoriteBookGenre: nil
         ) { result in
             isLoading = false
             switch result {
             case .success:
-                print("LoginView: Sign up success")
                 // Navigation will be handled by the parent view
                 break
             case .failure:
-                print("LoginView: Sign up failure")
                 // Error is handled by the auth service
                 break
             }

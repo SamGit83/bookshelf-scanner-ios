@@ -833,4 +833,397 @@ struct DiscoverColors {
     static let trendingAccent = AccentColors.hotMagenta
     static let personalizedTint = PrimaryColors.vibrantPurple.opacity(0.1)
     static let addToLibraryButton = UIGradients.primaryButton
+// MARK: - Apple Books Design System
+
+// Apple Books Color Palette
+struct AppleBooksColors {
+    static let background = Color(hex: "F2F2F7")    // Light gray background
+    static let card = Color.white                   // Pure white cards
+    static let text = Color.black                   // Primary black text
+    static let textSecondary = Color(hex: "3C3C4399") // 60% opacity gray
+    static let textTertiary = Color(hex: "3C3C434D")  // 30% opacity gray
+    static let accent = Color(hex: "FF9F0A")       // Warm orange for CTAs
+    static let promotional = Color(hex: "FF3B30")   // Red for promotions
+    static let success = Color(hex: "34C759")      // Green for success states
+}
+
+// Apple Books Typography
+struct AppleBooksTypography {
+    // Display (Large Section Headers)
+    static let displayLarge = Font.system(size: 32, weight: .bold, design: .default)
+    static let displayMedium = Font.system(size: 28, weight: .bold, design: .default)
+
+    // Headline (Section Headers)
+    static let headlineLarge = Font.system(size: 22, weight: .semibold, design: .default)
+    static let headlineMedium = Font.system(size: 20, weight: .semibold, design: .default)
+    static let headlineSmall = Font.system(size: 18, weight: .semibold, design: .default)
+
+    // Body (Content Text)
+    static let bodyLarge = Font.system(size: 17, weight: .regular, design: .default)
+    static let bodyMedium = Font.system(size: 15, weight: .regular, design: .default)
+    static let bodySmall = Font.system(size: 13, weight: .regular, design: .default)
+
+    // Caption (Descriptive Text)
+    static let caption = Font.system(size: 12, weight: .regular, design: .default)
+    static let captionBold = Font.system(size: 12, weight: .semibold, design: .default)
+
+    // Button Text
+    static let buttonLarge = Font.system(size: 17, weight: .semibold, design: .default)
+    static let buttonMedium = Font.system(size: 15, weight: .semibold, design: .default)
+}
+
+// Apple Books Spacing
+struct AppleBooksSpacing {
+    static let space2: CGFloat = 2
+    static let space4: CGFloat = 4
+    static let space6: CGFloat = 6
+    static let space8: CGFloat = 8
+    static let space12: CGFloat = 12
+    static let space16: CGFloat = 16
+    static let space20: CGFloat = 20
+    static let space24: CGFloat = 24
+    static let space32: CGFloat = 32
+    static let space40: CGFloat = 40
+    static let space48: CGFloat = 48
+    static let space64: CGFloat = 64
+    static let space80: CGFloat = 80
+    static let space120: CGFloat = 120
+}
+
+// Apple Books Shadow System
+enum AppleBooksShadow {
+    case subtle
+    case medium
+    case elevated
+
+    var color: Color {
+        switch self {
+        case .subtle: return Color.black.opacity(0.06)
+        case .medium: return Color.black.opacity(0.12)
+        case .elevated: return Color.black.opacity(0.18)
+        }
+    }
+
+    var radius: CGFloat {
+        switch self {
+        case .subtle: return 8
+        case .medium: return 16
+        case .elevated: return 24
+        }
+    }
+
+    var x: CGFloat { 0 }
+    var y: CGFloat {
+        switch self {
+        case .subtle: return 4
+        case .medium: return 8
+        case .elevated: return 12
+        }
+    }
+}
+
+// Apple Books Components
+struct AppleBooksSectionHeader: View {
+    let title: String
+    let subtitle: String?
+    let showSeeAll: Bool
+    let seeAllAction: (() -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+            HStack {
+                Text(title)
+                    .font(AppleBooksTypography.headlineLarge)
+                    .foregroundColor(AppleBooksColors.text)
+
+                Spacer()
+
+                if showSeeAll {
+                    Button(action: { seeAllAction?() }) {
+                        Text("See All")
+                            .font(AppleBooksTypography.captionBold)
+                            .foregroundColor(AppleBooksColors.accent)
+                    }
+                }
+            }
+
+            if let subtitle = subtitle {
+                Text(subtitle)
+                    .font(AppleBooksTypography.caption)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+        .padding(.vertical, AppleBooksSpacing.space16)
+    }
+}
+
+struct AppleBooksCollection: View {
+    let books: [Book]
+    let title: String
+    let subtitle: String?
+    let onBookTap: (Book) -> Void
+    let onSeeAllTap: (() -> Void)?
+    let viewModel: BookViewModel? // For adding books to library
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space20) {
+            AppleBooksSectionHeader(
+                title: title,
+                subtitle: subtitle,
+                showSeeAll: onSeeAllTap != nil,
+                seeAllAction: onSeeAllTap
+            )
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: AppleBooksSpacing.space16) {
+                    ForEach(books) { book in
+                        AppleBooksBookCard(
+                            book: book,
+                            onTap: { onBookTap(book) },
+                            showAddButton: viewModel != nil,
+                            onAddTap: viewModel != nil ? { viewModel?.saveBookToFirestore(book) } : nil,
+                            viewModel: viewModel
+                        )
+                    }
+                }
+                .padding(.horizontal, AppleBooksSpacing.space24)
+            }
+        }
+    }
+}
+
+struct AppleBooksPromoBanner: View {
+    let title: String
+    let subtitle: String?
+    let gradient: LinearGradient
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                Text(title)
+                    .font(AppleBooksTypography.headlineMedium)
+                    .foregroundColor(.white)
+                    .bold()
+
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(AppleBooksTypography.bodyMedium)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(AppleBooksSpacing.space24)
+            .background(gradient)
+            .cornerRadius(16)
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+    }
+}
+
+struct AppleBooksCard<Content: View>: View {
+    let content: Content
+    let cornerRadius: CGFloat
+    let padding: CGFloat
+    let backgroundColor: Color
+    let shadowStyle: AppleBooksShadow
+
+    init(
+        cornerRadius: CGFloat = 12,
+        padding: CGFloat = AppleBooksSpacing.space16,
+        backgroundColor: Color = AppleBooksColors.card,
+        shadowStyle: AppleBooksShadow = .subtle,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.content = content()
+        self.cornerRadius = cornerRadius
+        self.padding = padding
+        self.backgroundColor = backgroundColor
+        self.shadowStyle = shadowStyle
+    }
+
+    var body: some View {
+        content
+            .padding(padding)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(backgroundColor)
+                    .shadow(
+                        color: shadowStyle.color,
+                        radius: shadowStyle.radius,
+                        x: shadowStyle.x,
+                        y: shadowStyle.y
+                    )
+            )
+    }
+}
+
+struct AppleBooksBookCard: View {
+    let book: Book
+    let onTap: () -> Void
+    let showAddButton: Bool
+    let onAddTap: (() -> Void)?
+    let viewModel: BookViewModel? // Add viewModel for adding to library
+
+    @State private var isAddingToLibrary = false
+
+    var body: some View {
+        AppleBooksCard(
+            cornerRadius: 12,
+            padding: AppleBooksSpacing.space12,
+            shadowStyle: .subtle
+        ) {
+            HStack(spacing: AppleBooksSpacing.space12) {
+                // Book Cover
+                if let coverData = book.coverImageData,
+                   let uiImage = UIImage(data: coverData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 60, height: 90)
+                        .cornerRadius(8)
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                } else if let coverURL = book.coverImageURL,
+                          let url = URL(string: coverURL) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 60, height: 90)
+                                .cornerRadius(8)
+                                .overlay(
+                                    ProgressView()
+                                        .scaleEffect(0.5)
+                                )
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 60, height: 90)
+                                .cornerRadius(8)
+                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        case .failure:
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 60, height: 90)
+                                .cornerRadius(8)
+                                .overlay(
+                                    Image(systemName: "book")
+                                        .foregroundColor(.gray)
+                                )
+                        @unknown default:
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 60, height: 90)
+                                .cornerRadius(8)
+                        }
+                    }
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 60, height: 90)
+                        .cornerRadius(8)
+                        .overlay(
+                            Text("No Cover")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        )
+                }
+
+                // Book Details
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                    Text(book.title ?? "Unknown Title")
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+
+                    Text(book.author ?? "Unknown Author")
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+
+                    if let genre = book.genre {
+                        Text(genre)
+                            .font(AppleBooksTypography.captionBold)
+                            .foregroundColor(AppleBooksColors.accent)
+                            .padding(.horizontal, AppleBooksSpacing.space8)
+                            .padding(.vertical, AppleBooksSpacing.space2)
+                            .background(AppleBooksColors.accent.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+                }
+
+                Spacer()
+
+                // Add Button (if needed)
+                if showAddButton {
+                    Button(action: addToLibrary) {
+                        if isAddingToLibrary {
+                            ProgressView()
+                                .frame(width: AppleBooksSpacing.space20, height: AppleBooksSpacing.space20)
+                        } else {
+                            Image(systemName: "plus")
+                                .font(AppleBooksTypography.buttonMedium)
+                                .foregroundColor(AppleBooksColors.accent)
+                                .padding(AppleBooksSpacing.space8)
+                                .background(AppleBooksColors.accent.opacity(0.1))
+                                .cornerRadius(8)
+                        }
+                    }
+                    .disabled(isAddingToLibrary)
+                }
+            }
+        }
+        .onTapGesture(perform: onTap)
+    }
+
+    private func addToLibrary() {
+        isAddingToLibrary = true
+        onAddTap?()
+        // Show feedback
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            isAddingToLibrary = false
+        }
+    }
+}
+
+// Reading Goals Section
+struct ReadingGoalsSection: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            Text("Daily Reading Goals")
+                .font(AppleBooksTypography.headlineLarge)
+                .foregroundColor(AppleBooksColors.text)
+                .padding(.horizontal, AppleBooksSpacing.space24)
+
+            // Placeholder for reading goals - you can expand this
+            AppleBooksCard {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Today's Goal")
+                            .font(AppleBooksTypography.bodyLarge)
+                            .foregroundColor(AppleBooksColors.text)
+                        Text("Read for 30 minutes")
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                    }
+                    Spacer()
+                    // Progress indicator placeholder
+                    Circle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 4)
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Circle()
+                                .trim(from: 0, to: 0.7)
+                                .stroke(AppleBooksColors.success, lineWidth: 4)
+                                .frame(width: 40, height: 40)
+                        )
+                }
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        }
+    }
+}
 }

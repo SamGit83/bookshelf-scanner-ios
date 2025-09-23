@@ -19,7 +19,7 @@ struct AddBookView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(.systemBackground)
+                AppleBooksColors.background
                     .ignoresSafeArea()
 
                 mainContent
@@ -35,7 +35,7 @@ struct AddBookView: View {
     }
 
     private var mainContent: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: AppleBooksSpacing.space32) {
             headerView
 
             if !showManualEntry {
@@ -50,61 +50,48 @@ struct AddBookView: View {
     }
 
     private var headerView: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(Color.blue.opacity(0.2))
-                    .frame(width: 80, height: 80)
-                    .blur(radius: 10)
-
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.blue)
-            }
-
+        VStack(spacing: AppleBooksSpacing.space16) {
             Text("Add New Book")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
+                .font(AppleBooksTypography.headlineLarge)
+                .foregroundColor(AppleBooksColors.text)
 
             Text("Search by ISBN or enter details manually")
-                .font(.body)
-                .foregroundColor(.secondary)
+                .font(AppleBooksTypography.bodyMedium)
+                .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.center)
         }
-        .padding(.horizontal, 32)
+        .padding(.horizontal, AppleBooksSpacing.space24)
+        .padding(.vertical, AppleBooksSpacing.space32)
     }
 
     private var isbnSearchView: some View {
-        VStack(spacing: 16) {
-            Text("Search by ISBN")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
+        AppleBooksCard {
+            VStack(spacing: AppleBooksSpacing.space16) {
+                Text("Search by ISBN")
+                    .font(AppleBooksTypography.headlineMedium)
+                    .foregroundColor(AppleBooksColors.text)
 
-            TextField("Enter ISBN (10 or 13 digits)", text: $isbn)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-                .keyboardType(.numberPad)
+                TextField("Enter ISBN (10 or 13 digits)", text: $isbn)
+                    .padding(AppleBooksSpacing.space12)
+                    .background(AppleBooksColors.card.opacity(0.5))
+                    .cornerRadius(8)
+                    .keyboardType(.numberPad)
+                    .foregroundColor(AppleBooksColors.text)
 
-            searchButton
+                searchButton
 
-            Button(action: {
-                withAnimation(.spring()) {
-                    showManualEntry = true
+                Button(action: {
+                    withAnimation(.spring()) {
+                        showManualEntry = true
+                    }
+                }) {
+                    Text("Enter Manually")
+                        .font(AppleBooksTypography.captionBold)
+                        .foregroundColor(AppleBooksColors.accent)
                 }
-            }) {
-                Text("Enter Manually")
-                    .font(.body)
-                    .foregroundColor(.blue)
             }
         }
-        .padding(24)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(radius: 2)
-        .padding(.horizontal, 32)
+        .padding(.horizontal, AppleBooksSpacing.space24)
     }
 
     private var searchButton: some View {
@@ -117,11 +104,11 @@ struct AddBookView: View {
             } else {
                 Text("Search Book")
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
+                    .padding(AppleBooksSpacing.space16)
+                    .background(AppleBooksColors.accent)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .font(.headline)
+                    .cornerRadius(12)
+                    .font(AppleBooksTypography.buttonLarge)
             }
         }
         .disabled(isbn.isEmpty || isLoading)
@@ -131,15 +118,15 @@ struct AddBookView: View {
         Group {
             if !searchResults.isEmpty {
                 ScrollView {
-                    LazyVStack(spacing: 16) {
+                    LazyVStack(spacing: AppleBooksSpacing.space16) {
                         ForEach(searchResults) { book in
                             BookSearchResultView(book: book, isSelected: selectedBook?.id == book.id) {
                                 selectedBook = book
                             }
                         }
                     }
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .padding(.vertical, AppleBooksSpacing.space16)
                 }
             } else {
                 EmptyView()
@@ -149,88 +136,89 @@ struct AddBookView: View {
 
     private var manualEntryView: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: AppleBooksSpacing.space20) {
                 manualEntryForm
             }
-            .padding(.vertical, 16)
+            .padding(.vertical, AppleBooksSpacing.space16)
         }
     }
 
     private var manualEntryForm: some View {
-        VStack(spacing: 16) {
-            Text("Manual Entry")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
+        AppleBooksCard {
+            VStack(spacing: AppleBooksSpacing.space16) {
+                Text("Manual Entry")
+                    .font(AppleBooksTypography.headlineMedium)
+                    .foregroundColor(AppleBooksColors.text)
 
-            titleField
-            authorField
-            isbnField
-            genreField
-            manualEntryButtons
+                titleField
+                authorField
+                isbnField
+                genreField
+                manualEntryButtons
+            }
         }
-        .padding(24)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(radius: 2)
-        .padding(.horizontal, 32)
+        .padding(.horizontal, AppleBooksSpacing.space24)
     }
 
     private var titleField: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
             Text("Title *")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(AppleBooksTypography.headlineSmall)
+                .foregroundColor(AppleBooksColors.textSecondary)
 
             TextField("Book Title", text: $title)
-                .padding()
-                .background(Color(.systemGray6))
+                .padding(AppleBooksSpacing.space12)
+                .background(AppleBooksColors.card.opacity(0.5))
                 .cornerRadius(8)
+                .foregroundColor(AppleBooksColors.text)
         }
     }
 
     private var authorField: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
             Text("Author *")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(AppleBooksTypography.headlineSmall)
+                .foregroundColor(AppleBooksColors.textSecondary)
 
             TextField("Author Name", text: $author)
-                .padding()
-                .background(Color(.systemGray6))
+                .padding(AppleBooksSpacing.space12)
+                .background(AppleBooksColors.card.opacity(0.5))
                 .cornerRadius(8)
+                .foregroundColor(AppleBooksColors.text)
         }
     }
 
     private var isbnField: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
             Text("ISBN (Optional)")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(AppleBooksTypography.headlineSmall)
+                .foregroundColor(AppleBooksColors.textSecondary)
 
             TextField("ISBN", text: $isbn)
-                .padding()
-                .background(Color(.systemGray6))
+                .padding(AppleBooksSpacing.space12)
+                .background(AppleBooksColors.card.opacity(0.5))
                 .cornerRadius(8)
                 .keyboardType(.numberPad)
+                .foregroundColor(AppleBooksColors.text)
         }
     }
 
     private var genreField: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
             Text("Genre (Optional)")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(AppleBooksTypography.headlineSmall)
+                .foregroundColor(AppleBooksColors.textSecondary)
 
             TextField("Genre", text: $genre)
-                .padding()
-                .background(Color(.systemGray6))
+                .padding(AppleBooksSpacing.space12)
+                .background(AppleBooksColors.card.opacity(0.5))
                 .cornerRadius(8)
+                .foregroundColor(AppleBooksColors.text)
         }
     }
 
     private var manualEntryButtons: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: AppleBooksSpacing.space12) {
             Button(action: {
                 addBookManually()
             }) {
@@ -240,11 +228,11 @@ struct AddBookView: View {
                 } else {
                     Text("Add Book")
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
+                        .padding(AppleBooksSpacing.space16)
+                        .background(AppleBooksColors.accent)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .font(.headline)
+                        .cornerRadius(12)
+                        .font(AppleBooksTypography.buttonLarge)
                 }
             }
             .disabled(title.isEmpty || author.isEmpty || isLoading)
@@ -255,10 +243,10 @@ struct AddBookView: View {
                 }
             }) {
                 Text("Search ISBN")
-                    .font(.body)
-                    .foregroundColor(.blue)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
+                    .font(AppleBooksTypography.captionBold)
+                    .foregroundColor(AppleBooksColors.accent)
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.vertical, AppleBooksSpacing.space12)
             }
         }
     }
@@ -361,84 +349,79 @@ struct BookSearchResultView: View {
     let onSelect: () -> Void
 
     var body: some View {
-        HStack(spacing: 16) {
-            // Book Cover
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray6))
-                    .frame(width: 50, height: 70)
+        AppleBooksCard {
+            HStack(spacing: AppleBooksSpacing.space12) {
+                // Book Cover
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(AppleBooksColors.card.opacity(0.5))
+                        .frame(width: 50, height: 70)
 
-                if let thumbnailURL = book.thumbnailURL,
-                   let url = URL(string: thumbnailURL) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                                .frame(width: 30, height: 30)
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 46, height: 66)
-                                .cornerRadius(6)
-                        case .failure:
-                            Image(systemName: "book")
-                                .resizable()
-                                .frame(width: 24, height: 30)
-                                .foregroundColor(.gray)
-                        @unknown default:
-                            EmptyView()
+                    if let thumbnailURL = book.thumbnailURL,
+                        let url = URL(string: thumbnailURL) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(width: 30, height: 30)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 46, height: 66)
+                                    .cornerRadius(6)
+                            case .failure:
+                                Image(systemName: "book")
+                                    .resizable()
+                                    .frame(width: 24, height: 30)
+                                    .foregroundColor(.gray)
+                            @unknown default:
+                                EmptyView()
+                            }
                         }
+                    } else {
+                        Image(systemName: "book")
+                            .resizable()
+                            .frame(width: 24, height: 30)
+                            .foregroundColor(.gray)
                     }
-                } else {
-                    Image(systemName: "book")
-                        .resizable()
-                        .frame(width: 24, height: 30)
-                        .foregroundColor(.gray)
                 }
-            }
 
-            // Book Details
-            VStack(alignment: .leading, spacing: 4) {
-                Text(book.title)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
+                // Book Details
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                    Text(book.title)
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                        .lineLimit(2)
 
-                Text(book.author)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    Text(book.author)
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(AppleBooksColors.textSecondary)
 
-                // BookRecommendation.genre is non-optional (String). Show only if non-empty and not "Unknown".
-                if !book.genre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && book.genre.lowercased() != "unknown" {
-                    Text(book.genre)
-                        .font(.caption)
-                        .foregroundColor(.blue)
+                    // BookRecommendation.genre is non-optional (String). Show only if non-empty and not "Unknown".
+                    if !book.genre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && book.genre.lowercased() != "unknown" {
+                        Text(book.genre)
+                            .font(AppleBooksTypography.captionBold)
+                            .foregroundColor(AppleBooksColors.accent)
+                    }
                 }
-            }
 
-            Spacer()
+                Spacer()
 
-            // Selection Indicator
-            ZStack {
-                Circle()
-                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: 2)
-                    .frame(width: 24, height: 24)
-
-                if isSelected {
+                // Selection Indicator
+                ZStack {
                     Circle()
-                        .fill(Color.blue)
-                        .frame(width: 16, height: 16)
+                        .stroke(isSelected ? AppleBooksColors.accent : AppleBooksColors.textTertiary, lineWidth: 2)
+                        .frame(width: 24, height: 24)
+
+                    if isSelected {
+                        Circle()
+                            .fill(AppleBooksColors.accent)
+                            .frame(width: 16, height: 16)
+                    }
                 }
             }
         }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(radius: 1)
-        .opacity(isSelected ? 1.0 : 0.8)
-        .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(.spring(), value: isSelected)
         .onTapGesture {
             onSelect()
         }

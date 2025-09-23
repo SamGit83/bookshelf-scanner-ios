@@ -7,62 +7,97 @@ struct RecommendationsView: View {
     @State private var errorMessage: String?
     @State private var lastRefreshDate: Date?
 
+    // Group recommendations by genre for categories
+    private var recommendationsByGenre: [String: [BookRecommendation]] {
+        Dictionary(grouping: recommendations) { recommendation in
+            recommendation.genre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || recommendation.genre.lowercased() == "unknown" ? "General" : recommendation.genre
+        }
+    }
+
     var body: some View {
         NavigationView {
-            VStack {
+            ZStack {
+                AppleBooksColors.background
+                    .ignoresSafeArea()
+
                 if isLoading {
-                    VStack(spacing: 20) {
+                    VStack(spacing: AppleBooksSpacing.space20) {
                         ProgressView()
                             .scaleEffect(1.5)
                         Text("Finding great books for you...")
-                            .foregroundColor(.gray)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
                     }
                     .padding()
                 } else if let error = errorMessage {
-                    VStack(spacing: 20) {
+                    VStack(spacing: AppleBooksSpacing.space20) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.system(size: 50))
-                            .foregroundColor(.orange)
+                            .foregroundColor(AppleBooksColors.warningPrimary)
                         Text("Unable to load recommendations")
-                            .font(.title2)
+                            .font(AppleBooksTypography.headlineMedium)
+                            .foregroundColor(AppleBooksColors.text)
                         Text(error)
-                            .foregroundColor(.gray)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                         Button(action: loadRecommendations) {
                             Text("Try Again")
+                                .font(AppleBooksTypography.buttonLarge)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.blue)
+                                .background(AppleBooksColors.accent)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(12)
                         }
                         .padding(.horizontal)
                     }
                     .padding()
                 } else if recommendations.isEmpty {
-                    VStack(spacing: 20) {
+                    VStack(spacing: AppleBooksSpacing.space20) {
                         Image(systemName: "book")
                             .font(.system(size: 60))
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppleBooksColors.textSecondary)
                         Text("No recommendations yet")
-                            .font(.title2)
-                            .foregroundColor(.gray)
+                            .font(AppleBooksTypography.headlineMedium)
+                            .foregroundColor(AppleBooksColors.text)
                         Text("Add some books to your library to get personalized recommendations!")
-                            .foregroundColor(.gray)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
                     .padding()
                 } else {
-                    List {
-                        Section(header: Text("Recommended for You")) {
-                            ForEach(recommendations) { recommendation in
-                                RecommendationRowView(recommendation: recommendation, viewModel: viewModel)
+                    ScrollView {
+                        VStack(spacing: AppleBooksSpacing.space32) {
+                            // Personalized Recommendations Section
+                            AppleBooksCollection(
+                                books: recommendations.map { convertToBook($0) },
+                                title: "Recommended for You",
+                                subtitle: "Personalized picks based on your library",
+                                viewModel: viewModel
+                            ) { book in
+                                // Handle book tap - perhaps navigate to detail
+                            }
+
+                            // Categories Sections
+                            ForEach(recommendationsByGenre.keys.sorted(), id: \.self) { genre in
+                                if let genreRecommendations = recommendationsByGenre[genre], !genreRecommendations.isEmpty {
+                                    AppleBooksCollection(
+                                        books: genreRecommendations.map { convertToBook($0) },
+                                        title: genre,
+                                        subtitle: "\(genreRecommendations.count) books",
+                                        viewModel: viewModel
+                                    ) { book in
+                                        // Handle book tap
+                                    }
+                                }
                             }
                         }
+                        .padding(.vertical, AppleBooksSpacing.space24)
                     }
-                    .listStyle(InsetGroupedListStyle())
                 }
             }
             .navigationTitle("Recommendations")
@@ -75,6 +110,17 @@ struct RecommendationsView: View {
                 }
             }
         }
+    }
+
+    // Helper to convert BookRecommendation to Book for AppleBooksCollection
+    private func convertToBook(_ recommendation: BookRecommendation) -> Book {
+        Book(
+            title: recommendation.title,
+            author: recommendation.author,
+            genre: recommendation.genre,
+            status: .library,
+            coverImageURL: recommendation.thumbnailURL
+        )
     }
 
     private func loadRecommendations() {
@@ -108,124 +154,5 @@ struct RecommendationsView: View {
     private func shouldRefreshRecommendations() -> Bool {
         guard let lastRefresh = lastRefreshDate else { return true }
         return Date().timeIntervalSince(lastRefresh) > 3600 // Refresh every hour
-    }
-}
-
-struct RecommendationRowView: View {
-    let recommendation: BookRecommendation
-    @ObservedObject var viewModel: BookViewModel
-    @State private var isAddingToLibrary = false
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Book cover or placeholder
-            if let thumbnailURL = recommendation.thumbnailURL,
-               let url = URL(string: thumbnailURL) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 60, height: 90)
-                            .cornerRadius(5)
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 60, height: 90)
-                            .cornerRadius(5)
-                    case .failure:
-                        Image(systemName: "book")
-                            .resizable()
-                            .frame(width: 60, height: 90)
-                            .foregroundColor(.gray)
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
-            } else {
-                Image(systemName: "book")
-                    .resizable()
-                    .frame(width: 60, height: 90)
-                    .foregroundColor(.gray)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(recommendation.title)
-                    .font(.headline)
-                    .lineLimit(2)
-
-                Text(recommendation.author)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-
-                if !recommendation.genre.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && recommendation.genre.lowercased() != "unknown" {
-                    Text(recommendation.genre)
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(4)
-                }
-
-                if let description = recommendation.description, !description.isEmpty {
-                    Text(recommendation.displayDescription)
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .lineLimit(2)
-                }
-
-                HStack {
-                    if let publishedDate = recommendation.publishedDate {
-                        Text("Published: \(publishedDate)")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                    }
-
-                    if let pageCount = recommendation.pageCount {
-                        Text("• \(pageCount) pages")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-
-            Spacer()
-
-            Button(action: addToLibrary) {
-                if isAddingToLibrary {
-                    ProgressView()
-                        .frame(width: 20, height: 20)
-                } else {
-                    Image(systemName: "plus.circle")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                }
-            }
-            .disabled(isAddingToLibrary)
-        }
-        .padding(.vertical, 8)
-    }
-
-    private func addToLibrary() {
-        isAddingToLibrary = true
-
-        // Convert recommendation to Book
-        let book = Book(
-            title: recommendation.title,
-            author: recommendation.author,
-            genre: recommendation.genre,
-            status: .library
-        )
-
-        viewModel.saveBookToFirestore(book)
-
-        // Show feedback
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            isAddingToLibrary = false
-        }
     }
 }

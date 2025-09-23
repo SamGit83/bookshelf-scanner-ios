@@ -5,9 +5,18 @@ Transform the Bookshelf Scanner into a stunning, modern iOS app featuring Apple'
 
 ## 🌟 Design Principles
 
+### Apple Books Design Language
+Based on analysis of Apple Books interface, incorporating:
+- **Clean Minimalism**: Pure white backgrounds with subtle gray accents
+- **Content-First**: Books and content take center stage
+- **Generous Spacing**: Abundant white space for breathing room
+- **Clear Hierarchy**: Distinct typography scales for organization
+- **Subtle Depth**: Gentle shadows and minimal glassmorphism
+- **Vibrant Accents**: Strategic use of color for promotional elements
+
 ### Liquid Glass Core Elements
-- **Glassmorphism**: Translucent surfaces with blur effects
-- **Depth & Layers**: Multiple transparency levels creating depth
+- **Refined Glassmorphism**: Subtle translucent surfaces with minimal blur
+- **Depth & Layers**: Gentle transparency levels creating subtle depth
 - **Dynamic Blur**: Context-aware background blur effects
 - **Fluid Motion**: Smooth, physics-based animations
 - **Subtle Shadows**: Layered shadow system for depth
@@ -22,55 +31,215 @@ Transform the Bookshelf Scanner into a stunning, modern iOS app featuring Apple'
 ## 🎯 Phase 1: Design System Foundation
 
 ### Color Palette
+
+#### Apple Books Inspired Colors
 ```swift
-// Primary Colors
-let liquidGlassPrimary = Color(hex: "007AFF")      // iOS Blue
-let liquidGlassSecondary = Color(hex: "5856D6")    // iOS Purple
-let liquidGlassAccent = Color(hex: "FF9500")       // iOS Orange
+// Primary Interface Colors (Apple Books inspired)
+let appleBooksBackground = Color(hex: "F2F2F7")    // Light gray background
+let appleBooksCard = Color.white                   // Pure white cards
+let appleBooksText = Color.black                   // Primary black text
+let appleBooksTextSecondary = Color(hex: "3C3C4399") // 60% opacity gray
+let appleBooksTextTertiary = Color(hex: "3C3C434D")  // 30% opacity gray
 
-// Glass Effect Colors
-let glassBackground = Color.white.opacity(0.1)
-let glassBorder = Color.white.opacity(0.2)
-let glassShadow = Color.black.opacity(0.1)
+// Accent Colors for Promotional Elements
+let appleBooksAccent = Color(hex: "FF9F0A")       // Warm orange for CTAs
+let appleBooksPromotional = Color(hex: "FF3B30")   // Red for promotions
+let appleBooksSuccess = Color(hex: "34C759")      // Green for success states
 
-// Semantic Colors
-let successGlass = Color(hex: "34C759").opacity(0.8)
-let warningGlass = Color(hex: "FF9500").opacity(0.8)
-let errorGlass = Color(hex: "FF3B30").opacity(0.8)
+// Glass Effect Colors (Refined for Apple Books aesthetic)
+let refinedGlassBackground = Color.white.opacity(0.05)
+let refinedGlassBorder = Color.white.opacity(0.1)
+let refinedGlassShadow = Color.black.opacity(0.05)
+
+// Semantic Colors (Adapted for clean aesthetic)
+let successRefined = Color(hex: "34C759").opacity(0.9)
+let warningRefined = Color(hex: "FF9500").opacity(0.9)
+let errorRefined = Color(hex: "FF3B30").opacity(0.9)
 ```
+
+#### Color Usage Guidelines
+- **Background**: Use `appleBooksBackground` for main screens
+- **Cards**: Pure white (`appleBooksCard`) with subtle shadows
+- **Text**: Black primary, with secondary/tertiary for hierarchy
+- **Promotional Elements**: Vibrant accents for featured content
+- **Glass Effects**: Minimal opacity for subtle depth
 
 ### Typography Scale
+
+#### Apple Books Typography System
 ```swift
-// Display
-let displayLarge = Font.system(size: 34, weight: .bold, design: .rounded)
-let displayMedium = Font.system(size: 28, weight: .semibold, design: .rounded)
+// Display (Large Section Headers)
+let appleBooksDisplayLarge = Font.system(size: 32, weight: .bold, design: .default)
+let appleBooksDisplayMedium = Font.system(size: 28, weight: .bold, design: .default)
 
-// Headline
-let headlineLarge = Font.system(size: 24, weight: .semibold, design: .rounded)
-let headlineMedium = Font.system(size: 20, weight: .medium, design: .rounded)
+// Headline (Section Headers)
+let appleBooksHeadlineLarge = Font.system(size: 22, weight: .semibold, design: .default)
+let appleBooksHeadlineMedium = Font.system(size: 20, weight: .semibold, design: .default)
+let appleBooksHeadlineSmall = Font.system(size: 18, weight: .semibold, design: .default)
 
-// Body
-let bodyLarge = Font.system(size: 17, weight: .regular, design: .rounded)
-let bodyMedium = Font.system(size: 15, weight: .regular, design: .rounded)
-let bodySmall = Font.system(size: 13, weight: .regular, design: .rounded)
+// Body (Content Text)
+let appleBooksBodyLarge = Font.system(size: 17, weight: .regular, design: .default)
+let appleBooksBodyMedium = Font.system(size: 15, weight: .regular, design: .default)
+let appleBooksBodySmall = Font.system(size: 13, weight: .regular, design: .default)
+
+// Caption (Descriptive Text)
+let appleBooksCaption = Font.system(size: 12, weight: .regular, design: .default)
+let appleBooksCaptionBold = Font.system(size: 12, weight: .semibold, design: .default)
+
+// Button Text
+let appleBooksButtonLarge = Font.system(size: 17, weight: .semibold, design: .default)
+let appleBooksButtonMedium = Font.system(size: 15, weight: .semibold, design: .default)
 ```
 
+#### Typography Usage Guidelines
+- **Section Headers**: Use `appleBooksHeadlineLarge` for main sections
+- **Subsections**: Use `appleBooksHeadlineMedium` for subsections
+- **Body Text**: Use `appleBooksBodyLarge` for primary content
+- **Descriptions**: Use `appleBooksBodyMedium` for secondary text
+- **Captions**: Use `appleBooksCaption` for descriptive text
+- **Buttons**: Use `appleBooksButtonLarge` for primary actions
+
 ### Spacing System
+
+#### Apple Books Spacing Guidelines
 ```swift
-let space4: CGFloat = 4
-let space8: CGFloat = 8
-let space12: CGFloat = 12
-let space16: CGFloat = 16
-let space20: CGFloat = 20
-let space24: CGFloat = 24
-let space32: CGFloat = 32
-let space48: CGFloat = 48
-let space64: CGFloat = 64
+// Micro spacing (tight elements)
+let appleBooksSpace2: CGFloat = 2
+let appleBooksSpace4: CGFloat = 4
+let appleBooksSpace6: CGFloat = 6
+let appleBooksSpace8: CGFloat = 8
+
+// Standard spacing (content elements)
+let appleBooksSpace12: CGFloat = 12
+let appleBooksSpace16: CGFloat = 16
+let appleBooksSpace20: CGFloat = 20
+let appleBooksSpace24: CGFloat = 24
+
+// Section spacing (layout breathing room)
+let appleBooksSpace32: CGFloat = 32
+let appleBooksSpace40: CGFloat = 40
+let appleBooksSpace48: CGFloat = 48
+let appleBooksSpace64: CGFloat = 64
+
+// Layout containers (major sections)
+let appleBooksSpace80: CGFloat = 80
+let appleBooksSpace120: CGFloat = 120
+```
+
+#### Layout Spacing Guidelines
+- **Card Padding**: `appleBooksSpace20` for internal card content
+- **Section Margins**: `appleBooksSpace32` between major sections
+- **Card Spacing**: `appleBooksSpace16` between cards in collections
+- **Text Line Height**: 1.4-1.6 for optimal readability
+- **Content Margins**: `appleBooksSpace24` from screen edges
+
+## 📚 Apple Books Component Library
+
+### 1. Section Header Component
+```swift
+struct AppleBooksSectionHeader: View {
+    let title: String
+    let subtitle: String?
+    let showSeeAll: Bool
+    let seeAllAction: (() -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: appleBooksSpace4) {
+            HStack {
+                Text(title)
+                    .font(appleBooksHeadlineLarge)
+                    .foregroundColor(appleBooksText)
+
+                Spacer()
+
+                if showSeeAll {
+                    Button(action: { seeAllAction?() }) {
+                        Text("See All")
+                            .font(appleBooksCaptionBold)
+                            .foregroundColor(appleBooksAccent)
+                    }
+                }
+            }
+
+            if let subtitle = subtitle {
+                Text(subtitle)
+                    .font(appleBooksCaption)
+                    .foregroundColor(appleBooksTextSecondary)
+            }
+        }
+        .padding(.horizontal, appleBooksSpace24)
+        .padding(.vertical, appleBooksSpace16)
+    }
+}
+```
+
+### 2. Book Collection Component
+```swift
+struct AppleBooksCollection: View {
+    let books: [Book]
+    let title: String
+    let subtitle: String?
+    let onBookTap: (Book) -> Void
+    let onSeeAllTap: (() -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: appleBooksSpace20) {
+            AppleBooksSectionHeader(
+                title: title,
+                subtitle: subtitle,
+                showSeeAll: onSeeAllTap != nil,
+                seeAllAction: onSeeAllTap
+            )
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: appleBooksSpace16) {
+                    ForEach(books) { book in
+                        AppleBooksCard(book: book)
+                            .onTapGesture { onBookTap(book) }
+                    }
+                }
+                .padding(.horizontal, appleBooksSpace24)
+            }
+        }
+    }
+}
+```
+
+### 3. Promotional Banner Component
+```swift
+struct AppleBooksPromoBanner: View {
+    let title: String
+    let subtitle: String?
+    let gradient: LinearGradient
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: appleBooksSpace4) {
+                Text(title)
+                    .font(appleBooksHeadlineMedium)
+                    .foregroundColor(.white)
+                    .bold()
+
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(appleBooksBodyMedium)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(appleBooksSpace24)
+            .background(gradient)
+            .cornerRadius(16)
+        }
+        .padding(.horizontal, appleBooksSpace24)
+    }
+}
 ```
 
 ## 🔧 Phase 2: Core Components
 
-### LiquidGlassModifier
+### LiquidGlassModifier (Refined for Apple Books)
 ```swift
 struct LiquidGlassModifier: ViewModifier {
     let cornerRadius: CGFloat
@@ -122,17 +291,27 @@ struct GlassButton: View {
 }
 ```
 
-### GlassCard
+### AppleBooksCard (Refined Card Design)
 ```swift
-struct GlassCard<Content: View>: View {
+struct AppleBooksCard<Content: View>: View {
     let content: Content
     let cornerRadius: CGFloat
     let padding: CGFloat
+    let backgroundColor: Color
+    let shadowStyle: AppleBooksShadow
 
-    init(cornerRadius: CGFloat = 16, padding: CGFloat = 20, @ViewBuilder content: () -> Content) {
+    init(
+        cornerRadius: CGFloat = 12,
+        padding: CGFloat = appleBooksSpace16,
+        backgroundColor: Color = appleBooksCard,
+        shadowStyle: AppleBooksShadow = .subtle,
+        @ViewBuilder content: () -> Content
+    ) {
         self.content = content()
         self.cornerRadius = cornerRadius
         self.padding = padding
+        self.backgroundColor = backgroundColor
+        self.shadowStyle = shadowStyle
     }
 
     var body: some View {
@@ -140,22 +319,115 @@ struct GlassCard<Content: View>: View {
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(.ultraThinMaterial)
-                    .opacity(0.7)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+                    .fill(backgroundColor)
+                    .shadow(
+                        color: shadowStyle.color,
+                        radius: shadowStyle.radius,
+                        x: shadowStyle.x,
+                        y: shadowStyle.y
                     )
-                    .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
             )
-            .modifier(LiquidGlassModifier(cornerRadius: cornerRadius, blurRadius: 1))
+    }
+}
+
+enum AppleBooksShadow {
+    case subtle
+    case medium
+    case elevated
+
+    var color: Color {
+        switch self {
+        case .subtle: return Color.black.opacity(0.06)
+        case .medium: return Color.black.opacity(0.12)
+        case .elevated: return Color.black.opacity(0.18)
+        }
+    }
+
+    var radius: CGFloat {
+        switch self {
+        case .subtle: return 8
+        case .medium: return 16
+        case .elevated: return 24
+        }
+    }
+
+    var x: CGFloat { 0 }
+    var y: CGFloat {
+        switch self {
+        case .subtle: return 4
+        case .medium: return 8
+        case .elevated: return 12
+        }
     }
 }
 ```
 
 ## 🎭 Phase 3: Screen-by-Screen Redesign
 
-### 1. Authentication Screens
+### 1. Reading Now Screen (Apple Books Style)
+
+#### Main Reading Now Interface
+Based on Apple Books "Reading Now" tab design:
+- **Header**: Clean profile icon and status bar
+- **Daily Goals**: Reading goals and progress indicators
+- **Currently Reading**: Horizontal scrollable book collection
+- **Recommendations**: Personalized book suggestions
+- **Featured Content**: Promotional banners and curated collections
+- **Quick Actions**: Easy access to Book Store and Audiobooks
+
+#### Layout Structure
+```swift
+struct AppleBooksReadingNow: View {
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                // Daily Reading Goals Section
+                ReadingGoalsSection()
+
+                // Currently Reading Collection
+                AppleBooksCollection(
+                    books: currentlyReadingBooks,
+                    title: "Continue Reading",
+                    subtitle: "Pick up where you left off"
+                ) {
+                    // Handle book tap
+                }
+
+                // Featured Promotional Banner
+                AppleBooksPromoBanner(
+                    title: "$9.99 Audiobooks",
+                    subtitle: "Limited time offer",
+                    gradient: promotionalGradient
+                ) {
+                    // Handle promo tap
+                }
+
+                // Customer Favorites
+                AppleBooksCollection(
+                    books: favoriteBooks,
+                    title: "Customer Favorites",
+                    subtitle: "See the books readers love"
+                ) {
+                    // Handle book tap
+                }
+
+                // New & Trending
+                AppleBooksCollection(
+                    books: trendingBooks,
+                    title: "New & Trending",
+                    subtitle: "Explore what's hot in audiobooks"
+                ) {
+                    // Handle book tap
+                }
+            }
+        }
+        .background(appleBooksBackground)
+        .navigationBarHidden(true)
+    }
+}
+```
+
+#### Authentication Screens
 
 #### LoginView Redesign
 - **Background**: Dynamic gradient with subtle animation
@@ -278,18 +550,95 @@ struct GlassCard<Content: View>: View {
 └─────────────────────────────────┘
 ```
 
-### 2. Main Tab Bar
+### 2. Apple Books Tab Bar
 
-#### Modern Tab Bar Design
-- **Background**: Ultra-thin material with blur
-- **Icons**: Custom SF Symbols with glass effect
-- **Active State**: Liquid animation for selected tab
-- **Labels**: Subtle typography with glass background
+#### Clean Tab Bar Design
+Based on Apple Books navigation patterns:
+- **Background**: Clean white background with subtle separator
+- **Icons**: Standard SF Symbols without glass effects
+- **Active State**: Simple selection indicator with Apple blue
+- **Labels**: Clear, readable typography
+- **Layout**: Five tabs with equal spacing
 
-#### Animation Details
-- **Tab Switch**: Smooth morphing animation between icons
-- **Active Indicator**: Liquid-like flowing indicator
-- **Press Feedback**: Scale and glow effects
+#### Tab Structure
+1. **Reading Now** - Currently reading and recommendations
+2. **Library** - Personal book collection
+3. **Book Store** - Browse and purchase books
+4. **Audiobooks** - Audio content section
+5. **Search** - Global search functionality
+
+#### Design Specifications
+```swift
+struct AppleBooksTabBar: View {
+    @State private var selectedTab: Tab = .readingNow
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(Tab.allCases, id: \.self) { tab in
+                TabBarItem(
+                    tab: tab,
+                    isSelected: selectedTab == tab
+                ) {
+                    selectedTab = tab
+                }
+            }
+        }
+        .padding(.top, appleBooksSpace8)
+        .background(appleBooksCard)
+        .overlay(
+            Divider()
+                .padding(.top, 0),
+            alignment: .top
+        )
+    }
+}
+
+struct TabBarItem: View {
+    let tab: Tab
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: appleBooksSpace2) {
+                Image(systemName: tab.iconName)
+                    .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(isSelected ? appleBooksAccent : appleBooksTextSecondary)
+
+                Text(tab.title)
+                    .font(appleBooksCaption)
+                    .foregroundColor(isSelected ? appleBooksAccent : appleBooksTextSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, appleBooksSpace8)
+        }
+    }
+}
+
+enum Tab: CaseIterable {
+    case readingNow, library, bookStore, audiobooks, search
+
+    var title: String {
+        switch self {
+        case .readingNow: return "Reading Now"
+        case .library: return "Library"
+        case .bookStore: return "Book Store"
+        case .audiobooks: return "Audiobooks"
+        case .search: return "Search"
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .readingNow: return "book"
+        case .library: return "books.vertical"
+        case .bookStore: return "bag"
+        case .audiobooks: return "headphones"
+        case .search: return "magnifyingglass"
+        }
+    }
+}
+```
 
 ### 3. Book Cards
 
@@ -337,7 +686,71 @@ struct LiquidBookCard: View {
 }
 ```
 
-### 4. Camera Interface
+### 4. Apple Books Book Card
+```swift
+struct AppleBooksBookCard: View {
+    let book: Book
+    let onTap: () -> Void
+    let showAddButton: Bool
+    let onAddTap: (() -> Void)?
+
+    var body: some View {
+        AppleBooksCard(
+            cornerRadius: 12,
+            padding: appleBooksSpace12,
+            shadowStyle: .subtle
+        ) {
+            HStack(spacing: appleBooksSpace12) {
+                // Book Cover
+                BookCoverView(book: book)
+                    .frame(width: 60, height: 90)
+                    .cornerRadius(8)
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                // Book Details
+                VStack(alignment: .leading, spacing: appleBooksSpace4) {
+                    Text(book.title)
+                        .font(appleBooksBodyLarge)
+                        .foregroundColor(appleBooksText)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+
+                    Text(book.author)
+                        .font(appleBooksCaption)
+                        .foregroundColor(appleBooksTextSecondary)
+
+                    if let genre = book.genre {
+                        Text(genre)
+                            .font(appleBooksCaptionBold)
+                            .foregroundColor(appleBooksAccent)
+                            .padding(.horizontal, appleBooksSpace8)
+                            .padding(.vertical, appleBooksSpace2)
+                            .background(appleBooksAccent.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+                }
+
+                Spacer()
+
+                // Add Button (if needed)
+                if showAddButton {
+                    Button(action: { onAddTap?() }) {
+                        Image(systemName: "plus")
+                            .font(appleBooksButtonMedium)
+                            .foregroundColor(appleBooksAccent)
+                            .padding(appleBooksSpace8)
+                            .background(appleBooksAccent.opacity(0.1))
+                            .cornerRadius(8)
+                    }
+                }
+            }
+        }
+        .onTapGesture(perform: onTap)
+    }
+}
+```
+
+### 5. Camera Interface
 
 #### Modern Camera Overlay
 - **Control Panel**: Glass panel with camera controls

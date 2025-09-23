@@ -3,6 +3,7 @@ import SwiftUI
 import UIKit
 #endif
 import FirebaseFirestore
+import LiquidGlassDesignSystem
 
 struct EditBookView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -29,45 +30,30 @@ struct EditBookView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(.systemBackground)
+                AppleBooksColors.background
                     .ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 24) {
+                    VStack(spacing: AppleBooksSpacing.space32) {
                         // Header
-                        VStack(spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.blue.opacity(0.2))
-                                    .frame(width: 80, height: 80)
-                                    .blur(radius: 10)
-
-                                Image(systemName: "pencil.circle.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.primary)
-                            }
-
+                        VStack(spacing: AppleBooksSpacing.space8) {
                             Text("Edit Book")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
+                                .font(AppleBooksTypography.displayMedium)
+                                .foregroundColor(AppleBooksColors.text)
 
                             Text("Update book details and status")
-                                .font(.body)
-                                .foregroundColor(.secondary)
+                                .font(AppleBooksTypography.bodyMedium)
+                                .foregroundColor(AppleBooksColors.textSecondary)
                         }
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
                         // Book Cover Preview
                         if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemGray6))
+                                    .fill(AppleBooksColors.card)
                                     .frame(width: 120, height: 160)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                    )
+                                    .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
 
                                 Image(uiImage: uiImage)
                                     .resizable()
@@ -75,107 +61,143 @@ struct EditBookView: View {
                                     .frame(width: 112, height: 152)
                                     .cornerRadius(8)
                             }
-                            .shadow(color: Color.black.opacity(0.2), radius: 12, x: 0, y: 6)
-                            .padding(.horizontal, 32)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
                         }
 
                         // Edit Form
-                        VStack(spacing: 20) {
-                            // Title Field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Title *")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                        AppleBooksCard(
+                            cornerRadius: 16,
+                            padding: AppleBooksSpacing.space24,
+                            shadowStyle: .subtle
+                        ) {
+                            VStack(spacing: AppleBooksSpacing.space20) {
+                                // Title Field
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                    Text("Title *")
+                                        .font(AppleBooksTypography.caption)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
 
-                                TextField("Book Title", text: $title)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                            }
-
-                            // Author Field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Author *")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-
-                                TextField("Author Name", text: $author)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                            }
-
-                            // ISBN Field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("ISBN")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-
-                                TextField("ISBN (Optional)", text: $isbn)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .keyboardType(.numberPad)
-                            }
-
-                            // Genre Field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Genre")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-
-                                TextField("Genre (Optional)", text: $genre)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                            }
-
-                            // Reading Status
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Reading Status")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-
-                                Picker("Status", selection: $selectedStatus) {
-                                    ForEach(BookStatus.allCases, id: \.self) { status in
-                                        Text(status.rawValue)
-                                            .tag(status)
-                                    }
-                                }
-                                .pickerStyle(SegmentedPickerStyle())
-                            }
-
-                            // Action Buttons
-                            HStack(spacing: 12) {
-                                Button(action: {
-                                    presentationMode.wrappedValue.dismiss()
-                                }) {
-                                    Text("Cancel")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.gray)
-                                        .foregroundColor(.white)
+                                    TextField("Book Title", text: $title)
+                                        .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+                                        .padding(AppleBooksSpacing.space12)
+                                        .background(AppleBooksColors.background)
                                         .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
                                 }
 
-                                Button(action: {
-                                    saveChanges()
-                                }) {
-                                    if isLoading {
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    } else {
-                                        Text("Save Changes")
-                                    }
+                                // Author Field
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                    Text("Author *")
+                                        .font(AppleBooksTypography.caption)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+
+                                    TextField("Author Name", text: $author)
+                                        .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+                                        .padding(AppleBooksSpacing.space12)
+                                        .background(AppleBooksColors.background)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
                                 }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
-                                .disabled(title.isEmpty || author.isEmpty || isLoading)
+
+                                // ISBN Field
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                    Text("ISBN")
+                                        .font(AppleBooksTypography.caption)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+
+                                    TextField("ISBN (Optional)", text: $isbn)
+                                        .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+                                        .padding(AppleBooksSpacing.space12)
+                                        .background(AppleBooksColors.background)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                        .keyboardType(.numberPad)
+                                }
+
+                                // Genre Field
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                    Text("Genre")
+                                        .font(AppleBooksTypography.caption)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+
+                                    TextField("Genre (Optional)", text: $genre)
+                                        .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+                                        .padding(AppleBooksSpacing.space12)
+                                        .background(AppleBooksColors.background)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                }
+
+                                // Reading Status
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+                                    Text("Reading Status")
+                                        .font(AppleBooksTypography.caption)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+
+                                    Picker("Status", selection: $selectedStatus) {
+                                        ForEach(BookStatus.allCases, id: \.self) { status in
+                                            Text(status.rawValue)
+                                                .tag(status)
+                                        }
+                                    }
+                                    .pickerStyle(SegmentedPickerStyle())
+                                }
+
+                                // Action Buttons
+                                HStack(spacing: AppleBooksSpacing.space16) {
+                                    Button(action: {
+                                        presentationMode.wrappedValue.dismiss()
+                                    }) {
+                                        Text("Cancel")
+                                            .font(AppleBooksTypography.buttonLarge)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(AppleBooksSpacing.space16)
+                                            .background(Color.gray.opacity(0.2))
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .cornerRadius(12)
+                                    }
+
+                                    Button(action: {
+                                        saveChanges()
+                                    }) {
+                                        if isLoading {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                        } else {
+                                            Text("Save Changes")
+                                                .font(AppleBooksTypography.buttonLarge)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(AppleBooksSpacing.space16)
+                                    .background(AppleBooksColors.accent)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(12)
+                                    .disabled(title.isEmpty || author.isEmpty || isLoading)
+                                }
                             }
                         }
-                        .padding(16)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
-                        Spacer(minLength: 32)
+                        Spacer(minLength: AppleBooksSpacing.space32)
                     }
-                    .padding(.vertical, 16)
+                    .padding(.vertical, AppleBooksSpacing.space16)
                 }
             }
             .navigationBarItems(
@@ -183,7 +205,7 @@ struct EditBookView: View {
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(.primary)
+                        .foregroundColor(AppleBooksColors.text)
                         .font(.system(size: 16, weight: .medium))
                 }
             )

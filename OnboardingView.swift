@@ -10,209 +10,143 @@ struct OnboardingView: View {
             title: "Welcome to Bookshelf Scanner",
             description: "Transform your physical book collection into a beautiful digital library with AI-powered recognition.",
             imageName: "books.vertical.fill",
-            color: PrimaryColors.electricBlue,
-            gradient: BackgroundGradients.heroGradient
+            accentColor: AppleBooksColors.accent
         ),
         OnboardingPage(
             title: "Scan Your Books",
             description: "Point your camera at your bookshelf and watch as our AI identifies your books automatically.",
             imageName: "camera.fill",
-            color: PrimaryColors.freshGreen,
-            gradient: LinearGradient(
-                colors: [
-                    Color(hex: "FF9500").opacity(0.8),
-                    Color(hex: "FF2D92").opacity(0.6),
-                    Color.black.opacity(0.4)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            accentColor: AppleBooksColors.success
         ),
         OnboardingPage(
             title: "Build Your Library",
             description: "Organize your books into collections, track your reading progress, and discover new favorites.",
             imageName: "building.columns.fill",
-            color: PrimaryColors.vibrantPurple,
-            gradient: BackgroundGradients.libraryGradient
+            accentColor: AppleBooksColors.accent
         ),
         OnboardingPage(
             title: "Track Your Progress",
             description: "Set reading goals, log your sessions, and watch your reading habits come to life with detailed analytics.",
             imageName: "chart.bar.fill",
-            color: PrimaryColors.dynamicOrange,
-            gradient: BackgroundGradients.profileGradient
+            accentColor: AppleBooksColors.success
         ),
         OnboardingPage(
             title: "Smart Recommendations",
             description: "Get personalized book suggestions based on your reading history and preferences.",
             imageName: "sparkles",
-            color: PrimaryColors.energeticPink,
-            gradient: BackgroundGradients.heroGradient
+            accentColor: AppleBooksColors.promotional
         ),
         OnboardingPage(
             title: "Ready to Begin!",
             description: "Let's start building your digital bookshelf. You can always access this tutorial from settings.",
             imageName: "checkmark.circle.fill",
-            color: SecondaryColors.turquoise,
-            gradient: BackgroundGradients.libraryGradient
+            accentColor: AppleBooksColors.success
         )
     ]
 
     var body: some View {
         ZStack {
-            // Enhanced vibrant background gradient
-            pages[currentPage].gradient
+            // Clean Apple Books background
+            AppleBooksColors.background
                 .ignoresSafeArea()
-                .animation(AnimationTiming.pageTransition, value: currentPage)
 
-            // Animated floating elements
-            GeometryReader { geometry in
-                Circle()
-                    .fill(Color.white.opacity(0.1))
-                    .frame(width: 200, height: 200)
-                    .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.2)
-                    .blur(radius: 30)
-                    .offset(x: currentPage % 2 == 0 ? 20 : -20)
-                    .animation(.easeInOut(duration: 3).repeatForever(), value: currentPage)
-
-                Circle()
-                    .fill(Color.white.opacity(0.05))
-                    .frame(width: 150, height: 150)
-                    .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.7)
-                    .blur(radius: 25)
-                    .offset(y: currentPage % 2 == 0 ? -15 : 15)
-                    .animation(.easeInOut(duration: 4).repeatForever(), value: currentPage)
-            }
-
-            VStack(spacing: 0) {
+            VStack(spacing: AppleBooksSpacing.space32) {
                 Spacer()
 
-                // Enhanced Page Content
-                VStack(spacing: SpacingSystem.xl) {
-                    // Enhanced Page Indicator
-                    HStack(spacing: SpacingSystem.sm) {
-                        ForEach(0..<pages.count, id: \.self) { index in
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                                .frame(width: index == currentPage ? 24 : 8, height: 8)
-                                .scaleEffect(index == currentPage ? 1.0 : 0.8)
-                                .animation(AnimationTiming.transition, value: currentPage)
+                // Page Content in Apple Books Card
+                AppleBooksCard(
+                    cornerRadius: 20,
+                    padding: AppleBooksSpacing.space32,
+                    shadowStyle: .medium
+                ) {
+                    VStack(spacing: AppleBooksSpacing.space32) {
+                        // Page Indicator
+                        HStack(spacing: AppleBooksSpacing.space8) {
+                            ForEach(0..<pages.count, id: \.self) { index in
+                                Circle()
+                                    .fill(index == currentPage ? pages[currentPage].accentColor : AppleBooksColors.textTertiary)
+                                    .frame(width: index == currentPage ? 10 : 8, height: index == currentPage ? 10 : 8)
+                                    .animation(.easeInOut(duration: 0.3), value: currentPage)
+                            }
+                        }
+
+                        // Icon
+                        Image(systemName: pages[currentPage].imageName)
+                            .font(.system(size: 80, weight: .light))
+                            .foregroundColor(pages[currentPage].accentColor)
+                            .frame(height: 120)
+
+                        // Text Content
+                        VStack(spacing: AppleBooksSpacing.space16) {
+                            Text(pages[currentPage].title)
+                                .font(AppleBooksTypography.displayLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(6)
+
+                            Text(pages[currentPage].description)
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, AppleBooksSpacing.space16)
                         }
                     }
-                    .padding(.top, SpacingSystem.lg)
-
-                    // Enhanced Icon with glass effect
-                    ZStack {
-                        Circle()
-                            .fill(Color.white.opacity(0.15))
-                            .frame(width: 160, height: 160)
-                            .blur(radius: 20)
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.white.opacity(0.3), lineWidth: 2)
-                                    .frame(width: 160, height: 160)
-                            )
-
-                        Image(systemName: pages[currentPage].imageName)
-                            .font(.system(size: 72, weight: .medium))
-                            .foregroundColor(.white)
-                            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
-                            .scaleEffect(1.0)
-                            .animation(AnimationTiming.transition.delay(0.2), value: currentPage)
-                    }
-                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
-
-                    // Enhanced Text Content
-                    VStack(spacing: SpacingSystem.lg) {
-                        Text(pages[currentPage].title)
-                            .font(TypographySystem.displayMedium)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
-                            .animation(AnimationTiming.transition.delay(0.1), value: currentPage)
-
-                        Text(pages[currentPage].description)
-                            .font(TypographySystem.bodyLarge)
-                            .foregroundColor(.white.opacity(0.9))
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(4)
-                            .padding(.horizontal, SpacingSystem.xl)
-                            .animation(AnimationTiming.transition.delay(0.3), value: currentPage)
-                    }
                 }
-                .padding(.horizontal, SpacingSystem.lg)
+                .padding(.horizontal, AppleBooksSpacing.space24)
 
                 Spacer()
 
-                // Enhanced Navigation Buttons
-                HStack(spacing: SpacingSystem.md) {
+                // Navigation Buttons
+                HStack(spacing: AppleBooksSpacing.space16) {
                     if currentPage > 0 {
                         Button(action: {
-                            withAnimation(AnimationTiming.transition) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
                                 currentPage -= 1
                             }
                         }) {
-                            HStack(spacing: SpacingSystem.sm) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 16, weight: .semibold))
-                                Text("Previous")
-                                    .font(TypographySystem.buttonMedium)
-                            }
-                            .frame(maxWidth: .infinity)
+                            Text("Previous")
+                                .font(AppleBooksTypography.buttonMedium)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, AppleBooksSpacing.space16)
+                                .background(AppleBooksColors.card)
+                                .cornerRadius(12)
                         }
-                        .ghostButtonStyle()
-                        .foregroundColor(.white)
                     } else {
                         Spacer()
                     }
 
                     if currentPage < pages.count - 1 {
                         Button(action: {
-                            withAnimation(AnimationTiming.transition) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
                                 currentPage += 1
                             }
                         }) {
-                            HStack(spacing: SpacingSystem.sm) {
-                                Text("Next")
-                                    .font(TypographySystem.buttonLarge)
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 16, weight: .semibold))
-                            }
-                            .frame(maxWidth: .infinity)
+                            Text("Next")
+                                .font(AppleBooksTypography.buttonLarge)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, AppleBooksSpacing.space16)
+                                .background(pages[currentPage].accentColor)
+                                .cornerRadius(12)
                         }
-                        .buttonStyle(LiquidButtonStyle(
-                            background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
-                            foregroundColor: pages[currentPage].color,
-                            cornerRadius: 16,
-                            padding: EdgeInsets(top: 16, leading: 24, bottom: 16, trailing: 24),
-                            font: TypographySystem.buttonLarge,
-                            shadow: (color: Color.white.opacity(0.3), radius: 12, x: 0, y: 6)
-                        ))
                     } else {
                         Button(action: {
                             completeOnboarding()
                         }) {
-                            HStack(spacing: SpacingSystem.sm) {
-                                Text("Get Started")
-                                    .font(TypographySystem.buttonLarge)
-                                Image(systemName: "arrow.right.circle.fill")
-                                    .font(.system(size: 20, weight: .semibold))
-                            }
-                            .frame(maxWidth: .infinity)
+                            Text("Get Started")
+                                .font(AppleBooksTypography.buttonLarge)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, AppleBooksSpacing.space16)
+                                .background(AppleBooksColors.accent)
+                                .cornerRadius(12)
                         }
-                        .buttonStyle(LiquidButtonStyle(
-                            background: LinearGradient(colors: [Color.white], startPoint: .leading, endPoint: .trailing),
-                            foregroundColor: pages[currentPage].color,
-                            cornerRadius: 16,
-                            padding: EdgeInsets(top: 18, leading: 28, bottom: 18, trailing: 28),
-                            font: TypographySystem.buttonLarge,
-                            shadow: (color: Color.white.opacity(0.4), radius: 16, x: 0, y: 8)
-                        ))
-                        .scaleEffect(1.05)
                     }
                 }
-                .padding(.horizontal, SpacingSystem.lg)
-                .padding(.bottom, SpacingSystem.xl)
+                .padding(.horizontal, AppleBooksSpacing.space24)
+                .padding(.bottom, AppleBooksSpacing.space48)
             }
         }
         .fullScreenCover(isPresented: $showMainApp) {
@@ -222,7 +156,7 @@ struct OnboardingView: View {
 
     private func completeOnboarding() {
         authService.completeOnboarding()
-        withAnimation(.spring()) {
+        withAnimation(.easeInOut(duration: 0.5)) {
             showMainApp = true
         }
     }
@@ -232,8 +166,7 @@ struct OnboardingPage {
     let title: String
     let description: String
     let imageName: String
-    let color: Color
-    let gradient: LinearGradient
+    let accentColor: Color
 }
 
 // Preview

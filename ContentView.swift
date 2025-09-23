@@ -3,6 +3,14 @@ import SwiftUI
 import UIKit
 #endif
 
+// Apple Books Design Colors
+let appleBooksBackground = Color(hex: "F2F2F7")    // Light gray background
+let appleBooksCard = Color.white                   // Pure white cards
+let appleBooksText = Color.black                   // Primary black text
+let appleBooksTextSecondary = Color(hex: "3C3C4399") // 60% opacity gray
+let appleBooksTextTertiary = Color(hex: "3C3C434D")  // 30% opacity gray
+let appleBooksAccent = Color(hex: "FF9F0A")       // Warm orange for CTAs
+
 struct ContentView: View {
      @ObservedObject private var authService = AuthService.shared
      @StateObject private var viewModel = BookViewModel()
@@ -60,13 +68,12 @@ struct ContentView: View {
     }
 
     private var tabs: [TabItem] {
-        let initials = userInitials
-        print("DEBUG ContentView tabs: userInitials = '\(initials)'")
         return [
-            TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
-            TabItem(icon: AnyView(Image(systemName: "book")), label: "Reading", tag: 1),
-            TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
-            TabItem(icon: AnyView(ProfileInitialsView(initials: initials)), label: "Profile", tag: 3)
+            TabItem(icon: AnyView(Image(systemName: "book")), label: "Reading Now", tag: 0),
+            TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 1),
+            TabItem(icon: AnyView(Image(systemName: "bag")), label: "Book Store", tag: 2),
+            TabItem(icon: AnyView(Image(systemName: "headphones")), label: "Audiobooks", tag: 3),
+            TabItem(icon: AnyView(Image(systemName: "magnifyingglass")), label: "Search", tag: 4)
         ]
     }
 
@@ -74,15 +81,17 @@ struct ContentView: View {
         Group {
             switch selectedTab {
             case 0:
-                LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-            case 1:
                 CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+            case 1:
+                LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
             case 2:
                 RecommendationsView(viewModel: viewModel)
             case 3:
-                ProfileView(authService: authService)
+                RecommendationsView(viewModel: viewModel)
+            case 4:
+                SearchView(viewModel: viewModel)
             default:
-                LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+                CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
             }
         }
     }
@@ -90,6 +99,7 @@ struct ContentView: View {
     public var authenticatedView: some View {
         ZStack(alignment: .bottom) {
             selectedView
+                .background(appleBooksBackground)
                 .ignoresSafeArea()
 
             LiquidGlassTabBar(selectedTab: $selectedTab, tabs: tabs)

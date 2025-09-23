@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import LiquidGlassDesignSystem
 
 struct SearchView: View {
     @ObservedObject var viewModel: BookViewModel
@@ -22,20 +23,22 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(.systemBackground)
+                AppleBooksColors.background
                     .ignoresSafeArea()
 
-                VStack(spacing: 16) {
+                VStack(spacing: AppleBooksSpacing.space24) {
                     // Search Header
-                    VStack(spacing: 16) {
-                        HStack {
-                            HStack {
+                    VStack(spacing: AppleBooksSpacing.space20) {
+                        // Prominent Search Bar
+                        GlassCard {
+                            HStack(spacing: AppleBooksSpacing.space12) {
                                 Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.gray)
-                                    .font(.system(size: 16))
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                    .font(.system(size: 20))
 
                                 TextField("Search your library...", text: $searchText)
-                                    .foregroundColor(.primary)
+                                    .font(AppleBooksTypography.bodyLarge)
+                                    .foregroundColor(AppleBooksColors.text)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
 
@@ -44,36 +47,40 @@ struct SearchView: View {
                                         searchText = ""
                                     }) {
                                         Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.gray)
-                                            .font(.system(size: 16))
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                            .font(.system(size: 20))
                                     }
                                 }
                             }
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
-                            .onChange(of: searchText) { newValue in
-                                performSearch(query: newValue)
-                            }
+                            .padding(AppleBooksSpacing.space16)
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
+                        // Cancel Button
+                        HStack {
+                            Spacer()
                             Button(action: {
                                 presentationMode.wrappedValue.dismiss()
                             }) {
                                 Text("Cancel")
-                                    .foregroundColor(.blue)
-                                    .font(.system(size: 16, weight: .medium))
+                                    .font(AppleBooksTypography.buttonMedium)
+                                    .foregroundColor(AppleBooksColors.accent)
                             }
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
-                        // Filter Picker
+                        // Category Filters
                         Picker("Filter", selection: $selectedFilter) {
                             ForEach(SearchFilter.allCases, id: \.self) { filter in
-                                Text(filter.rawValue).tag(filter)
+                                Text(filter.rawValue)
+                                    .font(AppleBooksTypography.captionBold)
+                                    .tag(filter)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal, 16)
+                        .background(AppleBooksColors.card.opacity(0.8))
+                        .cornerRadius(8)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
                         .onChange(of: selectedFilter) { _ in
                             if !searchText.isEmpty {
                                 performSearch(query: searchText)
@@ -84,76 +91,75 @@ struct SearchView: View {
                     // Search Results
                     if searchText.isEmpty {
                         // Empty State
-                        VStack(spacing: 20) {
+                        VStack(spacing: AppleBooksSpacing.space32) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.blue.opacity(0.2))
-                                    .frame(width: 100, height: 100)
-                                    .blur(radius: 10)
+                                    .fill(AppleBooksColors.accent.opacity(0.1))
+                                    .frame(width: 120, height: 120)
+                                    .blur(radius: 20)
 
                                 Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 48))
+                                    .foregroundColor(AppleBooksColors.accent)
                             }
 
                             Text("Search Your Library")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
+                                .font(AppleBooksTypography.displayMedium)
+                                .foregroundColor(AppleBooksColors.text)
 
                             Text("Find books by title, author, genre, or ISBN")
-                                .font(.body)
-                                .foregroundColor(.secondary)
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.textSecondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 32)
+                                .padding(.horizontal, AppleBooksSpacing.space32)
                         }
-                        .padding(.top, 64)
+                        .padding(.top, AppleBooksSpacing.space80)
                     } else if isSearching {
                         // Loading State
-                        VStack(spacing: 20) {
+                        VStack(spacing: AppleBooksSpacing.space24) {
                             ProgressView()
                                 .scaleEffect(1.5)
+                                .tint(AppleBooksColors.accent)
                             Text("Searching...")
-                                .font(.body)
-                                .foregroundColor(.secondary)
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.textSecondary)
                         }
-                        .padding(.top, 64)
+                        .padding(.top, AppleBooksSpacing.space80)
                     } else if searchResults.isEmpty {
                         // No Results
-                        VStack(spacing: 20) {
+                        VStack(spacing: AppleBooksSpacing.space32) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(width: 100, height: 100)
-                                    .blur(radius: 10)
+                                    .fill(AppleBooksColors.textTertiary.opacity(0.1))
+                                    .frame(width: 120, height: 120)
+                                    .blur(radius: 20)
 
                                 Image(systemName: "book.closed")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 48))
+                                    .foregroundColor(AppleBooksColors.textTertiary)
                             }
 
                             Text("No books found")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundColor(.primary)
+                                .font(AppleBooksTypography.displayMedium)
+                                .foregroundColor(AppleBooksColors.text)
 
                             Text("Try different keywords or check spelling")
-                                .font(.body)
-                                .foregroundColor(.secondary)
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.textSecondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 32)
+                                .padding(.horizontal, AppleBooksSpacing.space32)
                         }
-                        .padding(.top, 64)
+                        .padding(.top, AppleBooksSpacing.space80)
                     } else {
                         // Results List
                         ScrollView {
-                            LazyVStack(spacing: 16) {
+                            LazyVStack(spacing: AppleBooksSpacing.space16) {
                                 ForEach(searchResults) { book in
-                                    SearchResultRow(book: book, viewModel: viewModel)
-                                        .padding(.horizontal, 16)
+                                    AppleBooksSearchResultRow(book: book, viewModel: viewModel)
                                 }
                             }
-                            .padding(.vertical, 16)
+                            .padding(.vertical, AppleBooksSpacing.space16)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
                         }
                     }
 
@@ -205,79 +211,85 @@ struct SearchView: View {
     }
 }
 
-struct SearchResultRow: View {
+struct AppleBooksSearchResultRow: View {
     let book: Book
     @ObservedObject var viewModel: BookViewModel
     @State private var showActionSheet = false
 
     var body: some View {
-        HStack(spacing: 16) {
-            // Book Cover
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray6))
-                    .frame(width: 50, height: 70)
+        AppleBooksCard(
+            cornerRadius: 12,
+            padding: AppleBooksSpacing.space16,
+            shadowStyle: .subtle
+        ) {
+            HStack(spacing: AppleBooksSpacing.space12) {
+                // Book Cover
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(AppleBooksColors.card.opacity(0.5))
+                        .frame(width: 60, height: 90)
 
-                if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 46, height: 66)
-                        .cornerRadius(6)
-                } else {
-                    Image(systemName: "book.fill")
-                        .resizable()
-                        .frame(width: 24, height: 30)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            // Book Details
-            VStack(alignment: .leading, spacing: 4) {
-                Text(book.title ?? "Unknown Title")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-
-                Text(book.author ?? "Unknown Author")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-
-                if let genre = book.genre {
-                    Text(genre)
-                        .font(.caption)
-                        .foregroundColor(.blue)
+                    if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 56, height: 86)
+                            .cornerRadius(6)
+                    } else {
+                        Image(systemName: "book.fill")
+                            .resizable()
+                            .frame(width: 28, height: 35)
+                            .foregroundColor(AppleBooksColors.textTertiary)
+                    }
                 }
 
-                // Status indicator
-                Text(book.status.rawValue)
-                    .font(.caption)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(
-                        book.status == .currentlyReading ?
-                            Color.blue.opacity(0.8) :
-                            Color.gray.opacity(0.8)
-                    )
-                    .cornerRadius(4)
-            }
+                // Book Details
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                    Text(book.title ?? "Unknown Title")
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                        .lineLimit(2)
 
-            Spacer()
+                    Text(book.author ?? "Unknown Author")
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(AppleBooksColors.textSecondary)
 
-            // Action Button
-            Button(action: {
-                showActionSheet = true
-            }) {
-                Image(systemName: "ellipsis.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.gray)
+                    if let genre = book.genre {
+                        Text(genre)
+                            .font(AppleBooksTypography.captionBold)
+                            .foregroundColor(AppleBooksColors.accent)
+                            .padding(.horizontal, AppleBooksSpacing.space8)
+                            .padding(.vertical, AppleBooksSpacing.space2)
+                            .background(AppleBooksColors.accent.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+
+                    // Status indicator
+                    Text(book.status.rawValue)
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, AppleBooksSpacing.space8)
+                        .padding(.vertical, AppleBooksSpacing.space2)
+                        .background(
+                            book.status == .currentlyReading ?
+                                AppleBooksColors.success.opacity(0.9) :
+                                AppleBooksColors.textTertiary.opacity(0.8)
+                        )
+                        .cornerRadius(4)
+                }
+
+                Spacer()
+
+                // Action Button
+                Button(action: {
+                    showActionSheet = true
+                }) {
+                    Image(systemName: "ellipsis.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                }
             }
         }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(radius: 1)
         .actionSheet(isPresented: $showActionSheet) {
             ActionSheet(
                 title: Text(book.title ?? "Unknown Title"),
