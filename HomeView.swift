@@ -73,12 +73,13 @@ struct HomeView: View {
                     books: favoriteBooks,
                     title: "Customer Favorites",
                     subtitle: "See the books readers love",
+                    onBookTap: { book in
+                        // Handle book tap
+                        print("Book tapped: \(book.title ?? "Unknown")")
+                    },
                     onSeeAllTap: nil,
                     viewModel: nil
-                ) {
-                    // Handle book tap
-                    print("Book tapped: \($0.title ?? "Unknown")")
-                }
+                )
 
                 // New & Trending
                 AppleBooksCollection(
