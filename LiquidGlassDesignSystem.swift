@@ -1070,7 +1070,7 @@ public struct AppleBooksBookCard: View {
 
     @State private var isAddingToLibrary = false
 
-    var body: some View {
+    public var body: some View {
         AppleBooksCard(
             cornerRadius: 12,
             padding: AppleBooksSpacing.space12,
@@ -1193,7 +1193,7 @@ public struct AppleBooksBookCard: View {
 
 // Reading Goals Section
 public struct ReadingGoalsSection: View {
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
             Text("Daily Reading Goals")
                 .font(AppleBooksTypography.headlineLarge)
