@@ -931,7 +931,7 @@ public struct AppleBooksSectionHeader: View {
     let showSeeAll: Bool
     let seeAllAction: (() -> Void)?
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
             HStack {
                 Text(title)
@@ -968,7 +968,7 @@ public struct AppleBooksCollection: View {
     let onSeeAllTap: (() -> Void)?
     let viewModel: BookViewModel? // For adding books to library
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space20) {
             AppleBooksSectionHeader(
                 title: title,
@@ -1001,7 +1001,7 @@ public struct AppleBooksPromoBanner: View {
     let gradient: LinearGradient
     let action: () -> Void
 
-    var body: some View {
+    public var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
                 Text(title)
@@ -1045,7 +1045,7 @@ public struct AppleBooksCard<Content: View>: View {
         self.shadowStyle = shadowStyle
     }
 
-    var body: some View {
+    public var body: some View {
         content
             .padding(padding)
             .background(
