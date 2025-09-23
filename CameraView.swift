@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import UIKit
+import LiquidGlassDesignSystem
 
 // Apple Books Design System Constants for Camera Interface
 struct AppleBooksCameraColors {

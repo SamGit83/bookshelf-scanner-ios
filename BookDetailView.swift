@@ -1,4 +1,5 @@
 import SwiftUI
+import LiquidGlassDesignSystem
 #if canImport(UIKit)
 import UIKit
 #endif
