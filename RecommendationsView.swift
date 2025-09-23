@@ -77,10 +77,12 @@ struct RecommendationsView: View {
                                 books: recommendations.map { convertToBook($0) },
                                 title: "Recommended for You",
                                 subtitle: "Personalized picks based on your library",
+                                onBookTap: { book in
+                                    // Handle book tap - perhaps navigate to detail
+                                },
+                                onSeeAllTap: nil,
                                 viewModel: viewModel
-                            ) { book in
-                                // Handle book tap - perhaps navigate to detail
-                            }
+                            )
 
                             // Categories Sections
                             ForEach(recommendationsByGenre.keys.sorted(), id: \.self) { genre in
@@ -89,10 +91,12 @@ struct RecommendationsView: View {
                                         books: genreRecommendations.map { convertToBook($0) },
                                         title: genre,
                                         subtitle: "\(genreRecommendations.count) books",
+                                        onBookTap: { book in
+                                            // Handle book tap
+                                        },
+                                        onSeeAllTap: nil,
                                         viewModel: viewModel
-                                    ) { book in
-                                        // Handle book tap
-                                    }
+                                    )
                                 }
                             }
                         }
