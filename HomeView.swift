@@ -116,19 +116,19 @@ struct HomeView: View {
                             .foregroundColor(AppleBooksColors.text)
 
                         VStack(spacing: AppleBooksSpacing.space16) {
-                            FeatureCard(
+                            HomeFeatureCard(
                                 icon: "wifi.slash",
                                 title: "Offline Access",
                                 description: "Read and manage your library anywhere, even offline"
                             )
 
-                            FeatureCard(
+                            HomeFeatureCard(
                                 icon: "chart.bar.fill",
                                 title: "Reading Progress",
                                 description: "Track pages read, set goals, and monitor your reading habits"
                             )
 
-                            FeatureCard(
+                            HomeFeatureCard(
                                 icon: "plus.circle.fill",
                                 title: "Manual Entry",
                                 description: "Add books manually with ISBN lookup for complete coverage"
@@ -180,7 +180,7 @@ struct FeatureRow: View {
     }
 }
 
-struct FeatureCard: View {
+struct HomeFeatureCard: View {
     let icon: String
     let title: String
     let description: String
