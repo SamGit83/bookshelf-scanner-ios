@@ -164,6 +164,7 @@ struct ProfileView: View {
                             }
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
                         Spacer(minLength: AppleBooksSpacing.space64)
                     }
