@@ -369,8 +369,8 @@ struct BookDetailView: View {
                                 book: Book(
                                     title: recommendation.title,
                                     author: recommendation.author,
-                                    coverImageURL: recommendation.thumbnailURL,
                                     genre: nil as String?,
+                                    coverImageURL: recommendation.thumbnailURL,
                                     status: .library
                                 ),
                                 onTap: {},
