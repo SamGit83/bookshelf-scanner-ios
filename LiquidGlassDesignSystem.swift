@@ -1228,4 +1228,3 @@ public struct ReadingGoalsSection: View {
         }
     }
 }
-}
