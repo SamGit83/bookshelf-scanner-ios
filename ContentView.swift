@@ -67,31 +67,20 @@ struct ContentView: View {
          }
     }
 
-    private var tabs: [TabItem] {
-        return [
-            TabItem(icon: AnyView(Image(systemName: "book")), label: "Reading Now", tag: 0),
-            TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 1),
-            TabItem(icon: AnyView(Image(systemName: "bag")), label: "Book Store", tag: 2),
-            TabItem(icon: AnyView(Image(systemName: "headphones")), label: "Audiobooks", tag: 3),
-            TabItem(icon: AnyView(Image(systemName: "magnifyingglass")), label: "Search", tag: 4)
-        ]
-    }
 
     private var selectedView: some View {
         Group {
             switch selectedTab {
             case 0:
-                CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
-            case 1:
                 LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+            case 1:
+                CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
             case 2:
                 RecommendationsView(viewModel: viewModel)
             case 3:
-                RecommendationsView(viewModel: viewModel)
-            case 4:
-                SearchView(viewModel: viewModel)
+                ProfileView(authService: authService)
             default:
-                CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+                LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
             }
         }
     }
@@ -102,7 +91,7 @@ struct ContentView: View {
                 .background(appleBooksBackground)
                 .ignoresSafeArea()
 
-            LiquidGlassTabBar(selectedTab: $selectedTab, tabs: tabs)
+            LiquidGlassTabBar(selectedTab: $selectedTab)
         }
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
