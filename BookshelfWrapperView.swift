@@ -38,7 +38,7 @@ struct BookshelfWrapperView: View {
 
                     // Currently Reading Collection
                     AppleBooksCollection(
-                        books: viewModel.books.filter { $0.status == .currentlyReading },
+                        books: viewModel.books.filter { $0.status == .reading || $0.status == .currentlyReading },
                         title: "Continue Reading",
                         subtitle: "Pick up where you left off",
                         onBookTap: { book in

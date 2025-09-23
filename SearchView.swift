@@ -269,7 +269,7 @@ struct AppleBooksSearchResultRow: View {
                         .padding(.horizontal, AppleBooksSpacing.space8)
                         .padding(.vertical, AppleBooksSpacing.space2)
                         .background(
-                            book.status == .currentlyReading ?
+                            (book.status == .reading || book.status == .currentlyReading) ?
                                 AppleBooksColors.success.opacity(0.9) :
                                 AppleBooksColors.textTertiary.opacity(0.8)
                         )
@@ -295,7 +295,7 @@ struct AppleBooksSearchResultRow: View {
                 buttons: [
                     .default(Text("Move to Currently Reading")) {
                         withAnimation(.spring()) {
-                            viewModel.moveBook(book, to: .currentlyReading)
+                            viewModel.moveBook(book, to: .reading)
                         }
                     },
                     .default(Text("Move to Library")) {

@@ -310,7 +310,7 @@ struct BookDetailView: View {
                     if currentBook.status == .library {
                         Button(action: {
                             withAnimation(.spring()) {
-                                viewModel.moveBook(currentBook, to: .currentlyReading)
+                                viewModel.moveBook(currentBook, to: .reading)
                             }
                         }) {
                             Text("Start Reading")
@@ -321,7 +321,7 @@ struct BookDetailView: View {
                                 .background(AppleBooksColors.accent)
                                 .cornerRadius(12)
                         }
-                    } else if currentBook.status == .currentlyReading {
+                    } else if currentBook.status == .reading || currentBook.status == .currentlyReading {
                         Button(action: {
                             showProgressView = true
                         }) {

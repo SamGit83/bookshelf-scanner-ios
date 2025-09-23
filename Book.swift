@@ -29,7 +29,7 @@ struct Book: Identifiable, Codable, Hashable {
     var dateStartedReading: Date?
     var dateFinishedReading: Date?
 
-    init(title: String?, author: String?, isbn: String? = nil, genre: String? = nil, status: BookStatus = .library, coverImageData: Data? = nil, coverImageURL: String? = nil) {
+    init(title: String?, author: String?, isbn: String? = nil, genre: String? = nil, status: BookStatus = .toRead, coverImageData: Data? = nil, coverImageURL: String? = nil) {
         self.title = title ?? ""
         self.author = author ?? ""
         self.isbn = isbn
@@ -76,8 +76,8 @@ struct Book: Identifiable, Codable, Hashable {
         self.confidence = try container.decodeIfPresent(Double.self, forKey: .confidence)
         self.position = try container.decodeIfPresent(String.self, forKey: .position)
 
-        // Default to .library if 'status' is missing
-        self.status = try container.decodeIfPresent(BookStatus.self, forKey: .status) ?? .library
+        // Default to .toRead if 'status' is missing
+        self.status = try container.decodeIfPresent(BookStatus.self, forKey: .status) ?? .toRead
 
         // Default to current date if 'dateAdded' is missing
         self.dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
@@ -96,6 +96,11 @@ struct Book: Identifiable, Codable, Hashable {
 }
 
 enum BookStatus: String, Codable, CaseIterable {
+    case toRead = "To Read"
+    case reading = "Reading"
+    case read = "Read"
+    
+    // Legacy support for existing data
     case library = "Library"
     case currentlyReading = "Currently Reading"
 }

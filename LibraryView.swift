@@ -60,72 +60,76 @@ struct LibraryView: View {
     private var libraryContentView: some View {
         ScrollView {
             VStack(spacing: AppleBooksSpacing.space32) {
-                // Currently Reading Section
-                let currentlyReadingBooks = viewModel.books.filter { $0.status == .currentlyReading }.sorted(by: selectedSort.sortFunction)
-                if !currentlyReadingBooks.isEmpty {
+                // Reading Section (Currently Reading + Legacy)
+                let readingBooks = viewModel.books.filter {
+                    $0.status == .reading || $0.status == .currentlyReading
+                }.sorted(by: selectedSort.sortFunction)
+                if !readingBooks.isEmpty {
                     AppleBooksSectionHeader(
-                        title: "Currently Reading",
-                        subtitle: "\(currentlyReadingBooks.count) books",
+                        title: "Reading",
+                        subtitle: "\(readingBooks.count) books",
                         showSeeAll: false,
                         seeAllAction: nil
                     )
 
                     LazyVStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(currentlyReadingBooks) { book in
+                        ForEach(readingBooks) { book in
                             AppleBooksBookCard(
                                 book: book,
                                 onTap: { selectedBook = book; isShowingDetail = true },
                                 showAddButton: false,
                                 onAddTap: nil,
-                                viewModel: nil
+                                viewModel: viewModel
                             )
                         }
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
                 }
 
-                // Library Section
-                let libraryBooks = viewModel.books.filter { $0.status == .library }.sorted(by: selectedSort.sortFunction)
-                if !libraryBooks.isEmpty {
+                // To Read Section (New books + Legacy Library)
+                let toReadBooks = viewModel.books.filter {
+                    $0.status == .toRead || $0.status == .library
+                }.sorted(by: selectedSort.sortFunction)
+                if !toReadBooks.isEmpty {
                     AppleBooksSectionHeader(
-                        title: "Library",
-                        subtitle: "\(libraryBooks.count) books",
+                        title: "To Read",
+                        subtitle: "\(toReadBooks.count) books",
                         showSeeAll: false,
                         seeAllAction: nil
                     )
 
                     LazyVStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(libraryBooks) { book in
+                        ForEach(toReadBooks) { book in
                             AppleBooksBookCard(
                                 book: book,
                                 onTap: { selectedBook = book; isShowingDetail = true },
                                 showAddButton: false,
                                 onAddTap: nil,
-                                viewModel: nil
+                                viewModel: viewModel
                             )
                         }
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
                 }
 
-                // Other statuses if any
-                let otherBooks = viewModel.books.filter { $0.status != .currentlyReading && $0.status != .library }.sorted(by: selectedSort.sortFunction)
-                if !otherBooks.isEmpty {
+                // Read Section (Completed books)
+                let readBooks = viewModel.books.filter { $0.status == .read }.sorted(by: selectedSort.sortFunction)
+                if !readBooks.isEmpty {
                     AppleBooksSectionHeader(
-                        title: "Other",
-                        subtitle: "\(otherBooks.count) books",
+                        title: "Read",
+                        subtitle: "\(readBooks.count) books",
                         showSeeAll: false,
                         seeAllAction: nil
                     )
 
                     LazyVStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(otherBooks) { book in
+                        ForEach(readBooks) { book in
                             AppleBooksBookCard(
                                 book: book,
                                 onTap: { selectedBook = book; isShowingDetail = true },
                                 showAddButton: false,
                                 onAddTap: nil,
-                                viewModel: nil
+                                viewModel: viewModel
                             )
                         }
                     }

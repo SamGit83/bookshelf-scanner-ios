@@ -373,7 +373,7 @@ struct BookCard: View {
                         // Reading status indicator
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(book.status == .currentlyReading ? Color.blue : Color.gray)
+                                .fill((book.status == .reading || book.status == .currentlyReading) ? Color.blue : Color.gray)
                                 .frame(width: 8, height: 8)
 
                             Text(book.status.rawValue)

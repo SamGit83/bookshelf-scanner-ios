@@ -346,12 +346,26 @@ class BookViewModel: ObservableObject {
         }
     }
 
+    // Legacy support - map old statuses to new ones
     var libraryBooks: [Book] {
-        books.filter { $0.status == .library }
+        books.filter { $0.status == .library || $0.status == .toRead || $0.status == .reading || $0.status == .read }
     }
 
     var currentlyReadingBooks: [Book] {
-        books.filter { $0.status == .currentlyReading }
+        books.filter { $0.status == .currentlyReading || $0.status == .reading }
+    }
+    
+    // New status-based computed properties
+    var toReadBooks: [Book] {
+        books.filter { $0.status == .toRead || $0.status == .library }
+    }
+    
+    var readingBooks: [Book] {
+        books.filter { $0.status == .reading || $0.status == .currentlyReading }
+    }
+    
+    var readBooks: [Book] {
+        books.filter { $0.status == .read }
     }
 
     // MARK: - Recommendations

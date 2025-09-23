@@ -74,9 +74,9 @@ struct ContentView: View {
             case 0:
                 LibraryView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
             case 1:
-                CurrentlyReadingView(viewModel: viewModel, isShowingCamera: $isShowingCamera)
+                ReadingView(viewModel: viewModel)
             case 2:
-                RecommendationsView(viewModel: viewModel)
+                DiscoverView(viewModel: viewModel)
             case 3:
                 ProfileView(authService: authService)
             default:
