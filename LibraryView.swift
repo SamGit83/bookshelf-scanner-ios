@@ -213,25 +213,102 @@ struct LibraryView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Apple Books clean background
-                AppleBooksColors.background
-                    .ignoresSafeArea()
+        ZStack {
+            // Apple Books clean background
+            AppleBooksColors.background
+                .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    if viewModel.books.isEmpty {
-                        Spacer()
-                        emptyStateView
-                        Spacer()
-                    } else {
-                        libraryContentView
-                    }
-
+            VStack(spacing: 0) {
+                if viewModel.books.isEmpty {
                     Spacer()
-                    
+                    emptyStateView
+                    Spacer()
                     actionButtonsView
-                        .padding(.bottom, geometry.safeAreaInsets.bottom > 0 ? 0 : AppleBooksSpacing.space16)
+                } else {
+                    ScrollView {
+                        VStack(spacing: AppleBooksSpacing.space32) {
+                            // Reading Section (Currently Reading + Legacy)
+                            let readingBooks = viewModel.books.filter {
+                                $0.status == .reading || $0.status == .currentlyReading
+                            }.sorted(by: selectedSort.sortFunction)
+                            if !readingBooks.isEmpty {
+                                AppleBooksSectionHeader(
+                                    title: "Reading",
+                                    subtitle: "\(readingBooks.count) books",
+                                    showSeeAll: false,
+                                    seeAllAction: nil
+                                )
+
+                                LazyVStack(spacing: AppleBooksSpacing.space16) {
+                                    ForEach(readingBooks) { book in
+                                        AppleBooksBookCard(
+                                            book: book,
+                                            onTap: { selectedBook = book; isShowingDetail = true },
+                                            showAddButton: false,
+                                            onAddTap: nil,
+                                            viewModel: viewModel
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, AppleBooksSpacing.space24)
+                            }
+
+                            // To Read Section (New books + Legacy Library)
+                            let toReadBooks = viewModel.books.filter {
+                                $0.status == .toRead || $0.status == .library
+                            }.sorted(by: selectedSort.sortFunction)
+                            if !toReadBooks.isEmpty {
+                                AppleBooksSectionHeader(
+                                    title: "To Read",
+                                    subtitle: "\(toReadBooks.count) books",
+                                    showSeeAll: false,
+                                    seeAllAction: nil
+                                )
+
+                                LazyVStack(spacing: AppleBooksSpacing.space16) {
+                                    ForEach(toReadBooks) { book in
+                                        AppleBooksBookCard(
+                                            book: book,
+                                            onTap: { selectedBook = book; isShowingDetail = true },
+                                            showAddButton: false,
+                                            onAddTap: nil,
+                                            viewModel: viewModel
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, AppleBooksSpacing.space24)
+                            }
+
+                            // Read Section (Completed books)
+                            let readBooks = viewModel.books.filter { $0.status == .read }.sorted(by: selectedSort.sortFunction)
+                            if !readBooks.isEmpty {
+                                AppleBooksSectionHeader(
+                                    title: "Read",
+                                    subtitle: "\(readBooks.count) books",
+                                    showSeeAll: false,
+                                    seeAllAction: nil
+                                )
+
+                                LazyVStack(spacing: AppleBooksSpacing.space16) {
+                                    ForEach(readBooks) { book in
+                                        AppleBooksBookCard(
+                                            book: book,
+                                            onTap: { selectedBook = book; isShowingDetail = true },
+                                            showAddButton: false,
+                                            onAddTap: nil,
+                                            viewModel: viewModel
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, AppleBooksSpacing.space24)
+                            }
+
+                            // Action buttons at bottom of scroll content
+                            actionButtonsView
+                                .padding(.bottom, AppleBooksSpacing.space80) // Extra space for tab bar
+                        }
+                        .padding(.vertical, AppleBooksSpacing.space24)
+                    }
                 }
             }
         }

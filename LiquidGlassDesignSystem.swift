@@ -1146,25 +1146,37 @@ public struct AppleBooksBookCard: View {
                         .font(AppleBooksTypography.caption)
                         .foregroundColor(AppleBooksColors.textSecondary)
 
-                    // Row 1: Page count and reading time
-                    HStack(spacing: AppleBooksSpacing.space8) {
+                    // Row 1: Page count and reading time badges
+                    HStack(spacing: AppleBooksSpacing.space6) {
                         if let pageCount = book.pageCount {
                             Text("\(pageCount) pages")
                                 .font(AppleBooksTypography.caption)
-                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .foregroundColor(AppleBooksColors.accent)
+                                .padding(.horizontal, AppleBooksSpacing.space6)
+                                .padding(.vertical, AppleBooksSpacing.space2)
+                                .background(AppleBooksColors.accent.opacity(0.1))
+                                .cornerRadius(4)
                         }
                         if let readingTime = book.estimatedReadingTime {
-                            Text("• \(readingTime)")
+                            Text(readingTime)
                                 .font(AppleBooksTypography.caption)
-                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .foregroundColor(AppleBooksColors.success)
+                                .padding(.horizontal, AppleBooksSpacing.space6)
+                                .padding(.vertical, AppleBooksSpacing.space2)
+                                .background(AppleBooksColors.success.opacity(0.1))
+                                .cornerRadius(4)
                         }
                     }
 
-                    // Row 2: Sub genre
+                    // Row 2: Sub genre badge
                     if let subGenre = book.subGenre {
                         Text(subGenre)
                             .font(AppleBooksTypography.caption)
-                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .foregroundColor(AppleBooksColors.text)
+                            .padding(.horizontal, AppleBooksSpacing.space6)
+                            .padding(.vertical, AppleBooksSpacing.space2)
+                            .background(AppleBooksColors.card.opacity(0.8))
+                            .cornerRadius(4)
                     }
                 }
 
