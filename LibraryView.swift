@@ -66,7 +66,8 @@ struct LibraryView: View {
                     AppleBooksSectionHeader(
                         title: "Currently Reading",
                         subtitle: "\(currentlyReadingBooks.count) books",
-                        showSeeAll: false
+                        showSeeAll: false,
+                        seeAllAction: nil
                     )
 
                     LazyVStack(spacing: AppleBooksSpacing.space16) {
@@ -87,7 +88,8 @@ struct LibraryView: View {
                     AppleBooksSectionHeader(
                         title: "Library",
                         subtitle: "\(libraryBooks.count) books",
-                        showSeeAll: false
+                        showSeeAll: false,
+                        seeAllAction: nil
                     )
 
                     LazyVStack(spacing: AppleBooksSpacing.space16) {
@@ -108,7 +110,8 @@ struct LibraryView: View {
                     AppleBooksSectionHeader(
                         title: "Other",
                         subtitle: "\(otherBooks.count) books",
-                        showSeeAll: false
+                        showSeeAll: false,
+                        seeAllAction: nil
                     )
 
                     LazyVStack(spacing: AppleBooksSpacing.space16) {
@@ -215,7 +218,7 @@ struct LibraryView: View {
             }
             .overlay(loadingOverlay)
             .background(
-                NavigationLink(destination: BookDetailView(book: selectedBook!, viewModel: viewModel), isActive: Binding(get: { isShowingDetail }, set: { isShowingDetail = $0; if !$0 { selectedBook = nil } }))
+                NavigationLink("", destination: BookDetailView(book: selectedBook!, viewModel: viewModel), isActive: Binding(get: { isShowingDetail }, set: { isShowingDetail = $0; if !$0 { selectedBook = nil } }))
             )
             .navigationTitle("Library")
             .navigationBarTitleDisplayMode(.large)
