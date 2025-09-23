@@ -227,7 +227,11 @@ struct LibraryView: View {
         }
         .overlay(loadingOverlay)
         .background(
-            NavigationLink("", destination: BookDetailView(book: selectedBook!, viewModel: viewModel), isActive: Binding(get: { isShowingDetail }, set: { isShowingDetail = $0; if !$0 { selectedBook = nil } }))
+            Group {
+                if let book = selectedBook {
+                    NavigationLink("", destination: BookDetailView(book: book, viewModel: viewModel), isActive: Binding(get: { isShowingDetail }, set: { isShowingDetail = $0; if !$0 { selectedBook = nil } }))
+                }
+            }
         )
         .navigationTitle("Library")
         .navigationBarTitleDisplayMode(.large)
