@@ -27,7 +27,7 @@ struct LiquidGlassTabBar: View {
                 .font(.caption2)
                 .fontWeight(selectedTab == tab.tag ? .semibold : .regular)
         }
-        .foregroundColor(selectedTab == tab.tag ? Color(hex: "FF9F0A") : Color(hex: "3C3C4399"))
+        .foregroundColor(selectedTab == tab.tag ? Color(hex: "FF9F0A") : AdaptiveColors.secondaryText)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
     }
@@ -49,7 +49,7 @@ struct LiquidGlassTabBar: View {
     }
 
     private var backgroundShape: some View {
-        Color.white
+        AdaptiveColors.secondaryBackground
             .overlay(
                 Divider()
                     .padding(.top, 0),
