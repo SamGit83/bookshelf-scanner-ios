@@ -27,7 +27,7 @@ struct LiquidGlassTabBar: View {
                 .font(.caption2)
                 .fontWeight(selectedTab == tab.tag ? .semibold : .regular)
         }
-        .foregroundColor(selectedTab == tab.tag ? Color(hex: "FF9F0A") : AdaptiveColors.secondaryText)
+        .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
     }
