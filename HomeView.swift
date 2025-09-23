@@ -1,5 +1,4 @@
 import SwiftUI
-import LiquidGlassDesignSystem
 
 struct HomeView: View {
     @ObservedObject private var authService = AuthService.shared

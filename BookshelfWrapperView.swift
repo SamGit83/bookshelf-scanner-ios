@@ -1,5 +1,4 @@
 import SwiftUI
-import LiquidGlassDesignSystem
 
 struct BookshelfWrapperView: View {
     @ObservedObject private var authService = AuthService.shared

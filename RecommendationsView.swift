@@ -1,5 +1,4 @@
 import SwiftUI
-import LiquidGlassDesignSystem
 
 struct RecommendationsView: View {
     @ObservedObject var viewModel: BookViewModel
