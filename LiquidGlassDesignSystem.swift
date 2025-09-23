@@ -836,7 +836,7 @@ struct DiscoverColors {
 // MARK: - Apple Books Design System
 
 // Apple Books Color Palette
-struct AppleBooksColors {
+public struct AppleBooksColors {
     static let background = Color(hex: "F2F2F7")    // Light gray background
     static let card = Color.white                   // Pure white cards
     static let text = Color.black                   // Primary black text
@@ -848,7 +848,7 @@ struct AppleBooksColors {
 }
 
 // Apple Books Typography
-struct AppleBooksTypography {
+public struct AppleBooksTypography {
     // Display (Large Section Headers)
     static let displayLarge = Font.system(size: 32, weight: .bold, design: .default)
     static let displayMedium = Font.system(size: 28, weight: .bold, design: .default)
@@ -873,7 +873,7 @@ struct AppleBooksTypography {
 }
 
 // Apple Books Spacing
-struct AppleBooksSpacing {
+public struct AppleBooksSpacing {
     static let space2: CGFloat = 2
     static let space4: CGFloat = 4
     static let space6: CGFloat = 6
@@ -891,7 +891,7 @@ struct AppleBooksSpacing {
 }
 
 // Apple Books Shadow System
-enum AppleBooksShadow {
+public enum AppleBooksShadow {
     case subtle
     case medium
     case elevated
@@ -923,7 +923,7 @@ enum AppleBooksShadow {
 }
 
 // Apple Books Components
-struct AppleBooksSectionHeader: View {
+public struct AppleBooksSectionHeader: View {
     let title: String
     let subtitle: String?
     let showSeeAll: Bool
@@ -958,7 +958,7 @@ struct AppleBooksSectionHeader: View {
     }
 }
 
-struct AppleBooksCollection: View {
+public struct AppleBooksCollection: View {
     let books: [Book]
     let title: String
     let subtitle: String?
@@ -993,7 +993,7 @@ struct AppleBooksCollection: View {
     }
 }
 
-struct AppleBooksPromoBanner: View {
+public struct AppleBooksPromoBanner: View {
     let title: String
     let subtitle: String?
     let gradient: LinearGradient
@@ -1022,7 +1022,7 @@ struct AppleBooksPromoBanner: View {
     }
 }
 
-struct AppleBooksCard<Content: View>: View {
+public struct AppleBooksCard<Content: View>: View {
     let content: Content
     let cornerRadius: CGFloat
     let padding: CGFloat
@@ -1059,7 +1059,7 @@ struct AppleBooksCard<Content: View>: View {
     }
 }
 
-struct AppleBooksBookCard: View {
+public struct AppleBooksBookCard: View {
     let book: Book
     let onTap: () -> Void
     let showAddButton: Bool
@@ -1190,7 +1190,7 @@ struct AppleBooksBookCard: View {
 }
 
 // Reading Goals Section
-struct ReadingGoalsSection: View {
+public struct ReadingGoalsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
             Text("Daily Reading Goals")
