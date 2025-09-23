@@ -75,7 +75,9 @@ struct LibraryView: View {
                             AppleBooksBookCard(
                                 book: book,
                                 onTap: { selectedBook = book; isShowingDetail = true },
-                                showAddButton: false
+                                showAddButton: false,
+                                onAddTap: nil,
+                                viewModel: nil
                             )
                         }
                     }
@@ -97,7 +99,9 @@ struct LibraryView: View {
                             AppleBooksBookCard(
                                 book: book,
                                 onTap: { selectedBook = book; isShowingDetail = true },
-                                showAddButton: false
+                                showAddButton: false,
+                                onAddTap: nil,
+                                viewModel: nil
                             )
                         }
                     }
@@ -119,7 +123,9 @@ struct LibraryView: View {
                             AppleBooksBookCard(
                                 book: book,
                                 onTap: { selectedBook = book; isShowingDetail = true },
-                                showAddButton: false
+                                showAddButton: false,
+                                onAddTap: nil,
+                                viewModel: nil
                             )
                         }
                     }
