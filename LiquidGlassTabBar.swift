@@ -14,7 +14,7 @@ struct LiquidGlassTabBar: View {
         return [
             TabItem(icon: AnyView(Image(systemName: "books.vertical")), label: "Library", tag: 0),
             TabItem(icon: AnyView(Image(systemName: "book.closed")), label: "Currently Reading", tag: 1),
-            TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Recommendations", tag: 2),
+            TabItem(icon: AnyView(Image(systemName: "sparkles")), label: "Discover", tag: 2),
             TabItem(icon: AnyView(Image(systemName: "person.circle")), label: "Profile", tag: 3)
         ]
     }
