@@ -3,8 +3,6 @@ import SwiftUI
 import UIKit
 #endif
 import FirebaseFirestore
-import LiquidGlassDesignSystem
-
 struct EditBookView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: BookViewModel
