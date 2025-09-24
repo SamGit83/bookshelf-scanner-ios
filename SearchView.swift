@@ -32,14 +32,14 @@ struct SearchView: View {
                             HStack(spacing: AppleBooksSpacing.space12) {
                                 Image(systemName: "magnifyingglass")
                                     .foregroundColor(AppleBooksColors.textSecondary)
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 18))
 
                                 TextField("Search your library...", text: $searchText)
-                                    .font(AppleBooksTypography.bodyLarge)
+                                    .font(AppleBooksTypography.bodyMedium)
                                     .foregroundColor(AppleBooksColors.text)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
-                                    .frame(height: 24)
+                                    .frame(height: 20)
 
                                 if !searchText.isEmpty {
                                     Button(action: {
@@ -47,12 +47,12 @@ struct SearchView: View {
                                     }) {
                                         Image(systemName: "xmark.circle.fill")
                                             .foregroundColor(AppleBooksColors.textSecondary)
-                                            .font(.system(size: 20))
+                                            .font(.system(size: 18))
                                     }
                                 }
                             }
-                            .padding(.vertical, AppleBooksSpacing.space12)
-                            .padding(.horizontal, AppleBooksSpacing.space16)
+                            .padding(.vertical, AppleBooksSpacing.space8)
+                            .padding(.horizontal, AppleBooksSpacing.space12)
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
 
