@@ -106,28 +106,7 @@ struct BookDetailView: View {
         .padding(.horizontal, AppleBooksSpacing.space24)
     }
 
-    private var descriptionSection: AnyView {
-        if let description = bookDetails?.description, !description.isEmpty {
-            AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                AppleBooksSectionHeader(
-                    title: "Description",
-                    subtitle: nil,
-                    showSeeAll: false,
-                    seeAllAction: {}
-                )
-
-                AppleBooksCard {
-                    Text(description)
-                        .font(AppleBooksTypography.bodyLarge)
-                        .foregroundColor(AppleBooksColors.text)
-                        .lineSpacing(6)
-                }
-            }
-            .padding(.horizontal, AppleBooksSpacing.space24))
-        } else {
-            AnyView(EmptyView())
-        }
-    }
+    // Removed descriptionSection to avoid duplication with AI-generated teaser
 
     private var bookDetailsSection: AnyView {
         if (currentBook.pageCount ?? bookDetails?.pageCount) != nil || currentBook.estimatedReadingTime != nil {
@@ -393,7 +372,6 @@ struct BookDetailView: View {
             VStack(spacing: AppleBooksSpacing.space32) {
                 bookCoverSection
                 bookMetadataSection
-                descriptionSection
                 bookDetailsSection
                 bookTeaserSection
                 authorBiographySection

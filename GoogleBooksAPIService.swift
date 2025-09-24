@@ -140,35 +140,84 @@ class GoogleBooksAPIService {
     func fetchBookDetails(isbn: String?, title: String?, author: String?, completion: @escaping (Result<BookRecommendation?, Error>) -> Void) {
         print("DEBUG GoogleBooksAPIService: fetchBookDetails called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
 
-        var query = ""
-        if let isbn = isbn {
-            query = "isbn:\(isbn)"
-            print("DEBUG GoogleBooksAPIService: Using ISBN query: '\(query)'")
-        } else if let title = title, let author = author {
-            query = "intitle:\(title) inauthor:\(author)"
-            print("DEBUG GoogleBooksAPIService: Using title+author query: '\(query)'")
-        } else if let title = title {
-            query = title
-            print("DEBUG GoogleBooksAPIService: Using title-only query: '\(query)'")
-        } else {
-            print("DEBUG GoogleBooksAPIService: No valid search parameters provided")
+        // Clean and prepare search parameters
+        let cleanTitle = title?.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: " ")
+        let cleanAuthor = author?.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: " ")
+        let cleanISBN = isbn?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        print("DEBUG GoogleBooksAPIService: Cleaned params - title: '\(cleanTitle ?? "nil")', author: '\(cleanAuthor ?? "nil")', isbn: '\(cleanISBN ?? "nil")'")
+
+        // Try different search strategies in order of preference
+        let searchStrategies = createSearchStrategies(isbn: cleanISBN, title: cleanTitle, author: cleanAuthor)
+
+        trySearchStrategies(searchStrategies, completion: completion)
+    }
+
+    private func createSearchStrategies(isbn: String?, title: String?, author: String?) -> [(query: String, description: String)] {
+        var strategies: [(query: String, description: String)] = []
+
+        // Strategy 1: ISBN (most accurate)
+        if let isbn = isbn, !isbn.isEmpty {
+            strategies.append(("isbn:\(isbn)", "ISBN search"))
+        }
+
+        // Strategy 2: Title + Author (very accurate)
+        if let title = title, !title.isEmpty, let author = author, !author.isEmpty {
+            // Try exact title + author
+            strategies.append(("intitle:\"\(title)\" inauthor:\"\(author)\"", "Exact title + author"))
+
+            // Try partial author name (first word only)
+            let authorFirstWord = author.components(separatedBy: " ").first ?? author
+            if authorFirstWord != author {
+                strategies.append(("intitle:\"\(title)\" inauthor:\(authorFirstWord)", "Title + author first name"))
+            }
+
+            // Try title + author without quotes
+            strategies.append(("intitle:\(title) inauthor:\(author)", "Title + author (no quotes)"))
+        }
+
+        // Strategy 3: Title only (less accurate but better than nothing)
+        if let title = title, !title.isEmpty {
+            strategies.append(("intitle:\"\(title)\"", "Exact title only"))
+            strategies.append((title, "Title keywords"))
+        }
+
+        // Strategy 4: Author + partial title (if we have both)
+        if let author = author, !author.isEmpty, let title = title, !title.isEmpty {
+            let titleWords = title.components(separatedBy: " ").prefix(2).joined(separator: " ")
+            strategies.append(("inauthor:\"\(author)\" \(titleWords)", "Author + title keywords"))
+        }
+
+        return strategies
+    }
+
+    private func trySearchStrategies(_ strategies: [(query: String, description: String)], completion: @escaping (Result<BookRecommendation?, Error>) -> Void) {
+        guard !strategies.isEmpty else {
+            print("DEBUG GoogleBooksAPIService: No search strategies available")
             completion(.success(nil))
             return
         }
 
-        searchBooks(query: query, maxResults: 1) { result in
+        let strategy = strategies.first!
+        print("DEBUG GoogleBooksAPIService: Trying strategy: \(strategy.description) - query: '\(strategy.query)'")
+
+        searchBooks(query: strategy.query, maxResults: 1) { [weak self] result in
             switch result {
             case .success(let recommendations):
-                print("DEBUG GoogleBooksAPIService: fetchBookDetails got \(recommendations.count) results")
-                if let first = recommendations.first {
-                    print("DEBUG GoogleBooksAPIService: Returning book: \(first.title) by \(first.author)")
+                if let book = recommendations.first {
+                    print("DEBUG GoogleBooksAPIService: ✅ Strategy '\(strategy.description)' found: \(book.title) by \(book.author)")
+                    completion(.success(book))
                 } else {
-                    print("DEBUG GoogleBooksAPIService: No results found")
+                    print("DEBUG GoogleBooksAPIService: ❌ Strategy '\(strategy.description)' found no results, trying next strategy")
+                    // Try next strategy
+                    let remainingStrategies = Array(strategies.dropFirst())
+                    self?.trySearchStrategies(remainingStrategies, completion: completion)
                 }
-                completion(.success(recommendations.first))
             case .failure(let error):
-                print("DEBUG GoogleBooksAPIService: fetchBookDetails search failed: \(error.localizedDescription)")
-                completion(.failure(error))
+                print("DEBUG GoogleBooksAPIService: ❌ Strategy '\(strategy.description)' failed: \(error.localizedDescription), trying next strategy")
+                // Try next strategy
+                let remainingStrategies = Array(strategies.dropFirst())
+                self?.trySearchStrategies(remainingStrategies, completion: completion)
             }
         }
     }
@@ -233,61 +282,114 @@ class GoogleBooksAPIService {
             return
         }
 
-        var query = "title:\(title)"
+        // Try multiple Open Library search strategies
+        let searchStrategies = createOpenLibraryStrategies(title: title, author: author)
+        tryOpenLibraryStrategies(searchStrategies, completion: completion)
+    }
+
+    private func createOpenLibraryStrategies(title: String, author: String?) -> [(query: String, description: String)] {
+        var strategies: [(query: String, description: String)] = []
+
+        // Strategy 1: Title + Author (most specific)
         if let author = author, !author.isEmpty {
-            query += " author:\(author)"
+            strategies.append(("title:\(title) author:\(author)", "Title + Author"))
         }
 
-        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://openlibrary.org/search.json?\(encodedQuery)&limit=1") else {
-            print("DEBUG GoogleBooksAPIService: Failed to create Open Library search URL")
+        // Strategy 2: Title only
+        strategies.append(("title:\(title)", "Title only"))
+
+        // Strategy 3: Title keywords (first 3 words)
+        let titleWords = title.components(separatedBy: " ").prefix(3).joined(separator: " ")
+        if titleWords != title {
+            strategies.append((titleWords, "Title keywords"))
+        }
+
+        // Strategy 4: Author + title keywords
+        if let author = author, !author.isEmpty {
+            let authorFirstWord = author.components(separatedBy: " ").first ?? author
+            strategies.append(("author:\(authorFirstWord) \(titleWords)", "Author + title keywords"))
+        }
+
+        return strategies
+    }
+
+    private func tryOpenLibraryStrategies(_ strategies: [(query: String, description: String)], completion: @escaping (Result<String?, Error>) -> Void) {
+        guard !strategies.isEmpty else {
+            print("DEBUG GoogleBooksAPIService: No Open Library search strategies available")
             completion(.success(nil))
             return
         }
 
-        print("DEBUG GoogleBooksAPIService: Searching Open Library: \(url.absoluteString)")
+        let strategy = strategies.first!
+        guard let encodedQuery = strategy.query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://openlibrary.org/search.json?\(encodedQuery)&limit=5") else {
+            print("DEBUG GoogleBooksAPIService: Failed to create Open Library search URL for strategy: \(strategy.description)")
+            let remainingStrategies = Array(strategies.dropFirst())
+            tryOpenLibraryStrategies(remainingStrategies, completion: completion)
+            return
+        }
 
-        URLSession.shared.dataTask(with: url) { data, response, error in
+        print("DEBUG GoogleBooksAPIService: Trying Open Library strategy: \(strategy.description) - URL: \(url.absoluteString)")
+
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             if let error = error {
-                print("DEBUG GoogleBooksAPIService: Open Library search failed: \(error.localizedDescription)")
-                completion(.failure(error))
+                print("DEBUG GoogleBooksAPIService: Open Library strategy '\(strategy.description)' failed: \(error.localizedDescription)")
+                let remainingStrategies = Array(strategies.dropFirst())
+                self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
                 return
             }
 
             guard let data = data else {
-                print("DEBUG GoogleBooksAPIService: No data from Open Library search")
-                completion(.success(nil))
+                print("DEBUG GoogleBooksAPIService: No data from Open Library strategy: \(strategy.description)")
+                let remainingStrategies = Array(strategies.dropFirst())
+                self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
                 return
             }
 
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let docs = json["docs"] as? [[String: Any]],
-                   let firstDoc = docs.first,
-                   let olid = firstDoc["key"] as? String {
+                   let docs = json["docs"] as? [[String: Any]] {
 
-                    // Extract OLID (Open Library ID) and create cover URL
-                    let cleanOLID = olid.replacingOccurrences(of: "/works/", with: "").replacingOccurrences(of: "/books/", with: "")
-                    let coverURL = "https://covers.openlibrary.org/b/olid/\(cleanOLID)-L.jpg"
+                    print("DEBUG GoogleBooksAPIService: Open Library strategy '\(strategy.description)' found \(docs.count) results")
 
-                    print("DEBUG GoogleBooksAPIService: Found Open Library OLID: \(cleanOLID), cover URL: \(coverURL)")
+                    // Try each result to find one with a cover
+                    for (index, doc) in docs.enumerated() {
+                        if let olid = doc["key"] as? String {
+                            let cleanOLID = olid.replacingOccurrences(of: "/works/", with: "").replacingOccurrences(of: "/books/", with: "")
+                            let coverURL = "https://covers.openlibrary.org/b/olid/\(cleanOLID)-L.jpg"
 
-                    // Test if cover exists
-                    self.testImageURL(coverURL) { exists in
-                        if exists {
-                            completion(.success(coverURL))
-                        } else {
-                            print("DEBUG GoogleBooksAPIService: Open Library cover not found for OLID: \(cleanOLID)")
-                            completion(.success(nil))
+                            print("DEBUG GoogleBooksAPIService: Testing cover for result \(index + 1): \(coverURL)")
+
+                            // Test if this cover exists
+                            self?.testImageURL(coverURL) { exists in
+                                if exists {
+                                    print("DEBUG GoogleBooksAPIService: ✅ Found working cover: \(coverURL)")
+                                    completion(.success(coverURL))
+                                } else if index == docs.count - 1 {
+                                    // Last result, try next strategy
+                                    print("DEBUG GoogleBooksAPIService: ❌ No covers found for strategy '\(strategy.description)', trying next")
+                                    let remainingStrategies = Array(strategies.dropFirst())
+                                    self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
+                                }
+                            }
+                            return // Wait for cover test result
                         }
                     }
+
+                    // No OLID found in any result
+                    print("DEBUG GoogleBooksAPIService: No OLID found in Open Library results for strategy: \(strategy.description)")
+                    let remainingStrategies = Array(strategies.dropFirst())
+                    self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
+
                 } else {
-                    print("DEBUG GoogleBooksAPIService: No valid results from Open Library search")
-                    completion(.success(nil))
+                    print("DEBUG GoogleBooksAPIService: Invalid Open Library response for strategy: \(strategy.description)")
+                    let remainingStrategies = Array(strategies.dropFirst())
+                    self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
                 }
             } catch {
-                print("DEBUG GoogleBooksAPIService: Failed to parse Open Library response: \(error.localizedDescription)")
-                completion(.failure(error))
+                print("DEBUG GoogleBooksAPIService: Failed to parse Open Library response for strategy '\(strategy.description)': \(error.localizedDescription)")
+                let remainingStrategies = Array(strategies.dropFirst())
+                self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
             }
         }.resume()
     }
