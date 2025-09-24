@@ -43,6 +43,27 @@
     <string>This app needs camera access to scan bookshelves</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app needs photo library access to save book cover images</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+    	<key>NSAllowsArbitraryLoads</key>
+    	<false/>
+    	<key>NSAllowsLocalNetworking</key>
+    	<true/>
+    	<key>NSExceptionDomains</key>
+    	<dict>
+    		<key>books.google.com</key>
+    		<dict>
+    			<key>NSExceptionAllowsInsecureHTTPLoads</key>
+    			<true/>
+    			<key>NSExceptionMinimumTLSVersion</key>
+    			<string>TLSv1.0</string>
+    			<key>NSExceptionRequiresForwardSecrecy</key>
+    			<false/>
+    			<key>NSIncludesSubdomains</key>
+    			<true/>
+    		</dict>
+    	</dict>
+    </dict>
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
     <key>UIMainStoryboardFile</key>

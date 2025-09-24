@@ -1187,6 +1187,7 @@ public struct AppleBooksBookCard: View {
                                 .overlay(
                                     Image(systemName: "book")
                                         .foregroundColor(.gray)
+                                        .font(.system(size: 20))
                                 )
                         @unknown default:
                             Rectangle()
@@ -1195,6 +1196,7 @@ public struct AppleBooksBookCard: View {
                                 .cornerRadius(8)
                         }
                     }
+                    .id(book.coverImageURL) // Force refresh when URL changes
                 } else {
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))

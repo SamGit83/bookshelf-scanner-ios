@@ -82,22 +82,31 @@ class BookViewModel: ObservableObject {
                         var updatedBook = book
                         switch result {
                         case .success(let url):
-                            if let urlString = url, let imageURL = URL(string: urlString) {
+                            if let urlString = url {
                                 print("DEBUG BookViewModel: Fetched cover URL: \(urlString) for \(book.title ?? "")")
-                                // Download the image data to store locally (handles http URLs and ATS)
-                                URLSession.shared.dataTask(with: imageURL) { data, response, error in
-                                    DispatchQueue.main.async {
-                                        if let data = data, error == nil {
-                                            updatedBook.coverImageData = data
-                                            print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "")")
-                                        } else {
-                                            print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
+                                updatedBook.coverImageURL = urlString
+                                // Try to download the image data for local storage
+                                if let imageURL = URL(string: urlString) {
+                                    URLSession.shared.dataTask(with: imageURL) { data, response, error in
+                                        DispatchQueue.main.async {
+                                            if let data = data, error == nil {
+                                                updatedBook.coverImageData = data
+                                                print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "")")
+                                            } else {
+                                                print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
+                                            }
+                                            // Save to Firestore and update local array
+                                            self?.saveBookToFirestore(updatedBook)
+                                            self?.updateLocalBook(updatedBook)
                                         }
-                                        self?.saveBookToFirestore(updatedBook)
-                                    }
-                                }.resume()
+                                    }.resume()
+                                } else {
+                                    // Save with URL even if download fails
+                                    self?.saveBookToFirestore(updatedBook)
+                                    self?.updateLocalBook(updatedBook)
+                                }
                             } else {
-                                print("DEBUG BookViewModel: Invalid cover URL: \(url ?? "nil") for \(book.title ?? "")")
+                                print("DEBUG BookViewModel: No cover URL found for \(book.title ?? "")")
                                 self?.saveBookToFirestore(updatedBook)
                             }
                         case .failure(let error):
@@ -342,6 +351,15 @@ class BookViewModel: ObservableObject {
                 self.errorMessage = "Failed to save book: \(error.localizedDescription)"
             } else {
                 print("DEBUG BookViewModel: Successfully saved book to Firestore")
+            }
+        }
+    }
+
+    private func updateLocalBook(_ updatedBook: Book) {
+        DispatchQueue.main.async {
+            if let index = self.books.firstIndex(where: { $0.id == updatedBook.id }) {
+                self.books[index] = updatedBook
+                print("DEBUG BookViewModel: Updated local book with cover image: \(updatedBook.title ?? "")")
             }
         }
     }
