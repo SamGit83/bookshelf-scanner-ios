@@ -415,7 +415,7 @@ struct BookCard: View {
                 title: Text(book.title ?? "Unknown Title"),
                 message: Text("Choose an action"),
                 buttons: [
-                    .default(Text("Track Progress")) {
+                    .default(Text("Update Progress")) {
                         showProgressView = true
                     },
                     .default(Text("Edit Book")) {
