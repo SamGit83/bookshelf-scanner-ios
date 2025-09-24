@@ -145,6 +145,82 @@ class BookViewModel: ObservableObject {
         setupFirestoreListener()
     }
 
+    func refreshBookCovers() {
+        print("DEBUG BookViewModel: Manual cover refresh requested")
+        fetchMissingCoversForExistingBooks()
+    }
+
+    func fetchMissingCoversForExistingBooks() {
+        print("DEBUG BookViewModel: fetchMissingCoversForExistingBooks called")
+        let booksWithoutCovers = books.filter { $0.coverImageURL == nil && $0.coverImageData == nil }
+        print("DEBUG BookViewModel: Found \(booksWithoutCovers.count) books without covers")
+
+        // Process books with rate limiting to avoid overwhelming the API
+        processBooksForCovers(Array(booksWithoutCovers), index: 0)
+    }
+
+    private func processBooksForCovers(_ booksToProcess: [Book], index: Int) {
+        guard index < booksToProcess.count else {
+            print("DEBUG BookViewModel: Finished processing all books for covers")
+            return
+        }
+
+        let book = booksToProcess[index]
+        print("DEBUG BookViewModel: Fetching cover for existing book (\(index + 1)/\(booksToProcess.count)): \(book.title ?? "") by \(book.author ?? "")")
+
+        googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
+            var updatedBook = book
+            switch result {
+            case .success(let url):
+                if let urlString = url {
+                    print("DEBUG BookViewModel: Fetched cover URL for existing book: \(urlString)")
+                    updatedBook.coverImageURL = urlString
+                    // Try to download the image data
+                    if let imageURL = URL(string: urlString) {
+                        URLSession.shared.dataTask(with: imageURL) { data, response, error in
+                            DispatchQueue.main.async {
+                                if let data = data, error == nil {
+                                    updatedBook.coverImageData = data
+                                    print("DEBUG BookViewModel: Downloaded cover image data for existing book")
+                                } else {
+                                    print("DEBUG BookViewModel: Failed to download cover for existing book: \(error?.localizedDescription ?? "Unknown error")")
+                                }
+                                // Save to Firestore and update local array
+                                self?.saveBookToFirestore(updatedBook)
+                                self?.updateLocalBook(updatedBook)
+
+                                // Process next book after a delay
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    self?.processBooksForCovers(booksToProcess, index: index + 1)
+                                }
+                            }
+                        }.resume()
+                    } else {
+                        // Save with URL even if download fails
+                        self?.saveBookToFirestore(updatedBook)
+                        self?.updateLocalBook(updatedBook)
+                        // Process next book
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            self?.processBooksForCovers(booksToProcess, index: index + 1)
+                        }
+                    }
+                } else {
+                    print("DEBUG BookViewModel: No cover URL found for existing book: \(book.title ?? "")")
+                    // Process next book
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self?.processBooksForCovers(booksToProcess, index: index + 1)
+                    }
+                }
+            case .failure(let error):
+                print("DEBUG BookViewModel: Failed to fetch cover for existing book \(book.title ?? ""): \(error.localizedDescription)")
+                // Process next book even on failure
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self?.processBooksForCovers(booksToProcess, index: index + 1)
+                }
+            }
+        }
+    }
+
     func moveBook(_ book: Book, to status: BookStatus) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
             errorMessage = "User not authenticated"
@@ -316,6 +392,11 @@ class BookViewModel: ObservableObject {
                 self?.books = loadedBooks
                 // Cache the books for offline use
                 OfflineCache.shared.cacheBooks(loadedBooks)
+
+                // Fetch missing covers for existing books
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { // Small delay to avoid overwhelming the API
+                    self?.fetchMissingCoversForExistingBooks()
+                }
             }
     }
 
