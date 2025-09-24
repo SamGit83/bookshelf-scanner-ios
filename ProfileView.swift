@@ -59,7 +59,7 @@ struct ProfileView: View {
 
                             VStack(spacing: AppleBooksSpacing.space12) {
                                 NavigationLink(destination: AccountSettingsView()) {
-                                    AppleBooksCard {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "gear")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -74,12 +74,11 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
                                 NavigationLink(destination: ReadingStatsView()) {
-                                    AppleBooksCard {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "chart.bar.fill")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -94,7 +93,6 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
@@ -117,7 +115,6 @@ struct ProfileView: View {
                                         )
                                     }
                                 }
-                                .padding(.horizontal, AppleBooksSpacing.space24)
 
                                 // Accent Color Section
                                 AppleBooksCard {
@@ -142,13 +139,12 @@ struct ProfileView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal, AppleBooksSpacing.space24)
 
                                 // Sign Out
                                 Button(action: {
                                     showSignOutAlert = true
                                 }) {
-                                    AppleBooksCard {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "arrow.right.square")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -163,13 +159,11 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
 
                         Spacer(minLength: AppleBooksSpacing.space64)
                     }

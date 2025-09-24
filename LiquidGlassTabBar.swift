@@ -47,6 +47,7 @@ struct LiquidGlassTabBar: View {
                 .frame(width: 24, height: 24)
             } else {
                 tab.icon
+                    .font(.system(size: 20, weight: .regular))
                     .frame(width: 24, height: 24)
                     .foregroundColor(selectedTab == tab.tag ? AppleBooksColors.accent : AdaptiveColors.secondaryText)
             }
@@ -69,7 +70,10 @@ struct LiquidGlassTabBar: View {
                     }
                 }) {
                     tabButtonContent(for: tab)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
             }
         }
         .padding(.horizontal, 16)
