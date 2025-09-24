@@ -44,6 +44,9 @@ struct SearchView: View {
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
                                     .frame(height: 18)
+                                    .onChange(of: searchText) { newValue in
+                                        performSearch(query: newValue)
+                                    }
 
                                 if !searchText.isEmpty {
                                     Button(action: {

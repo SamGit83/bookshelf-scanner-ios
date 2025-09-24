@@ -122,19 +122,17 @@ struct ProfileInitialsView: View {
     }
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(backgroundColor)
-                .frame(width: 24, height: 24)
-                .overlay(
-                    Circle()
-                        .stroke(borderColor, lineWidth: 1)
-                )
-            Text(initials)
-                .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                .foregroundColor(textColor)
-                .frame(width: 20, alignment: .center)
-        }
-        .clipShape(Circle())
+        Circle()
+            .fill(backgroundColor)
+            .frame(width: 24, height: 24)
+            .overlay(
+                Circle()
+                    .stroke(borderColor, lineWidth: 1)
+            )
+            .overlay(
+                Text(initials)
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .foregroundColor(textColor)
+            )
     }
 }
