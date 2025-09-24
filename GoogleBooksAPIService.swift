@@ -6,13 +6,20 @@ class GoogleBooksAPIService {
     private var apiKey: String {
         // Try environment variable first, fallback to SecureConfig
         if let envKey = ProcessInfo.processInfo.environment["GOOGLE_BOOKS_API_KEY"], !envKey.isEmpty {
+            print("DEBUG GoogleBooksAPIService: Using Google Books API key from environment variable")
             return envKey
         }
-        return SecureConfig.shared.googleBooksAPIKey
+        let configKey = SecureConfig.shared.googleBooksAPIKey
+        print("DEBUG GoogleBooksAPIService: Using Google Books API key from SecureConfig: '\(configKey.prefix(10))...' (length: \(configKey.count))")
+        return configKey
     }
 
     func searchBooks(query: String, maxResults: Int = 10, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
+        print("DEBUG GoogleBooksAPIService: searchBooks called with query: '\(query)', maxResults: \(maxResults)")
+        print("DEBUG GoogleBooksAPIService: Using API key: \(apiKey.prefix(10))...")
+
         guard var urlComponents = URLComponents(string: baseURL) else {
+            print("DEBUG GoogleBooksAPIService: Invalid base URL")
             completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
             return
         }
@@ -24,47 +31,79 @@ class GoogleBooksAPIService {
         ]
 
         guard let url = urlComponents.url else {
+            print("DEBUG GoogleBooksAPIService: Failed to construct URL")
             completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
             return
         }
 
+        print("DEBUG GoogleBooksAPIService: Making request to: \(url.absoluteString)")
+
         URLSession.shared.dataTask(with: url) { data, response, error in
+            print("DEBUG GoogleBooksAPIService: Received response, error: \(error?.localizedDescription ?? "none")")
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("DEBUG GoogleBooksAPIService: HTTP status code: \(httpResponse.statusCode)")
+            }
+
             if let error = error {
+                print("DEBUG GoogleBooksAPIService: Network error: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
 
             guard let data = data else {
+                print("DEBUG GoogleBooksAPIService: No data received")
                 completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
                 return
             }
 
+            print("DEBUG GoogleBooksAPIService: Received \(data.count) bytes of data")
+
+            // Print raw response for debugging
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("DEBUG GoogleBooksAPIService: Raw response (first 500 chars): \(responseString.prefix(500))")
+            }
+
             do {
                 let googleBooksResponse = try JSONDecoder().decode(GoogleBooksResponse.self, from: data)
+                print("DEBUG GoogleBooksAPIService: Successfully decoded response, items count: \(googleBooksResponse.items?.count ?? 0)")
                 let recommendations = googleBooksResponse.items?.compactMap { self.convertToBookRecommendation($0) } ?? []
+                print("DEBUG GoogleBooksAPIService: Converted to \(recommendations.count) recommendations")
                 completion(.success(recommendations))
             } catch {
+                print("DEBUG GoogleBooksAPIService: JSON decode error: \(error)")
                 completion(.failure(error))
             }
         }.resume()
     }
 
     private func convertToBookRecommendation(_ volume: GoogleBookVolume) -> BookRecommendation? {
+        print("DEBUG GoogleBooksAPIService: Converting volume with ID: \(volume.id)")
+        print("DEBUG GoogleBooksAPIService: Volume info - title: '\(volume.volumeInfo.title ?? "nil")', authors: \(volume.volumeInfo.authors ?? [])")
+
         guard let title = volume.volumeInfo.title,
               let authors = volume.volumeInfo.authors else {
+            print("DEBUG GoogleBooksAPIService: Missing title or authors, skipping")
             return nil
         }
 
-        return BookRecommendation(
+        let thumbnailURL = volume.volumeInfo.imageLinks?.thumbnail
+        print("DEBUG GoogleBooksAPIService: Thumbnail URL: '\(thumbnailURL ?? "nil")'")
+        print("DEBUG GoogleBooksAPIService: Image links object: \(String(describing: volume.volumeInfo.imageLinks))")
+
+        let recommendation = BookRecommendation(
             id: volume.id,
             title: title,
             author: authors.joined(separator: ", "),
             genre: volume.volumeInfo.categories?.first ?? "Unknown",
             description: volume.volumeInfo.description,
-            thumbnailURL: volume.volumeInfo.imageLinks?.thumbnail,
+            thumbnailURL: thumbnailURL,
             publishedDate: volume.volumeInfo.publishedDate,
             pageCount: volume.volumeInfo.pageCount
         )
+
+        print("DEBUG GoogleBooksAPIService: Created recommendation: \(recommendation.title) by \(recommendation.author), thumbnail: \(recommendation.thumbnailURL ?? "nil")")
+        return recommendation
     }
 
     func getRecommendationsBasedOnAuthor(_ author: String, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
@@ -85,14 +124,20 @@ class GoogleBooksAPIService {
     }
 
     func fetchBookDetails(isbn: String?, title: String?, author: String?, completion: @escaping (Result<BookRecommendation?, Error>) -> Void) {
+        print("DEBUG GoogleBooksAPIService: fetchBookDetails called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
+
         var query = ""
         if let isbn = isbn {
             query = "isbn:\(isbn)"
+            print("DEBUG GoogleBooksAPIService: Using ISBN query: '\(query)'")
         } else if let title = title, let author = author {
             query = "intitle:\(title) inauthor:\(author)"
+            print("DEBUG GoogleBooksAPIService: Using title+author query: '\(query)'")
         } else if let title = title {
             query = title
+            print("DEBUG GoogleBooksAPIService: Using title-only query: '\(query)'")
         } else {
+            print("DEBUG GoogleBooksAPIService: No valid search parameters provided")
             completion(.success(nil))
             return
         }
@@ -100,19 +145,29 @@ class GoogleBooksAPIService {
         searchBooks(query: query, maxResults: 1) { result in
             switch result {
             case .success(let recommendations):
+                print("DEBUG GoogleBooksAPIService: fetchBookDetails got \(recommendations.count) results")
+                if let first = recommendations.first {
+                    print("DEBUG GoogleBooksAPIService: Returning book: \(first.title) by \(first.author)")
+                } else {
+                    print("DEBUG GoogleBooksAPIService: No results found")
+                }
                 completion(.success(recommendations.first))
             case .failure(let error):
+                print("DEBUG GoogleBooksAPIService: fetchBookDetails search failed: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
     }
 
     func fetchCoverURL(isbn: String?, title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
+        print("DEBUG GoogleBooksAPIService: fetchCoverURL called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
         fetchBookDetails(isbn: isbn, title: title, author: author) { result in
             switch result {
             case .success(let book):
+                print("DEBUG GoogleBooksAPIService: fetchCoverURL success, thumbnailURL: '\(book?.thumbnailURL ?? "nil")'")
                 completion(.success(book?.thumbnailURL))
             case .failure(let error):
+                print("DEBUG GoogleBooksAPIService: fetchCoverURL failed: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
