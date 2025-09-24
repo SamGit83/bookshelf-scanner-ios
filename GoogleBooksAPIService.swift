@@ -175,16 +175,141 @@ class GoogleBooksAPIService {
 
     func fetchCoverURL(isbn: String?, title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
         print("DEBUG GoogleBooksAPIService: fetchCoverURL called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
-        fetchBookDetails(isbn: isbn, title: title, author: author) { result in
+
+        // Try Google Books first
+        fetchBookDetails(isbn: isbn, title: title, author: author) { [weak self] result in
             switch result {
             case .success(let book):
-                print("DEBUG GoogleBooksAPIService: fetchCoverURL success, thumbnailURL: '\(book?.thumbnailURL ?? "nil")'")
-                completion(.success(book?.thumbnailURL))
+                if let googleURL = book?.thumbnailURL {
+                    print("DEBUG GoogleBooksAPIService: fetchCoverURL success from Google Books: '\(googleURL)'")
+                    completion(.success(googleURL))
+                    return
+                }
+                // Fall back to Open Library
+                print("DEBUG GoogleBooksAPIService: No cover from Google Books, trying Open Library")
+                self?.fetchOpenLibraryCover(isbn: isbn, title: title, author: author, completion: completion)
             case .failure(let error):
-                print("DEBUG GoogleBooksAPIService: fetchCoverURL failed: \(error.localizedDescription)")
-                completion(.failure(error))
+                print("DEBUG GoogleBooksAPIService: Google Books failed: \(error.localizedDescription), trying Open Library")
+                // Fall back to Open Library
+                self?.fetchOpenLibraryCover(isbn: isbn, title: title, author: author, completion: completion)
             }
         }
+    }
+
+    private func fetchOpenLibraryCover(isbn: String?, title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
+        print("DEBUG GoogleBooksAPIService: fetchOpenLibraryCover called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
+
+        // Open Library API: https://openlibrary.org/dev/docs/api/covers
+        // Format: https://covers.openlibrary.org/b/isbn/{ISBN}-L.jpg
+        // Or: https://covers.openlibrary.org/b/olid/{OLID}-L.jpg
+        // Or search by title: https://openlibrary.org/search.json?title={title}&author={author}
+
+        if let isbn = isbn, !isbn.isEmpty {
+            // Try ISBN first - most reliable
+            let coverURL = "https://covers.openlibrary.org/b/isbn/\(isbn)-L.jpg"
+            print("DEBUG GoogleBooksAPIService: Trying Open Library ISBN cover: \(coverURL)")
+
+            // Test if the URL actually works by making a HEAD request
+            testImageURL(coverURL) { exists in
+                if exists {
+                    print("DEBUG GoogleBooksAPIService: Open Library ISBN cover exists: \(coverURL)")
+                    completion(.success(coverURL))
+                } else {
+                    print("DEBUG GoogleBooksAPIService: Open Library ISBN cover not found, trying title search")
+                    self.searchOpenLibraryByTitle(title: title, author: author, completion: completion)
+                }
+            }
+            return
+        }
+
+        // Fall back to title search
+        searchOpenLibraryByTitle(title: title, author: author, completion: completion)
+    }
+
+    private func searchOpenLibraryByTitle(title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
+        guard let title = title, !title.isEmpty else {
+            print("DEBUG GoogleBooksAPIService: No title provided for Open Library search")
+            completion(.success(nil))
+            return
+        }
+
+        var query = "title:\(title)"
+        if let author = author, !author.isEmpty {
+            query += " author:\(author)"
+        }
+
+        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://openlibrary.org/search.json?\(encodedQuery)&limit=1") else {
+            print("DEBUG GoogleBooksAPIService: Failed to create Open Library search URL")
+            completion(.success(nil))
+            return
+        }
+
+        print("DEBUG GoogleBooksAPIService: Searching Open Library: \(url.absoluteString)")
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("DEBUG GoogleBooksAPIService: Open Library search failed: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                print("DEBUG GoogleBooksAPIService: No data from Open Library search")
+                completion(.success(nil))
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let docs = json["docs"] as? [[String: Any]],
+                   let firstDoc = docs.first,
+                   let olid = firstDoc["key"] as? String {
+
+                    // Extract OLID (Open Library ID) and create cover URL
+                    let cleanOLID = olid.replacingOccurrences(of: "/works/", with: "").replacingOccurrences(of: "/books/", with: "")
+                    let coverURL = "https://covers.openlibrary.org/b/olid/\(cleanOLID)-L.jpg"
+
+                    print("DEBUG GoogleBooksAPIService: Found Open Library OLID: \(cleanOLID), cover URL: \(coverURL)")
+
+                    // Test if cover exists
+                    self.testImageURL(coverURL) { exists in
+                        if exists {
+                            completion(.success(coverURL))
+                        } else {
+                            print("DEBUG GoogleBooksAPIService: Open Library cover not found for OLID: \(cleanOLID)")
+                            completion(.success(nil))
+                        }
+                    }
+                } else {
+                    print("DEBUG GoogleBooksAPIService: No valid results from Open Library search")
+                    completion(.success(nil))
+                }
+            } catch {
+                print("DEBUG GoogleBooksAPIService: Failed to parse Open Library response: \(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    private func testImageURL(_ urlString: String, completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: urlString) else {
+            completion(false)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD" // Just check if URL exists without downloading
+
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let httpResponse = response as? HTTPURLResponse,
+               httpResponse.statusCode == 200,
+               error == nil {
+                completion(true)
+            } else {
+                completion(false)
+            }
+        }.resume()
     }
 }
 

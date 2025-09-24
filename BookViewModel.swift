@@ -149,7 +149,50 @@ class BookViewModel: ObservableObject {
 
     func refreshBookCovers() {
         print("DEBUG BookViewModel: Manual cover refresh requested")
+        migrateExistingHTTPURLs() // First migrate any HTTP URLs to HTTPS
         fetchMissingCoversForExistingBooks()
+    }
+
+    private func migrateExistingHTTPURLs() {
+        print("DEBUG BookViewModel: Starting migration of HTTP URLs to HTTPS")
+        guard let userId = FirebaseConfig.shared.currentUserId else {
+            print("DEBUG BookViewModel: Cannot migrate URLs - user not authenticated")
+            return
+        }
+
+        let booksRef = db.collection("users").document(userId).collection("books")
+
+        booksRef.whereField("coverImageURL", isGreaterThan: "").getDocuments { snapshot, error in
+            if let error = error {
+                print("DEBUG BookViewModel: Error fetching books for migration: \(error.localizedDescription)")
+                return
+            }
+
+            guard let documents = snapshot?.documents else {
+                print("DEBUG BookViewModel: No documents found for migration")
+                return
+            }
+
+            print("DEBUG BookViewModel: Found \(documents.count) books to check for HTTP URLs")
+
+            for document in documents {
+                let data = document.data()
+                if let coverURL = data["coverImageURL"] as? String,
+                   coverURL.hasPrefix("http://") {
+
+                    let httpsURL = coverURL.replacingOccurrences(of: "http://", with: "https://")
+                    print("DEBUG BookViewModel: Migrating \(coverURL) to \(httpsURL)")
+
+                    document.reference.updateData(["coverImageURL": httpsURL]) { error in
+                        if let error = error {
+                            print("DEBUG BookViewModel: Failed to migrate URL for book \(document.documentID): \(error.localizedDescription)")
+                        } else {
+                            print("DEBUG BookViewModel: Successfully migrated URL for book \(document.documentID)")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     func fetchMissingCoversForExistingBooks() {
