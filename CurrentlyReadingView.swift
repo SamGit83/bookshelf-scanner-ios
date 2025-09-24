@@ -271,43 +271,40 @@ struct CurrentlyReadingView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 0) {
-                    readingGoalsSection
-                    currentlyReadingSection
-                    promoBannerSection
-                    favoritesSection
-                    trendingSection
-                    emptyStateSection
-                }
+        ScrollView {
+            VStack(spacing: 0) {
+                readingGoalsSection
+                currentlyReadingSection
+                promoBannerSection
+                favoritesSection
+                trendingSection
+                emptyStateSection
             }
-            .background(AppleBooksColors.background)
-            .navigationBarHidden(true)
-            .overlay(
-                Group {
-                    if viewModel.isLoading {
-                        HStack(spacing: 12) {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            Text("Analyzing image...")
-                                .font(.body)
-                                .foregroundColor(.white)
-                        }
-                        .padding(16)
-                        .background(Color.black.opacity(0.8))
-                        .cornerRadius(8)
-                        .padding(.horizontal, 32)
-                        .transition(.scale.combined(with: .opacity))
+        }
+        .background(AppleBooksColors.background)
+        .overlay(
+            Group {
+                if viewModel.isLoading {
+                    HStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        Text("Analyzing image...")
+                            .font(.body)
+                            .foregroundColor(.white)
                     }
+                    .padding(16)
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(8)
+                    .padding(.horizontal, 32)
+                    .transition(.scale.combined(with: .opacity))
                 }
-            )
-            .sheet(item: $selectedBook) { book in
-                BookDetailView(book: book, viewModel: viewModel)
             }
-            .sheet(item: $progressBook) { book in
-                ReadingProgressView(book: book, viewModel: viewModel)
-            }
+        )
+        .sheet(item: $selectedBook) { book in
+            BookDetailView(book: book, viewModel: viewModel)
+        }
+        .sheet(item: $progressBook) { book in
+            ReadingProgressView(book: book, viewModel: viewModel)
         }
     }
 }
