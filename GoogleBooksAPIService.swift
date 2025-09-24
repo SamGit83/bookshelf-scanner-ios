@@ -60,7 +60,13 @@ class GoogleBooksAPIService {
 
             // Print raw response for debugging
             if let responseString = String(data: data, encoding: .utf8) {
-                print("DEBUG GoogleBooksAPIService: Raw response (first 500 chars): \(responseString.prefix(500))")
+                print("DEBUG GoogleBooksAPIService: Raw response (first 1000 chars): \(responseString.prefix(1000))")
+                // Also print if it contains imageLinks
+                if responseString.contains("imageLinks") {
+                    print("DEBUG GoogleBooksAPIService: Response contains 'imageLinks'")
+                } else {
+                    print("DEBUG GoogleBooksAPIService: Response does NOT contain 'imageLinks'")
+                }
             }
 
             do {
@@ -88,6 +94,8 @@ class GoogleBooksAPIService {
 
         var thumbnailURL = volume.volumeInfo.imageLinks?.thumbnail
         print("DEBUG GoogleBooksAPIService: Original thumbnail URL: '\(thumbnailURL ?? "nil")'")
+        print("DEBUG GoogleBooksAPIService: ImageLinks object exists: \(volume.volumeInfo.imageLinks != nil)")
+        print("DEBUG GoogleBooksAPIService: Full imageLinks: \(String(describing: volume.volumeInfo.imageLinks))")
 
         // Convert HTTP URLs to HTTPS for better security and iOS compatibility
         if let originalURL = thumbnailURL, originalURL.hasPrefix("http://") {
@@ -96,7 +104,6 @@ class GoogleBooksAPIService {
         }
 
         print("DEBUG GoogleBooksAPIService: Final thumbnail URL: '\(thumbnailURL ?? "nil")'")
-        print("DEBUG GoogleBooksAPIService: Image links object: \(String(describing: volume.volumeInfo.imageLinks))")
 
         let recommendation = BookRecommendation(
             id: volume.id,
