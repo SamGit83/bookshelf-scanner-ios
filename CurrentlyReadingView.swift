@@ -301,10 +301,14 @@ struct CurrentlyReadingView: View {
             }
         )
         .sheet(item: $selectedBook) { book in
-            BookDetailView(book: book, viewModel: viewModel)
+            NavigationView { // Add NavigationView here
+                BookDetailView(book: book, viewModel: viewModel)
+            }
         }
         .sheet(item: $progressBook) { book in
-            ReadingProgressView(book: book, viewModel: viewModel)
+            NavigationView { // Add NavigationView here
+                ReadingProgressView(book: book, viewModel: viewModel)
+            }
         }
     }
 }
