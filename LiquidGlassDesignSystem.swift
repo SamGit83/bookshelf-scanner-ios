@@ -1161,7 +1161,6 @@ public struct AppleBooksBookCard: View {
                         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 } else if let coverURL = book.coverImageURL,
                           let url = URL(string: coverURL) {
-                    print("DEBUG AppleBooksBookCard: Loading cover image from URL: \(coverURL)")
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .empty:
@@ -1181,7 +1180,6 @@ public struct AppleBooksBookCard: View {
                                 .cornerRadius(8)
                                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                         case .failure:
-                            print("DEBUG AppleBooksBookCard: Failed to load image from URL: \(coverURL)")
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
                                 .frame(width: 60, height: 90)
