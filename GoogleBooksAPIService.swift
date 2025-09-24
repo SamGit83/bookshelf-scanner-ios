@@ -86,8 +86,16 @@ class GoogleBooksAPIService {
             return nil
         }
 
-        let thumbnailURL = volume.volumeInfo.imageLinks?.thumbnail
-        print("DEBUG GoogleBooksAPIService: Thumbnail URL: '\(thumbnailURL ?? "nil")'")
+        var thumbnailURL = volume.volumeInfo.imageLinks?.thumbnail
+        print("DEBUG GoogleBooksAPIService: Original thumbnail URL: '\(thumbnailURL ?? "nil")'")
+
+        // Convert HTTP URLs to HTTPS for better security and iOS compatibility
+        if let originalURL = thumbnailURL, originalURL.hasPrefix("http://") {
+            thumbnailURL = originalURL.replacingOccurrences(of: "http://", with: "https://")
+            print("DEBUG GoogleBooksAPIService: Converted to HTTPS: '\(thumbnailURL ?? "nil")'")
+        }
+
+        print("DEBUG GoogleBooksAPIService: Final thumbnail URL: '\(thumbnailURL ?? "nil")'")
         print("DEBUG GoogleBooksAPIService: Image links object: \(String(describing: volume.volumeInfo.imageLinks))")
 
         let recommendation = BookRecommendation(

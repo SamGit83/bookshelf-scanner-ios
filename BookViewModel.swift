@@ -83,8 +83,10 @@ class BookViewModel: ObservableObject {
                         switch result {
                         case .success(let url):
                             if let urlString = url {
-                                print("DEBUG BookViewModel: Fetched cover URL: \(urlString) for \(book.title ?? "")")
-                                updatedBook.coverImageURL = urlString
+                                // Convert HTTP to HTTPS for security and iOS compatibility
+                                let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
+                                print("DEBUG BookViewModel: Fetched cover URL: \(secureURLString) for \(book.title ?? "")")
+                                updatedBook.coverImageURL = secureURLString
                                 // Try to download the image data for local storage
                                 if let imageURL = URL(string: urlString) {
                                     URLSession.shared.dataTask(with: imageURL) { data, response, error in
@@ -173,8 +175,10 @@ class BookViewModel: ObservableObject {
             switch result {
             case .success(let url):
                 if let urlString = url {
-                    print("DEBUG BookViewModel: Fetched cover URL for existing book: \(urlString)")
-                    updatedBook.coverImageURL = urlString
+                    // Convert HTTP to HTTPS for security and iOS compatibility
+                    let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
+                    print("DEBUG BookViewModel: Fetched cover URL for existing book: \(secureURLString)")
+                    updatedBook.coverImageURL = secureURLString
                     // Try to download the image data
                     if let imageURL = URL(string: urlString) {
                         URLSession.shared.dataTask(with: imageURL) { data, response, error in
