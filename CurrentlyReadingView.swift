@@ -165,11 +165,11 @@ struct CurrentlyReadingView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: AppleBooksSpacing.space16) {
                     ForEach(viewModel.currentlyReadingBooks) { book in
-                        CurrentlyReadingBookCard(book: book, onProgressTap: { progressBook in
-                            self.progressBook = progressBook
-                        }) {
+                        CurrentlyReadingBookCard(book: book, onTap: {
                             selectedBook = book
-                        }
+                        }, onProgressTap: { progressBook in
+                            self.progressBook = progressBook
+                        })
                     }
                 }
                 .padding(.horizontal, AppleBooksSpacing.space24)
@@ -208,9 +208,7 @@ struct CurrentlyReadingView: View {
                     ForEach(favoriteBooks) { book in
                         BookCard(book: book, viewModel: viewModel, onProgressTap: { progressBook in
                             self.progressBook = progressBook
-                        }) {
-                            selectedBook = book
-                        }
+                        })
                     }
                 }
                 .padding(.horizontal, AppleBooksSpacing.space24)
@@ -235,9 +233,7 @@ struct CurrentlyReadingView: View {
                     ForEach(trendingBooks) { book in
                         BookCard(book: book, viewModel: viewModel, onProgressTap: { progressBook in
                             self.progressBook = progressBook
-                        }) {
-                            selectedBook = book
-                        }
+                        })
                     }
                 }
                 .padding(.horizontal, AppleBooksSpacing.space24)
