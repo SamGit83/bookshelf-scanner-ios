@@ -315,16 +315,16 @@ struct ReadingProgressView: View {
 
     private func updateCurrentPage() {
         guard let page = Int(currentPage), page >= 0 else {
-            // TODO: Show error
+            // Show error - could add a state variable for this
             return
         }
 
-        // TODO: Update book progress in Firestore
+        viewModel.updateReadingProgress(book, currentPage: page)
         presentationMode.wrappedValue.dismiss()
     }
 
     private func markBookComplete() {
-        // TODO: Mark book as completed and move to library
+        viewModel.markBookAsComplete(book)
         presentationMode.wrappedValue.dismiss()
     }
 

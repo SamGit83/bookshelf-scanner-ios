@@ -342,6 +342,64 @@ class BookViewModel: ObservableObject {
         }
     }
 
+    func updateReadingProgress(_ book: Book, currentPage: Int) {
+        guard let userId = FirebaseConfig.shared.currentUserId else {
+            errorMessage = "User not authenticated"
+            return
+        }
+
+        let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
+
+        var updateData: [String: Any] = ["currentPage": currentPage]
+
+        // If this is the first time reading, set the start date
+        if book.dateStartedReading == nil {
+            updateData["dateStartedReading"] = Timestamp(date: Date())
+        }
+
+        bookRef.updateData(updateData) { error in
+            if let error = error {
+                self.errorMessage = "Failed to update reading progress: \(error.localizedDescription)"
+            } else {
+                // Update local book
+                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                    self.books[index].currentPage = currentPage
+                    if self.books[index].dateStartedReading == nil {
+                        self.books[index].dateStartedReading = Date()
+                    }
+                }
+            }
+        }
+    }
+
+    func markBookAsComplete(_ book: Book) {
+        guard let userId = FirebaseConfig.shared.currentUserId else {
+            errorMessage = "User not authenticated"
+            return
+        }
+
+        let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
+
+        let updateData: [String: Any] = [
+            "status": BookStatus.read.rawValue,
+            "dateFinishedReading": Timestamp(date: Date()),
+            "currentPage": book.totalPages ?? book.currentPage
+        ]
+
+        bookRef.updateData(updateData) { error in
+            if let error = error {
+                self.errorMessage = "Failed to mark book as complete: \(error.localizedDescription)"
+            } else {
+                // Update local book
+                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                    self.books[index].status = .read
+                    self.books[index].dateFinishedReading = Date()
+                    self.books[index].currentPage = book.totalPages ?? book.currentPage
+                }
+            }
+        }
+    }
+
     func clearAllLibraryBooks() {
         let libraryBooks = self.libraryBooks
         for book in libraryBooks {
@@ -421,6 +479,18 @@ class BookViewModel: ObservableObject {
                     let teaser = data["teaser"] as? String
                     let authorBio = data["authorBio"] as? String
                     let pageCount = data["pageCount"] as? Int
+                    let currentPage = data["currentPage"] as? Int ?? 0
+                    let totalPages = data["totalPages"] as? Int
+
+                    var dateStartedReading: Date? = nil
+                    if let ts = data["dateStartedReading"] as? Timestamp {
+                        dateStartedReading = ts.dateValue()
+                    }
+
+                    var dateFinishedReading: Date? = nil
+                    if let ts = data["dateFinishedReading"] as? Timestamp {
+                        dateFinishedReading = ts.dateValue()
+                    }
 
                     // Build Book
                     var book = Book(title: title, author: author, isbn: isbn, genre: genre, status: status, coverImageData: coverData, coverImageURL: coverImageURL)
@@ -434,6 +504,10 @@ class BookViewModel: ObservableObject {
                     book.teaser = teaser
                     book.authorBio = authorBio
                     book.pageCount = pageCount
+                    book.currentPage = currentPage
+                    book.totalPages = totalPages
+                    book.dateStartedReading = dateStartedReading
+                    book.dateFinishedReading = dateFinishedReading
                     return book
                 }
 
@@ -473,7 +547,11 @@ class BookViewModel: ObservableObject {
             "coverImageData": book.coverImageData as Any,
             "coverImageURL": book.coverImageURL as Any,
             "teaser": book.teaser as Any,
-            "authorBio": book.authorBio as Any
+            "authorBio": book.authorBio as Any,
+            "currentPage": book.currentPage,
+            "totalPages": book.totalPages as Any,
+            "dateStartedReading": book.dateStartedReading.map { Timestamp(date: $0) } as Any,
+            "dateFinishedReading": book.dateFinishedReading.map { Timestamp(date: $0) } as Any
         ]
         print("DEBUG BookViewModel: saveBookToFirestore data keys: \(data.keys.sorted())")
         print("DEBUG BookViewModel: saveBookToFirestore pageCount value: \(String(describing: book.pageCount))")
