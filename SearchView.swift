@@ -27,19 +27,19 @@ struct SearchView: View {
                 VStack(spacing: AppleBooksSpacing.space24) {
                     // Search Header
                     VStack(spacing: AppleBooksSpacing.space20) {
-                        // Prominent Search Bar
+                        // Compact Search Bar
                         GlassCard {
-                            HStack(spacing: AppleBooksSpacing.space12) {
+                            HStack(spacing: AppleBooksSpacing.space8) {
                                 Image(systemName: "magnifyingglass")
                                     .foregroundColor(AppleBooksColors.textSecondary)
-                                    .font(.system(size: 18))
+                                    .font(.system(size: 16))
 
                                 TextField("Search your library...", text: $searchText)
                                     .font(AppleBooksTypography.bodyMedium)
                                     .foregroundColor(AppleBooksColors.text)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
-                                    .frame(height: 20)
+                                    .frame(height: 18)
 
                                 if !searchText.isEmpty {
                                     Button(action: {
@@ -47,14 +47,15 @@ struct SearchView: View {
                                     }) {
                                         Image(systemName: "xmark.circle.fill")
                                             .foregroundColor(AppleBooksColors.textSecondary)
-                                            .font(.system(size: 18))
+                                            .font(.system(size: 16))
                                     }
                                 }
                             }
-                            .padding(.vertical, AppleBooksSpacing.space8)
-                            .padding(.horizontal, AppleBooksSpacing.space12)
+                            .padding(.vertical, AppleBooksSpacing.space6)
+                            .padding(.horizontal, AppleBooksSpacing.space8)
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
+                        .frame(height: 36)
 
                         // Cancel Button
                         HStack {
