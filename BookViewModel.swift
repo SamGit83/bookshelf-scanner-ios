@@ -174,6 +174,7 @@ class BookViewModel: ObservableObject {
             }
 
             print("DEBUG BookViewModel: Found \(documents.count) books to check for HTTP URLs")
+            var migrationCount = 0
 
             for document in documents {
                 let data = document.data()
@@ -181,17 +182,20 @@ class BookViewModel: ObservableObject {
                    coverURL.hasPrefix("http://") {
 
                     let httpsURL = coverURL.replacingOccurrences(of: "http://", with: "https://")
-                    print("DEBUG BookViewModel: Migrating \(coverURL) to \(httpsURL)")
+                    print("DEBUG BookViewModel: Migrating book \(document.documentID): \(coverURL) → \(httpsURL)")
+                    migrationCount += 1
 
                     document.reference.updateData(["coverImageURL": httpsURL]) { error in
                         if let error = error {
-                            print("DEBUG BookViewModel: Failed to migrate URL for book \(document.documentID): \(error.localizedDescription)")
+                            print("DEBUG BookViewModel: ❌ Failed to migrate URL for book \(document.documentID): \(error.localizedDescription)")
                         } else {
-                            print("DEBUG BookViewModel: Successfully migrated URL for book \(document.documentID)")
+                            print("DEBUG BookViewModel: ✅ Successfully migrated URL for book \(document.documentID)")
                         }
                     }
                 }
             }
+
+            print("DEBUG BookViewModel: Migration complete - processed \(migrationCount) HTTP URLs")
         }
     }
 
@@ -440,9 +444,9 @@ class BookViewModel: ObservableObject {
                 // Cache the books for offline use
                 OfflineCache.shared.cacheBooks(loadedBooks)
 
-                // Fetch missing covers for existing books
+                // Fetch missing covers for existing books (includes migration of HTTP URLs)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { // Small delay to avoid overwhelming the API
-                    self?.fetchMissingCoversForExistingBooks()
+                    self?.refreshBookCovers()
                 }
             }
     }
