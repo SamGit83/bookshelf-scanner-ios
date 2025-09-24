@@ -74,6 +74,7 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
+                                    .padding(.horizontal, AppleBooksSpacing.space24)
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
@@ -93,6 +94,7 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
+                                    .padding(.horizontal, AppleBooksSpacing.space24)
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
@@ -115,6 +117,7 @@ struct ProfileView: View {
                                         )
                                     }
                                 }
+                                .padding(.horizontal, AppleBooksSpacing.space24)
 
                                 // Accent Color Section
                                 AppleBooksCard {
@@ -139,6 +142,7 @@ struct ProfileView: View {
                                         }
                                     }
                                 }
+                                .padding(.horizontal, AppleBooksSpacing.space24)
 
                                 // Sign Out
                                 Button(action: {
@@ -159,6 +163,7 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
+                                    .padding(.horizontal, AppleBooksSpacing.space24)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }

@@ -7,6 +7,7 @@ import UIKit
 struct CurrentlyReadingBookCard: View {
     let book: Book
     let onTap: () -> Void
+    let onProgressTap: (Book) -> Void
 
     private var progress: Double {
         guard let totalPages = book.totalPages, totalPages > 0 else { return 0 }
@@ -104,6 +105,26 @@ struct CurrentlyReadingBookCard: View {
                 }
             }
         }
+        .overlay(
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        onProgressTap(book)
+                    }) {
+                        Image(systemName: "chart.bar.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(AppleBooksColors.accent.opacity(0.8))
+                            .clipShape(Circle())
+                            .shadow(radius: 2)
+                    }
+                    .padding(8)
+                }
+                Spacer()
+            }
+        )
         .onTapGesture(perform: onTap)
     }
 }
@@ -112,6 +133,7 @@ struct CurrentlyReadingView: View {
     @ObservedObject var viewModel: BookViewModel
     @Binding var isShowingCamera: Bool
     @State private var selectedBook: Book?
+    @State private var progressBook: Book?
 
     // Dummy data for favorites and trending
     private var favoriteBooks: [Book] {
@@ -143,7 +165,9 @@ struct CurrentlyReadingView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: AppleBooksSpacing.space16) {
                         ForEach(viewModel.currentlyReadingBooks) { book in
-                            CurrentlyReadingBookCard(book: book) {
+                            CurrentlyReadingBookCard(book: book, onProgressTap: { progressBook in
+                                self.progressBook = progressBook
+                            }) {
                                 selectedBook = book
                             }
                         }
@@ -183,9 +207,11 @@ struct CurrentlyReadingView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: AppleBooksSpacing.space16) {
                         ForEach(favoriteBooks) { book in
-                            AppleBooksBookCard(book: book, onTap: {
+                            BookCard(book: book, viewModel: viewModel, onProgressTap: { progressBook in
+                                self.progressBook = progressBook
+                            }) {
                                 selectedBook = book
-                            }, showAddButton: false, onAddTap: nil, viewModel: viewModel)
+                            }
                         }
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
@@ -209,11 +235,11 @@ struct CurrentlyReadingView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: AppleBooksSpacing.space16) {
                         ForEach(trendingBooks) { book in
-                            AppleBooksBookCard(book: book, onTap: {
+                            BookCard(book: book, viewModel: viewModel, onProgressTap: { progressBook in
+                                self.progressBook = progressBook
+                            }) {
                                 selectedBook = book
-                            }, showAddButton: true, onAddTap: {
-                                viewModel.saveBookToFirestore(book)
-                            }, viewModel: viewModel)
+                            }
                         }
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
@@ -287,6 +313,9 @@ struct CurrentlyReadingView: View {
             .sheet(item: $selectedBook) { book in
                 BookDetailView(book: book, viewModel: viewModel)
             }
+            .sheet(item: $progressBook) { book in
+                ReadingProgressView(book: book, viewModel: viewModel)
+            }
         }
     }
 }
@@ -296,9 +325,9 @@ struct CurrentlyReadingView: View {
 struct BookCard: View {
     let book: Book
     @ObservedObject var viewModel: BookViewModel
+    let onProgressTap: (Book) -> Void
     @State private var showActionSheet = false
     @State private var showEditView = false
-    @State private var showProgressView = false
 
     var body: some View {
         ZStack {
@@ -416,7 +445,7 @@ struct BookCard: View {
                 message: Text("Choose an action"),
                 buttons: [
                     .default(Text("Update Progress")) {
-                        showProgressView = true
+                        onProgressTap(book)
                     },
                     .default(Text("Edit Book")) {
                         showEditView = true
@@ -437,9 +466,6 @@ struct BookCard: View {
         }
         .sheet(isPresented: $showEditView) {
             EditBookView(book: book, viewModel: viewModel)
-        }
-        .sheet(isPresented: $showProgressView) {
-            ReadingProgressView(book: book, viewModel: viewModel)
         }
     }
 }
