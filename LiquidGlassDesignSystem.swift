@@ -1161,11 +1161,6 @@ public struct AppleBooksBookCard: View {
                         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 } else if let coverURL = book.coverImageURL,
                           let url = URL(string: coverURL) {
-                    // Debug: Log the URL being loaded
-                    DispatchQueue.main.async {
-                        print("DEBUG AsyncImage: Attempting to load URL: \(coverURL)")
-                        print("DEBUG AsyncImage: URL components - scheme: \(url.scheme ?? "nil"), host: \(url.host ?? "nil")")
-                    }
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .empty:
@@ -1184,11 +1179,7 @@ public struct AppleBooksBookCard: View {
                                 .frame(width: 60, height: 90)
                                 .cornerRadius(8)
                                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                        case .failure(let error):
-                            // Debug: Log the error
-                            DispatchQueue.main.async {
-                                print("DEBUG AsyncImage: Failed to load \(coverURL), error: \(error.localizedDescription)")
-                            }
+                        case .failure:
                             Rectangle()
                                 .fill(Color.red.opacity(0.3)) // Make failure more visible for debugging
                                 .frame(width: 60, height: 90)
