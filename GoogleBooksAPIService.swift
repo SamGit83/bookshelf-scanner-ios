@@ -16,7 +16,7 @@ class GoogleBooksAPIService {
 
     func searchBooks(query: String, maxResults: Int = 10, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
         print("DEBUG GoogleBooksAPIService: searchBooks called with query: '\(query)', maxResults: \(maxResults)")
-        print("DEBUG GoogleBooksAPIService: Using API key: \(apiKey.prefix(10))...")
+        print("DEBUG GoogleBooksAPIService: Making request without API key (public access)")
 
         guard var urlComponents = URLComponents(string: baseURL) else {
             print("DEBUG GoogleBooksAPIService: Invalid base URL")
@@ -26,8 +26,7 @@ class GoogleBooksAPIService {
 
         urlComponents.queryItems = [
             URLQueryItem(name: "q", value: query),
-            URLQueryItem(name: "maxResults", value: String(maxResults)),
-            URLQueryItem(name: "key", value: apiKey)
+            URLQueryItem(name: "maxResults", value: String(maxResults))
         ]
 
         guard let url = urlComponents.url else {
