@@ -18,15 +18,13 @@ struct ReadersJourneySection: View {
                  JourneyCard(
                      icon: "person.fill",
                      title: "Alex's Daily Reading Routine",
-                     problem: "Alex, a passionate college student, starts her mornings with coffee and a good book. However, she struggles to discover new titles that match her interests, loses track of her reading progress, and finds it hard to organize her growing physical book collection.",
-                     solution: "These challenges make her reading experience less enjoyable and efficient."
+                     description: "Alex, a passionate college student, starts her mornings with coffee and a good book. She effortlessly discovers new titles that match her interests, tracks her reading progress seamlessly, and organizes her growing physical book collection with ease."
                  )
 
                  JourneyCard(
                      icon: "sparkles",
                      title: "How Bookshelf Scanner Helps",
-                     problem: "Traditional methods of book discovery and organization are time-consuming and frustrating.",
-                     solution: "Our app uses AI to provide personalized recommendations, tracks reading progress seamlessly, and allows easy scanning of bookshelves to build a digital library."
+                     description: "With Bookshelf Scanner, Alex now has an AI companion that suggests books she'll love, keeps her reading progress at her fingertips, and lets her scan her shelves to create a beautiful digital library."
                  )
              }
             .padding(.horizontal, 32)
@@ -37,8 +35,7 @@ struct ReadersJourneySection: View {
 struct JourneyCard: View {
     let icon: String
     let title: String
-    let problem: String
-    let solution: String
+    let description: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
@@ -55,27 +52,9 @@ struct JourneyCard: View {
                     .foregroundColor(AppleBooksColors.text)
             }
 
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                Text("Problem")
-                    .font(AppleBooksTypography.bodySmall)
-                    .foregroundColor(AppleBooksColors.textSecondary)
-                    .fontWeight(.semibold)
-
-                Text(problem)
-                    .font(AppleBooksTypography.bodyMedium)
-                    .foregroundColor(AppleBooksColors.textSecondary)
-            }
-
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                Text("Solution")
-                    .font(AppleBooksTypography.bodySmall)
-                    .foregroundColor(AppleBooksColors.accent)
-                    .fontWeight(.semibold)
-
-                Text(solution)
-                    .font(AppleBooksTypography.bodyMedium)
-                    .foregroundColor(AppleBooksColors.text)
-            }
+            Text(description)
+                .font(AppleBooksTypography.bodyMedium)
+                .foregroundColor(AppleBooksColors.textSecondary)
         }
         .padding(AppleBooksSpacing.space16)
         .background(
@@ -83,7 +62,6 @@ struct JourneyCard: View {
                 .fill(AppleBooksColors.card)
                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         )
-        .frame(width: .infinity, height: 160)
         .frame(maxWidth: .infinity)
     }
 }
