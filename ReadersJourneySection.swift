@@ -1,27 +1,18 @@
 import SwiftUI
 
 struct ReadersJourneySection: View {
-    @State private var animateContent = false
-
     var body: some View {
         VStack(spacing: 32) {
             Text("Alex's Reading Journey")
-                .font(.title3)
-                .foregroundColor(.white.opacity(0.8))
-                .multilineTextAlignment(.center)
+                .font(AppleBooksTypography.headlineLarge)
+                .foregroundColor(AppleBooksColors.text)
                 .padding(.horizontal, 32)
-                .offset(y: animateContent ? 0 : 20)
-                .opacity(animateContent ? 1 : 0)
-                .animation(.spring().delay(0.1), value: animateContent)
 
             Text("Meet Alex, a young college student passionate about reading. Follow her journey as she discovers, builds, tracks, and finds her perfect books.")
-                .font(AppleBooksTypography.bodyMedium)
-                .foregroundColor(.white.opacity(0.8))
+                .font(AppleBooksTypography.bodyLarge)
+                .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-                .offset(y: animateContent ? 0 : 20)
-                .opacity(animateContent ? 1 : 0)
-                .animation(.spring().delay(0.2), value: animateContent)
+                .padding(.horizontal, AppleBooksSpacing.space24)
 
             VStack(spacing: AppleBooksSpacing.space16) {
                 JourneyCard(
@@ -53,11 +44,6 @@ struct ReadersJourneySection: View {
                 )
             }
             .padding(.horizontal, 32)
-        }
-        .onAppear {
-            withAnimation(.spring().delay(0.1)) {
-                animateContent = true
-            }
         }
     }
 }
@@ -92,8 +78,6 @@ struct JourneyCard: View {
                 Text(problem)
                     .font(AppleBooksTypography.bodyMedium)
                     .foregroundColor(AppleBooksColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(nil)
             }
 
             VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
@@ -105,8 +89,6 @@ struct JourneyCard: View {
                 Text(solution)
                     .font(AppleBooksTypography.bodyMedium)
                     .foregroundColor(AppleBooksColors.text)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(nil)
             }
         }
         .padding(AppleBooksSpacing.space16)
@@ -115,8 +97,8 @@ struct JourneyCard: View {
                 .fill(AppleBooksColors.card)
                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         )
-        .frame(width: 320, height: 180)
-        .frame(maxWidth: 320, maxHeight: 180)
+        .frame(width: .infinity, height: 160)
+        .frame(maxWidth: .infinity)
     }
 }
 
