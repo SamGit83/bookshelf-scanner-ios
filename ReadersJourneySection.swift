@@ -93,7 +93,7 @@ struct JourneyCard: View {
         .padding(AppleBooksSpacing.space16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(AppleBooksColors.surface)
+                .fill(AppleBooksColors.card)
                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         )
     }
