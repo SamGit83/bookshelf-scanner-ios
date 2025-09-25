@@ -28,19 +28,34 @@ struct ProfileView: View {
                                 )
 
                             if let user = authService.currentUser {
-                                VStack(spacing: AppleBooksSpacing.space4) {
-                                    Text(user.displayName ?? user.email ?? "User")
-                                        .font(AppleBooksTypography.headlineLarge)
-                                        .foregroundColor(AppleBooksColors.text)
-                                        .multilineTextAlignment(.center)
+                                VStack(spacing: AppleBooksSpacing.space8) {
+                                    HStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "person.circle")
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.accent)
+                                        Text(user.displayName ?? user.email ?? "User")
+                                            .font(AppleBooksTypography.headlineLarge)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .multilineTextAlignment(.center)
+                                    }
 
-                                    Text(user.email ?? "")
-                                        .font(AppleBooksTypography.bodyMedium)
-                                        .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+                                    HStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "envelope")
+                                            .font(AppleBooksTypography.bodyMedium)
+                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+                                        Text(user.email ?? "")
+                                            .font(AppleBooksTypography.bodyMedium)
+                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+                                    }
 
-                                    Text("Member since \(formattedDate(user.metadata.creationDate))")
-                                        .font(AppleBooksTypography.caption)
-                                        .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
+                                    HStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "calendar")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
+                                        Text("Member since \(formattedDate(user.metadata.creationDate))")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
+                                    }
                                 }
                                 .padding(.horizontal, AppleBooksSpacing.space24)
                             }

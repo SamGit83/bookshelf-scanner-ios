@@ -8,41 +8,27 @@ struct ReadersJourneySection: View {
                 .foregroundColor(AppleBooksColors.text)
                 .padding(.horizontal, 32)
 
-            Text("Meet Alex, a young college student passionate about reading. Follow her journey as she discovers, builds, tracks, and finds her perfect books.")
+            Text("Meet Alex, a busy college student passionate about reading. See how she navigates her daily reading challenges and discovers how Bookshelf Scanner transforms her experience.")
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppleBooksSpacing.space24)
 
             VStack(spacing: AppleBooksSpacing.space16) {
-                JourneyCard(
-                    icon: "magnifyingglass",
-                    title: "Discover",
-                    problem: "Struggling to discover new books that match my interests",
-                    solution: "Get personalized recommendations powered by AI"
-                )
+                 JourneyCard(
+                     icon: "person.fill",
+                     title: "Alex's Daily Reading Routine",
+                     problem: "Alex, a passionate college student, starts her mornings with coffee and a good book. However, she struggles to discover new titles that match her interests, loses track of her reading progress, and finds it hard to organize her growing physical book collection.",
+                     solution: "These challenges make her reading experience less enjoyable and efficient."
+                 )
 
-                JourneyCard(
-                    icon: "plus",
-                    title: "Build",
-                    problem: "Hard to organize and catalog my physical book collection",
-                    solution: "Build your digital library by scanning bookshelves or adding manually"
-                )
-
-                JourneyCard(
-                    icon: "chart.bar",
-                    title: "Track",
-                    problem: "Losing track of reading progress and goals",
-                    solution: "Track your reading progress, set goals, and monitor your reading habits"
-                )
-
-                JourneyCard(
-                    icon: "books.vertical",
-                    title: "Find",
-                    problem: "Can't easily find books in my growing collection",
-                    solution: "Find your books easily with smart organization and powerful search"
-                )
-            }
+                 JourneyCard(
+                     icon: "sparkles",
+                     title: "How Bookshelf Scanner Helps",
+                     problem: "Traditional methods of book discovery and organization are time-consuming and frustrating.",
+                     solution: "Our app uses AI to provide personalized recommendations, tracks reading progress seamlessly, and allows easy scanning of bookshelves to build a digital library."
+                 )
+             }
             .padding(.horizontal, 32)
         }
     }
