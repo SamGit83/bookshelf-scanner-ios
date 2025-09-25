@@ -241,14 +241,14 @@ struct ResponsiveButton<Content: View>: View {
         44 // Apple's minimum touch target size
     }
     
-    private var backgroundColor: Color {
+    private var backgroundColor: some ShapeStyle {
         switch style {
         case .primary:
             return LinearGradient(
                 colors: [Color(hex: "FF6B6B"), Color(hex: "FF8E53")],
                 startPoint: .leading,
                 endPoint: .trailing
-            ).opacity(1.0) as! Color
+            )
         case .secondary:
             return Color.white.opacity(0.1)
         case .ghost:
