@@ -2,16 +2,17 @@ import SwiftUI
 
 struct ReadersJourneySection: View {
     var body: some View {
-        VStack(spacing: AppleBooksSpacing.space24) {
+        VStack(spacing: 32) {
             Text("Alex's Reading Journey")
                 .font(AppleBooksTypography.headlineLarge)
                 .foregroundColor(AppleBooksColors.text)
+                .padding(.horizontal, 32)
 
             Text("Meet Alex, a young college student passionate about reading. Follow her journey as she discovers, builds, tracks, and finds her perfect books.")
                 .font(AppleBooksTypography.bodyMedium)
-                .foregroundColor(AppleBooksColors.textSecondary)
+                .foregroundColor(AppleBooksColors.text)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, AppleBooksSpacing.space24)
+                .padding(.horizontal, 32)
 
             VStack(spacing: AppleBooksSpacing.space16) {
                 JourneyCard(
@@ -42,7 +43,7 @@ struct ReadersJourneySection: View {
                     solution: "Find your books easily with smart organization and powerful search"
                 )
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.horizontal, 32)
         }
     }
 }
@@ -96,6 +97,7 @@ struct JourneyCard: View {
                 .fill(AppleBooksColors.card)
                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         )
+        .frame(minHeight: 140)
     }
 }
 
