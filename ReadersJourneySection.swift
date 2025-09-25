@@ -12,7 +12,7 @@ struct ReadersJourneySection: View {
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.leading)
-                .padding(.horizontal, AppleBooksSpacing.space24)
+                .padding(.horizontal, AppleBooksSpacing.space32)
 
             // Progress indicator showing transformation
             TransformationProgressIndicator()
