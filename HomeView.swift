@@ -76,6 +76,9 @@ struct HomeView: View {
                         Spacer(minLength: AppleBooksSpacing.space40)
                     }
 
+                    // Reader's Journey Section
+                    ReadersJourneySection()
+
                     // How It Works Section
                     VStack(spacing: AppleBooksSpacing.space24) {
                         Text("How It Works")
@@ -105,34 +108,6 @@ struct HomeView: View {
                                 icon: "star.fill",
                                 title: "Discover New Books",
                                 description: "Get personalized recommendations powered by Grok AI"
-                            )
-                        }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                    }
-
-                    // Key Features Section
-                    VStack(spacing: AppleBooksSpacing.space24) {
-                        Text("Key Features")
-                            .font(AppleBooksTypography.headlineLarge)
-                            .foregroundColor(AppleBooksColors.text)
-
-                        VStack(spacing: AppleBooksSpacing.space16) {
-                            HomeFeatureCard(
-                                icon: "wifi.slash",
-                                title: "Offline Access",
-                                description: "Read and manage your library anywhere, even offline"
-                            )
-
-                            HomeFeatureCard(
-                                icon: "chart.bar.fill",
-                                title: "Reading Progress",
-                                description: "Track pages read, set goals, and monitor your reading habits"
-                            )
-
-                            HomeFeatureCard(
-                                icon: "plus.circle.fill",
-                                title: "Manual Entry",
-                                description: "Add books manually with ISBN lookup for complete coverage"
                             )
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
