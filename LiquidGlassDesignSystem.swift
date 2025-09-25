@@ -902,8 +902,8 @@ public struct AppleBooksColors {
     )
     
     static let textSecondary = Color(
-        light: Color(hex: "3C3C4399"),  // 60% opacity gray
-        dark: Color(hex: "EBEBF599")    // 60% opacity light gray
+        light: Color(hex: "2C2C2E").opacity(0.7),  // Darker gray
+        dark: Color(hex: "CCCCCC").opacity(0.7)    // Darker light gray
     )
     
     static let textTertiary = Color(

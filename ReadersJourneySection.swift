@@ -60,7 +60,7 @@ enum CardType {
         case .struggles:
             return Color(hex: "FFF3F0") // Light orange/red background
         case .enhancements:
-            return Color(hex: "F0F8FF") // Light blue background
+            return Color(hex: "F0FFF0") // Light green background
         }
     }
 
@@ -69,7 +69,7 @@ enum CardType {
         case .struggles:
             return Color(hex: "FF6B35") // Orange/red accent
         case .enhancements:
-            return Color(hex: "4A90E2") // Blue accent
+            return Color(hex: "30D158") // Green accent
         }
     }
 
@@ -144,11 +144,6 @@ struct TransformationProgressIndicator: View {
                 .foregroundColor(AppleBooksColors.textSecondary)
 
             ZStack {
-                // Background track
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 8)
-
                 // Progress fill
                 RoundedRectangle(cornerRadius: 4)
                     .fill(
@@ -158,13 +153,13 @@ struct TransformationProgressIndicator: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: 200, height: 8) // Fixed width for 70% progress
+                    .frame(width: 280, height: 8) // Full width
 
                 // Arrow indicator
                 Image(systemName: "arrow.right")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                    .offset(x: 85) // Position at 70% of progress
+                    .offset(x: 196) // Position at 70% of 280
             }
             .frame(width: 280)
 
