@@ -766,125 +766,13 @@ extension View {
     }
 }
 
-// MARK: - Enhanced Landing Page Design System
-struct LandingPageDesignSystem {
-    // Unified color palette for landing page
-    struct Colors {
-        static let heroGradient = LinearGradient(
-            colors: [
-                Color(hex: "FF6B6B"),  // Warm coral (trust)
-                Color(hex: "4ECDC4"),  // Calming teal (reliability)
-                Color(hex: "45B7D1")   // Confident blue (innovation)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        
-        static let primaryText = Color.white
-        static let secondaryText = Color.white.opacity(0.85)
-        static let tertiaryText = Color.white.opacity(0.65)
-        static let ctaPrimary = Color.white
-        static let ctaSecondary = Color.white.opacity(0.2)
-        static let interactive = Color(hex: "FFE66D")
-        
-        // Feature-specific colors
-        static let aiScanning = Color(hex: "FF6B6B")
-        static let smartOrganization = Color(hex: "4ECDC4")
-        static let readingProgress = Color(hex: "45B7D1")
-        static let recommendations = Color(hex: "FFE66D")
-        static let offlineAccess = Color(hex: "FF8E53")
-        static let crossDeviceSync = Color(hex: "B19CD9")
-    }
-    
-    // Unified typography system for landing page
-    struct Typography {
-        static let heroTitle = Font.system(size: 36, weight: .heavy, design: .rounded)
-        static let heroSubtitle = Font.system(size: 18, weight: .regular, design: .default)
-        static let sectionTitle = Font.system(size: 32, weight: .bold, design: .rounded)
-        static let sectionSubtitle = Font.system(size: 18, weight: .regular, design: .default)
-        static let journeyTitle = Font.system(size: 22, weight: .semibold, design: .rounded)
-        static let journeyBody = Font.system(size: 16, weight: .regular, design: .default)
-        static let journeyCaption = Font.system(size: 14, weight: .medium, design: .default)
-        static let ctaLarge = Font.system(size: 20, weight: .semibold, design: .rounded)
-        static let ctaMedium = Font.system(size: 16, weight: .medium, design: .rounded)
-        static let ctaSmall = Font.system(size: 14, weight: .medium, design: .rounded)
-        static let featureTitle = Font.system(size: 20, weight: .semibold, design: .rounded)
-        static let featureBody = Font.system(size: 15, weight: .regular, design: .default)
-        static let navigationTitle = Font.system(size: 18, weight: .semibold, design: .rounded)
-        static let navigationSubtitle = Font.system(size: 11, weight: .medium, design: .default)
-    }
-    
-    // Unified spacing system for landing page
-    struct Spacing {
-        static let xs: CGFloat = 4      // Micro spacing
-        static let sm: CGFloat = 8      // Small spacing
-        static let md: CGFloat = 16     // Medium spacing
-        static let lg: CGFloat = 24     // Large spacing
-        static let xl: CGFloat = 32     // Extra large spacing
-        static let xxl: CGFloat = 48    // Section spacing
-        static let xxxl: CGFloat = 64   // Page spacing
-        static let hero: CGFloat = 80   // Hero section spacing
-    }
-    
-    // Enhanced glass effects for landing page
-    struct GlassEffects {
-        static let primaryGlass = LinearGradient(
-            colors: [
-                Color.white.opacity(0.25),
-                Color.white.opacity(0.1)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        
-        static let secondaryGlass = LinearGradient(
-            colors: [
-                Color.white.opacity(0.15),
-                Color.white.opacity(0.05)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        
-        static let interactiveGlass = LinearGradient(
-            colors: [
-                Color.white.opacity(0.35),
-                Color.white.opacity(0.15)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        
-        static let navigationGlass = LinearGradient(
-            colors: [
-                Color.white.opacity(0.25),
-                Color.white.opacity(0.15),
-                Color.white.opacity(0.05)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-    }
-    
-    // Animation timing for consistent feel
-    struct Animations {
-        static let microInteraction = Animation.spring(response: 0.3, dampingFraction: 0.7)
-        static let standardTransition = Animation.spring(response: 0.5, dampingFraction: 0.8)
-        static let sectionEntrance = Animation.spring(response: 0.8, dampingFraction: 0.8)
-        static let heroEntrance = Animation.spring(response: 1.0, dampingFraction: 0.7)
-        static let pulseAnimation = Animation.easeInOut(duration: 2.5).repeatForever(autoreverses: true)
-        static let glowAnimation = Animation.easeInOut(duration: 4.0).repeatForever(autoreverses: true)
-        static let floatingAnimation = Animation.easeInOut(duration: 4.0).repeatForever(autoreverses: true)
-    }
-}
-
-// MARK: - Section-Specific Color Applications (Enhanced)
+// MARK: - Section-Specific Color Applications
 struct HomePageColors {
-    static let heroBackground = LandingPageDesignSystem.Colors.heroGradient
-    static let navigationBackground = LandingPageDesignSystem.GlassEffects.navigationGlass
-    static let featureCardBackground = LandingPageDesignSystem.GlassEffects.primaryGlass
+    static let heroBackground = BackgroundGradients.heroGradient
+    static let navigationBackground = Color.white.opacity(0.1)
+    static let featureCardBackground = UIGradients.cardBackground
     static let ctaButton = UIGradients.primaryButton
-    static let accentElements = LandingPageDesignSystem.Colors.interactive
+    static let accentElements = AccentColors.hotMagenta
 }
 
 struct LibraryColors {
