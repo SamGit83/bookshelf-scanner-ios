@@ -39,7 +39,7 @@ struct HomeView: View {
                             .font(AppleBooksTypography.bodyLarge)
                             .foregroundColor(AppleBooksColors.textSecondary)
                             .multilineTextAlignment(.leading)
-                            .padding(.horizontal, AppleBooksSpacing.space32)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
 
                         // CTA Buttons
                         VStack(spacing: AppleBooksSpacing.space16) {
