@@ -38,7 +38,7 @@ struct HomeView: View {
                         Text("Transform your physical bookshelf into a smart digital library with AI-powered book recognition.")
                             .font(AppleBooksTypography.bodyLarge)
                             .foregroundColor(AppleBooksColors.textSecondary)
-                            .multilineTextAlignment(.center)
+                            .multilineTextAlignment(.leading)
                             .padding(.horizontal, AppleBooksSpacing.space24)
 
                         // CTA Buttons
