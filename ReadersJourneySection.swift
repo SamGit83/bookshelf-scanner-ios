@@ -3,12 +3,12 @@ import SwiftUI
 struct ReadersJourneySection: View {
     var body: some View {
         VStack(spacing: 32) {
-            Text("Alex's Reading Journey")
+            Text("Your Reading Journey")
                 .font(AppleBooksTypography.headlineLarge)
                 .foregroundColor(AppleBooksColors.text)
                 .padding(.horizontal, 32)
 
-            Text("Meet Alex, a busy college student passionate about reading. See how she navigates her daily reading challenges and discovers how Bookshelf Scanner transforms her experience.")
+            Text("Transform your physical bookshelf into a digital library with AI-powered scanning. Discover how Bookshelf Scanner revolutionizes your reading experience from discovery to organization.")
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.center)
@@ -16,15 +16,15 @@ struct ReadersJourneySection: View {
 
             VStack(spacing: AppleBooksSpacing.space16) {
                  JourneyCard(
-                     icon: "person.fill",
-                     title: "Alex's Daily Reading Routine",
-                     description: "Alex, a passionate college student, starts her mornings with coffee and a good book. She effortlessly discovers new titles that match her interests, tracks her reading progress seamlessly, and organizes her growing physical book collection with ease."
+                     icon: "star.fill",
+                     title: "Discovery & Onboarding",
+                     description: "Start your journey with an intuitive onboarding that highlights bookshelf scanning benefits. Grant camera permissions and dive into the world of digital library management with comprehensive tutorials."
                  )
 
                  JourneyCard(
-                     icon: "sparkles",
-                     title: "How Bookshelf Scanner Helps",
-                     description: "With Bookshelf Scanner, Alex now has an AI companion that suggests books she'll love, keeps her reading progress at her fingertips, and lets her scan her shelves to create a beautiful digital library."
+                     icon: "camera.fill",
+                     title: "Core Bookshelf Scanning",
+                     description: "Scan your physical bookshelves with advanced AI recognition. Our app detects multiple books from a single photo, adds them to your library with proper status tracking, and seamlessly integrates with your reading workflow."
                  )
              }
             .padding(.horizontal, 32)
