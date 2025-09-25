@@ -3,37 +3,43 @@ import SwiftUI
 struct ReadersJourneySection: View {
     var body: some View {
         VStack(spacing: AppleBooksSpacing.space24) {
-            Text("Reader's Journey")
+            Text("Alex's Reading Journey")
                 .font(AppleBooksTypography.headlineLarge)
                 .foregroundColor(AppleBooksColors.text)
 
-            VStack(spacing: AppleBooksSpacing.space20) {
-                JourneyStepRow(
-                    stepNumber: 1,
+            Text("Meet Alex, a young college student passionate about reading. Follow her journey as she discovers, builds, tracks, and finds her perfect books.")
+                .font(AppleBooksTypography.bodyMedium)
+                .foregroundColor(AppleBooksColors.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppleBooksSpacing.space24)
+
+            VStack(spacing: AppleBooksSpacing.space16) {
+                JourneyCard(
                     icon: "magnifyingglass",
                     title: "Discover",
-                    description: "Discover new books and get personalized recommendations powered by AI"
+                    problem: "Struggling to discover new books that match my interests",
+                    solution: "Get personalized recommendations powered by AI"
                 )
 
-                JourneyStepRow(
-                    stepNumber: 2,
-                    icon: "plus.circle.fill",
+                JourneyCard(
+                    icon: "plus",
                     title: "Build",
-                    description: "Build your digital library by scanning bookshelves or adding manually"
+                    problem: "Hard to organize and catalog my physical book collection",
+                    solution: "Build your digital library by scanning bookshelves or adding manually"
                 )
 
-                JourneyStepRow(
-                    stepNumber: 3,
-                    icon: "chart.bar.fill",
+                JourneyCard(
+                    icon: "chart.bar",
                     title: "Track",
-                    description: "Track your reading progress, set goals, and monitor your reading habits"
+                    problem: "Losing track of reading progress and goals",
+                    solution: "Track your reading progress, set goals, and monitor your reading habits"
                 )
 
-                JourneyStepRow(
-                    stepNumber: 4,
-                    icon: "books.vertical.fill",
+                JourneyCard(
+                    icon: "books.vertical",
                     title: "Find",
-                    description: "Find your books easily with smart organization and powerful search"
+                    problem: "Can't easily find books in my growing collection",
+                    solution: "Find your books easily with smart organization and powerful search"
                 )
             }
             .padding(.horizontal, AppleBooksSpacing.space24)
@@ -41,47 +47,55 @@ struct ReadersJourneySection: View {
     }
 }
 
-struct JourneyStepRow: View {
-    let stepNumber: Int
+struct JourneyCard: View {
     let icon: String
     let title: String
-    let description: String
+    let problem: String
+    let solution: String
 
     var body: some View {
-        HStack(spacing: AppleBooksSpacing.space16) {
-            // Step Number Badge
-            ZStack {
-                Circle()
-                    .fill(AppleBooksColors.accent.opacity(0.1))
-                    .frame(width: 32, height: 32)
-
-                Text("\(stepNumber)")
-                    .font(AppleBooksTypography.headlineSmall)
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+            HStack(spacing: AppleBooksSpacing.space12) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
                     .foregroundColor(AppleBooksColors.accent)
-                    .fontWeight(.bold)
-            }
+                    .frame(width: 32, height: 32)
+                    .background(AppleBooksColors.accent.opacity(0.1))
+                    .cornerRadius(6)
 
-            // Icon
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(AppleBooksColors.accent)
-                .frame(width: 40, height: 40)
-                .background(AppleBooksColors.accent.opacity(0.1))
-                .cornerRadius(8)
-
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
                 Text(title)
                     .font(AppleBooksTypography.headlineSmall)
                     .foregroundColor(AppleBooksColors.text)
-
-                Text(description)
-                    .font(AppleBooksTypography.bodyMedium)
-                    .foregroundColor(AppleBooksColors.textSecondary)
-                    .lineLimit(2)
             }
 
-            Spacer()
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                Text("Problem")
+                    .font(AppleBooksTypography.bodySmall)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                    .fontWeight(.semibold)
+
+                Text(problem)
+                    .font(AppleBooksTypography.bodyMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+            }
+
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                Text("Solution")
+                    .font(AppleBooksTypography.bodySmall)
+                    .foregroundColor(AppleBooksColors.accent)
+                    .fontWeight(.semibold)
+
+                Text(solution)
+                    .font(AppleBooksTypography.bodyMedium)
+                    .foregroundColor(AppleBooksColors.text)
+            }
         }
+        .padding(AppleBooksSpacing.space16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(AppleBooksColors.surface)
+                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        )
     }
 }
 
