@@ -5,124 +5,83 @@ struct HomeView: View {
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var showLogin = false
     @State private var showSignup = false
+    @State private var scrollOffset: CGFloat = 0
 
     var body: some View {
         ZStack {
-            // Apple Books clean background
-            AppleBooksColors.background
+            // Enhanced gradient background with Apple Books styling
+            LandingPageDesignSystem.Colors.heroGradient
                 .ignoresSafeArea()
+            
+            // Animated background elements
+            GeometryReader { geometry in
+                // Floating elements for depth
+                Circle()
+                    .fill(Color.white.opacity(0.1))
+                    .frame(width: geometry.size.width * 0.6)
+                    .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.3)
+                    .blur(radius: 30)
+                    .offset(y: scrollOffset * 0.3)
+                
+                Circle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(width: geometry.size.width * 0.4)
+                    .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.7)
+                    .blur(radius: 20)
+                    .offset(y: scrollOffset * 0.2)
+            }
 
             ScrollView {
-                VStack(spacing: AppleBooksSpacing.space64) {
-                    // Hero Section
-                    VStack(spacing: AppleBooksSpacing.space32) {
-                        Spacer(minLength: AppleBooksSpacing.space80)
+                LazyVStack(spacing: 0) {
+                    // Enhanced Navigation Bar (Fixed position)
+                    HomeNavigationBar(showLogin: $showLogin, showSignup: $showSignup)
+                    
+                    // Enhanced Hero Section with proper spacing
+                    HeroSection(showSignup: $showSignup, showLogin: $showLogin)
+                        .padding(.bottom, LandingPageDesignSystem.Spacing.xxxl)
 
-                        // App Icon
-                        Image(systemName: "books.vertical.fill")
-                            .font(.system(size: 80, weight: .light))
-                            .foregroundColor(AppleBooksColors.accent)
-                            .padding(AppleBooksSpacing.space24)
-                            .background(
-                                Circle()
-                                    .fill(AppleBooksColors.accent.opacity(0.1))
-                            )
+                    // Enhanced Interactive Journey Section with consistent spacing
+                    EnhancedUserJourneySection()
+                        .padding(.bottom, LandingPageDesignSystem.Spacing.xxxl)
 
-                        // Title
-                        Text("Bookshelf Scanner")
-                            .font(AppleBooksTypography.displayLarge)
-                            .foregroundColor(AppleBooksColors.text)
-                            .multilineTextAlignment(.center)
+                    // Enhanced Features Section with Apple Books styling
+                    FeaturesSection()
+                        .padding(.bottom, LandingPageDesignSystem.Spacing.xxxl)
 
-                        // Subtitle
-                        Text("Transform your physical bookshelf into a smart digital library with AI-powered book recognition.")
-                            .font(AppleBooksTypography.bodyLarge)
-                            .foregroundColor(AppleBooksColors.textSecondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-
-                        // CTA Buttons
-                        VStack(spacing: AppleBooksSpacing.space16) {
-                            Button(action: {
-                                showSignup = true
-                            }) {
-                                Text("Get Started")
-                                    .font(AppleBooksTypography.buttonLarge)
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, AppleBooksSpacing.space16)
-                                    .background(AppleBooksColors.accent)
-                                    .cornerRadius(12)
-                            }
-
-                            Button(action: {
-                                showLogin = true
-                            }) {
-                                Text("Sign In")
-                                    .font(AppleBooksTypography.buttonLarge)
-                                    .foregroundColor(AppleBooksColors.accent)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, AppleBooksSpacing.space16)
-                                    .background(AppleBooksColors.card)
-                                    .cornerRadius(12)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(AppleBooksColors.accent, lineWidth: 1)
-                                    )
-                            }
-                        }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-
-                        Spacer(minLength: AppleBooksSpacing.space40)
-                    }
-
-                    // Reader's Journey Section
-                    ReadersJourneySection()
-
-                    // How It Works Section
-                    VStack(spacing: AppleBooksSpacing.space24) {
-                        Text("How It Works")
-                            .font(AppleBooksTypography.headlineLarge)
-                            .foregroundColor(AppleBooksColors.text)
-
-                        VStack(spacing: AppleBooksSpacing.space20) {
-                            FeatureRow(
-                                icon: "camera.fill",
-                                title: "Scan Your Bookshelf",
-                                description: "Point your camera at your bookshelf and capture a photo"
-                            )
-
-                            FeatureRow(
-                                icon: "sparkles",
-                                title: "AI Recognition",
-                                description: "Our AI instantly identifies books using advanced computer vision"
-                            )
-
-                            FeatureRow(
-                                icon: "books.vertical.fill",
-                                title: "Organize & Track",
-                                description: "Automatically organize your library and track reading progress"
-                            )
-
-                            FeatureRow(
-                                icon: "star.fill",
-                                title: "Discover New Books",
-                                description: "Get personalized recommendations powered by Grok AI"
-                            )
-                        }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                    }
-
-                    Spacer(minLength: AppleBooksSpacing.space80)
+                    // Enhanced Footer with final conversion opportunities
+                    HomeFooter()
                 }
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .preference(key: ScrollOffsetPreferenceKey.self, value: geometry.frame(in: .named("scroll")).minY)
+                    }
+                )
+            }
+            .coordinateSpace(name: "scroll")
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                scrollOffset = value
             }
         }
+        .preferredColorScheme(.dark) // Ensure dark mode for landing page
         .sheet(isPresented: $showLogin) {
             LoginView(isSignUp: false)
+                .preferredColorScheme(.dark)
         }
         .sheet(isPresented: $showSignup) {
             LoginView(isSignUp: true)
+                .preferredColorScheme(.dark)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Bookshelf Scanner landing page")
+    }
+}
+
+// MARK: - Scroll Offset Tracking
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 
