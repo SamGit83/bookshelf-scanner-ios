@@ -221,7 +221,7 @@ struct SurveyNavigationView: View {
                         .foregroundColor(canGoNext ? .white : AdaptiveColors.secondaryText)
                         .padding(.horizontal, SpacingSystem.lg)
                         .padding(.vertical, SpacingSystem.sm)
-                        .background(canGoNext ? UIGradients.primaryButton : AdaptiveColors.glassBackground)
+                        .background(canGoNext ? Color.blue : AdaptiveColors.glassBackground)
                         .cornerRadius(12)
                 }
                 .disabled(!canGoNext)

@@ -148,6 +148,7 @@ class AnalyticsManager {
         logEvent("subscription_completed", parameters: params)
 
         // Also track as revenue event
+        #if canImport(FirebaseAnalytics)
         if let price = price, let currency = currency {
             logEvent(AnalyticsEventPurchase, parameters: [
                 AnalyticsParameterValue: price,
@@ -155,6 +156,7 @@ class AnalyticsManager {
                 "tier": tier.rawValue
             ])
         }
+        #endif
     }
 
     // MARK: - User Engagement Events
@@ -326,7 +328,11 @@ class AnalyticsManager {
     // MARK: - Real-time Dashboard Data Collection
 
     func trackSessionStart() {
+        #if canImport(FirebaseAnalytics)
         logEvent(AnalyticsEventAppOpen, parameters: nil)
+        #else
+        logEvent("app_open", parameters: nil)
+        #endif
     }
 
     func trackSessionEnd(duration: TimeInterval) {
@@ -334,6 +340,7 @@ class AnalyticsManager {
     }
 
     func trackScreenView(screenName: String, screenClass: String? = nil) {
+        #if canImport(FirebaseAnalytics)
         var params: [String: Any] = [
             AnalyticsParameterScreenName: screenName
         ]
@@ -341,6 +348,15 @@ class AnalyticsManager {
             params[AnalyticsParameterScreenClass] = screenClass
         }
         logEvent(AnalyticsEventScreenView, parameters: params)
+        #else
+        var params: [String: Any] = [
+            "screen_name": screenName
+        ]
+        if let screenClass = screenClass {
+            params["screen_class"] = screenClass
+        }
+        logEvent("screen_view", parameters: params)
+        #endif
     }
 
     // MARK: - Alert System Integration
