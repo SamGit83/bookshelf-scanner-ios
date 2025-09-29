@@ -62,6 +62,24 @@ class SecureConfig {
         return "YOUR_GROK_API_KEY_HERE"
     }
 
+    var revenueCatAPIKey: String? {
+        // Try environment variable first
+        if let envKey = ProcessInfo.processInfo.environment["REVENUECAT_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using RevenueCat API key from environment variable")
+            return envKey
+        }
+
+        // Try UserDefaults
+        if let storedKey = UserDefaults.standard.string(forKey: "revenuecat_api_key"), !storedKey.isEmpty {
+            print("DEBUG SecureConfig: Using RevenueCat API key from UserDefaults")
+            return storedKey
+        }
+
+        // No fallback - return nil if not configured
+        print("DEBUG SecureConfig: RevenueCat API key not configured")
+        return nil
+    }
+
     // MARK: - Configuration Management
 
     func setGeminiAPIKey(_ key: String) {

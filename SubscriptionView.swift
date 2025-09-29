@@ -2,18 +2,20 @@ import SwiftUI
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
-// import RevenueCat  // TODO: Add RevenueCat dependency
+#if canImport(RevenueCat)
+import RevenueCat
+#endif
 
 struct SubscriptionView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var abTestingService = ABTestingService.shared
+    @ObservedObject var revenueCatManager = RevenueCatManager.shared
     @State private var offerings: [SubscriptionOffering] = []
     @State private var selectedPackage: SubscriptionPackage?
     @State private var isLoading = false
     @State private var isPurchasing = false
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var currentSubscription: SubscriptionInfo?
     @State private var variantConfig: SubscriptionVariantConfig?
 
     var body: some View {
@@ -38,6 +40,7 @@ struct SubscriptionView: View {
                             offeringsSection
                             featuresSection
                             faqSection
+                            restorePurchasesSection
                         }
                         .padding(.vertical, SpacingSystem.xl)
                     }
@@ -48,7 +51,6 @@ struct SubscriptionView: View {
             .onAppear {
                 loadVariantConfig()
                 loadOfferings()
-                loadCurrentSubscription()
                 trackView()
             }
             .alert(isPresented: $showError) {
@@ -92,7 +94,7 @@ struct SubscriptionView: View {
 
     private var currentPlanSection: some View {
         Group {
-            if let subscription = currentSubscription {
+            if revenueCatManager.isSubscribed, let subscription = revenueCatManager.getSubscriptionInfo() {
                 AppleBooksCard {
                     VStack(spacing: SpacingSystem.md) {
                         HStack {
@@ -228,6 +230,24 @@ struct SubscriptionView: View {
         .padding(.horizontal, SpacingSystem.lg)
     }
 
+    private var restorePurchasesSection: some View {
+        VStack(spacing: SpacingSystem.md) {
+            Button(action: restorePurchases) {
+                Text("Restore Purchases")
+                    .font(AppleBooksTypography.buttonMedium)
+                    .foregroundColor(AppleBooksColors.accent)
+                    .padding(.vertical, SpacingSystem.sm)
+            }
+            .disabled(isPurchasing)
+
+            Text("If you've already purchased a subscription, tap here to restore your access.")
+                .font(AppleBooksTypography.caption)
+                .foregroundColor(AppleBooksColors.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, SpacingSystem.lg)
+    }
+
     private var closeButton: some View {
         Button(action: {
             trackDismiss()
@@ -255,49 +275,93 @@ struct SubscriptionView: View {
     private func loadOfferings() {
         isLoading = true
 
-        // TODO: Replace with actual RevenueCat integration
-        // Simulate loading offerings
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let monthlyPackage = SubscriptionPackage(
-                id: "monthly",
-                productId: "bookshelf_scanner_monthly",
-                title: "Monthly",
-                price: variantConfig?.monthlyPrice ?? 2.99,
-                currency: "USD",
-                period: "month",
-                isPopular: false
+        #if canImport(RevenueCat)
+        // Use RevenueCat offerings
+        if let offering = revenueCatManager.offerings["premium"] {
+            // Convert RevenueCat packages to our SubscriptionPackage format
+            let packages = offering.packages.map { rcPackage in
+                SubscriptionPackage(
+                    id: rcPackage.identifier,
+                    productId: rcPackage.storeProduct.productIdentifier,
+                    title: rcPackage.storeProduct.localizedTitle,
+                    price: rcPackage.storeProduct.price.doubleValue,
+                    currency: rcPackage.storeProduct.currencyCode ?? "USD",
+                    period: rcPackage.storeProduct.subscriptionPeriod?.unit.rawValue == "year" ? "year" : "month",
+                    isPopular: rcPackage.identifier.contains("annual") // Simple heuristic
+                )
+            }
+
+            let subscriptionOffering = SubscriptionOffering(
+                id: offering.identifier,
+                packages: packages
             )
 
-            let annualPackage = SubscriptionPackage(
-                id: "annual",
-                productId: "bookshelf_scanner_annual",
-                title: "Annual",
-                price: variantConfig?.annualPrice ?? 29.99,
-                currency: "USD",
-                period: "year",
-                isPopular: true
-            )
-
-            let offering = SubscriptionOffering(
-                id: "premium",
-                packages: [monthlyPackage, annualPackage]
-            )
-
-            self.offerings = [offering]
-            self.selectedPackage = annualPackage // Default to annual
+            self.offerings = [subscriptionOffering]
+            // Default to the most expensive (likely annual) or first package
+            self.selectedPackage = packages.max(by: { $0.price < $1.price }) ?? packages.first
             self.isLoading = false
+        } else {
+            // Fallback to simulated offerings if RevenueCat not available
+            loadSimulatedOfferings()
         }
+        #else
+        // Fallback for development
+        loadSimulatedOfferings()
+        #endif
     }
 
-    private func loadCurrentSubscription() {
-        // TODO: Load current subscription from RevenueCat
-        // For now, check user tier
-        if let user = AuthService.shared.currentUser, user.tier == .premium {
-            currentSubscription = SubscriptionInfo(
-                productName: "Premium Plan",
-                expirationDate: Date().addingTimeInterval(30 * 24 * 60 * 60), // 30 days from now
-                isTrial: false
-            )
+    private func loadSimulatedOfferings() {
+        let monthlyPackage = SubscriptionPackage(
+            id: "monthly",
+            productId: "bookshelf_scanner_monthly",
+            title: "Monthly",
+            price: variantConfig?.monthlyPrice ?? 2.99,
+            currency: "USD",
+            period: "month",
+            isPopular: false
+        )
+
+        let annualPackage = SubscriptionPackage(
+            id: "annual",
+            productId: "bookshelf_scanner_annual",
+            title: "Annual",
+            price: variantConfig?.annualPrice ?? 29.99,
+            currency: "USD",
+            period: "year",
+            isPopular: true
+        )
+
+        let offering = SubscriptionOffering(
+            id: "premium",
+            packages: [monthlyPackage, annualPackage]
+        )
+
+        self.offerings = [offering]
+        self.selectedPackage = annualPackage // Default to annual
+        self.isLoading = false
+    }
+
+    private func restorePurchases() {
+        isPurchasing = true
+
+        revenueCatManager.restorePurchases { result in
+            DispatchQueue.main.async {
+                self.isPurchasing = false
+
+                switch result {
+                case .success:
+                    if self.revenueCatManager.isSubscribed {
+                        self.presentationMode.wrappedValue.dismiss()
+                    } else {
+                        self.errorMessage = "No previous purchases found to restore."
+                        self.showError = true
+                    }
+
+                case .failure(let error):
+                    self.errorMessage = "Restore failed: \(error.localizedDescription)"
+                    self.showError = true
+                }
+            }
         }
     }
 
@@ -305,8 +369,34 @@ struct SubscriptionView: View {
         isPurchasing = true
         trackPurchaseStart(package: package)
 
-        // TODO: Implement RevenueCat purchase flow
-        // For now, simulate purchase
+        #if canImport(RevenueCat)
+        // Find the corresponding RevenueCat package
+        guard let offering = revenueCatManager.offerings["premium"],
+              let rcPackage = offering.packages.first(where: { $0.identifier == package.id }) else {
+            self.isPurchasing = false
+            self.errorMessage = "Package not found. Please try again."
+            self.showError = true
+            return
+        }
+
+        revenueCatManager.purchase(package: rcPackage) { result in
+            DispatchQueue.main.async {
+                self.isPurchasing = false
+
+                switch result {
+                case .success(let customerInfo):
+                    self.trackPurchaseSuccess(package: package)
+                    self.presentationMode.wrappedValue.dismiss()
+
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                    self.showError = true
+                    self.trackPurchaseFailure(package: package)
+                }
+            }
+        }
+        #else
+        // Fallback for development - simulate purchase
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             self.isPurchasing = false
 
@@ -322,6 +412,7 @@ struct SubscriptionView: View {
                 self.trackPurchaseFailure(package: package)
             }
         }
+        #endif
     }
 
     private func updateUserTierToPremium() {
