@@ -39,7 +39,7 @@ struct UserProfile: Codable, Identifiable {
         self.tier = UserTier(rawValue: firestoreData["tier"] as? String ?? "free") ?? .free
         self.subscriptionId = firestoreData["subscriptionId"] as? String
         self.hasCompletedOnboarding = firestoreData["hasCompletedOnboarding"] as? Bool ?? false
-        self.creationDate = firebaseUser.metadata?.creationDate
+        self.creationDate = firebaseUser.metadata.creationDate
     }
 
     var displayName: String {
