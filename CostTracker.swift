@@ -270,6 +270,11 @@ class CostTracker {
         let dailyAverage = revenueMetrics.dailyRevenue.values.reduce(0, +) / max(1, Double(revenueMetrics.dailyRevenue.count))
         return dailyAverage * Double(projectionDays)
     }
+
+    // MARK: - Cost Rate Access
+    func getCostRate(for service: String) -> Double {
+        return costRates[service] ?? 0.0
+    }
 }
 
 // MARK: - Supporting Types
@@ -281,14 +286,10 @@ struct CostMetrics {
     var costByService: [String: Double] {
         var result: [String: Double] = [:]
         for (service, usage) in apiUsage {
-            let rate = self.getCostRate(for: service)
+            let rate = CostTracker.shared.getCostRate(for: service)
             result[service] = Double(usage) * rate
         }
         return result
-    }
-
-    private func getCostRate(for service: String) -> Double {
-        return costRates[service] ?? 0.0
     }
 }
 
