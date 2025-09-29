@@ -84,11 +84,11 @@ class UsageTrackerTests: XCTestCase {
         // Simulate month change by clearing last reset date
         UserDefaults.standard.removeObject(forKey: "lastResetDate")
 
-        // Create new instance to trigger reset check
-        let newTracker = UsageTracker()
+        // Reset the shared instance by calling reset manually for testing
+        usageTracker.resetAllUsage()
 
         // Should have reset monthly counters
-        XCTAssertEqual(newTracker.monthlyScans, 0)
-        XCTAssertEqual(newTracker.monthlyRecommendations, 0)
+        XCTAssertEqual(usageTracker.monthlyScans, 0)
+        XCTAssertEqual(usageTracker.monthlyRecommendations, 0)
     }
 }
