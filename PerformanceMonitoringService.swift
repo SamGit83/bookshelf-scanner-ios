@@ -20,7 +20,11 @@ class PerformanceMonitoringService {
     // MARK: - Private Properties
     private let queue = DispatchQueue(label: "com.bookshelfscanner.performance", qos: .utility)
     private var cancellables = Set<AnyCancellable>()
+    #if canImport(FirebasePerformance)
     private var activeTraces = [String: Trace]()
+    #else
+    private var activeTraces = [String: Any]()
+    #endif
     private var metricBuffers = [String: [PerformanceMetric]]()
     private var alertThresholds = [AlertType: Double]()
 
@@ -110,9 +114,13 @@ class PerformanceMonitoringService {
 
     func stopTrace(traceId: String) {
         queue.async {
-            if let trace = self.activeTraces.removeValue(forKey: traceId) {
+            #if canImport(FirebasePerformance)
+            if let trace = self.activeTraces.removeValue(forKey: traceId) as? Trace {
                 trace.stop()
             }
+            #else
+            self.activeTraces.removeValue(forKey: traceId)
+            #endif
         }
     }
 
@@ -415,7 +423,9 @@ class PerformanceMonitoringService {
     // MARK: - Cleanup
     func cleanup() {
         queue.async {
-            self.activeTraces.values.forEach { $0.stop() }
+            #if canImport(FirebasePerformance)
+            self.activeTraces.values.forEach { ($0 as? Trace)?.stop() }
+            #endif
             self.activeTraces.removeAll()
             self.metricBuffers.removeAll()
         }
