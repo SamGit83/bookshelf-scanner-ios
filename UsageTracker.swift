@@ -2,7 +2,9 @@ import Foundation
 import Combine
 
 // Analytics integration
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 
 class UsageTracker: ObservableObject {
     static let shared = UsageTracker()
@@ -58,9 +60,12 @@ class UsageTracker: ObservableObject {
         monthlyScans += 1
         saveUsageData()
         // Update analytics user properties
+        #if canImport(FirebaseAnalytics)
         AnalyticsManager.shared.updateDynamicUserProperties(totalBooks: totalBooks, monthlyScans: monthlyScans, monthlyRecommendations: monthlyRecommendations)
+        #endif
 
         // Track analytics
+        #if canImport(FirebaseAnalytics)
         if monthlyScans == scanLimit {
             AnalyticsManager.shared.trackLimitHit(limitType: "scan", currentValue: monthlyScans, limitValue: scanLimit)
             ABTestingService.shared.trackExperimentEvent(
@@ -69,8 +74,11 @@ class UsageTracker: ObservableObject {
                 event: "limit_reached",
                 parameters: ["limit_type": "scan", "current": monthlyScans, "limit": scanLimit]
             )
+        }
+        #endif
 
-            // Trigger usage limit survey
+        // Trigger usage limit survey
+        if monthlyScans == scanLimit {
             NotificationCenter.default.post(
                 name: Notification.Name("LimitHit"),
                 object: nil,
@@ -83,8 +91,11 @@ class UsageTracker: ObservableObject {
         totalBooks += 1
         saveUsageData()
         // Update analytics user properties
+        #if canImport(FirebaseAnalytics)
         AnalyticsManager.shared.updateDynamicUserProperties(totalBooks: totalBooks, monthlyScans: monthlyScans, monthlyRecommendations: monthlyRecommendations)
+        #endif
 
+        #if canImport(FirebaseAnalytics)
         if totalBooks == bookLimit {
             AnalyticsManager.shared.trackLimitHit(limitType: "book", currentValue: totalBooks, limitValue: bookLimit)
             ABTestingService.shared.trackExperimentEvent(
@@ -93,8 +104,11 @@ class UsageTracker: ObservableObject {
                 event: "limit_reached",
                 parameters: ["limit_type": "book", "current": totalBooks, "limit": bookLimit]
             )
+        }
+        #endif
 
-            // Trigger usage limit survey
+        // Trigger usage limit survey
+        if totalBooks == bookLimit {
             NotificationCenter.default.post(
                 name: Notification.Name("LimitHit"),
                 object: nil,
@@ -107,8 +121,11 @@ class UsageTracker: ObservableObject {
         monthlyRecommendations += 1
         saveUsageData()
         // Update analytics user properties
+        #if canImport(FirebaseAnalytics)
         AnalyticsManager.shared.updateDynamicUserProperties(totalBooks: totalBooks, monthlyScans: monthlyScans, monthlyRecommendations: monthlyRecommendations)
+        #endif
 
+        #if canImport(FirebaseAnalytics)
         if monthlyRecommendations == recommendationLimit {
             AnalyticsManager.shared.trackLimitHit(limitType: "recommendation", currentValue: monthlyRecommendations, limitValue: recommendationLimit)
             ABTestingService.shared.trackExperimentEvent(
@@ -117,8 +134,11 @@ class UsageTracker: ObservableObject {
                 event: "limit_reached",
                 parameters: ["limit_type": "recommendation", "current": monthlyRecommendations, "limit": recommendationLimit]
             )
+        }
+        #endif
 
-            // Trigger usage limit survey
+        // Trigger usage limit survey
+        if monthlyRecommendations == recommendationLimit {
             NotificationCenter.default.post(
                 name: Notification.Name("LimitHit"),
                 object: nil,
@@ -165,7 +185,9 @@ class UsageTracker: ObservableObject {
         totalBooks = count
         saveUsageData()
         // Update analytics user properties
+        #if canImport(FirebaseAnalytics)
         AnalyticsManager.shared.updateDynamicUserProperties(totalBooks: totalBooks, monthlyScans: monthlyScans, monthlyRecommendations: monthlyRecommendations)
+        #endif
     }
 
     // MARK: - A/B Testing Integration
