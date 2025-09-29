@@ -213,7 +213,7 @@ class RevenueCatManager: ObservableObject {
         AnalyticsManager.shared.trackSubscriptionCompleted(
             tier: .premium,
             subscriptionId: nil,
-            price: package.storeProduct?.price.map { Double(truncating: NSDecimalNumber(decimal: $0)) },
+            price: package.storeProduct.flatMap { Double(truncating: NSDecimalNumber(decimal: $0.price)) },
             currency: package.storeProduct?.currencyCode ?? ""
         )
     }
@@ -222,7 +222,7 @@ class RevenueCatManager: ObservableObject {
         AnalyticsManager.shared.trackSubscriptionCompleted(
             tier: .premium,
             subscriptionId: customerInfo.originalAppUserId,
-            price: package.storeProduct?.price.map { Double(truncating: NSDecimalNumber(decimal: $0)) },
+            price: package.storeProduct.flatMap { Double(truncating: NSDecimalNumber(decimal: $0.price)) },
             currency: package.storeProduct?.currencyCode ?? ""
         )
     }
