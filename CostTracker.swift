@@ -280,9 +280,13 @@ struct CostMetrics {
 
     var costByService: [String: Double] {
         apiUsage.mapValues { usage in
-            let rate = CostTracker.shared.costRates[$0] ?? 0.0
+            let rate = self.getCostRate(for: $0)
             return Double(usage) * rate
         }
+    }
+
+    private func getCostRate(for service: String) -> Double {
+        return costRates[service] ?? 0.0
     }
 }
 

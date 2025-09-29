@@ -41,19 +41,19 @@ class UsageTracker: ObservableObject {
     func canPerformScan() -> Bool {
         guard let tier = AuthService.shared.currentUser?.tier else { return false }
         if tier == .premium { return true }
-        return monthlyScans < freeTierScanLimit
+        return monthlyScans < variantScanLimit
     }
 
     func canAddBook() -> Bool {
         guard let tier = AuthService.shared.currentUser?.tier else { return false }
         if tier == .premium { return true }
-        return totalBooks < freeTierBookLimit
+        return totalBooks < variantBookLimit
     }
 
     func canGetRecommendation() -> Bool {
         guard let tier = AuthService.shared.currentUser?.tier else { return false }
         if tier == .premium { return true }
-        return monthlyRecommendations < freeTierRecommendationLimit
+        return monthlyRecommendations < variantRecommendationLimit
     }
 
     func incrementScans() {

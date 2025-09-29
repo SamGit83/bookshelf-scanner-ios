@@ -149,9 +149,14 @@ class ABTestingManager: ObservableObject {
     }
 
     private func updateUsageTrackerLimits() {
-        UsageTracker.shared.freeTierScanLimit = currentLimitsVariant.scanLimit
-        UsageTracker.shared.freeTierBookLimit = currentLimitsVariant.bookLimit
-        UsageTracker.shared.freeTierRecommendationLimit = currentLimitsVariant.recommendationLimit
+        // Update the variant limits in UsageTracker
+        Task {
+            await MainActor.run {
+                UsageTracker.shared.variantScanLimit = currentLimitsVariant.scanLimit
+                UsageTracker.shared.variantBookLimit = currentLimitsVariant.bookLimit
+                UsageTracker.shared.variantRecommendationLimit = currentLimitsVariant.recommendationLimit
+            }
+        }
     }
 
     // MARK: - Analytics Tracking
