@@ -8,17 +8,18 @@ struct ReadersJourneySection: View {
                 .foregroundColor(AppleBooksColors.text)
                 .padding(.horizontal, AppleBooksSpacing.space32)
 
+            Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Bookshelf Scanner, and how our app transformed her entire reading experience.")
+                .font(AppleBooksTypography.bodyLarge)
+                .foregroundColor(AppleBooksColors.textSecondary)
+                .multilineTextAlignment(.leading)
+                .padding(.horizontal, AppleBooksSpacing.space32)
+
             // Progress indicator showing transformation
             TransformationProgressIndicator()
                 .padding(.horizontal, AppleBooksSpacing.space32)
                 .padding(.vertical, AppleBooksSpacing.space16)
 
             VStack(spacing: AppleBooksSpacing.space20) {
-                Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Bookshelf Scanner, and how our app transformed her entire reading experience.")
-                    .font(AppleBooksTypography.bodyLarge)
-                    .foregroundColor(AppleBooksColors.textSecondary)
-                    .multilineTextAlignment(.leading)
-                    .padding(.horizontal, AppleBooksSpacing.space20)
                 EnhancedJourneyCard(
                     icon: "exclamationmark.triangle.fill",
                     title: "Traditional Reading Struggles",
