@@ -439,63 +439,104 @@ struct SubscriptionOfferingCard: View {
 
     var body: some View {
         ForEach(offering.packages, id: \.id) { package in
-            Button(action: { onSelect(package) }) {
-                AppleBooksCard {
-                    VStack(spacing: SpacingSystem.md) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: SpacingSystem.xs) {
-                                HStack {
-                                    Text(package.title)
-                                        .font(AppleBooksTypography.headlineMedium)
-                                        .foregroundColor(AppleBooksColors.text)
+            PackageButton(package: package, isSelected: isSelected, onSelect: onSelect)
+        }
+    }
+}
 
-                                    if package.isPopular {
-                                        Text("Most Popular")
-                                            .font(AppleBooksTypography.captionBold)
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, SpacingSystem.sm)
-                                            .padding(.vertical, SpacingSystem.xs)
-                                            .background(PrimaryColors.vibrantPink)
-                                            .cornerRadius(8)
-                                    }
-                                }
+private struct PackageButton: View {
+    let package: SubscriptionPackage
+    let isSelected: Bool
+    let onSelect: (SubscriptionPackage) -> Void
 
-                                Text("$\(String(format: "%.2f", package.price))/\(package.period)")
-                                    .font(AppleBooksTypography.bodyLarge)
-                                    .foregroundColor(AppleBooksColors.accent)
+    var body: some View {
+        Button(action: { onSelect(package) }) {
+            packageCardContent
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
 
-                                if package.period == "year" {
-                                    Text("$\(String(format: "%.2f", package.price/12))/month")
-                                        .font(AppleBooksTypography.caption)
-                                        .foregroundColor(AppleBooksColors.textSecondary)
-                                }
-                            }
-
-                            Spacer()
-
-                            ZStack {
-                                Circle()
-                                    .stroke(isSelected ? AppleBooksColors.accent : AppleBooksColors.textTertiary, lineWidth: 2)
-                                    .frame(width: 24, height: 24)
-
-                                if isSelected {
-                                    Circle()
-                                        .fill(AppleBooksColors.accent)
-                                        .frame(width: 16, height: 16)
-                                }
-                            }
-                        }
-
-                        if package.isPopular {
-                            Text("Save 17% with annual billing")
-                                .font(AppleBooksTypography.caption)
-                                .foregroundColor(SemanticColors.successPrimary)
-                        }
-                    }
+    private var packageCardContent: some View {
+        AppleBooksCard {
+            VStack(spacing: SpacingSystem.md) {
+                packageHeader
+                if package.isPopular {
+                    popularBadge
                 }
             }
-            .buttonStyle(PlainButtonStyle())
         }
+    }
+
+    private var packageHeader: some View {
+        HStack {
+            packageDetails
+            Spacer()
+            selectionIndicator
+        }
+    }
+
+    private var packageDetails: some View {
+        VStack(alignment: .leading, spacing: SpacingSystem.xs) {
+            titleRow
+            priceText
+            if package.period == "year" {
+                monthlyEquivalentText
+            }
+        }
+    }
+
+    private var titleRow: some View {
+        HStack {
+            Text(package.title)
+                .font(AppleBooksTypography.headlineMedium)
+                .foregroundColor(AppleBooksColors.text)
+
+            if package.isPopular {
+                popularLabel
+            }
+        }
+    }
+
+    private var popularLabel: some View {
+        Text("Most Popular")
+            .font(AppleBooksTypography.captionBold)
+            .foregroundColor(.white)
+            .padding(.horizontal, SpacingSystem.sm)
+            .padding(.vertical, SpacingSystem.xs)
+            .background(PrimaryColors.vibrantPink)
+            .cornerRadius(8)
+    }
+
+    private var priceText: some View {
+        Text("$\(String(format: "%.2f", package.price))/\(package.period)")
+            .font(AppleBooksTypography.bodyLarge)
+            .foregroundColor(AppleBooksColors.accent)
+    }
+
+    private var monthlyEquivalentText: some View {
+        Text("$\(String(format: "%.2f", package.price/12))/month")
+            .font(AppleBooksTypography.caption)
+            .foregroundColor(AppleBooksColors.textSecondary)
+    }
+
+    private var selectionIndicator: some View {
+        ZStack {
+            Circle()
+                .stroke(isSelected ? AppleBooksColors.accent : AppleBooksColors.textTertiary, lineWidth: 2)
+                .frame(width: 24, height: 24)
+
+            if isSelected {
+                Circle()
+                    .fill(AppleBooksColors.accent)
+                    .frame(width: 16, height: 16)
+            }
+        }
+    }
+
+    private var popularBadge: some View {
+        Text("Save 17% with annual billing")
+            .font(AppleBooksTypography.caption)
+            .foregroundColor(SemanticColors.successPrimary)
     }
 }
 
