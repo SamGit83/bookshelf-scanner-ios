@@ -14,7 +14,7 @@ class UsageTracker: ObservableObject {
     private let recommendationsKey = "monthlyRecommendations"
     private let lastResetKey = "lastResetDate"
 
-    private init() {
+    init() {
         loadUsageData()
         checkAndResetMonthlyUsage()
     }
