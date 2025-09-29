@@ -517,7 +517,7 @@ struct Survey: Identifiable {
     static func fromDictionary(_ dict: [String: Any]) -> Survey? {
         guard let id = dict["id"] as? String,
               let typeString = dict["type"] as? String,
-              let type = SurveyType(rawValue: typeString),
+              let type = FeedbackManager.SurveyType(rawValue: typeString),
               let userId = dict["userId"] as? String,
               let questionsDicts = dict["questions"] as? [[String: Any]],
               let createdAtTimestamp = dict["createdAt"] as? Timestamp,
@@ -582,6 +582,16 @@ struct SurveyQuestion: Codable, Identifiable {
             required: required,
             options: dict["options"] as? [String]
         )
+    }
+
+    func toDictionary() -> [String: Any] {
+        return [
+            "id": id,
+            "type": type.rawValue,
+            "question": question,
+            "required": required,
+            "options": options as Any
+        ]
     }
 }
 
