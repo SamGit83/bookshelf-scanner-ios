@@ -1,6 +1,10 @@
 import Foundation
+#if canImport(FirebaseCore)
 import FirebaseCore
+#endif
+#if canImport(FirebasePerformance)
 import FirebasePerformance
+#endif
 import Combine
 import UIKit
 
@@ -34,6 +38,7 @@ class PerformanceMonitoringService {
 
     // MARK: - Firebase Performance Setup
     private func setupFirebasePerformance() {
+        #if canImport(FirebaseCore) && canImport(FirebasePerformance)
         // Ensure Firebase is configured
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
@@ -48,6 +53,7 @@ class PerformanceMonitoringService {
         performance.setValue("bookshelf_scanner", forAttribute: "app_name")
         performance.setValue(UIDevice.current.systemVersion, forAttribute: "ios_version")
         performance.setValue(UIDevice.current.model, forAttribute: "device_model")
+        #endif
     }
 
     private func setupDefaultThresholds() {
@@ -93,9 +99,11 @@ class PerformanceMonitoringService {
     func startTrace(name: String, attributes: [String: String] = [:]) -> String {
         let traceId = UUID().uuidString
         queue.async {
+            #if canImport(FirebasePerformance)
             let trace = Performance.startTrace(name: name)
             attributes.forEach { trace?.setValue($0.value, forAttribute: $0.key) }
             self.activeTraces[traceId] = trace
+            #endif
         }
         return traceId
     }
@@ -179,10 +187,12 @@ class PerformanceMonitoringService {
         trackMetric(metric)
 
         // Firebase screen trace
+        #if canImport(FirebasePerformance)
         let trace = Performance.startTrace(name: "screen_load")
         trace?.setValue(screenName, forAttribute: "screen_name")
         trace?.setValue(String(loadTime), forAttribute: "load_time")
         trace?.stop()
+        #endif
     }
 
     func trackMemoryUsage(currentUsage: Double, peakUsage: Double) {
