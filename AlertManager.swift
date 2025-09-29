@@ -1,7 +1,9 @@
 import Foundation
 import UserNotifications
 import Combine
+#if canImport(FirebaseMessaging)
 import FirebaseMessaging
+#endif
 
 /**
  * AlertManager - Configurable Threshold-Based Alert System

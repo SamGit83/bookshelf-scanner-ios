@@ -1,5 +1,7 @@
 import SwiftUI
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 
 struct UpgradeModalView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -276,36 +278,46 @@ struct UpgradeModalView: View {
 
     // Analytics tracking
     private func trackModalView() {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("upgrade_modal_viewed", parameters: [
             "variant_id": variantConfig?.variantId ?? "default"
         ])
+        #endif
     }
 
     private func trackModalDismiss() {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("upgrade_modal_dismissed", parameters: [
             "variant_id": variantConfig?.variantId ?? "default"
         ])
+        #endif
     }
 
     private func trackCTAClick() {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("upgrade_cta_clicked", parameters: [
             "variant_id": variantConfig?.variantId ?? "default",
             "selected_plan": selectedPlan == .monthly ? "monthly" : "annual"
         ])
+        #endif
     }
 
     private func trackSubscriptionSuccess() {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("subscription_started", parameters: [
             "variant_id": variantConfig?.variantId ?? "default",
             "plan": selectedPlan == .monthly ? "monthly" : "annual"
         ])
+        #endif
     }
 
     private func trackSubscriptionFailure() {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("subscription_failed", parameters: [
             "variant_id": variantConfig?.variantId ?? "default",
             "plan": selectedPlan == .monthly ? "monthly" : "annual"
         ])
+        #endif
     }
 }
 
