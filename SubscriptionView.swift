@@ -494,11 +494,6 @@ struct SubscriptionPackage: Identifiable {
     let isPopular: Bool
 }
 
-struct SubscriptionInfo {
-    let productName: String
-    let expirationDate: Date
-    let isTrial: Bool
-}
 
 struct SubscriptionVariantConfig {
     let variantId: String

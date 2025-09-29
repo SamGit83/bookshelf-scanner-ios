@@ -2,6 +2,11 @@ import Foundation
 import Combine
 #if canImport(RevenueCat)
 import RevenueCat
+#else
+// Stub types for when RevenueCat is not available
+class Offering {}
+class CustomerInfo {}
+class Package {}
 #endif
 
 class RevenueCatManager: ObservableObject {

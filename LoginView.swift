@@ -166,10 +166,10 @@ struct LoginView: View {
                                                 
                                                 // Features with positive framing
                                                 VStack(alignment: .leading, spacing: AppleBooksSpacing.space6) {
-                                                    FeatureRow(text: "20 scans per month", isSelected: selectedTier == .free)
-                                                    FeatureRow(text: "25 books in library", isSelected: selectedTier == .free)
-                                                    FeatureRow(text: "5 AI recommendations", isSelected: selectedTier == .free)
-                                                    FeatureRow(text: "Basic reading insights", isSelected: selectedTier == .free)
+                                                    TierFeatureRow(text: "20 scans per month", isSelected: selectedTier == .free)
+                                                    TierFeatureRow(text: "25 books in library", isSelected: selectedTier == .free)
+                                                    TierFeatureRow(text: "5 AI recommendations", isSelected: selectedTier == .free)
+                                                    TierFeatureRow(text: "Basic reading insights", isSelected: selectedTier == .free)
                                                 }
                                                 
                                                 Spacer()
@@ -231,11 +231,11 @@ struct LoginView: View {
                                                     
                                                     // Features with unlimited emphasis
                                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space6) {
-                                                        FeatureRow(text: "Unlimited scans", isSelected: selectedTier == .premium, isPremium: true)
-                                                        FeatureRow(text: "Unlimited books", isSelected: selectedTier == .premium, isPremium: true)
-                                                        FeatureRow(text: "Unlimited AI recommendations", isSelected: selectedTier == .premium, isPremium: true)
-                                                        FeatureRow(text: "Advanced reading analytics", isSelected: selectedTier == .premium, isPremium: true)
-                                                        FeatureRow(text: "Priority support", isSelected: selectedTier == .premium, isPremium: true)
+                                                        TierFeatureRow(text: "Unlimited scans", isSelected: selectedTier == .premium, isPremium: true)
+                                                        TierFeatureRow(text: "Unlimited books", isSelected: selectedTier == .premium, isPremium: true)
+                                                        TierFeatureRow(text: "Unlimited AI recommendations", isSelected: selectedTier == .premium, isPremium: true)
+                                                        TierFeatureRow(text: "Advanced reading analytics", isSelected: selectedTier == .premium, isPremium: true)
+                                                        TierFeatureRow(text: "Priority support", isSelected: selectedTier == .premium, isPremium: true)
                                                     }
                                                     
                                                     Spacer()
@@ -869,17 +869,17 @@ struct PasswordResetView: View {
 
 // MARK: - Helper Components for Enhanced Tier Selection
 
-struct FeatureRow: View {
+struct TierFeatureRow: View {
     let text: String
     let isSelected: Bool
     let isPremium: Bool
-    
+
     init(text: String, isSelected: Bool, isPremium: Bool = false) {
         self.text = text
         self.isSelected = isSelected
         self.isPremium = isPremium
     }
-    
+
     var body: some View {
         HStack(spacing: AppleBooksSpacing.space8) {
             Image(systemName: "checkmark.circle.fill")
@@ -889,7 +889,7 @@ struct FeatureRow: View {
                     (isPremium ? .white : AppleBooksColors.accent) :
                     AppleBooksColors.success
                 )
-            
+
             Text(text)
                 .font(AppleBooksTypography.caption)
                 .foregroundColor(
