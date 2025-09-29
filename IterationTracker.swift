@@ -9,7 +9,7 @@ import SwiftUI
  * Manages the lifecycle of user feedback implementation tasks, from initial
  * feedback processing through prioritization, assignment, and completion tracking.
  */
-class IterationTracker {
+class IterationTracker: ObservableObject {
     static let shared = IterationTracker()
 
     private let db = Firestore.firestore()
@@ -563,15 +563,16 @@ struct TaskCardView: View {
     }
 }
 
+
 struct PriorityBadge: View {
     let priority: IterationPriority
 
     var body: some View {
         Text(priority.rawValue.uppercased())
-            .font(TypographySystem.captionBold)
+            .font(.system(size: 12, weight: .bold))
             .foregroundColor(.white)
-            .padding(.horizontal, SpacingSystem.xs)
-            .padding(.vertical, SpacingSystem.xxs)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
             .background(priorityColor)
             .cornerRadius(6)
     }
