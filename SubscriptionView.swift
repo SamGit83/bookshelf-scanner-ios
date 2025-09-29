@@ -438,7 +438,7 @@ struct SubscriptionOfferingCard: View {
     let onSelect: (SubscriptionPackage) -> Void
 
     var body: some View {
-        ForEach(offering.packages) { package in
+        ForEach(offering.packages, id: \.id) { package in
             Button(action: { onSelect(package) }) {
                 AppleBooksCard {
                     VStack(spacing: SpacingSystem.md) {
