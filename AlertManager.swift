@@ -73,12 +73,12 @@ class AlertManager {
         }
 
         // Check memory usage
-        if metrics.memoryUsageMB > 100.0 {
+        if metrics.memoryUsage > 100.0 {
             let alert = PerformanceAlert(
                 id: UUID().uuidString,
                 type: .memoryUsage,
-                message: "Memory usage exceeded threshold: \(String(format: "%.1f", metrics.memoryUsageMB))MB",
-                value: metrics.memoryUsageMB,
+                message: "Memory usage exceeded threshold: \(String(format: "%.1f", metrics.memoryUsage))MB",
+                value: metrics.memoryUsage,
                 threshold: 100.0,
                 timestamp: Date()
             )
@@ -260,7 +260,8 @@ class AlertManager {
     }
 
     private func scheduleAutoResolve(_ alertId: String, after minutes: Int) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + Double(minutes) * 60) { [weak self] in
+        let deadline = DispatchTime.now() + Double(minutes) * 60
+        DispatchQueue.main.asyncAfter(deadline: deadline) { [weak self] in
             self?.resolveAlert(alertId, resolution: .autoResolved)
         }
     }

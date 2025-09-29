@@ -491,20 +491,47 @@ struct PerformanceAlert {
     let value: Double
     let threshold: Double
     let timestamp: Date
+    var severity: AlertSeverity = .medium
+    var configuration: AlertConfiguration?
+    var resolution: AlertResolution?
+    var resolvedAt: Date?
+    var escalationLevel: EscalationLevel = .normal
 
     func toDictionary() -> [String: Any] {
-        return [
+        var dict: [String: Any] = [
             "id": id,
             "type": type.rawValue,
             "message": message,
             "value": value,
             "threshold": threshold,
-            "timestamp": timestamp.ISO8601Format()
+            "timestamp": timestamp.ISO8601Format(),
+            "severity": severity.rawValue,
+            "escalation_level": escalationLevel.rawValue
         ]
+
+        if let configuration = configuration {
+            dict["configuration"] = [
+                "type": configuration.type.rawValue,
+                "threshold": configuration.threshold,
+                "condition": configuration.condition.rawValue,
+                "severity": configuration.severity.rawValue,
+                "enabled": configuration.enabled
+            ]
+        }
+
+        if let resolution = resolution {
+            dict["resolution"] = resolution.rawValue
+        }
+
+        if let resolvedAt = resolvedAt {
+            dict["resolved_at"] = resolvedAt.ISO8601Format()
+        }
+
+        return dict
     }
 }
 
-enum AlertType: String {
+enum AlertType: String, Codable {
     case apiResponseTime = "api_response_time"
     case memoryUsage = "memory_usage_current"
     case batteryDrain = "battery_drain_rate"
