@@ -410,7 +410,7 @@ struct PricingCard: View {
             .padding(SpacingSystem.lg)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(isSelected ? UIGradients.primaryButton : AdaptiveColors.glassBackground)
+                    .fill(isSelected ? AnyShapeStyle(UIGradients.primaryButton) : AnyShapeStyle(AdaptiveColors.glassBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(isSelected ? PrimaryColors.vibrantPink : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)

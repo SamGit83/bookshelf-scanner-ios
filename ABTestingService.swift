@@ -14,7 +14,7 @@ import FirebaseAnalytics
 import FirebaseAnalytics
 #endif
 
-class ABTestingService {
+class ABTestingService: ObservableObject {
     static let shared = ABTestingService()
 
     #if canImport(FirebaseRemoteConfig)
