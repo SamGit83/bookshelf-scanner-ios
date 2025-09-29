@@ -105,7 +105,8 @@ struct SurveyView: View {
         guard currentQuestionIndex < survey.questions.count else { return false }
         let question = survey.questions[currentQuestionIndex]
         if !question.required { return true }
-        return responses[question.id] != nil && !(responses[question.id] as? String)?.isEmpty ?? true
+        guard let response = responses[question.id] as? String else { return false }
+        return !response.isEmpty
     }
 
     private func goToPrevious() {
@@ -179,7 +180,7 @@ struct SurveyHeaderView: View {
                 .padding(.horizontal, SpacingSystem.lg)
 
             ProgressView(value: progress)
-                .progressViewStyle(LinearProgressViewStyle(tint: PrimaryColors.vibrantPurple))
+                .progressViewStyle(LinearProgressViewStyle(tint: AdaptiveColors.vibrantPurple))
                 .frame(height: 4)
                 .padding(.horizontal, SpacingSystem.lg)
         }
@@ -231,7 +232,7 @@ struct SurveyNavigationView: View {
                         .foregroundColor(canGoNext ? .white : AdaptiveColors.secondaryText)
                         .padding(.horizontal, SpacingSystem.lg)
                         .padding(.vertical, SpacingSystem.sm)
-                        .background(canGoNext ? UIGradients.primaryButton : AdaptiveColors.glassBackground)
+                        .background(canGoNext ? Color.blue : AdaptiveColors.glassBackground)
                         .cornerRadius(12)
                 }
                 .disabled(!canGoNext)
@@ -279,10 +280,10 @@ struct RatingButton: View {
                 .frame(width: 44, height: 44)
                 .background(
                     Circle()
-                        .fill(isSelected ? PrimaryColors.vibrantPurple : AdaptiveColors.glassBackground)
+                        .fill(isSelected ? AdaptiveColors.vibrantPurple : AdaptiveColors.glassBackground)
                         .overlay(
                             Circle()
-                                .stroke(isSelected ? PrimaryColors.vibrantPink : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
+                                .stroke(isSelected ? AdaptiveColors.vibrantPink : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
                         )
                 )
         }
@@ -357,7 +358,7 @@ struct MultipleChoiceButton: View {
         Button(action: action) {
             HStack(spacing: SpacingSystem.md) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isSelected ? PrimaryColors.vibrantGreen : AdaptiveColors.secondaryText)
+                    .foregroundColor(isSelected ? AdaptiveColors.vibrantGreen : AdaptiveColors.secondaryText)
                     .font(.system(size: 20))
 
                 Text(text)
@@ -370,10 +371,10 @@ struct MultipleChoiceButton: View {
             .padding(SpacingSystem.md)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? PrimaryColors.vibrantGreen.opacity(0.1) : AdaptiveColors.glassBackground)
+                    .fill(isSelected ? AdaptiveColors.vibrantGreen.opacity(0.1) : AdaptiveColors.glassBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? PrimaryColors.vibrantGreen : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
+                            .stroke(isSelected ? AdaptiveColors.vibrantGreen : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
@@ -450,15 +451,15 @@ struct NPSButton: View {
     var body: some View {
         Button(action: action) {
             Text("\(score)")
-                .font(TypographySystem.captionBold)
+                .font(AppleBooksTypography.captionBold)
                 .foregroundColor(isSelected ? .white : AdaptiveColors.primaryText)
                 .frame(width: 32, height: 32)
                 .background(
                     Circle()
-                        .fill(isSelected ? PrimaryColors.vibrantPurple : AdaptiveColors.glassBackground)
+                        .fill(isSelected ? AdaptiveColors.vibrantPurple : AdaptiveColors.glassBackground)
                         .overlay(
                             Circle()
-                                .stroke(isSelected ? PrimaryColors.vibrantPink : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
+                                .stroke(isSelected ? AdaptiveColors.vibrantPink : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
                         )
                 )
         }
@@ -482,17 +483,17 @@ struct ChoiceButton: View {
 
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .foregroundColor(PrimaryColors.vibrantGreen)
+                        .foregroundColor(AdaptiveColors.vibrantGreen)
                         .font(.system(size: 16, weight: .semibold))
                 }
             }
             .padding(SpacingSystem.md)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? PrimaryColors.vibrantGreen.opacity(0.1) : AdaptiveColors.glassBackground)
+                    .fill(isSelected ? AdaptiveColors.vibrantGreen.opacity(0.1) : AdaptiveColors.glassBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? PrimaryColors.vibrantGreen : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
+                            .stroke(isSelected ? AdaptiveColors.vibrantGreen : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
@@ -518,7 +519,7 @@ struct QuestionText: View {
 
             if required {
                 Text("*")
-                    .font(TypographySystem.captionBold)
+                    .font(AppleBooksTypography.captionBold)
                     .foregroundColor(SemanticColors.warningPrimary)
             }
         }
