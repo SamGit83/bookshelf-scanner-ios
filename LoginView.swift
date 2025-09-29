@@ -127,204 +127,10 @@ struct LoginView: View {
                                     .textContentType(isSignUp ? .newPassword : .password)
                             }
 
-                            // Enhanced Tier Selection (only for signup)
+                            // Mobile-First Expandable Tier Selection (only for signup)
                             if isSignUp {
-                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
-                                    Text("Choose Your Plan")
-                                        .font(AppleBooksTypography.headlineSmall)
-                                        .foregroundColor(AppleBooksColors.text)
-
-                                    HStack(alignment: .top, spacing: AppleBooksSpacing.space12) {
-                                        // Free Tier Card (45% width)
-                                        Button(action: {
-                                            withAnimation(AnimationTiming.micro) {
-                                                selectedTier = .free
-                                            }
-                                        }) {
-                                            VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
-                                                // Header with icon and badge
-                                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                                    HStack {
-                                                        Text("📚")
-                                                            .font(.system(size: 24))
-                                                        Spacer()
-                                                        Text("Always Free")
-                                                            .font(AppleBooksTypography.caption)
-                                                            .foregroundColor(AppleBooksColors.success)
-                                                            .padding(.horizontal, AppleBooksSpacing.space8)
-                                                            .padding(.vertical, AppleBooksSpacing.space4)
-                                                            .background(AppleBooksColors.success.opacity(0.1))
-                                                            .cornerRadius(8)
-                                                    }
-                                                    
-                                                    Text("Get Started")
-                                                        .font(AppleBooksTypography.headlineMedium)
-                                                        .foregroundColor(selectedTier == .free ? AppleBooksColors.card : AppleBooksColors.text)
-                                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                                        .multilineTextAlignment(.leading)
-                                                }
-                                                
-                                                // Features with positive framing
-                                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space6) {
-                                                    TierFeatureRow(text: "20 scans per month", isSelected: selectedTier == .free)
-                                                    TierFeatureRow(text: "25 books in library", isSelected: selectedTier == .free)
-                                                    TierFeatureRow(text: "5 AI recommendations", isSelected: selectedTier == .free)
-                                                    TierFeatureRow(text: "Basic reading insights", isSelected: selectedTier == .free)
-                                                }
-                                                
-                                                Spacer(minLength: AppleBooksSpacing.space8)
-                                            }
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(AppleBooksSpacing.space16)
-                                            .background(
-                                                selectedTier == .free ?
-                                                LinearGradient(
-                                                    colors: [AppleBooksColors.accent.opacity(0.1), AppleBooksColors.accent.opacity(0.05)],
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                ) :
-                                                LinearGradient(
-                                                    colors: [AppleBooksColors.card, AppleBooksColors.card],
-                                                    startPoint: .top,
-                                                    endPoint: .bottom
-                                                )
-                                            )
-                                            .cornerRadius(16)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 16)
-                                                    .stroke(
-                                                        selectedTier == .free ? AppleBooksColors.accent : Color.gray.opacity(0.2),
-                                                        lineWidth: selectedTier == .free ? 2 : 1
-                                                    )
-                                            )
-                                            .shadow(
-                                                color: selectedTier == .free ? AppleBooksColors.accent.opacity(0.2) : Color.black.opacity(0.05),
-                                                radius: selectedTier == .free ? 8 : 4,
-                                                x: 0,
-                                                y: selectedTier == .free ? 4 : 2
-                                            )
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .layoutPriority(0.45)
-
-                                        // Premium Tier Card (55% width)
-                                        Button(action: {
-                                            withAnimation(AnimationTiming.micro) {
-                                                selectedTier = .premium
-                                            }
-                                        }) {
-                                            ZStack {
-                                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
-                                                    // Header with crown icon and recommended badge
-                                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                                        HStack {
-                                                            Text("👑")
-                                                                .font(.system(size: 24))
-                                                            Spacer()
-                                                        }
-                                                        
-                                                        Text("Unlock Everything")
-                                                            .font(AppleBooksTypography.headlineMedium)
-                                                            .foregroundColor(selectedTier == .premium ? .white : AppleBooksColors.text)
-                                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                                            .multilineTextAlignment(.leading)
-                                                    }
-                                                    
-                                                    // Features with unlimited emphasis
-                                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space6) {
-                                                        TierFeatureRow(text: "Unlimited scans", isSelected: selectedTier == .premium, isPremium: true)
-                                                        TierFeatureRow(text: "Unlimited books", isSelected: selectedTier == .premium, isPremium: true)
-                                                        TierFeatureRow(text: "Unlimited AI recommendations", isSelected: selectedTier == .premium, isPremium: true)
-                                                        TierFeatureRow(text: "Advanced reading analytics", isSelected: selectedTier == .premium, isPremium: true)
-                                                        TierFeatureRow(text: "Priority support", isSelected: selectedTier == .premium, isPremium: true)
-                                                    }
-                                                    
-                                                    Spacer(minLength: AppleBooksSpacing.space8)
-                                                    
-                                                    // Trust signals
-                                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
-                                                        Text("$2.99/month")
-                                                            .font(AppleBooksTypography.headlineSmall)
-                                                            .foregroundColor(selectedTier == .premium ? .white : AppleBooksColors.text)
-                                                        
-                                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space2) {
-                                                            Text("7-day free trial")
-                                                                .font(AppleBooksTypography.caption)
-                                                                .foregroundColor(selectedTier == .premium ? .white.opacity(0.9) : AppleBooksColors.textSecondary)
-                                                            Text("Cancel anytime")
-                                                                .font(AppleBooksTypography.caption)
-                                                                .foregroundColor(selectedTier == .premium ? .white.opacity(0.9) : AppleBooksColors.textSecondary)
-                                                        }
-                                                    }
-                                                }
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                                .padding(AppleBooksSpacing.space16)
-                                                .background(
-                                                    selectedTier == .premium ?
-                                                    LinearGradient(
-                                                        colors: [
-                                                            AppleBooksColors.accent,
-                                                            AppleBooksColors.accent.opacity(0.8)
-                                                        ],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ) :
-                                                    LinearGradient(
-                                                        colors: [
-                                                            AppleBooksColors.accent.opacity(0.05),
-                                                            AppleBooksColors.accent.opacity(0.02)
-                                                        ],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    )
-                                                )
-                                                .cornerRadius(16)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 16)
-                                                        .stroke(
-                                                            selectedTier == .premium ? Color.clear : AppleBooksColors.accent.opacity(0.3),
-                                                            lineWidth: 1
-                                                        )
-                                                )
-                                                .shadow(
-                                                    color: selectedTier == .premium ? AppleBooksColors.accent.opacity(0.4) : AppleBooksColors.accent.opacity(0.1),
-                                                    radius: selectedTier == .premium ? 12 : 6,
-                                                    x: 0,
-                                                    y: selectedTier == .premium ? 6 : 3
-                                                )
-                                                
-                                                // Floating "RECOMMENDED" badge
-                                                VStack {
-                                                    HStack {
-                                                        Spacer()
-                                                        Text("✨ RECOMMENDED")
-                                                            .font(AppleBooksTypography.caption)
-                                                            .foregroundColor(.white)
-                                                            .padding(.horizontal, AppleBooksSpacing.space8)
-                                                            .padding(.vertical, AppleBooksSpacing.space4)
-                                                            .background(
-                                                                LinearGradient(
-                                                                    colors: [
-                                                                        AppleBooksColors.accent,
-                                                                        AppleBooksColors.accent.opacity(0.8)
-                                                                    ],
-                                                                    startPoint: .leading,
-                                                                    endPoint: .trailing
-                                                                )
-                                                            )
-                                                            .cornerRadius(12)
-                                                            .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 4, x: 0, y: 2)
-                                                            .offset(y: -8)
-                                                    }
-                                                    Spacer()
-                                                }
-                                            }
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .layoutPriority(0.55)
-                                    }
-                                }
-                                .padding(.bottom, AppleBooksSpacing.space24)
+                                ExpandableTierSelection(selectedTier: $selectedTier)
+                                    .padding(.bottom, AppleBooksSpacing.space24)
                             }
 
                             // Required Name Fields (only for signup)
@@ -863,6 +669,268 @@ struct PasswordResetView: View {
                     message = error.localizedDescription
                 }
             }
+        }
+    }
+}
+
+// MARK: - Mobile-First Expandable Tier Selection
+
+struct ExpandableTierSelection: View {
+    @Binding var selectedTier: UserTier
+    @State private var expandedTier: UserTier? = nil
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+            Text("Choose Your Plan")
+                .font(AppleBooksTypography.headlineSmall)
+                .foregroundColor(AppleBooksColors.text)
+            
+            VStack(spacing: AppleBooksSpacing.space12) {
+                // Free Tier Button
+                ExpandableTierButton(
+                    tier: .free,
+                    icon: "📚",
+                    title: "Free - Get Started",
+                    badge: "Always Free",
+                    badgeColor: AppleBooksColors.success,
+                    pricing: nil,
+                    features: [
+                        "20 scans per month",
+                        "25 books in library",
+                        "5 AI recommendations",
+                        "Basic reading insights"
+                    ],
+                    selectedTier: $selectedTier,
+                    expandedTier: $expandedTier
+                )
+                
+                // Premium Tier Button
+                ExpandableTierButton(
+                    tier: .premium,
+                    icon: "👑",
+                    title: "Premium - Unlock Everything",
+                    badge: "✨ RECOMMENDED",
+                    badgeColor: AppleBooksColors.accent,
+                    pricing: "$2.99/month",
+                    pricingSubtext: "7-day free trial • Cancel anytime",
+                    features: [
+                        "Unlimited scans",
+                        "Unlimited books",
+                        "Unlimited AI recommendations",
+                        "Advanced reading analytics",
+                        "Priority support"
+                    ],
+                    selectedTier: $selectedTier,
+                    expandedTier: $expandedTier
+                )
+            }
+        }
+    }
+}
+
+struct ExpandableTierButton: View {
+    let tier: UserTier
+    let icon: String
+    let title: String
+    let badge: String
+    let badgeColor: Color
+    let pricing: String?
+    let pricingSubtext: String?
+    let features: [String]
+    @Binding var selectedTier: UserTier
+    @Binding var expandedTier: UserTier?
+    
+    // Initialize with optional pricing subtext
+    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>) {
+        self.tier = tier
+        self.icon = icon
+        self.title = title
+        self.badge = badge
+        self.badgeColor = badgeColor
+        self.pricing = pricing
+        self.pricingSubtext = pricingSubtext
+        self.features = features
+        self._selectedTier = selectedTier
+        self._expandedTier = expandedTier
+    }
+    
+    private var isSelected: Bool { selectedTier == tier }
+    private var isExpanded: Bool { expandedTier == tier }
+    private var isPremium: Bool { tier == .premium }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Main Button
+            Button(action: {
+                withAnimation(AnimationTiming.transition) {
+                    if selectedTier == tier && isExpanded {
+                        // Collapse if tapping the same expanded tier
+                        expandedTier = nil
+                    } else {
+                        // Select and expand
+                        selectedTier = tier
+                        expandedTier = tier
+                    }
+                }
+            }) {
+                HStack(spacing: AppleBooksSpacing.space12) {
+                    // Icon
+                    Text(icon)
+                        .font(.system(size: 28))
+                    
+                    // Title and Badge
+                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                        Text(title)
+                            .font(AppleBooksTypography.headlineMedium)
+                            .foregroundColor(buttonTextColor)
+                            .multilineTextAlignment(.leading)
+                        
+                        HStack {
+                            Text(badge)
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, AppleBooksSpacing.space8)
+                                .padding(.vertical, AppleBooksSpacing.space4)
+                                .background(badgeColor)
+                                .cornerRadius(8)
+                            
+                            if let pricing = pricing {
+                                Text(pricing)
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(buttonTextColor)
+                                    .bold()
+                            }
+                            
+                            Spacer()
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Selection Indicator
+                    ZStack {
+                        Circle()
+                            .stroke(isSelected ? AppleBooksColors.accent : Color.gray.opacity(0.4), lineWidth: 2)
+                            .frame(width: 24, height: 24)
+                        
+                        if isSelected {
+                            Circle()
+                                .fill(AppleBooksColors.accent)
+                                .frame(width: 16, height: 16)
+                        }
+                    }
+                }
+                .padding(AppleBooksSpacing.space16)
+                .background(buttonBackground)
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(buttonBorderColor, lineWidth: isSelected ? 2 : 1)
+                )
+                .shadow(
+                    color: buttonShadowColor,
+                    radius: isSelected ? 8 : 4,
+                    x: 0,
+                    y: isSelected ? 4 : 2
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            // Expandable Features Section
+            if isExpanded {
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+                    // Features List
+                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                        ForEach(features, id: \.self) { feature in
+                            HStack(spacing: AppleBooksSpacing.space8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(AppleBooksColors.success)
+                                
+                                Text(feature)
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.text)
+                                
+                                Spacer()
+                            }
+                        }
+                    }
+                    
+                    // Pricing Subtext for Premium
+                    if let pricingSubtext = pricingSubtext {
+                        Text(pricingSubtext)
+                            .font(AppleBooksTypography.caption)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .padding(.top, AppleBooksSpacing.space4)
+                    }
+                }
+                .padding(AppleBooksSpacing.space16)
+                .background(AppleBooksColors.card)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+                .padding(.top, AppleBooksSpacing.space8)
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.95).combined(with: .opacity).combined(with: .move(edge: .top)),
+                    removal: .scale(scale: 0.95).combined(with: .opacity).combined(with: .move(edge: .top))
+                ))
+            }
+        }
+    }
+    
+    // MARK: - Computed Properties for Styling
+    
+    private var buttonBackground: LinearGradient {
+        if isSelected && isPremium {
+            return LinearGradient(
+                colors: [
+                    AppleBooksColors.accent,
+                    AppleBooksColors.accent.opacity(0.8)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        } else if isSelected {
+            return LinearGradient(
+                colors: [
+                    AppleBooksColors.accent.opacity(0.1),
+                    AppleBooksColors.accent.opacity(0.05)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        } else {
+            return LinearGradient(
+                colors: [AppleBooksColors.card, AppleBooksColors.card],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+    }
+    
+    private var buttonTextColor: Color {
+        if isSelected && isPremium {
+            return .white
+        } else {
+            return AppleBooksColors.text
+        }
+    }
+    
+    private var buttonBorderColor: Color {
+        if isSelected {
+            return isPremium ? Color.clear : AppleBooksColors.accent
+        } else {
+            return Color.gray.opacity(0.2)
+        }
+    }
+    
+    private var buttonShadowColor: Color {
+        if isSelected {
+            return AppleBooksColors.accent.opacity(isPremium ? 0.4 : 0.2)
+        } else {
+            return Color.black.opacity(0.05)
         }
     }
 }
