@@ -32,21 +32,25 @@ class OfflineCache {
     // MARK: - Books Caching
 
     func cacheBooks(_ books: [Book]) {
+        print("DEBUG OfflineCache: Caching \(books.count) books to \(booksCacheFile.lastPathComponent)")
         do {
             let data = try JSONEncoder().encode(books)
             try data.write(to: booksCacheFile, options: .atomic)
+            print("DEBUG OfflineCache: Successfully cached books")
         } catch {
-            print("Failed to cache books: \(error)")
+            print("DEBUG OfflineCache: Failed to cache books: \(error)")
         }
     }
 
     func loadCachedBooks() -> [Book]? {
+        print("DEBUG OfflineCache: Attempting to load cached books from \(booksCacheFile.lastPathComponent)")
         do {
             let data = try Data(contentsOf: booksCacheFile)
             let books = try JSONDecoder().decode([Book].self, from: data)
+            print("DEBUG OfflineCache: Successfully loaded \(books.count) cached books")
             return books
         } catch {
-            print("Failed to load cached books: \(error)")
+            print("DEBUG OfflineCache: Failed to load cached books: \(error)")
             return nil
         }
     }

@@ -100,6 +100,9 @@ class AuthService: ObservableObject {
         do {
             try Auth.auth().signOut()
             errorMessage = nil
+            // Clear cached books to prevent them from being loaded in unauthenticated state
+            OfflineCache.shared.clearBooksCache()
+            print("DEBUG AuthService: Cleared books cache on sign out")
         } catch let error {
             errorMessage = error.localizedDescription
         }

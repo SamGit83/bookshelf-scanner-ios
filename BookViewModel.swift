@@ -415,14 +415,9 @@ class BookViewModel: ObservableObject {
 
     private func setupFirestoreListener() {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            print("DEBUG BookViewModel: setupFirestoreListener - user not authenticated, loading from cache")
-            // Load from cache if offline
-            if let cachedBooks = OfflineCache.shared.loadCachedBooks() {
-                self.books = cachedBooks
-                print("DEBUG BookViewModel: Loaded \(cachedBooks.count) books from cache")
-            } else {
-                print("DEBUG BookViewModel: No cached books available")
-            }
+            print("DEBUG BookViewModel: setupFirestoreListener - user not authenticated (currentUserId is nil), setting books to empty")
+            // Do not load from cache for unauthenticated users to prevent showing books from previous sessions
+            self.books = []
             return
         }
 
@@ -511,11 +506,12 @@ class BookViewModel: ObservableObject {
                     return book
                 }
 
-                print("DEBUG BookViewModel: Successfully loaded \(loadedBooks.count) books from Firestore")
+                print("DEBUG BookViewModel: Successfully loaded \(loadedBooks.count) books from Firestore for user \(userId)")
                 let libraryBooksCount = loadedBooks.filter { $0.status == .library }.count
                 print("DEBUG BookViewModel: Library books count: \(libraryBooksCount)")
                 self?.books = loadedBooks
                 // Cache the books for offline use
+                print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
 
                 // Fetch missing covers for existing books (includes migration of HTTP URLs)
