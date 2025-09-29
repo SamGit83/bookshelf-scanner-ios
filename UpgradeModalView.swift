@@ -1,5 +1,4 @@
 import SwiftUI
-import LiquidGlassDesignSystem
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
@@ -82,7 +81,7 @@ struct UpgradeModalView: View {
                         .font(.system(size: 16))
                 }
                 Text("4.9/5")
-                    .font(TypographySystem.captionBold)
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(AdaptiveColors.primaryText)
             }
 
@@ -385,7 +384,7 @@ struct PricingCard: View {
             VStack(spacing: SpacingSystem.sm) {
                 if let savings = savings {
                     Text(savings)
-                        .font(TypographySystem.captionBold)
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(SemanticColors.successPrimary)
                         .padding(.horizontal, SpacingSystem.sm)
                         .padding(.vertical, SpacingSystem.xs)
