@@ -1,13 +1,23 @@
 import Foundation
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
+#if canImport(FirebaseAuth)
 import FirebaseAuth
+#endif
+#if canImport(FirebaseFirestore)
 import FirebaseFirestore
+#endif
 import Combine
 
 class AnalyticsManager {
     static let shared = AnalyticsManager()
 
+    #if canImport(FirebaseFirestore)
     private let db = Firestore.firestore()
+    #else
+    private let db: Any? = nil
+    #endif
     private var cancellables = Set<AnyCancellable>()
 
     // User properties
@@ -82,10 +92,12 @@ class AnalyticsManager {
 
     private func clearUserProperties() {
         // Clear user-specific properties on logout
+        #if canImport(FirebaseAnalytics)
         let propertiesToClear: [UserProperty] = [.userTier, .subscriptionId, .onboardingCompleted, .totalBooks, .monthlyScans, .monthlyRecommendations, .experimentVariant, .favoriteGenre]
         for property in propertiesToClear {
             Analytics.setUserProperty(nil, forName: property.rawValue)
         }
+        #endif
     }
 
     func updateDynamicUserProperties(totalBooks: Int, monthlyScans: Int, monthlyRecommendations: Int) {
@@ -99,7 +111,9 @@ class AnalyticsManager {
     }
 
     private func setUserProperty(_ name: String, value: String?) {
+        #if canImport(FirebaseAnalytics)
         Analytics.setUserProperty(value, forName: name)
+        #endif
     }
 
     // MARK: - Freemium Metrics Events
@@ -366,17 +380,23 @@ class AnalyticsManager {
     // MARK: - Helper Methods
 
     private func logEvent(_ name: String, parameters: [String: Any]?) {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent(name, parameters: parameters)
+        #endif
     }
 
     // MARK: - Privacy Compliance
 
     func disableAnalyticsForUser() {
+        #if canImport(FirebaseAnalytics)
         Analytics.setUserProperty("opted_out", forName: "analytics_consent")
+        #endif
         // Additional privacy compliance measures would be implemented here
     }
 
     func enableAnalyticsForUser() {
+        #if canImport(FirebaseAnalytics)
         Analytics.setUserProperty("opted_in", forName: "analytics_consent")
+        #endif
     }
 }
