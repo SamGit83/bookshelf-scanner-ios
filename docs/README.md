@@ -13,7 +13,8 @@ Comprehensive design specifications and UI/UX guidelines for the Bookshelf Scann
 ### 📋 Planning Documentation (`docs/planning/`)
 Project planning, user journey analysis, and development roadmap.
 
-- **[MVP Plan and User Journey](planning/MVP_Plan_and_User_Journey.md)** - Comprehensive MVP development plan with 90% completion status, detailed user personas, journey mapping, and success metrics
+- **[MVP Plan and User Journey](planning/MVP_Plan_and_User_Journey.md)** - Comprehensive MVP development plan with 90% completion status, detailing the core bookshelf scanning and library management features that form the foundation for the freemium monetization model
+- **[Freemium Tier Specifications](planning/Freemium_Tier_Specifications.md)** - Detailed freemium business model that builds upon the MVP features, with tier limits, pricing, cost estimates, and revenue projections
 - **[Initial Technical Architecture Plan](planning/MVP_Plan_and_User_Journey.md#initial-technical-architecture-plan)** - Original technical architecture specification including data models, API integration, and implementation phases
 
 ### 🔧 Technical Documentation (`docs/technical/`)

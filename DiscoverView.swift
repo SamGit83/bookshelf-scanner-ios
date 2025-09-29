@@ -8,6 +8,7 @@ struct DiscoverView: View {
     @State private var errorMessage: String?
     @State private var lastRefreshDate: Date?
     @State private var selectedBook: Book?
+    @State private var showUpgradePrompt = false
 
     // Group recommendations by genre for categories
     private var recommendationsByGenre: [String: [BookRecommendation]] {
@@ -157,6 +158,16 @@ struct DiscoverView: View {
         .sheet(item: $selectedBook) { book in
             BookDetailView(book: book, viewModel: viewModel)
         }
+        .alert(isPresented: $showUpgradePrompt) {
+            Alert(
+                title: Text("Recommendation Limit Reached"),
+                message: Text("You've reached your monthly recommendation limit of \(UsageTracker.shared.recommendationLimit) recommendations. Upgrade to Premium for unlimited recommendations!"),
+                primaryButton: .default(Text("Upgrade")) {
+                    // TODO: Navigate to subscription view
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
 
     // Helper to convert BookRecommendation to Book for AppleBooksCollection
@@ -208,9 +219,14 @@ struct DiscoverView: View {
                     lastRefreshDate = Date()
                     errorMessage = nil
                 case .failure(let error):
-                    // If we have cached data, keep using it; otherwise show error
-                    if recommendations.isEmpty {
-                        errorMessage = error.localizedDescription
+                    // Check if it's a limit error
+                    if error.localizedDescription.contains("Recommendation limit reached") {
+                        showUpgradePrompt = true
+                    } else {
+                        // If we have cached data, keep using it; otherwise show error
+                        if recommendations.isEmpty {
+                            errorMessage = error.localizedDescription
+                        }
                     }
                 }
             }

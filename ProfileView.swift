@@ -6,6 +6,7 @@ struct ProfileView: View {
     @ObservedObject var authService: AuthService
     @ObservedObject var themeManager = ThemeManager.shared
     @ObservedObject var accentColorManager = AccentColorManager.shared
+    @ObservedObject var usageTracker = UsageTracker.shared
     @State private var showSignOutAlert = false
 
     var body: some View {
@@ -62,6 +63,49 @@ struct ProfileView: View {
                         }
                         .padding(.top, AppleBooksSpacing.space32)
 
+                        // Usage Stats Section
+                        if let user = authService.currentUser {
+                            VStack(spacing: AppleBooksSpacing.space16) {
+                                AppleBooksSectionHeader(
+                                    title: "Usage This Month",
+                                    subtitle: user.tier == .free ? "Free tier limits" : "Premium - Unlimited",
+                                    showSeeAll: false,
+                                    seeAllAction: nil
+                                )
+
+                                AppleBooksCard {
+                                    VStack(spacing: AppleBooksSpacing.space16) {
+                                        // Scans
+                                        UsageRow(
+                                            icon: "camera.fill",
+                                            title: "AI Scans",
+                                            current: usageTracker.monthlyScans,
+                                            limit: usageTracker.scanLimit,
+                                            color: AppleBooksColors.accent
+                                        )
+
+                                        // Books
+                                        UsageRow(
+                                            icon: "book.fill",
+                                            title: "Books in Library",
+                                            current: usageTracker.totalBooks,
+                                            limit: usageTracker.bookLimit,
+                                            color: AppleBooksColors.success
+                                        )
+
+                                        // Recommendations
+                                        UsageRow(
+                                            icon: "sparkles",
+                                            title: "AI Recommendations",
+                                            current: usageTracker.monthlyRecommendations,
+                                            limit: usageTracker.recommendationLimit,
+                                            color: AppleBooksColors.promotional
+                                        )
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+                        }
 
                         // Settings Options Section
                         VStack(spacing: AppleBooksSpacing.space16) {
@@ -587,28 +631,69 @@ struct PrivacySection: View {
     let title: String
     let description: String
     let iconColor: Color
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: SpacingSystem.md) {
             Image(systemName: icon)
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundColor(iconColor)
                 .frame(width: 40, height: 40)
-            
+
             VStack(alignment: .leading, spacing: SpacingSystem.sm) {
                 Text(title)
                     .font(TypographySystem.headlineSmall)
                     .foregroundColor(AdaptiveColors.primaryText)
-                
+
                 Text(description)
                     .font(TypographySystem.bodyMedium)
                     .foregroundColor(AdaptiveColors.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            
+
             Spacer()
         }
         .padding(SpacingSystem.md)
         .featureCardStyle()
+    }
+}
+
+struct UsageRow: View {
+    let icon: String
+    let title: String
+    let current: Int
+    let limit: Int
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: AppleBooksSpacing.space12) {
+            Image(systemName: icon)
+                .font(AppleBooksTypography.bodyLarge)
+                .foregroundColor(color)
+                .frame(width: 24, height: 24)
+
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                Text(title)
+                    .font(AppleBooksTypography.bodyMedium)
+                    .foregroundColor(AppleBooksColors.text)
+
+                if limit == Int.max {
+                    Text("Unlimited")
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                } else {
+                    Text("\(current) / \(limit)")
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(current >= limit ? AppleBooksColors.promotional : AppleBooksColors.textSecondary)
+                }
+            }
+
+            Spacer()
+
+            if limit != Int.max {
+                ProgressView(value: min(Float(current), Float(limit)), total: Float(limit))
+                    .progressViewStyle(LinearProgressViewStyle(tint: current >= limit ? AppleBooksColors.promotional : color))
+                    .frame(width: 60)
+            }
+        }
     }
 }

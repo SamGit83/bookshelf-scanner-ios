@@ -7,6 +7,7 @@ struct BookshelfWrapperView: View {
     @State private var capturedImage: UIImage?
     @State private var isShowingCamera = false
     @State private var selectedTab = 0
+    @State private var showUpgradePrompt = false
 
     var body: some View {
         Group {
@@ -96,9 +97,23 @@ struct BookshelfWrapperView: View {
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
         }
+        .alert(isPresented: $showUpgradePrompt) {
+            Alert(
+                title: Text("Scan Limit Reached"),
+                message: Text("You've reached your monthly scan limit of \(UsageTracker.shared.scanLimit) scans. Upgrade to Premium for unlimited scans!"),
+                primaryButton: .default(Text("Upgrade")) {
+                    // TODO: Navigate to subscription view
+                },
+                secondaryButton: .cancel()
+            )
+        }
         .onChange(of: capturedImage) { newImage in
             if let image = newImage {
-                viewModel.scanBookshelf(image: image)
+                if UsageTracker.shared.canPerformScan() {
+                    viewModel.scanBookshelf(image: image)
+                } else {
+                    showUpgradePrompt = true
+                }
                 capturedImage = nil
             }
         }

@@ -19,6 +19,7 @@ struct LoginView: View {
     @State private var country = ""
     @State private var city = ""
     @State private var favoriteBookGenre = ""
+    @State private var selectedTier: UserTier = .free
 
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
@@ -124,6 +125,63 @@ struct LoginView: View {
                                             .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                     )
                                     .textContentType(isSignUp ? .newPassword : .password)
+                            }
+
+                            // Tier Selection (only for signup)
+                            if isSignUp {
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                    Text("Choose Your Plan")
+                                        .font(AppleBooksTypography.headlineSmall)
+                                        .foregroundColor(AppleBooksColors.text)
+
+                                    HStack(spacing: AppleBooksSpacing.space12) {
+                                        // Free Tier
+                                        Button(action: {
+                                            selectedTier = .free
+                                        }) {
+                                            VStack(spacing: AppleBooksSpacing.space8) {
+                                                Text("Free")
+                                                    .font(AppleBooksTypography.headlineMedium)
+                                                    .foregroundColor(selectedTier == .free ? AppleBooksColors.card : AppleBooksColors.text)
+                                                Text("20 scans/month\n25 books\n5 recommendations")
+                                                    .font(AppleBooksTypography.caption)
+                                                    .foregroundColor(selectedTier == .free ? AppleBooksColors.card.opacity(0.8) : AppleBooksColors.textSecondary)
+                                                    .multilineTextAlignment(.center)
+                                            }
+                                            .frame(maxWidth: .infinity)
+                                            .padding(AppleBooksSpacing.space16)
+                                            .background(selectedTier == .free ? AppleBooksColors.accent : AppleBooksColors.background)
+                                            .cornerRadius(12)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(selectedTier == .free ? AppleBooksColors.accent : Color.gray.opacity(0.3), lineWidth: selectedTier == .free ? 2 : 1)
+                                            )
+                                        }
+
+                                        // Premium Tier
+                                        Button(action: {
+                                            selectedTier = .premium
+                                        }) {
+                                            VStack(spacing: AppleBooksSpacing.space8) {
+                                                Text("Premium")
+                                                    .font(AppleBooksTypography.headlineMedium)
+                                                    .foregroundColor(selectedTier == .premium ? AppleBooksColors.card : AppleBooksColors.text)
+                                                Text("$2.99/month\nUnlimited scans\nUnlimited books\nUnlimited recommendations")
+                                                    .font(AppleBooksTypography.caption)
+                                                    .foregroundColor(selectedTier == .premium ? AppleBooksColors.card.opacity(0.8) : AppleBooksColors.textSecondary)
+                                                    .multilineTextAlignment(.center)
+                                            }
+                                            .frame(maxWidth: .infinity)
+                                            .padding(AppleBooksSpacing.space16)
+                                            .background(selectedTier == .premium ? AppleBooksColors.accent : AppleBooksColors.background)
+                                            .cornerRadius(12)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(selectedTier == .premium ? AppleBooksColors.accent : Color.gray.opacity(0.3), lineWidth: selectedTier == .premium ? 2 : 1)
+                                            )
+                                        }
+                                    }
+                                }
                             }
 
                             // Required Name Fields (only for signup)
@@ -479,7 +537,8 @@ struct LoginView: View {
             phone: phone.isEmpty ? nil : phone,
             country: country.isEmpty ? nil : country,
             city: city.isEmpty ? nil : city,
-            favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre
+            favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre,
+            tier: selectedTier
         ) { result in
             isLoading = false
             switch result {

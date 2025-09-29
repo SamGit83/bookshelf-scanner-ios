@@ -257,6 +257,9 @@ Add to Info.plist:
 
 ## 🚀 **FUTURE FEATURES & ENHANCEMENTS**
 
+### 💰 Freemium Monetization Model
+For detailed tier specifications, pricing, and revenue projections, see the [Freemium Tier Specifications](Freemium_Tier_Specifications.md).
+
 ### **📈 Advanced Analytics & Insights**
 - **Reading Streaks**: Daily/weekly reading streak tracking with gamification
 - **Reading Speed Analysis**: Calculate pages per hour and reading velocity trends
@@ -475,6 +478,7 @@ Profile Tab → View Statistics → Adjust Settings → Access Help → Manage A
 3. Update navigation flow between tabs
 4. Implement book status system (To Read/Reading/Read)
 5. Update Reading tab to show active books only
+6. Update signup page to display tier options (free and pro) and allow users to select a tier during signup. This involves UI updates to the signup flow and backend integration for tier selection.
 ```
 
 ### **Week 2: Feature Integration** 

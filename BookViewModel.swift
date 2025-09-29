@@ -35,6 +35,7 @@ class BookViewModel: ObservableObject {
                 switch result {
                 case .success(let responseText):
                     print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count)")
+                    UsageTracker.shared.incrementScans()
                     self?.parseAndAddBooks(from: responseText)
                 case .failure(let error):
                     print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription)")
@@ -510,6 +511,8 @@ class BookViewModel: ObservableObject {
                 let libraryBooksCount = loadedBooks.filter { $0.status == .library }.count
                 print("DEBUG BookViewModel: Library books count: \(libraryBooksCount)")
                 self?.books = loadedBooks
+                // Sync book count with UsageTracker
+                UsageTracker.shared.syncBookCount(loadedBooks.count)
                 // Cache the books for offline use
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
@@ -595,6 +598,13 @@ class BookViewModel: ObservableObject {
     // MARK: - Recommendations
 
     func generateRecommendations(for currentBook: Book? = nil, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
+        // Check limits first
+        if !UsageTracker.shared.canGetRecommendation() {
+            let error = NSError(domain: "BookshelfScanner", code: 1, userInfo: [NSLocalizedDescriptionKey: "Recommendation limit reached. Upgrade to Premium for unlimited recommendations."])
+            completion(.failure(error))
+            return
+        }
+
         // Use Grok AI to generate personalized recommendations based on user's entire library
         grokService.generateRecommendations(userBooks: books, currentBook: currentBook) { result in
             DispatchQueue.main.async {
@@ -606,6 +616,9 @@ class BookViewModel: ObservableObject {
 
                     // Cache recommendations for offline use
                     OfflineCache.shared.cacheRecommendations(limitedRecommendations)
+
+                    // Track usage
+                    UsageTracker.shared.incrementRecommendations()
 
                     completion(.success(limitedRecommendations))
                 case .failure(let error):
