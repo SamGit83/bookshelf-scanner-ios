@@ -53,7 +53,7 @@ struct ProfileView: View {
                                         Image(systemName: "calendar")
                                             .font(AppleBooksTypography.caption)
                                             .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
-                                        Text("Member since \(formattedDate(user.metadata.creationDate))")
+                                        Text("Member since \(formattedDate(user.creationDate))")
                                             .font(AppleBooksTypography.caption)
                                             .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
                                     }

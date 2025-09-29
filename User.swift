@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 
 enum UserTier: String, Codable, CaseIterable {
     case free
@@ -20,6 +21,7 @@ struct UserProfile: Codable, Identifiable {
     var tier: UserTier
     var subscriptionId: String?
     var hasCompletedOnboarding: Bool
+    var creationDate: Date?
 
     init(from firebaseUser: FirebaseAuth.User, firestoreData: [String: Any]) {
         self.id = firebaseUser.uid
@@ -37,6 +39,7 @@ struct UserProfile: Codable, Identifiable {
         self.tier = UserTier(rawValue: firestoreData["tier"] as? String ?? "free") ?? .free
         self.subscriptionId = firestoreData["subscriptionId"] as? String
         self.hasCompletedOnboarding = firestoreData["hasCompletedOnboarding"] as? Bool ?? false
+        self.creationDate = firebaseUser.metadata?.creationDate
     }
 
     var displayName: String {
