@@ -1,6 +1,7 @@
 import Foundation
 import FirebaseFirestore
 import Combine
+import SwiftUI
 
 /**
  * IterationTracker - Workflow management from feedback to implementation
@@ -99,7 +100,7 @@ class IterationTracker {
         var grouped: [IterationPriority: [IterationTask]] = [:]
 
         for priority in IterationPriority.allCases {
-            grouped[priority] = getTasks(priority: priority, status: .pending)
+            grouped[priority] = getTasks(status: .pending, priority: priority)
         }
 
         return grouped

@@ -361,7 +361,7 @@ class FeedbackProcessor {
                 .getDocuments()
 
             for document in snapshot.documents {
-                let response = try document.data(as: SurveyResponse.self)
+                guard let response = SurveyResponse.fromDictionary(document.data()) else { continue }
                 await processSurveyResponse(response)
 
                 // Mark as processed

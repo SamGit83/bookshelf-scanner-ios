@@ -2,12 +2,15 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 import Combine
+#if canImport(FirebaseAnalytics)
+import FirebaseAnalytics
+#endif
 
 class PrivacyManager {
     static let shared = PrivacyManager()
 
     private let db = Firestore.firestore()
-    private let userDefaults = UserDefaults.standard()
+    private let userDefaults = UserDefaults.standard
 
     // Consent states
     enum ConsentType: String, CaseIterable {
@@ -58,10 +61,12 @@ class PrivacyManager {
         applyConsent(for: type, status: status)
 
         // Track consent change
-        AnalyticsManager.shared.logEvent("consent_updated", parameters: [
+        #if canImport(FirebaseAnalytics)
+        Analytics.logEvent("consent_updated", parameters: [
             "consent_type": type.rawValue,
             "status": status.rawValue
         ])
+        #endif
     }
 
     func getConsentStatus(for type: ConsentType) -> ConsentStatus {
@@ -205,10 +210,12 @@ class PrivacyManager {
         clearLocalData()
 
         // Track deletion
-        AnalyticsManager.shared.logEvent("user_data_deleted", parameters: [
+        #if canImport(FirebaseAnalytics)
+        Analytics.logEvent("user_data_deleted", parameters: [
             "user_id": userId,
             "deletion_timestamp": Date().ISO8601Format()
         ])
+        #endif
     }
 
     // MARK: - Data Portability
@@ -232,7 +239,9 @@ class PrivacyManager {
     private func anonymizeAnalyticsData() {
         // Implement analytics data anonymization
         // This would typically involve server-side processing
-        AnalyticsManager.shared.logEvent("analytics_consent_withdrawn", parameters: nil)
+        #if canImport(FirebaseAnalytics)
+        Analytics.logEvent("analytics_consent_withdrawn", parameters: nil)
+        #endif
     }
 
     // MARK: - CCPA Specific Features
@@ -252,9 +261,11 @@ class PrivacyManager {
         try await db.collection("ccpa_requests").addDocument(data: requestData)
 
         // Track CCPA request
-        AnalyticsManager.shared.logEvent("ccpa_request_submitted", parameters: [
+        #if canImport(FirebaseAnalytics)
+        Analytics.logEvent("ccpa_request_submitted", parameters: [
             "request_type": requestType.rawValue
         ])
+        #endif
     }
 
     enum CCPARequestType: String {
