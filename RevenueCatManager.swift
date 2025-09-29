@@ -1,12 +1,36 @@
 import Foundation
 import Combine
+import StoreKit
 #if canImport(RevenueCat)
 import RevenueCat
 #else
 // Stub types for when RevenueCat is not available
+enum PeriodType {
+    case intro, normal, trial
+}
+
+class EntitlementInfo {
+    var isActive: Bool = false
+    var productIdentifier: String = ""
+    var expirationDate: Date?
+    var periodType: PeriodType = .normal
+}
+
+class Entitlements {
+    var active: [String: EntitlementInfo] = [:]
+}
+
 class Offering {}
-class CustomerInfo {}
-class Package {}
+
+class CustomerInfo {
+    var originalAppUserId: String = ""
+    var entitlements: Entitlements = Entitlements()
+}
+
+class Package {
+    var storeProduct: StoreProduct?
+    var identifier: String = ""
+}
 #endif
 
 class RevenueCatManager: ObservableObject {
