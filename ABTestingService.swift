@@ -1,16 +1,32 @@
 import Foundation
+#if canImport(FirebaseRemoteConfig)
 import FirebaseRemoteConfig
+#endif
+#if canImport(FirebaseFirestore)
 import FirebaseFirestore
+#endif
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 
 // Analytics integration
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 
 class ABTestingService {
     static let shared = ABTestingService()
 
+    #if canImport(FirebaseRemoteConfig)
     private let remoteConfig = RemoteConfig.remoteConfig()
+    #else
+    private let remoteConfig: Any? = nil
+    #endif
+    #if canImport(FirebaseFirestore)
     private let db = Firestore.firestore()
+    #else
+    private let db: Any? = nil
+    #endif
     private var experiments: [Experiment] = []
     private var userAssignments: [String: UserExperimentAssignment] = [:] // experimentId -> assignment
 
@@ -19,9 +35,11 @@ class ABTestingService {
     }
 
     private func configureRemoteConfig() {
+        #if canImport(FirebaseRemoteConfig)
         let settings = RemoteConfigSettings()
         settings.minimumFetchInterval = 0 // For development; set to 3600 in production
         remoteConfig.configSettings = settings
+        #endif
     }
 
     // MARK: - Experiment Management
@@ -37,6 +55,7 @@ class ABTestingService {
     }
 
     private func fetchFromRemoteConfig() async throws {
+        #if canImport(FirebaseRemoteConfig)
         let status = try await remoteConfig.fetchAndActivate()
         if status != .successFetchedFromRemote {
             throw ABTestingError.fetchFailed("Failed to fetch remote config")
@@ -47,13 +66,16 @@ class ABTestingService {
 
         let data = experimentsJson.data(using: .utf8)!
         experiments = try JSONDecoder().decode([Experiment].self, from: data)
+        #endif
     }
 
     private func fetchFromFirestore() async throws {
+        #if canImport(FirebaseFirestore)
         let snapshot = try await db.collection("experiments").getDocuments()
         experiments = snapshot.documents.compactMap { document in
             try? document.data(as: Experiment.self)
         }
+        #endif
     }
 
     // MARK: - User Assignment
@@ -84,11 +106,13 @@ class ABTestingService {
         userAssignments[experimentId] = assignment
 
         // Track assignment event
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("experiment_assigned", parameters: [
             "experiment_id": experimentId,
             "variant_id": variant.id,
             "user_id": userId
         ])
+        #endif
 
         // Set experiment variant in analytics
         AnalyticsManager.shared.setExperimentVariant(experimentId: experimentId, variantId: variant.id)
@@ -112,14 +136,20 @@ class ABTestingService {
     }
 
     private func fetchUserAssignment(experimentId: String, userId: String) async throws -> UserExperimentAssignment? {
+        #if canImport(FirebaseFirestore)
         let docRef = db.collection("userExperimentAssignments").document("\(userId)_\(experimentId)")
         let document = try await docRef.getDocument()
         return try document.data(as: UserExperimentAssignment.self)
+        #else
+        return nil
+        #endif
     }
 
     private func saveUserAssignment(_ assignment: UserExperimentAssignment) async throws {
+        #if canImport(FirebaseFirestore)
         let docRef = db.collection("userExperimentAssignments").document(assignment.id)
         try docRef.setData(from: assignment)
+        #endif
     }
 
     // MARK: - Configuration Retrieval
@@ -156,10 +186,12 @@ class ABTestingService {
     // MARK: - Analytics Tracking
 
     func trackExperimentEvent(experimentId: String, variantId: String, event: String, parameters: [String: Any] = [:]) {
+        #if canImport(FirebaseAnalytics)
         var params = parameters
         params["experiment_id"] = experimentId
         params["variant_id"] = variantId
         Analytics.logEvent(event, parameters: params)
+        #endif
     }
 
     // MARK: - RevenueCat Integration Points

@@ -4,7 +4,9 @@ import Combine
 import Foundation
 
 // Analytics integration
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 
 class AuthService: ObservableObject {
     static let shared = AuthService()
