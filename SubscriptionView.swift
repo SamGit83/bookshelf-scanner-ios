@@ -1,5 +1,7 @@
 import SwiftUI
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 // import RevenueCat  // TODO: Add RevenueCat dependency
 
 struct SubscriptionView: View {
@@ -335,42 +337,52 @@ struct SubscriptionView: View {
 
     // Analytics
     private func trackView() {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("subscription_view_opened", parameters: [
             "variant_id": variantConfig?.variantId ?? "default"
         ])
+        #endif
     }
 
     private func trackDismiss() {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("subscription_view_dismissed", parameters: [
             "variant_id": variantConfig?.variantId ?? "default"
         ])
+        #endif
     }
 
     private func trackPurchaseStart(package: SubscriptionPackage) {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("subscription_purchase_started", parameters: [
             "variant_id": variantConfig?.variantId ?? "default",
             "package_id": package.id,
             "price": package.price,
             "currency": package.currency
         ])
+        #endif
     }
 
     private func trackPurchaseSuccess(package: SubscriptionPackage) {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("subscription_purchase_success", parameters: [
             "variant_id": variantConfig?.variantId ?? "default",
             "package_id": package.id,
             "price": package.price,
             "currency": package.currency
         ])
+        #endif
     }
 
     private func trackPurchaseFailure(package: SubscriptionPackage) {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("subscription_purchase_failed", parameters: [
             "variant_id": variantConfig?.variantId ?? "default",
             "package_id": package.id,
             "price": package.price,
             "currency": package.currency
         ])
+        #endif
     }
 }
 
