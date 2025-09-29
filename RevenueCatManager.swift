@@ -27,6 +27,11 @@ class CustomerInfo {
     var entitlements: Entitlements = Entitlements()
 }
 
+class StoreProduct {
+    var price: Decimal = 0
+    var currencyCode: String = ""
+}
+
 class Package {
     var storeProduct: StoreProduct?
     var identifier: String = ""
