@@ -321,7 +321,7 @@ class FeedbackManager {
             await markSurveyCompleted(surveyId: response.surveyId, userId: response.userId)
 
             // Track completion
-            AnalyticsManager.shared.trackFeatureUsage(feature: "survey_completed", context: response.surveyType.rawValue)
+            AnalyticsManager.shared.trackFeatureUsage(feature: "survey_completed", context: response.surveyType)
 
             // Queue for processing
             await FeedbackProcessor.shared.processSurveyResponse(response)
@@ -410,12 +410,12 @@ class FeedbackManager {
 
     private func saveSurvey(_ survey: Survey) async throws {
         let docRef = db.collection("surveys").document(survey.id)
-        try docRef.setData(from: survey)
+        try await docRef.setData(survey.toDictionary())
     }
 
     private func saveSurveyResponse(_ response: SurveyResponse) async throws {
         let docRef = db.collection("surveyResponses").document(response.id)
-        try docRef.setData(from: response)
+        try await docRef.setData(response.toDictionary())
     }
 
     private func markSurveyCompleted(surveyId: String, userId: String) async {
@@ -440,7 +440,7 @@ class FeedbackManager {
                 .getDocuments()
 
             if let doc = snapshot.documents.first,
-               let response = try? doc.data(as: SurveyResponse.self) {
+               let response = SurveyResponse.fromDictionary(doc.data()) {
                 return response.completedAt
             }
         } catch {
@@ -460,7 +460,7 @@ class FeedbackManager {
                     .whereField("expiresAt", isGreaterThan: Timestamp(date: Date()))
                     .getDocuments()
 
-                self.surveyQueue = snapshot.documents.compactMap { try? $0.data(as: Survey.self) }
+                self.surveyQueue = snapshot.documents.compactMap { Survey.fromDictionary($0.data()) }
             } catch {
                 print("Failed to load pending surveys: \(error)")
             }
@@ -484,7 +484,7 @@ class FeedbackManager {
 
 // MARK: - Supporting Types
 
-struct Survey: Codable, Identifiable {
+struct Survey: Identifiable {
     var id: String
     var type: FeedbackManager.SurveyType
     var userId: String
@@ -496,6 +496,50 @@ struct Survey: Codable, Identifiable {
     var headline: String?
     var status: String = "pending"
     var completedAt: Date?
+
+    // Custom encoding/decoding to handle [String: Any]
+    func toDictionary() -> [String: Any] {
+        return [
+            "id": id,
+            "type": type.rawValue,
+            "userId": userId,
+            "questions": questions.map { $0.toDictionary() },
+            "createdAt": Timestamp(date: createdAt),
+            "expiresAt": Timestamp(date: expiresAt),
+            "context": context,
+            "variantId": variantId as Any,
+            "headline": headline as Any,
+            "status": status,
+            "completedAt": completedAt.map { Timestamp(date: $0) } as Any
+        ]
+    }
+
+    static func fromDictionary(_ dict: [String: Any]) -> Survey? {
+        guard let id = dict["id"] as? String,
+              let typeString = dict["type"] as? String,
+              let type = SurveyType(rawValue: typeString),
+              let userId = dict["userId"] as? String,
+              let questionsDicts = dict["questions"] as? [[String: Any]],
+              let createdAtTimestamp = dict["createdAt"] as? Timestamp,
+              let expiresAtTimestamp = dict["expiresAt"] as? Timestamp else { return nil }
+
+        let questions = questionsDicts.compactMap { SurveyQuestion.fromDict($0) }
+        let context = dict["context"] as? [String: Any] ?? [:]
+
+        return Survey(
+            id: id,
+            type: type,
+            userId: userId,
+            questions: questions,
+            createdAt: createdAtTimestamp.dateValue(),
+            expiresAt: expiresAtTimestamp.dateValue(),
+            context: context,
+            variantId: dict["variantId"] as? String,
+            headline: dict["headline"] as? String,
+            status: dict["status"] as? String ?? "pending",
+            completedAt: (dict["completedAt"] as? Timestamp)?.dateValue()
+        )
+    }
 
     var title: String {
         switch type {
@@ -541,7 +585,7 @@ struct SurveyQuestion: Codable, Identifiable {
     }
 }
 
-struct SurveyResponse: Codable, Identifiable {
+struct SurveyResponse: Identifiable {
     var id: String
     var surveyId: String
     var surveyType: String
@@ -550,4 +594,37 @@ struct SurveyResponse: Codable, Identifiable {
     var completedAt: Date
     var variantId: String?
     var context: [String: Any]
+
+    // Custom encoding/decoding to handle [String: Any]
+    func toDictionary() -> [String: Any] {
+        return [
+            "id": id,
+            "surveyId": surveyId,
+            "surveyType": surveyType,
+            "userId": userId,
+            "responses": responses,
+            "completedAt": Timestamp(date: completedAt),
+            "variantId": variantId as Any,
+            "context": context
+        ]
+    }
+
+    static func fromDictionary(_ dict: [String: Any]) -> SurveyResponse? {
+        guard let id = dict["id"] as? String,
+              let surveyId = dict["surveyId"] as? String,
+              let surveyType = dict["surveyType"] as? String,
+              let userId = dict["userId"] as? String,
+              let completedAtTimestamp = dict["completedAt"] as? Timestamp else { return nil }
+
+        return SurveyResponse(
+            id: id,
+            surveyId: surveyId,
+            surveyType: surveyType,
+            userId: userId,
+            responses: dict["responses"] as? [String: Any] ?? [:],
+            completedAt: completedAtTimestamp.dateValue(),
+            variantId: dict["variantId"] as? String,
+            context: dict["context"] as? [String: Any] ?? [:]
+        )
+    }
 }
