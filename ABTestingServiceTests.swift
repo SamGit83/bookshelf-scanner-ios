@@ -7,7 +7,7 @@
 // TODO: Test error handling
 
 import XCTest
-@testable import BookshelfScanner
+import Foundation
 
 class ABTestingServiceTests: XCTestCase {
     var service: ABTestingService!

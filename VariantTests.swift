@@ -4,7 +4,7 @@
 // TODO: Test AnyCodable encoding/decoding
 
 import XCTest
-@testable import BookshelfScanner
+import Foundation
 
 class VariantTests: XCTestCase {
     func testVariantDecoding() {

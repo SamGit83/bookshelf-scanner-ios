@@ -6,7 +6,9 @@ import UIKit
 #endif
 
 // Analytics integration
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 
 class BookViewModel: ObservableObject {
     @Published var books: [Book] = []

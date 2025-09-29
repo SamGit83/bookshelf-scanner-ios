@@ -4,7 +4,7 @@
 // TODO: Test assignment creation
 
 import XCTest
-@testable import BookshelfScanner
+import Foundation
 
 class UserExperimentAssignmentTests: XCTestCase {
     func testAssignmentDecoding() {

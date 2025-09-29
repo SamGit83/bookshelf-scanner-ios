@@ -4,7 +4,7 @@
 // TODO: Test target audience filtering
 
 import XCTest
-@testable import BookshelfScanner
+import Foundation
 
 class ExperimentTests: XCTestCase {
     func testExperimentDecoding() {
