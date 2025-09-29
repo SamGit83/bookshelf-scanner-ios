@@ -1,6 +1,10 @@
 import Foundation
+#if canImport(FirebaseRemoteConfig)
 import FirebaseRemoteConfig
+#endif
+#if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
+#endif
 
 class ABTestingManager: ObservableObject {
     static let shared = ABTestingManager()
@@ -8,7 +12,11 @@ class ABTestingManager: ObservableObject {
     @Published var currentPricingVariant: PricingVariant = .standard
     @Published var currentLimitsVariant: LimitsVariant = .standard
 
+    #if canImport(FirebaseRemoteConfig)
     private let remoteConfig = RemoteConfig.remoteConfig()
+    #else
+    private let remoteConfig: Any? = nil
+    #endif
     private let userDefaults = UserDefaults.standard
 
     // A/B Test Keys
@@ -75,6 +83,7 @@ class ABTestingManager: ObservableObject {
     }
 
     private func setupRemoteConfig() {
+        #if canImport(FirebaseRemoteConfig)
         let settings = RemoteConfigSettings()
         settings.minimumFetchInterval = 3600 // 1 hour
         remoteConfig.configSettings = settings
@@ -85,9 +94,11 @@ class ABTestingManager: ObservableObject {
             limitsTestKey: "standard" as NSObject
         ]
         remoteConfig.setDefaults(defaults)
+        #endif
     }
 
     func fetchRemoteConfig(completion: @escaping () -> Void) {
+        #if canImport(FirebaseRemoteConfig)
         remoteConfig.fetchAndActivate { [weak self] status, error in
             if let error = error {
                 print("Error fetching remote config: \(error.localizedDescription)")
@@ -97,9 +108,13 @@ class ABTestingManager: ObservableObject {
             }
             completion()
         }
+        #else
+        completion()
+        #endif
     }
 
     private func updateVariantsFromRemoteConfig() {
+        #if canImport(FirebaseRemoteConfig)
         let pricingVariant = remoteConfig[pricingTestKey].stringValue ?? "standard"
         let limitsVariant = remoteConfig[limitsTestKey].stringValue ?? "standard"
 
@@ -114,10 +129,13 @@ class ABTestingManager: ObservableObject {
         updateUsageTrackerLimits()
 
         // Log variant assignment
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("ab_test_variant_assigned", parameters: [
             "pricing_variant": pricingVariant,
             "limits_variant": limitsVariant
         ])
+        #endif
+        #endif
     }
 
     private func loadUserVariants() {
@@ -139,6 +157,7 @@ class ABTestingManager: ObservableObject {
     // MARK: - Analytics Tracking
 
     func trackConversion(fromVariant: String, toVariant: String? = nil) {
+        #if canImport(FirebaseAnalytics)
         var parameters: [String: Any] = [
             "from_variant": fromVariant,
             "pricing_variant": currentPricingVariant.rawValue,
@@ -150,22 +169,27 @@ class ABTestingManager: ObservableObject {
         }
 
         Analytics.logEvent("ab_test_conversion", parameters: parameters)
+        #endif
     }
 
     func trackLimitHit(limitType: String) {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("limit_hit", parameters: [
             "limit_type": limitType,
             "pricing_variant": currentPricingVariant.rawValue,
             "limits_variant": currentLimitsVariant.rawValue
         ])
+        #endif
     }
 
     func trackUpgradePromptShown(source: String) {
+        #if canImport(FirebaseAnalytics)
         Analytics.logEvent("upgrade_prompt_shown", parameters: [
             "source": source,
             "pricing_variant": currentPricingVariant.rawValue,
             "limits_variant": currentLimitsVariant.rawValue
         ])
+        #endif
     }
 
     // MARK: - Test Management
