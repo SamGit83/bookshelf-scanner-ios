@@ -34,9 +34,9 @@ class UsageTracker: ObservableObject {
     private let defaultRecommendationLimit = 5
 
     // Cached variant-specific limits
-    @Published private(set) var variantScanLimit: Int = 20
-    @Published private(set) var variantBookLimit: Int = 25
-    @Published private(set) var variantRecommendationLimit: Int = 5
+    @Published var variantScanLimit: Int = 20
+    @Published var variantBookLimit: Int = 25
+    @Published var variantRecommendationLimit: Int = 5
 
     func canPerformScan() -> Bool {
         guard let tier = AuthService.shared.currentUser?.tier else { return false }

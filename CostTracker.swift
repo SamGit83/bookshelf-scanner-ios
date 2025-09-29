@@ -279,8 +279,8 @@ struct CostMetrics {
     var dailyCosts: [String: Double] = [:]
 
     var costByService: [String: Double] {
-        apiUsage.mapValues { usage in
-            let rate = self.getCostRate(for: $0)
+        apiUsage.mapValues { (service: String, usage: Int) -> Double in
+            let rate = self.getCostRate(for: service)
             return Double(usage) * rate
         }
     }
