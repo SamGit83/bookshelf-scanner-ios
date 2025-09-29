@@ -43,7 +43,13 @@ class CostTracker {
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
         let actualCost = cost ?? (costRates[service] ?? 0.0) * Double(usage)
 
+        print("DEBUG: recordCost called for service: \(service), cost: \(actualCost), usage: \(usage)")
+        print("DEBUG: self pointer: \(Unmanaged.passUnretained(self).toOpaque())")
+
         queue.async {
+            print("DEBUG: Inside queue.async, self pointer: \(Unmanaged.passUnretained(self).toOpaque())")
+            print("DEBUG: currentCosts before: totalCost=\(self.currentCosts.totalCost), apiUsage count=\(self.currentCosts.apiUsage.count)")
+
             self.currentCosts.totalCost += actualCost
             self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
 
@@ -54,8 +60,11 @@ class CostTracker {
             }
             self.currentCosts.dailyCosts[today]! += actualCost
 
+            print("DEBUG: currentCosts after: totalCost=\(self.currentCosts.totalCost), apiUsage count=\(self.currentCosts.apiUsage.count)")
+
             // Update profitability
             self.updateProfitability()
+            print("DEBUG: updateProfitability completed")
         }
 
         // Track in performance monitoring
