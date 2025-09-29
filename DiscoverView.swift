@@ -8,7 +8,7 @@ struct DiscoverView: View {
     @State private var errorMessage: String?
     @State private var lastRefreshDate: Date?
     @State private var selectedBook: Book?
-    @State private var showUpgradePrompt = false
+    @State private var showUpgradeModal = false
 
     // Group recommendations by genre for categories
     private var recommendationsByGenre: [String: [BookRecommendation]] {
@@ -158,15 +158,8 @@ struct DiscoverView: View {
         .sheet(item: $selectedBook) { book in
             BookDetailView(book: book, viewModel: viewModel)
         }
-        .alert(isPresented: $showUpgradePrompt) {
-            Alert(
-                title: Text("Recommendation Limit Reached"),
-                message: Text("You've reached your monthly recommendation limit of \(UsageTracker.shared.recommendationLimit) recommendations. Upgrade to Premium for unlimited recommendations!"),
-                primaryButton: .default(Text("Upgrade")) {
-                    // TODO: Navigate to subscription view
-                },
-                secondaryButton: .cancel()
-            )
+        .sheet(isPresented: $showUpgradeModal) {
+            UpgradeModalView()
         }
     }
 
@@ -221,7 +214,7 @@ struct DiscoverView: View {
                 case .failure(let error):
                     // Check if it's a limit error
                     if error.localizedDescription.contains("Recommendation limit reached") {
-                        showUpgradePrompt = true
+                        showUpgradeModal = true
                     } else {
                         // If we have cached data, keep using it; otherwise show error
                         if recommendations.isEmpty {

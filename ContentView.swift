@@ -93,6 +93,9 @@ struct ContentView: View {
                     LiquidGlassTabBar(selectedTab: $selectedTab)
                 }
                 .edgesIgnoringSafeArea(.bottom)
+
+                // Survey modal overlay
+                SurveyModalView()
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())

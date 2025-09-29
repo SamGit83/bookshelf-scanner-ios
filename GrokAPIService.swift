@@ -18,6 +18,9 @@ class GrokAPIService {
     private let baseURL = "https://api.x.ai/v1/chat/completions"
 
     func generateRecommendations(userBooks: [Book], currentBook: Book?, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
+        let startTime = Date()
+        let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "grok", endpoint: "chat/completions", method: "POST")
+
         print("DEBUG GrokAPIService: generateRecommendations called with \(userBooks.count) books")
 
         let prompt = buildRecommendationPrompt(userBooks: userBooks, currentBook: currentBook)
@@ -53,14 +56,35 @@ class GrokAPIService {
 
         print("DEBUG GrokAPIService: Sending request to Grok API")
         URLSession.shared.dataTask(with: request) { data, response, error in
+            let responseTime = Date().timeIntervalSince(startTime)
+            let dataSize = Int64(data?.count ?? 0)
+
             if let error = error {
                 print("DEBUG GrokAPIService: Network error: \(error.localizedDescription)")
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    dataSize: dataSize,
+                    error: error
+                )
+
                 completion(.failure(error))
                 return
             }
 
             guard let data = data else {
-                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                let noDataError = NSError(domain: "NoData", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    error: noDataError
+                )
+
+                completion(.failure(noDataError))
                 return
             }
 
@@ -73,20 +97,60 @@ class GrokAPIService {
 
                 if let error = grokResponse.error {
                     print("DEBUG GrokAPIService: API error: \(error.message)")
-                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
+                    let apiError = NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])
+
+                    PerformanceMonitoringService.shared.completeAPICall(
+                        traceId: traceId,
+                        success: false,
+                        responseTime: responseTime,
+                        dataSize: dataSize,
+                        error: apiError
+                    )
+
+                    completion(.failure(apiError))
                     return
                 }
 
                 if let choices = grokResponse.choices, let content = choices.first?.message.content {
                     print("DEBUG GrokAPIService: Extracted content, length: \(content.count)")
                     print("DEBUG GrokAPIService: Content: \(content)")
+
+                    // Track successful API call and cost ($0.001 per request for Grok)
+                    PerformanceMonitoringService.shared.completeAPICall(
+                        traceId: traceId,
+                        success: true,
+                        responseTime: responseTime,
+                        dataSize: dataSize
+                    )
+
+                    CostTracker.shared.recordCost(service: "grok", cost: 0.001)
+
                     self.parseRecommendations(from: content, completion: completion)
                 } else {
                     print("DEBUG GrokAPIService: No content in response")
-                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])))
+                    let parseError = NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
+
+                    PerformanceMonitoringService.shared.completeAPICall(
+                        traceId: traceId,
+                        success: false,
+                        responseTime: responseTime,
+                        dataSize: dataSize,
+                        error: parseError
+                    )
+
+                    completion(.failure(parseError))
                 }
             } catch {
                 print("DEBUG GrokAPIService: JSON decode error: \(error)")
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    dataSize: dataSize,
+                    error: error
+                )
+
                 completion(.failure(error))
             }
         }.resume()

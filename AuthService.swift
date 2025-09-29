@@ -3,6 +3,9 @@ import FirebaseFirestore
 import Combine
 import Foundation
 
+// Analytics integration
+import FirebaseAnalytics
+
 class AuthService: ObservableObject {
     static let shared = AuthService()
 
@@ -13,19 +16,29 @@ class AuthService: ObservableObject {
     @Published var errorMessage: String?
 
     private var authStateListener: AuthStateDidChangeListenerHandle?
+    private var sessionStartTime: Date?
 
     private init() {
         // Listen to authentication state changes
         authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             print("Auth state changed: authenticated = \(user != nil), user: \(user?.email ?? "none")")
+            let wasAuthenticated = self?.isAuthenticated ?? false
             self?.isAuthenticated = user != nil
+
             if let user = user {
+                // User signed in
+                if !wasAuthenticated {
+                    self?.sessionStartTime = Date()
+                    AnalyticsManager.shared.trackSessionStart()
+                }
                 self?.isLoadingOnboardingStatus = true
                 self?.fetchUserProfile(for: user) { result in
                     switch result {
                     case .success(let userProfile):
                         self?.currentUser = userProfile
                         self?.hasCompletedOnboarding = userProfile.hasCompletedOnboarding
+                        // Refresh A/B testing limits for the new user
+                        UsageTracker.shared.refreshOnUserChange()
                     case .failure:
                         self?.currentUser = nil
                         self?.hasCompletedOnboarding = false
@@ -33,6 +46,12 @@ class AuthService: ObservableObject {
                     self?.isLoadingOnboardingStatus = false
                 }
             } else {
+                // User signed out
+                if wasAuthenticated, let startTime = self?.sessionStartTime {
+                    let sessionDuration = Date().timeIntervalSince(startTime)
+                    AnalyticsManager.shared.trackSessionEnd(duration: sessionDuration)
+                }
+                self?.sessionStartTime = nil
                 self?.currentUser = nil
                 self?.hasCompletedOnboarding = false
                 self?.isLoadingOnboardingStatus = false
@@ -90,6 +109,12 @@ class AuthService: ObservableObject {
                             } else {
                                 self?.errorMessage = nil
                                 let userProfile = UserProfile(from: user, firestoreData: data)
+                                self?.currentUser = userProfile
+                                self?.hasCompletedOnboarding = userProfile.hasCompletedOnboarding
+                                // Refresh A/B testing limits for new user
+                                UsageTracker.shared.refreshOnUserChange()
+                                // Track user acquisition
+                                AnalyticsManager.shared.trackUserAcquisition(source: "email_signup")
                                 completion(.success(userProfile))
                             }
                         }
@@ -110,6 +135,12 @@ class AuthService: ObservableObject {
                 self?.fetchUserProfile(for: user) { result in
                     switch result {
                     case .success(let userProfile):
+                        self?.currentUser = userProfile
+                        self?.hasCompletedOnboarding = userProfile.hasCompletedOnboarding
+                        // Refresh A/B testing limits
+                        UsageTracker.shared.refreshOnUserChange()
+                        // Track sign in
+                        AnalyticsManager.shared.trackFeatureUsage(feature: "sign_in", context: "email")
                         completion(.success(userProfile))
                     case .failure(let error):
                         completion(.failure(error))
@@ -126,6 +157,8 @@ class AuthService: ObservableObject {
             // Clear cached books to prevent them from being loaded in unauthenticated state
             OfflineCache.shared.clearBooksCache()
             print("DEBUG AuthService: Cleared books cache on sign out")
+            // Track sign out
+            AnalyticsManager.shared.trackFeatureUsage(feature: "sign_out")
         } catch let error {
             errorMessage = error.localizedDescription
         }
@@ -181,6 +214,14 @@ class AuthService: ObservableObject {
                     updatedUser.hasCompletedOnboarding = true
                     self?.currentUser = updatedUser
                 }
+                // Track onboarding completion
+                AnalyticsManager.shared.trackOnboardingStep(step: "onboarding_complete", completed: true)
+                AnalyticsManager.shared.trackConversionFunnelStep(step: "onboarding", stepNumber: 1, totalSteps: 3)
+
+                // Trigger onboarding feedback survey
+                Task {
+                    await FeedbackManager.shared.triggerSurvey(type: .onboarding)
+                }
             }
         }
     }
@@ -204,6 +245,9 @@ class AuthService: ObservableObject {
                     updatedUser.subscriptionId = subscriptionId
                     self?.currentUser = updatedUser
                 }
+                // Track subscription completion
+                AnalyticsManager.shared.trackSubscriptionCompleted(tier: tier, subscriptionId: subscriptionId)
+                AnalyticsManager.shared.trackConversionFunnelStep(step: "subscription", stepNumber: 3, totalSteps: 3)
             }
         }
     }

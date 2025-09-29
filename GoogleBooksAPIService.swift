@@ -15,12 +15,24 @@ class GoogleBooksAPIService {
     }
 
     func searchBooks(query: String, maxResults: Int = 10, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
+        let startTime = Date()
+        let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "google_books", endpoint: "volumes", method: "GET")
+
         print("DEBUG GoogleBooksAPIService: searchBooks called with query: '\(query)', maxResults: \(maxResults)")
         print("DEBUG GoogleBooksAPIService: Making request without API key (public access)")
 
         guard var urlComponents = URLComponents(string: baseURL) else {
             print("DEBUG GoogleBooksAPIService: Invalid base URL")
-            completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
+            let urlError = NSError(domain: "InvalidURL", code: 0, userInfo: nil)
+
+            PerformanceMonitoringService.shared.completeAPICall(
+                traceId: traceId,
+                success: false,
+                responseTime: Date().timeIntervalSince(startTime),
+                error: urlError
+            )
+
+            completion(.failure(urlError))
             return
         }
 
@@ -38,6 +50,9 @@ class GoogleBooksAPIService {
         print("DEBUG GoogleBooksAPIService: Making request to: \(url.absoluteString)")
 
         URLSession.shared.dataTask(with: url) { data, response, error in
+            let responseTime = Date().timeIntervalSince(startTime)
+            let dataSize = Int64(data?.count ?? 0)
+
             print("DEBUG GoogleBooksAPIService: Received response, error: \(error?.localizedDescription ?? "none")")
 
             if let httpResponse = response as? HTTPURLResponse {
@@ -46,13 +61,31 @@ class GoogleBooksAPIService {
 
             if let error = error {
                 print("DEBUG GoogleBooksAPIService: Network error: \(error.localizedDescription)")
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    dataSize: dataSize,
+                    error: error
+                )
+
                 completion(.failure(error))
                 return
             }
 
             guard let data = data else {
                 print("DEBUG GoogleBooksAPIService: No data received")
-                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
+                let noDataError = NSError(domain: "NoData", code: 0, userInfo: nil)
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    error: noDataError
+                )
+
+                completion(.failure(noDataError))
                 return
             }
 
@@ -74,9 +107,27 @@ class GoogleBooksAPIService {
                 print("DEBUG GoogleBooksAPIService: Successfully decoded response, items count: \(googleBooksResponse.items?.count ?? 0)")
                 let recommendations = googleBooksResponse.items?.compactMap { self.convertToBookRecommendation($0) } ?? []
                 print("DEBUG GoogleBooksAPIService: Converted to \(recommendations.count) recommendations")
+
+                // Track successful API call (Google Books is free, so no cost tracking)
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: true,
+                    responseTime: responseTime,
+                    dataSize: dataSize
+                )
+
                 completion(.success(recommendations))
             } catch {
                 print("DEBUG GoogleBooksAPIService: JSON decode error: \(error)")
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    dataSize: dataSize,
+                    error: error
+                )
+
                 completion(.failure(error))
             }
         }.resume()

@@ -15,7 +15,7 @@ struct AddBookView: View {
     @State private var selectedBook: BookRecommendation?
     @State private var showManualEntry = false
     @State private var errorMessage: String?
-    @State private var showUpgradePrompt = false
+    @State private var showUpgradeModal = false
 
     var body: some View {
         NavigationView {
@@ -32,15 +32,8 @@ struct AddBookView: View {
             .alert(item: errorBinding) { errorWrapper in
                 Alert(title: Text("Error"), message: Text(errorWrapper.error), dismissButton: .default(Text("OK")))
             }
-            .alert(isPresented: $showUpgradePrompt) {
-                Alert(
-                    title: Text("Book Limit Reached"),
-                    message: Text("You've reached your book limit of \(UsageTracker.shared.bookLimit) books. Upgrade to Premium for unlimited books!"),
-                    primaryButton: .default(Text("Upgrade")) {
-                        // TODO: Navigate to subscription view
-                    },
-                    secondaryButton: .cancel()
-                )
+            .sheet(isPresented: $showUpgradeModal) {
+                UpgradeModalView()
             }
         }
     }
@@ -322,7 +315,7 @@ struct AddBookView: View {
         guard let book = selectedBook else { return }
 
         if !UsageTracker.shared.canAddBook() {
-            showUpgradePrompt = true
+            showUpgradeModal = true
             return
         }
 
@@ -342,7 +335,7 @@ struct AddBookView: View {
         guard !title.isEmpty && !author.isEmpty else { return }
 
         if !UsageTracker.shared.canAddBook() {
-            showUpgradePrompt = true
+            showUpgradeModal = true
             return
         }
 

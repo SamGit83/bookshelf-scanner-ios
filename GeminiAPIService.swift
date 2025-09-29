@@ -30,10 +30,23 @@ class GeminiAPIService {
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
 
     func analyzeImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
+        let startTime = Date()
+        let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "gemini", endpoint: "generateContent", method: "POST")
+
         print("DEBUG GeminiAPIService: analyzeImage called, image size: \(image.size)")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             print("DEBUG GeminiAPIService: jpegData returned nil")
-            completion(.failure(NSError(domain: "ImageConversion", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])))
+            let error = NSError(domain: "ImageConversion", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])
+
+            // Track failed API call
+            PerformanceMonitoringService.shared.completeAPICall(
+                traceId: traceId,
+                success: false,
+                responseTime: Date().timeIntervalSince(startTime),
+                error: error
+            )
+
+            completion(.failure(error))
             return
         }
         print("DEBUG GeminiAPIService: jpegData successful, size: \(imageData.count) bytes")
@@ -113,14 +126,36 @@ class GeminiAPIService {
 
         print("DEBUG GeminiAPIService: Sending request to Gemini API")
         URLSession.shared.dataTask(with: request) { data, response, error in
+            let responseTime = Date().timeIntervalSince(startTime)
+            let dataSize = Int64(data?.count ?? 0)
+
             print("DEBUG GeminiAPIService: Received response, error: \(error?.localizedDescription ?? "none"), data count: \(data?.count ?? 0)")
+
             if let error = error {
+                // Track failed API call
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    dataSize: dataSize,
+                    error: error
+                )
+
                 completion(.failure(error))
                 return
             }
 
             guard let data = data else {
-                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                let noDataError = NSError(domain: "NoData", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    error: noDataError
+                )
+
+                completion(.failure(noDataError))
                 return
             }
 
@@ -131,7 +166,18 @@ class GeminiAPIService {
             // First, try to decode as error response
             if let errorResponse = try? JSONDecoder().decode(GeminiErrorResponse.self, from: data) {
                 print("DEBUG GeminiAPIService: API error: \(errorResponse.error.message)")
-                completion(.failure(NSError(domain: "APIError", code: errorResponse.error.code, userInfo: [NSLocalizedDescriptionKey: errorResponse.error.message])))
+                let apiError = NSError(domain: "APIError", code: errorResponse.error.code, userInfo: [NSLocalizedDescriptionKey: errorResponse.error.message])
+
+                // Track API error
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    dataSize: dataSize,
+                    error: apiError
+                )
+
+                completion(.failure(apiError))
                 return
             }
 
@@ -141,13 +187,44 @@ class GeminiAPIService {
                 if let text = geminiResponse.candidates.first?.content.parts.first?.text {
                     print("DEBUG GeminiAPIService: Extracted text, length: \(text.count)")
                     print("DEBUG GeminiAPIService: Response text: \(text)")
+
+                    // Track successful API call and cost
+                    PerformanceMonitoringService.shared.completeAPICall(
+                        traceId: traceId,
+                        success: true,
+                        responseTime: responseTime,
+                        dataSize: dataSize
+                    )
+
+                    // Record API cost ($0.0025 per image for Gemini 1.5 Flash)
+                    CostTracker.shared.recordCost(service: "gemini", cost: 0.0025)
+
                     completion(.success(text))
                 } else {
                     print("DEBUG GeminiAPIService: No text in response")
-                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])))
+                    let parseError = NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
+
+                    PerformanceMonitoringService.shared.completeAPICall(
+                        traceId: traceId,
+                        success: false,
+                        responseTime: responseTime,
+                        dataSize: dataSize,
+                        error: parseError
+                    )
+
+                    completion(.failure(parseError))
                 }
             } catch {
                 print("DEBUG GeminiAPIService: JSON decode error: \(error)")
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: responseTime,
+                    dataSize: dataSize,
+                    error: error
+                )
+
                 completion(.failure(error))
             }
         }.resume()

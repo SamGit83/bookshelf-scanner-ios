@@ -11,6 +11,47 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Surveys collection - users can read/write their own surveys
+    match /surveys/{surveyId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Survey responses collection - users can read/write their own responses
+    match /surveyResponses/{responseId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Feedback processing metadata - users can read/write their own processing data
+    match /feedbackProcessing/{processingId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Processed feedback collection - users can read/write their own processed feedback
+    match /processedFeedback/{feedbackId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.responseId;
+    }
+
+    // Iteration tasks collection - users can read/write their own tasks
+    match /iterationTasks/{taskId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Archived tasks collection - users can read/write their own archived tasks
+    match /archivedTasks/{taskId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // User experiment assignments - users can read/write their own assignments
+    match /userExperimentAssignments/{assignmentId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Experiments collection - read-only for all authenticated users
+    match /experiments/{experimentId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only admin can write
+    }
+
     // Allow reading public data if needed (e.g., for recommendations)
     // Add more rules as needed
   }

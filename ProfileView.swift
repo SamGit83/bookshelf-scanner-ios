@@ -8,6 +8,9 @@ struct ProfileView: View {
     @ObservedObject var accentColorManager = AccentColorManager.shared
     @ObservedObject var usageTracker = UsageTracker.shared
     @State private var showSignOutAlert = false
+    @State private var showUpgradeModal = false
+    @State private var showSubscriptionView = false
+    @State private var expandedUsageDetails = false
 
     var body: some View {
             ZStack {
@@ -63,44 +66,105 @@ struct ProfileView: View {
                         }
                         .padding(.top, AppleBooksSpacing.space32)
 
-                        // Usage Stats Section
+                        // Usage Stats Section with Progressive Disclosure
                         if let user = authService.currentUser {
                             VStack(spacing: AppleBooksSpacing.space16) {
                                 AppleBooksSectionHeader(
                                     title: "Usage This Month",
                                     subtitle: user.tier == .free ? "Free tier limits" : "Premium - Unlimited",
-                                    showSeeAll: false,
-                                    seeAllAction: nil
+                                    showSeeAll: user.tier == .free,
+                                    seeAllAction: user.tier == .free ? { expandedUsageDetails.toggle() } : nil
                                 )
 
                                 AppleBooksCard {
                                     VStack(spacing: AppleBooksSpacing.space16) {
                                         // Scans
-                                        UsageRow(
+                                        EnhancedUsageRow(
                                             icon: "camera.fill",
                                             title: "AI Scans",
                                             current: usageTracker.monthlyScans,
                                             limit: usageTracker.scanLimit,
-                                            color: AppleBooksColors.accent
+                                            color: AppleBooksColors.accent,
+                                            showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
+                                            onUpgradeTap: {
+                                                showUpgradeModal = true
+                                                AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "scan")
+                                                NotificationCenter.default.post(
+                                                    name: Notification.Name("UpgradePromptShown"),
+                                                    object: nil,
+                                                    userInfo: ["source": "profile_usage_teaser", "limit_type": "scan"]
+                                                )
+                                            }
                                         )
 
                                         // Books
-                                        UsageRow(
+                                        EnhancedUsageRow(
                                             icon: "book.fill",
                                             title: "Books in Library",
                                             current: usageTracker.totalBooks,
                                             limit: usageTracker.bookLimit,
-                                            color: AppleBooksColors.success
+                                            color: AppleBooksColors.success,
+                                            showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
+                                            onUpgradeTap: {
+                                                showUpgradeModal = true
+                                                AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "book")
+                                                NotificationCenter.default.post(
+                                                    name: Notification.Name("UpgradePromptShown"),
+                                                    object: nil,
+                                                    userInfo: ["source": "profile_usage_teaser", "limit_type": "book"]
+                                                )
+                                            }
                                         )
 
                                         // Recommendations
-                                        UsageRow(
+                                        EnhancedUsageRow(
                                             icon: "sparkles",
                                             title: "AI Recommendations",
                                             current: usageTracker.monthlyRecommendations,
                                             limit: usageTracker.recommendationLimit,
-                                            color: AppleBooksColors.promotional
+                                            color: AppleBooksColors.promotional,
+                                            showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
+                                            onUpgradeTap: {
+                                                showUpgradeModal = true
+                                                AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "recommendation")
+                                                NotificationCenter.default.post(
+                                                    name: Notification.Name("UpgradePromptShown"),
+                                                    object: nil,
+                                                    userInfo: ["source": "profile_usage_teaser", "limit_type": "recommendation"]
+                                                )
+                                            }
                                         )
+
+                                        // Progressive disclosure for detailed usage
+                                        if expandedUsageDetails && user.tier == .free {
+                                            Divider()
+                                                .background(AppleBooksColors.textTertiary.opacity(0.3))
+
+                                            VStack(spacing: AppleBooksSpacing.space12) {
+                                                Text("Upgrade to Premium for unlimited access")
+                                                    .font(AppleBooksTypography.captionBold)
+                                                    .foregroundColor(AppleBooksColors.accent)
+
+                                                Button(action: {
+                                                    showUpgradeModal = true
+                                                    AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_view_plans_button")
+                                                    NotificationCenter.default.post(
+                                                        name: Notification.Name("UpgradePromptShown"),
+                                                        object: nil,
+                                                        userInfo: ["source": "profile_view_plans_button"]
+                                                    )
+                                                }) {
+                                                    Text("View Premium Plans")
+                                                        .font(AppleBooksTypography.captionBold)
+                                                        .foregroundColor(.white)
+                                                        .padding(.horizontal, AppleBooksSpacing.space12)
+                                                        .padding(.vertical, AppleBooksSpacing.space6)
+                                                        .background(AppleBooksColors.accent)
+                                                        .cornerRadius(6)
+                                                }
+                                            }
+                                            .padding(.top, AppleBooksSpacing.space8)
+                                        }
                                     }
                                 }
                             }
@@ -224,12 +288,49 @@ struct ProfileView: View {
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         }
 
+                        // Subscription Management Section (for Premium users)
+                        if let user = authService.currentUser, user.tier == .premium {
+                            VStack(spacing: AppleBooksSpacing.space16) {
+                                AppleBooksSectionHeader(
+                                    title: "Subscription",
+                                    subtitle: "Manage your premium subscription",
+                                    showSeeAll: false,
+                                    seeAllAction: nil
+                                )
+
+                                VStack(spacing: AppleBooksSpacing.space12) {
+                                    NavigationLink(destination: SubscriptionView()) {
+                                        AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                                            HStack(spacing: AppleBooksSpacing.space12) {
+                                                Image(systemName: "crown.fill")
+                                                    .font(AppleBooksTypography.bodyLarge)
+                                                    .foregroundColor(PrimaryColors.vibrantPurple)
+                                                    .frame(width: 24, height: 24)
+                                                Text("Manage Subscription")
+                                                    .font(AppleBooksTypography.bodyLarge)
+                                                    .foregroundColor(AppleBooksColors.text)
+                                                Spacer()
+                                                Image(systemName: "chevron.right")
+                                                    .font(AppleBooksTypography.caption)
+                                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                            }
+                                        }
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                                .padding(.horizontal, AppleBooksSpacing.space24)
+                            }
+                        }
+
                         Spacer(minLength: AppleBooksSpacing.space64)
                     }
                 }
             }
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
+            .sheet(isPresented: $showUpgradeModal) {
+                UpgradeModalView()
+            }
             .alert(isPresented: $showSignOutAlert) {
                 Alert(
                     title: Text("Sign Out"),
@@ -654,6 +755,107 @@ struct PrivacySection: View {
         }
         .padding(SpacingSystem.md)
         .featureCardStyle()
+    }
+}
+
+struct EnhancedUsageRow: View {
+    let icon: String
+    let title: String
+    let current: Int
+    let limit: Int
+    let color: Color
+    let showTeaser: Bool
+    let onUpgradeTap: () -> Void
+
+    var body: some View {
+        VStack(spacing: AppleBooksSpacing.space8) {
+            HStack(spacing: AppleBooksSpacing.space12) {
+                Image(systemName: icon)
+                    .font(AppleBooksTypography.bodyLarge)
+                    .foregroundColor(color)
+                    .frame(width: 24, height: 24)
+
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                    Text(title)
+                        .font(AppleBooksTypography.bodyMedium)
+                        .foregroundColor(AppleBooksColors.text)
+
+                    if limit == Int.max {
+                        Text("Unlimited")
+                            .font(AppleBooksTypography.caption)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                    } else {
+                        HStack {
+                            Text("\(current) / \(limit)")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(current >= limit ? AppleBooksColors.promotional : AppleBooksColors.textSecondary)
+
+                            if current >= limit {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(AppleBooksColors.promotional)
+                            }
+                        }
+                    }
+                }
+
+                Spacer()
+
+                if limit != Int.max {
+                    ProgressView(value: min(Float(current), Float(limit)), total: Float(limit))
+                        .progressViewStyle(LinearProgressViewStyle(tint: current >= limit ? AppleBooksColors.promotional : color))
+                        .frame(width: 60)
+                }
+            }
+
+            // Usage teaser when approaching limit
+            if showTeaser && limit != Int.max {
+                VStack(spacing: AppleBooksSpacing.space6) {
+                    HStack(spacing: AppleBooksSpacing.space8) {
+                        Image(systemName: current >= limit ? "exclamationmark.triangle.fill" : "crown.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(current >= limit ? SemanticColors.warningPrimary : PrimaryColors.vibrantPurple)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(current >= limit ? "Limit reached!" : "Running low on \(title.lowercased())")
+                                .font(AppleBooksTypography.captionBold)
+                                .foregroundColor(current >= limit ? SemanticColors.warningPrimary : AppleBooksColors.accent)
+
+                            if current < limit {
+                                let remaining = limit - current
+                                Text("\(remaining) \(title.lowercased()) remaining this month")
+                                    .font(AppleBooksTypography.caption)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                            }
+                        }
+
+                        Spacer()
+
+                        Button(action: onUpgradeTap) {
+                            Text(current >= limit ? "Upgrade Now" : "Upgrade")
+                                .font(AppleBooksTypography.captionBold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, AppleBooksSpacing.space8)
+                                .padding(.vertical, AppleBooksSpacing.space4)
+                                .background(current >= limit ? SemanticColors.warningPrimary : AppleBooksColors.accent)
+                                .cornerRadius(4)
+                        }
+                    }
+
+                    // Urgency message for when very close to limit
+                    if current >= limit * 9 / 10 && current < limit {
+                        Text("⚡ Don't lose access to \(title.lowercased()) - upgrade before you reach the limit!")
+                            .font(AppleBooksTypography.caption)
+                            .foregroundColor(SemanticColors.warningPrimary)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+                .padding(.top, AppleBooksSpacing.space4)
+                .padding(.horizontal, AppleBooksSpacing.space4)
+                .background(current >= limit ? SemanticColors.warningSecondary : AppleBooksColors.accent.opacity(0.1))
+                .cornerRadius(6)
+            }
+        }
     }
 }
 

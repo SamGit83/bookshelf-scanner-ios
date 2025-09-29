@@ -5,6 +5,9 @@ import FirebaseFirestore
 import UIKit
 #endif
 
+// Analytics integration
+import FirebaseAnalytics
+
 class BookViewModel: ObservableObject {
     @Published var books: [Book] = []
     @Published var isLoading = false
@@ -26,20 +29,48 @@ class BookViewModel: ObservableObject {
 
     func scanBookshelf(image: UIImage) {
         print("DEBUG BookViewModel: scanBookshelf called")
+
+        // Check usage limits
+        if !UsageTracker.shared.canPerformScan() {
+            errorMessage = "Scan limit reached. Upgrade to Premium for unlimited scans."
+            // Trigger upgrade prompt
+            AnalyticsManager.shared.trackUpgradePromptShown(source: "scan_limit_hit", limitType: "scan")
+            NotificationCenter.default.post(
+                name: Notification.Name("UpgradePromptShown"),
+                object: nil,
+                userInfo: ["limit_type": "scan"]
+            )
+            return
+        }
+
         isLoading = true
         errorMessage = nil
+        let scanStartTime = Date()
 
         apiService.analyzeImage(image) { [weak self] result in
+            let responseTime = Date().timeIntervalSince(scanStartTime)
             DispatchQueue.main.async {
                 self?.isLoading = false
                 switch result {
                 case .success(let responseText):
                     print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count)")
                     UsageTracker.shared.incrementScans()
+                    // Track API call success
+                    AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: true, responseTime: responseTime)
+
+                    // Trigger feature usage for surveys
+                    NotificationCenter.default.post(
+                        name: Notification.Name("FeatureUsed"),
+                        object: nil,
+                        userInfo: ["feature": "scan", "context": "successful_scan"]
+                    )
+
                     self?.parseAndAddBooks(from: responseText)
                 case .failure(let error):
                     print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription)")
                     ErrorHandler.shared.handle(error, context: "Image Analysis")
+                    // Track API call failure
+                    AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
                 }
             }
         }
@@ -79,10 +110,13 @@ class BookViewModel: ObservableObject {
                     }
 
                     print("DEBUG BookViewModel: Fetching cover for book: \(book.title ?? "") by \(book.author ?? "")")
+                    let coverFetchStartTime = Date()
                     googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
+                        let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
                         var updatedBook = book
                         switch result {
                         case .success(let url):
+                            AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: true, responseTime: coverResponseTime)
                             if let urlString = url {
                                 // Convert HTTP to HTTPS for security and iOS compatibility
                                 let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
@@ -113,11 +147,14 @@ class BookViewModel: ObservableObject {
                                 self?.saveBookToFirestore(updatedBook)
                             }
                         case .failure(let error):
+                            AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: false, responseTime: coverResponseTime, errorMessage: error.localizedDescription)
                             print("DEBUG BookViewModel: Failed to fetch cover for \(book.title ?? ""): \(error.localizedDescription)")
                             self?.saveBookToFirestore(updatedBook)
                         }
                     }
                 }
+                // Track bookshelf scan completed
+                AnalyticsManager.shared.trackBookshelfScanCompleted(bookCount: decodedBooks.count)
             } else {
                 print("DEBUG BookViewModel: Failed to convert jsonString to data")
                 errorMessage = "Failed to parse book data. Please try again."
@@ -284,6 +321,9 @@ class BookViewModel: ObservableObject {
         bookRef.updateData(["status": status.rawValue]) { error in
             if let error = error {
                 self.errorMessage = "Failed to update book: \(error.localizedDescription)"
+            } else {
+                // Track book status change
+                AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
             }
         }
     }
@@ -369,6 +409,11 @@ class BookViewModel: ObservableObject {
                         self.books[index].dateStartedReading = Date()
                     }
                 }
+                // Track reading progress update
+                let pagesRead = currentPage - (book.currentPage)
+                if pagesRead > 0 {
+                    AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: 0, pagesRead: pagesRead) // Duration not tracked here
+                }
             }
         }
     }
@@ -397,6 +442,11 @@ class BookViewModel: ObservableObject {
                     self.books[index].dateFinishedReading = Date()
                     self.books[index].currentPage = book.totalPages ?? book.currentPage
                 }
+                // Track book completion
+                let sessionDuration = book.dateStartedReading != nil ? Date().timeIntervalSince(book.dateStartedReading!) : 0
+                let pagesRead = (book.totalPages ?? book.currentPage) - book.currentPage
+                AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: sessionDuration, pagesRead: pagesRead)
+                AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: .read)
             }
         }
     }
@@ -605,11 +655,14 @@ class BookViewModel: ObservableObject {
             return
         }
 
+        let recommendationStartTime = Date()
         // Use Grok AI to generate personalized recommendations based on user's entire library
         grokService.generateRecommendations(userBooks: books, currentBook: currentBook) { result in
+            let responseTime = Date().timeIntervalSince(recommendationStartTime)
             DispatchQueue.main.async {
                 switch result {
                 case .success(let recommendations):
+                    AnalyticsManager.shared.trackAPICall(service: "Grok", endpoint: "generateRecommendations", success: true, responseTime: responseTime)
                     // Remove duplicates and limit to 20 recommendations
                     let uniqueRecommendations = self.removeDuplicates(from: recommendations)
                     let limitedRecommendations = Array(uniqueRecommendations.prefix(20))
@@ -620,8 +673,16 @@ class BookViewModel: ObservableObject {
                     // Track usage
                     UsageTracker.shared.incrementRecommendations()
 
+                    // Trigger feature usage for surveys
+                    NotificationCenter.default.post(
+                        name: Notification.Name("FeatureUsed"),
+                        object: nil,
+                        userInfo: ["feature": "recommendations", "context": "successful_generation"]
+                    )
+
                     completion(.success(limitedRecommendations))
                 case .failure(let error):
+                    AnalyticsManager.shared.trackAPICall(service: "Grok", endpoint: "generateRecommendations", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
                     print("DEBUG BookViewModel: Grok recommendation failed: \(error.localizedDescription)")
                     // Fallback to cached recommendations if available
                     if let cachedRecommendations = OfflineCache.shared.loadCachedRecommendations() {
