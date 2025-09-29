@@ -134,17 +134,16 @@ struct LoginView: View {
                                         .font(AppleBooksTypography.headlineSmall)
                                         .foregroundColor(AppleBooksColors.text)
 
-                                    GeometryReader { geometry in
-                                        HStack(spacing: AppleBooksSpacing.space12) {
-                                            // Free Tier Card (45% width)
-                                            Button(action: {
-                                                withAnimation(AnimationTiming.micro) {
-                                                    selectedTier = .free
-                                                }
-                                            }) {
-                                            VStack(spacing: AppleBooksSpacing.space12) {
+                                    HStack(alignment: .top, spacing: AppleBooksSpacing.space12) {
+                                        // Free Tier Card (45% width)
+                                        Button(action: {
+                                            withAnimation(AnimationTiming.micro) {
+                                                selectedTier = .free
+                                            }
+                                        }) {
+                                            VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
                                                 // Header with icon and badge
-                                                VStack(spacing: AppleBooksSpacing.space8) {
+                                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                                     HStack {
                                                         Text("📚")
                                                             .font(.system(size: 24))
@@ -162,6 +161,7 @@ struct LoginView: View {
                                                         .font(AppleBooksTypography.headlineMedium)
                                                         .foregroundColor(selectedTier == .free ? AppleBooksColors.card : AppleBooksColors.text)
                                                         .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .multilineTextAlignment(.leading)
                                                 }
                                                 
                                                 // Features with positive framing
@@ -172,9 +172,9 @@ struct LoginView: View {
                                                     TierFeatureRow(text: "Basic reading insights", isSelected: selectedTier == .free)
                                                 }
                                                 
-                                                Spacer()
+                                                Spacer(minLength: AppleBooksSpacing.space8)
                                             }
-                                            .frame(maxWidth: .infinity)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
                                             .padding(AppleBooksSpacing.space16)
                                             .background(
                                                 selectedTier == .free ?
@@ -203,20 +203,20 @@ struct LoginView: View {
                                                 x: 0,
                                                 y: selectedTier == .free ? 4 : 2
                                             )
-                                            }
-                                            .frame(width: geometry.size.width * 0.45)
-                                            .frame(minHeight: 200)
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .layoutPriority(0.45)
 
-                                            // Premium Tier Card (55% width)
-                                            Button(action: {
-                                                withAnimation(AnimationTiming.micro) {
-                                                    selectedTier = .premium
-                                                }
-                                            }) {
+                                        // Premium Tier Card (55% width)
+                                        Button(action: {
+                                            withAnimation(AnimationTiming.micro) {
+                                                selectedTier = .premium
+                                            }
+                                        }) {
                                             ZStack {
-                                                VStack(spacing: AppleBooksSpacing.space12) {
+                                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
                                                     // Header with crown icon and recommended badge
-                                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                                         HStack {
                                                             Text("👑")
                                                                 .font(.system(size: 24))
@@ -227,6 +227,7 @@ struct LoginView: View {
                                                             .font(AppleBooksTypography.headlineMedium)
                                                             .foregroundColor(selectedTier == .premium ? .white : AppleBooksColors.text)
                                                             .frame(maxWidth: .infinity, alignment: .leading)
+                                                            .multilineTextAlignment(.leading)
                                                     }
                                                     
                                                     // Features with unlimited emphasis
@@ -238,15 +239,15 @@ struct LoginView: View {
                                                         TierFeatureRow(text: "Priority support", isSelected: selectedTier == .premium, isPremium: true)
                                                     }
                                                     
-                                                    Spacer()
+                                                    Spacer(minLength: AppleBooksSpacing.space8)
                                                     
                                                     // Trust signals
-                                                    VStack(spacing: AppleBooksSpacing.space4) {
+                                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
                                                         Text("$2.99/month")
                                                             .font(AppleBooksTypography.headlineSmall)
                                                             .foregroundColor(selectedTier == .premium ? .white : AppleBooksColors.text)
                                                         
-                                                        VStack(spacing: AppleBooksSpacing.space2) {
+                                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space2) {
                                                             Text("7-day free trial")
                                                                 .font(AppleBooksTypography.caption)
                                                                 .foregroundColor(selectedTier == .premium ? .white.opacity(0.9) : AppleBooksColors.textSecondary)
@@ -256,7 +257,7 @@ struct LoginView: View {
                                                         }
                                                     }
                                                 }
-                                                .frame(maxWidth: .infinity)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
                                                 .padding(AppleBooksSpacing.space16)
                                                 .background(
                                                     selectedTier == .premium ?
@@ -318,13 +319,12 @@ struct LoginView: View {
                                                     Spacer()
                                                 }
                                             }
-                                            }
-                                            .frame(width: geometry.size.width * 0.55)
-                                            .frame(minHeight: 200)
                                         }
+                                        .frame(maxWidth: .infinity)
+                                        .layoutPriority(0.55)
                                     }
-                                    .frame(height: 200)
                                 }
+                                .padding(.bottom, AppleBooksSpacing.space24)
                             }
 
                             // Required Name Fields (only for signup)
