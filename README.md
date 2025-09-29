@@ -36,6 +36,23 @@ This app uses **Google's Gemini 1.5 Flash** - the most advanced multimodal AI mo
 
 ---
 
+## 📚 Documentation
+
+For comprehensive project documentation, see the [`docs/`](./docs/) directory:
+
+- **[📋 Project Planning](docs/planning/MVP_Plan_and_User_Journey.md)** - MVP development plan, user journey analysis, and implementation roadmap
+- **[🎨 Design System](docs/design/LiquidGlassUIDesignPlan.md)** - Complete UI/UX specifications with Liquid Glass design language
+- **[🏗️ Technical Architecture](docs/planning/MVP_Plan_and_User_Journey.md#initial-technical-architecture-plan)** - Technical implementation details and API integrations
+- **[📖 Documentation Index](docs/README.md)** - Complete guide to all project documentation
+
+### Key Resources:
+- **MVP Status**: 90% complete with core bookshelf scanning functionality
+- **Design System**: Liquid Glass UI with glassmorphism effects
+- **Architecture**: MVVM with Firebase backend and offline support
+- **AI Integration**: Gemini 1.5 Flash for advanced book recognition
+
+---
+
 ## Setup Instructions
 
 ### 1. Firebase Configuration
