@@ -110,7 +110,7 @@ class OptimizationEngine {
 
         // Analyze API cost efficiency
         for (service, usage) in CostTracker.shared.currentCosts.apiUsage {
-            let costPerUse = (CostTracker.shared.costRates[service] ?? 0.0)
+            let costPerUse = CostTracker.shared.getCostRate(for: service)
             let totalCost = Double(usage) * costPerUse
 
             // Check if cost is increasing faster than usage
@@ -192,8 +192,8 @@ class OptimizationEngine {
         }
 
         // Analyze battery drain patterns
-        if let batteryMetric = PerformanceMonitoringService.shared.currentMetrics.batteryLevel,
-           batteryMetric < 20.0 {
+        let batteryMetric = PerformanceMonitoringService.shared.currentMetrics.batteryLevel
+        if batteryMetric < 20.0 {
             let recommendation = OptimizationRecommendation(
                 id: UUID().uuidString,
                 type: .ux,

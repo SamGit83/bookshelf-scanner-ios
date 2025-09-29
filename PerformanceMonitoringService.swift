@@ -484,7 +484,7 @@ struct PerformanceMetric {
     }
 }
 
-struct PerformanceAlert {
+struct PerformanceAlert: Codable {
     let id: String
     let type: AlertType
     let message: String
