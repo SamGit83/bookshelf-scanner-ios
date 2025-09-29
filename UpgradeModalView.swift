@@ -216,7 +216,7 @@ struct UpgradeModalView: View {
                         .foregroundColor(.white)
                         .cornerRadius(16)
                         .font(TypographySystem.buttonLarge)
-                        .shadow(color: PrimaryColors.vibrantPink.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: Color(hex: "FF2D92").opacity(0.3), radius: 8, x: 0, y: 4)
                 }
             }
             .disabled(isLoading)
@@ -331,7 +331,7 @@ struct FeatureComparisonRow: View {
     var body: some View {
         HStack(spacing: SpacingSystem.md) {
             Image(systemName: icon)
-                .foregroundColor(isPremium ? PrimaryColors.vibrantGreen : AdaptiveColors.secondaryText)
+                .foregroundColor(isPremium ? Color(hex: "30D158") : AdaptiveColors.secondaryText)
                 .frame(width: 24, height: 24)
 
             VStack(alignment: .leading, spacing: SpacingSystem.xs) {
@@ -350,7 +350,7 @@ struct FeatureComparisonRow: View {
 
                     Text(premiumText)
                         .font(TypographySystem.captionMedium)
-                        .foregroundColor(PrimaryColors.vibrantGreen)
+                        .foregroundColor(Color(hex: "30D158"))
                         .bold()
                 }
             }
@@ -413,7 +413,7 @@ struct PricingCard: View {
                     .fill(isSelected ? AnyShapeStyle(UIGradients.primaryButton) : AnyShapeStyle(AdaptiveColors.glassBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(isSelected ? PrimaryColors.vibrantPink : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
+                            .stroke(isSelected ? Color(hex: "FF2D92") : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
                     )
             )
         }
