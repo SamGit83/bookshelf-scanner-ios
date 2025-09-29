@@ -10,7 +10,7 @@ import SwiftUI
  * Manages the creation, scheduling, triggering, and completion of user feedback surveys.
  * Integrates with AnalyticsManager for event tracking and ABTestingService for variant-specific feedback.
  */
-class FeedbackManager {
+class FeedbackManager: ObservableObject {
     static let shared = FeedbackManager()
 
     private let db = Firestore.firestore()
