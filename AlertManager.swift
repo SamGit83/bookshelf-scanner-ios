@@ -33,6 +33,59 @@ class AlertManager {
         loadAlertHistory()
     }
 
+    private func setupAlertMonitoring() {
+        // Set up monitoring for various performance metrics
+        // This would typically integrate with PerformanceMonitoringService
+        // For now, set up basic monitoring
+        setupPerformanceMetricMonitoring()
+        setupBusinessKPIMonitoring()
+    }
+
+    private func setupPerformanceMetricMonitoring() {
+        // Monitor API response times, memory usage, etc.
+        // This would subscribe to PerformanceMonitoringService updates
+        PerformanceMonitoringService.shared.$currentMetrics
+            .sink { [weak self] metrics in
+                // Check for alerts based on metrics
+                self?.checkPerformanceMetrics(metrics)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupBusinessKPIMonitoring() {
+        // Monitor conversion rates, churn rates, etc.
+        // This would integrate with analytics data
+        // For now, this is a placeholder
+    }
+
+    private func checkPerformanceMetrics(_ metrics: PerformanceMetrics) {
+        // Check API response time
+        if metrics.averageResponseTime > 5.0 {
+            let alert = PerformanceAlert(
+                id: UUID().uuidString,
+                type: .apiResponseTime,
+                message: "API response time exceeded threshold: \(String(format: "%.2f", metrics.averageResponseTime))s",
+                value: metrics.averageResponseTime,
+                threshold: 5.0,
+                timestamp: Date()
+            )
+            handleAlert(alert)
+        }
+
+        // Check memory usage
+        if metrics.memoryUsageMB > 100.0 {
+            let alert = PerformanceAlert(
+                id: UUID().uuidString,
+                type: .memoryUsage,
+                message: "Memory usage exceeded threshold: \(String(format: "%.1f", metrics.memoryUsageMB))MB",
+                value: metrics.memoryUsageMB,
+                threshold: 100.0,
+                timestamp: Date()
+            )
+            handleAlert(alert)
+        }
+    }
+
     // MARK: - Alert Configuration
     private func setupDefaultConfigurations() {
         alertConfigurations = [

@@ -99,11 +99,11 @@ class ABTestingService: ObservableObject {
         }
 
         let variant = assignVariant(for: experiment)
-        let assignment = UserExperimentAssignment(userId: userId, experimentId: experimentId, variantId: variant.id)
+        let newAssignment = UserExperimentAssignment(userId: userId, experimentId: experimentId, variantId: variant.id)
 
         // Save assignment
-        try await saveUserAssignment(assignment)
-        userAssignments[experimentId] = assignment
+        try await saveUserAssignment(newAssignment)
+        userAssignments[experimentId] = newAssignment
 
         // Track assignment event
         #if canImport(FirebaseAnalytics)
