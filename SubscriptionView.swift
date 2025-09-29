@@ -503,7 +503,7 @@ private struct PackageButton: View {
             .foregroundColor(.white)
             .padding(.horizontal, SpacingSystem.sm)
             .padding(.vertical, SpacingSystem.xs)
-            .background(PrimaryColors.vibrantPink)
+            .background(AdaptiveColors.vibrantPink)
             .cornerRadius(8)
     }
 
