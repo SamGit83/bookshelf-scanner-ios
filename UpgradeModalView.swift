@@ -462,7 +462,7 @@ struct PricingCard: View {
                     Spacer(minLength: 10) // Additional balance
                 }
             }
-            .frame(minHeight: 140, maxWidth: .infinity) // Fixed height for consistency
+            .frame(maxWidth: .infinity, minHeight: 140) // Fixed height for consistency
             .padding(24)
             .glassBackground()
             .overlay(
