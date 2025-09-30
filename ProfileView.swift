@@ -23,13 +23,17 @@ struct ProfileView: View {
                         // User Info Section
                         VStack(spacing: AppleBooksSpacing.space20) {
                             // Profile picture
-                            ProfilePictureView(authService: authService)
-                                .padding(AppleBooksSpacing.space16)
-                                .background(
-                                    Circle()
-                                        .fill(AppleBooksColors.card)
-                                        .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
-                                )
+                            HStack {
+                                Spacer()
+                                ProfilePictureView(authService: authService)
+                                    .background(
+                                        Circle()
+                                            .fill(AppleBooksColors.card)
+                                            .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
+                                    )
+                                Spacer()
+                            }
+                            .padding(.bottom, AppleBooksSpacing.space16)
 
                             if let user = authService.currentUser {
                                 VStack(spacing: AppleBooksSpacing.space8) {
@@ -61,9 +65,9 @@ struct ProfileView: View {
                                             .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
                                     }
                                 }
-                                .padding(.horizontal, AppleBooksSpacing.space24)
                             }
                         }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
                         .padding(.top, AppleBooksSpacing.space32)
 
                         // Usage Stats Section with Progressive Disclosure
@@ -140,7 +144,7 @@ struct ProfileView: View {
                                             Divider()
                                                 .background(AppleBooksColors.textTertiary.opacity(0.3))
 
-                                            VStack(spacing: AppleBooksSpacing.space12) {
+                                            VStack(spacing: AppleBooksSpacing.space16) {
                                                 Text("Upgrade to Premium for unlimited access")
                                                     .font(AppleBooksTypography.captionBold)
                                                     .foregroundColor(AppleBooksColors.accent)
@@ -180,9 +184,9 @@ struct ProfileView: View {
                                 seeAllAction: nil
                             )
 
-                            VStack(spacing: AppleBooksSpacing.space12) {
+                            VStack(spacing: AppleBooksSpacing.space16) {
                                 NavigationLink(destination: AccountSettingsView()) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space16) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "gear")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -201,7 +205,7 @@ struct ProfileView: View {
                                 .buttonStyle(PlainButtonStyle())
 
                                 NavigationLink(destination: ReadingStatsView()) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space16) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "chart.bar.fill")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -220,7 +224,7 @@ struct ProfileView: View {
                                 .buttonStyle(PlainButtonStyle())
 
                                 // Theme Section
-                                AppleBooksCard {
+                                AppleBooksCard(padding: AppleBooksSpacing.space16) {
                                     VStack(spacing: AppleBooksSpacing.space12) {
                                         HStack {
                                             Text("Appearance")
@@ -240,7 +244,7 @@ struct ProfileView: View {
                                 }
 
                                 // Accent Color Section
-                                AppleBooksCard {
+                                AppleBooksCard(padding: AppleBooksSpacing.space16) {
                                     VStack(spacing: AppleBooksSpacing.space12) {
                                         HStack {
                                             Text("Accent Color")
@@ -267,7 +271,7 @@ struct ProfileView: View {
                                 Button(action: {
                                     showSignOutAlert = true
                                 }) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space16) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "arrow.right.square")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -298,9 +302,9 @@ struct ProfileView: View {
                                     seeAllAction: nil
                                 )
 
-                                VStack(spacing: AppleBooksSpacing.space12) {
+                                VStack(spacing: AppleBooksSpacing.space16) {
                                     NavigationLink(destination: SubscriptionView()) {
-                                        AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                                        AppleBooksCard(padding: AppleBooksSpacing.space16) {
                                             HStack(spacing: AppleBooksSpacing.space12) {
                                                 Image(systemName: "crown.fill")
                                                     .font(AppleBooksTypography.bodyLarge)
