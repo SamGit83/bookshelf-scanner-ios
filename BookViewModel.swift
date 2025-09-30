@@ -28,8 +28,10 @@ class BookViewModel: ObservableObject {
     init() {
         setupFirestoreListener()
         Task { await loadBooksPaginated(page: 0) }
+    print("DEBUG BookViewModel: Task started")
     }
 
+    print("DEBUG BookViewModel: loadBooksPaginated called, loaded \(books.count) books")
     func loadBooksPaginated(page: Int, limit: Int = 20) async {
         print("DEBUG BookViewModel: loadBooksPaginated called with page=\(page), limit=\(limit)")
         if page == 0 {
@@ -594,6 +596,7 @@ class BookViewModel: ObservableObject {
                 }
 
                 print("DEBUG BookViewModel: Successfully loaded \(loadedBooks.count) books from Firestore for user \(userId)")
+                print("DEBUG BookViewModel: Parsed \(books.count) books from listener")
                 print("DEBUG BookViewModel: Listener received \(loadedBooks.count) books")
                 let libraryBooksCount = loadedBooks.filter { $0.status == .library }.count
                 print("DEBUG BookViewModel: Library books count: \(libraryBooksCount)")
@@ -608,6 +611,7 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
                 // Sync book count with UsageTracker
                 UsageTracker.shared.syncBookCount(loadedBooks.count)
+                self.books = loadedBooks
                 // Cache the books for offline use
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)

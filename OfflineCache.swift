@@ -37,6 +37,7 @@ class OfflineCache {
             let data = try JSONEncoder().encode(books)
             try data.write(to: booksCacheFile, options: .atomic)
             print("DEBUG OfflineCache: Successfully cached books")
+            print("DEBUG OfflineCache: Saved \(books.count) books")
         } catch {
             print("DEBUG OfflineCache: Failed to cache books: \(error)")
         }
