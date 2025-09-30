@@ -1,5 +1,52 @@
 import SwiftUI
+
+#if canImport(RevenueCat)
 import RevenueCat
+#else
+// Stub types for when RevenueCat is not available
+enum PeriodType {
+    case intro, normal, trial
+}
+
+class EntitlementInfo {
+    var isActive: Bool = false
+    var productIdentifier: String = ""
+    var expirationDate: Date?
+    var periodType: PeriodType = .normal
+}
+
+class Entitlements {
+    var active: [String: EntitlementInfo] = [:]
+}
+
+class SubscriptionPeriod {
+    var unit: Unit = .month
+    enum Unit {
+        case day, week, month, year
+    }
+}
+
+class StoreProduct {
+    var price: NSDecimalNumber = 0
+    var currencyCode: String = ""
+    var localizedTitle: String = ""
+    var subscriptionPeriod: SubscriptionPeriod?
+}
+
+class Package {
+    var storeProduct: StoreProduct?
+    var identifier: String = ""
+}
+
+class Offering {
+    var availablePackages: [Package] = []
+}
+
+class CustomerInfo {
+    var originalAppUserId: String = ""
+    var entitlements: Entitlements = Entitlements()
+}
+#endif
 
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
@@ -122,7 +169,7 @@ struct OnboardingView: View {
 
                                     // Find selected package
                                      if let package = offering.availablePackages.first(where: { pkg in
-                                         let period = pkg.storeProduct?.subscriptionPeriod?.unit.rawValue ?? (pkg.identifier.contains("monthly") ? "month" : pkg.identifier.contains("yearly") ? "year" : "")
+                                         let period = pkg.storeProduct?.subscriptionPeriod?.unit.description ?? (pkg.identifier.contains("monthly") ? "month" : pkg.identifier.contains("yearly") ? "year" : "")
                                          return (selectedPeriod == "month" && period.contains("month")) || (selectedPeriod == "year" && period.contains("year"))
                                      }) {
                                         VStack(spacing: AppleBooksSpacing.space16) {
