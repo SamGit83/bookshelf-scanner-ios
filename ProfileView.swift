@@ -171,6 +171,7 @@ struct ProfileView: View {
                                         }
                                     }
                                 }
+                                .frame(maxWidth: 350)
                             }
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         }
@@ -178,8 +179,8 @@ struct ProfileView: View {
                         // Settings Options Section
                         VStack(spacing: AppleBooksSpacing.space16) {
                             AppleBooksSectionHeader(
-                                title: "Settings",
-                                subtitle: "Manage your account and preferences",
+                                title: "Manage your account and preferences",
+                                subtitle: nil,
                                 showSeeAll: false,
                                 seeAllAction: nil
                             )
@@ -201,6 +202,7 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
+                                    .frame(maxWidth: 350)
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
@@ -220,6 +222,7 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
+                                    .frame(maxWidth: 350)
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
@@ -242,6 +245,7 @@ struct ProfileView: View {
                                         )
                                     }
                                 }
+                                .frame(maxWidth: 350)
 
                                 // Accent Color Section
                                 AppleBooksCard(padding: AppleBooksSpacing.space12) {
@@ -266,6 +270,7 @@ struct ProfileView: View {
                                         }
                                     }
                                 }
+                                .frame(maxWidth: 350)
 
                                 // Sign Out
                                 Button(action: {
@@ -286,6 +291,7 @@ struct ProfileView: View {
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
+                                    .frame(maxWidth: 350)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
@@ -319,6 +325,7 @@ struct ProfileView: View {
                                                     .foregroundColor(AppleBooksColors.textSecondary)
                                             }
                                         }
+                                        .frame(maxWidth: 350)
                                     }
                                     .buttonStyle(PlainButtonStyle())
                                 }
