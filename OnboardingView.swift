@@ -124,7 +124,7 @@ struct OnboardingView: View {
 
                                     // Find selected package
                                     if let package = offering.availablePackages.first(where: { pkg in
-                                        let period = pkg.storeProduct.subscriptionPeriod?.unit.rawValue ?? ""
+                                        let period = pkg.subscriptionPeriod?.unit.rawValue ?? ""
                                         return (selectedPeriod == "month" && period.contains("month")) || (selectedPeriod == "year" && period.contains("year"))
                                     }) {
                                         VStack(spacing: AppleBooksSpacing.space16) {
