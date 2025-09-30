@@ -449,6 +449,9 @@ struct PricingCard: View {
                     .font(.largeTitle)
                     .foregroundColor(Color.primary)
                     .bold()
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
 
                 Text("per \(period)")
                     .font(.caption)
@@ -458,6 +461,9 @@ struct PricingCard: View {
                     Text("$\(String(format: "%.2f", price/12))/month")
                         .font(.caption2)
                         .foregroundColor(Color.secondary)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.8)
+                        .lineLimit(1)
                 } else {
                     Spacer(minLength: 10) // Additional balance
                 }
