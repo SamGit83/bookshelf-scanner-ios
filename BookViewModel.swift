@@ -513,6 +513,7 @@ class BookViewModel: ObservableObject {
 
         listener = db.collection("users").document(userId).collection("books")
             .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
                 if let error = error {
                     print("DEBUG BookViewModel: Firestore listener error: \(error.localizedDescription), loading from cache")
                     // Try to load from cache if Firestore fails
