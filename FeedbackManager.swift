@@ -452,9 +452,19 @@ class FeedbackManager: ObservableObject {
             } else {
                 print("DEBUG FeedbackManager: No documents found for survey type \(type.rawValue)")
             }
-        } catch {
+        } catch let error as NSError {
             print("DEBUG FeedbackManager: Failed to get last survey completion: \(error)")
-            print("DEBUG FeedbackManager: Error details - domain: \((error as NSError).domain), code: \((error as NSError).code)")
+            print("DEBUG FeedbackManager: Error details - domain: \(error.domain), code: \(error.code)")
+
+            // Handle index errors gracefully - return nil, allowing survey to be shown
+            if error.domain == "FIRFirestoreErrorDomain" && error.code == 9 {
+                print("DEBUG FeedbackManager: Index error detected - assuming no previous completion")
+                return nil // Allow survey to be shown
+            } else {
+                // For other errors, return nil to be safe
+                print("DEBUG FeedbackManager: Non-index error - returning nil for safety")
+                return nil
+            }
         }
         return nil
     }
@@ -478,9 +488,18 @@ class FeedbackManager: ObservableObject {
                 print("DEBUG FeedbackManager: Found \(snapshot.documents.count) pending surveys")
                 self.surveyQueue = snapshot.documents.compactMap { Survey.fromDictionary($0.data()) }
                 print("DEBUG FeedbackManager: Successfully loaded \(self.surveyQueue.count) surveys")
-            } catch {
+            } catch let error as NSError {
                 print("DEBUG FeedbackManager: Failed to load pending surveys: \(error)")
-                print("DEBUG FeedbackManager: Error details - domain: \((error as NSError).domain), code: \((error as NSError).code)")
+                print("DEBUG FeedbackManager: Error details - domain: \(error.domain), code: \(error.code)")
+
+                // Handle index errors gracefully - continue with empty queue
+                if error.domain == "FIRFirestoreErrorDomain" && error.code == 9 {
+                    print("DEBUG FeedbackManager: Index error detected - surveys may not load until indexes are created")
+                    // Keep surveyQueue empty, app continues to function
+                } else {
+                    // For other errors, could retry or show user-friendly message
+                    print("DEBUG FeedbackManager: Non-index error - may affect survey functionality")
+                }
             }
         }
     }

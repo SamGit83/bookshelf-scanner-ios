@@ -9,6 +9,7 @@ struct DiscoverView: View {
     @State private var lastRefreshDate: Date?
     @State private var selectedBook: Book?
     @State private var showUpgradeModal = false
+@AppStorage("showRecommendations") private var showRecommendations = false
 
     // Group recommendations by genre for categories
     private var recommendationsByGenre: [String: [BookRecommendation]] {
@@ -18,114 +19,114 @@ struct DiscoverView: View {
     }
 
     var body: some View {
-        ZStack {
-            AppleBooksColors.background
-                .ignoresSafeArea()
-
-            if isLoading {
-                VStack(spacing: AppleBooksSpacing.space20) {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                    Text("Discovering great books for you...")
-                        .font(AppleBooksTypography.bodyMedium)
-                        .foregroundColor(AppleBooksColors.textSecondary)
+        VStack(spacing: 0) {
+            Toggle(isOn: $showRecommendations) {
+                Text("Show Recommendations")
+                    .font(AppleBooksTypography.bodyMedium)
+                    .foregroundColor(AppleBooksColors.text)
+            }
+            .toggleStyle(.switch)
+            .padding(.horizontal, AppleBooksSpacing.space24)
+            .padding(.vertical, AppleBooksSpacing.space16)
+            .onChange(of: showRecommendations) { oldValue, newValue in
+                if newValue {
+                    loadRecommendations()
                 }
-                .padding()
-            } else if let error = errorMessage {
-                VStack(spacing: AppleBooksSpacing.space20) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 50))
-                        .foregroundColor(SemanticColors.warningPrimary)
-                    Text("Unable to load recommendations")
-                        .font(AppleBooksTypography.headlineMedium)
-                        .foregroundColor(AppleBooksColors.text)
-                    Text(error)
-                        .font(AppleBooksTypography.bodyMedium)
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                        .multilineTextAlignment(.center)
+            }
+
+            ZStack {
+                AppleBooksColors.background
+                    .ignoresSafeArea()
+
+                if isLoading {
+                    VStack(spacing: AppleBooksSpacing.space20) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text("Discovering great books for you...")
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                    }
+                    .padding()
+                } else if let error = errorMessage {
+                    VStack(spacing: AppleBooksSpacing.space20) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(SemanticColors.warningPrimary)
+                        Text("Unable to load recommendations")
+                            .font(AppleBooksTypography.headlineMedium)
+                            .foregroundColor(AppleBooksColors.text)
+                        Text(error)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        Button(action: loadRecommendations) {
+                            Text("Try Again")
+                                .font(AppleBooksTypography.buttonLarge)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(AppleBooksColors.accent)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
                         .padding(.horizontal)
-                    Button(action: loadRecommendations) {
-                        Text("Try Again")
+                    }
+                    .padding()
+                } else if showRecommendations && recommendations.isEmpty {
+                    VStack(spacing: AppleBooksSpacing.space20) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 60))
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                        Text("No recommendations yet")
+                            .font(AppleBooksTypography.headlineMedium)
+                            .foregroundColor(AppleBooksColors.text)
+                        Text("Add some books to your library to get personalized recommendations powered by Grok AI!")
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        Button(action: loadRecommendations) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Get Recommendations")
+                            }
                             .font(AppleBooksTypography.buttonLarge)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(AppleBooksColors.accent)
                             .foregroundColor(.white)
                             .cornerRadius(12)
-                    }
-                    .padding(.horizontal)
-                }
-                .padding()
-            } else if recommendations.isEmpty {
-                VStack(spacing: AppleBooksSpacing.space20) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 60))
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                    Text("No recommendations yet")
-                        .font(AppleBooksTypography.headlineMedium)
-                        .foregroundColor(AppleBooksColors.text)
-                    Text("Add some books to your library to get personalized recommendations powered by Grok AI!")
-                        .font(AppleBooksTypography.bodyMedium)
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                        .multilineTextAlignment(.center)
+                        }
                         .padding(.horizontal)
-                    
-                    Button(action: loadRecommendations) {
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                            Text("Get Recommendations")
-                        }
-                        .font(AppleBooksTypography.buttonLarge)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(AppleBooksColors.accent)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
                     }
-                    .padding(.horizontal)
-                }
-                .padding()
-            } else {
-                ScrollView {
-                    VStack(spacing: AppleBooksSpacing.space32) {
-                        // Header with Grok AI branding
-                        VStack(spacing: AppleBooksSpacing.space8) {
-                            HStack {
-                                Image(systemName: "sparkles")
-                                    .foregroundColor(Color(hex: "FF2D92"))
-                                Text("Powered by Grok AI")
-                                    .font(AppleBooksTypography.captionBold)
-                                    .foregroundColor(Color(hex: "FF2D92"))
+                    .padding()
+                } else if showRecommendations && !recommendations.isEmpty {
+                    ScrollView {
+                        VStack(spacing: AppleBooksSpacing.space32) {
+                            // Header with Grok AI branding
+                            VStack(spacing: AppleBooksSpacing.space8) {
+                                HStack {
+                                    Image(systemName: "sparkles")
+                                        .foregroundColor(Color(hex: "FF2D92"))
+                                    Text("Powered by Grok AI")
+                                        .font(AppleBooksTypography.captionBold)
+                                        .foregroundColor(Color(hex: "FF2D92"))
+                                }
+                                Text("Personalized recommendations based on your library")
+                                    .font(AppleBooksTypography.caption)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                    .multilineTextAlignment(.center)
                             }
-                            Text("Personalized recommendations based on your library")
-                                .font(AppleBooksTypography.caption)
-                                .foregroundColor(AppleBooksColors.textSecondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                        .padding(.top, AppleBooksSpacing.space16)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+                            .padding(.top, AppleBooksSpacing.space16)
 
-                        // All Recommendations Section
-                        if !recommendations.isEmpty {
-                            AppleBooksCollection(
-                                books: recommendations.map { convertToBook($0) },
-                                title: "Recommended for You",
-                                subtitle: "\(recommendations.count) personalized picks",
-                                onBookTap: { book in
-                                    selectedBook = book
-                                },
-                                onSeeAllTap: nil,
-                                viewModel: viewModel
-                            )
-                        }
-
-                        // Categories Sections
-                        ForEach(recommendationsByGenre.keys.sorted(), id: \.self) { genre in
-                            if let genreRecommendations = recommendationsByGenre[genre], !genreRecommendations.isEmpty {
+                            // All Recommendations Section
+                            if !recommendations.isEmpty {
                                 AppleBooksCollection(
-                                    books: genreRecommendations.map { convertToBook($0) },
-                                    title: genre,
-                                    subtitle: "\(genreRecommendations.count) books",
+                                    books: recommendations.map { convertToBook($0) },
+                                    title: "Recommended for You",
+                                    subtitle: "\(recommendations.count) personalized picks",
                                     onBookTap: { book in
                                         selectedBook = book
                                     },
@@ -133,9 +134,25 @@ struct DiscoverView: View {
                                     viewModel: viewModel
                                 )
                             }
+
+                            // Categories Sections
+                            ForEach(recommendationsByGenre.keys.sorted(), id: \.self) { genre in
+                                if let genreRecommendations = recommendationsByGenre[genre], !genreRecommendations.isEmpty {
+                                    AppleBooksCollection(
+                                        books: genreRecommendations.map { convertToBook($0) },
+                                        title: genre,
+                                        subtitle: "\(genreRecommendations.count) books",
+                                        onBookTap: { book in
+                                            selectedBook = book
+                                        },
+                                        onSeeAllTap: nil,
+                                        viewModel: viewModel
+                                    )
+                                }
+                            }
                         }
+                        .padding(.vertical, AppleBooksSpacing.space24)
                     }
-                    .padding(.vertical, AppleBooksSpacing.space24)
                 }
             }
         }
@@ -151,7 +168,7 @@ struct DiscoverView: View {
             }
         }
         .onAppear {
-            if recommendations.isEmpty || shouldRefreshRecommendations() {
+            if showRecommendations && (recommendations.isEmpty || shouldRefreshRecommendations()) {
                 loadRecommendations()
             }
         }

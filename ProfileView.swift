@@ -80,7 +80,7 @@ struct ProfileView: View {
                                     seeAllAction: user.tier == .free ? { expandedUsageDetails.toggle() } : nil
                                 )
 
-                                AppleBooksCard {
+                                AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                     VStack(spacing: AppleBooksSpacing.space16) {
                                         // Scans
                                         EnhancedUsageRow(
@@ -186,7 +186,7 @@ struct ProfileView: View {
 
                             VStack(spacing: AppleBooksSpacing.space16) {
                                 NavigationLink(destination: AccountSettingsView()) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space16) {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "gear")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -205,7 +205,7 @@ struct ProfileView: View {
                                 .buttonStyle(PlainButtonStyle())
 
                                 NavigationLink(destination: ReadingStatsView()) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space16) {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "chart.bar.fill")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -224,7 +224,7 @@ struct ProfileView: View {
                                 .buttonStyle(PlainButtonStyle())
 
                                 // Theme Section
-                                AppleBooksCard(padding: AppleBooksSpacing.space16) {
+                                AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                     VStack(spacing: AppleBooksSpacing.space12) {
                                         HStack {
                                             Text("Appearance")
@@ -244,7 +244,7 @@ struct ProfileView: View {
                                 }
 
                                 // Accent Color Section
-                                AppleBooksCard(padding: AppleBooksSpacing.space16) {
+                                AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                     VStack(spacing: AppleBooksSpacing.space12) {
                                         HStack {
                                             Text("Accent Color")
@@ -271,7 +271,7 @@ struct ProfileView: View {
                                 Button(action: {
                                     showSignOutAlert = true
                                 }) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space16) {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "arrow.right.square")
                                                 .font(AppleBooksTypography.bodyLarge)
@@ -304,7 +304,7 @@ struct ProfileView: View {
 
                                 VStack(spacing: AppleBooksSpacing.space16) {
                                     NavigationLink(destination: SubscriptionView()) {
-                                        AppleBooksCard(padding: AppleBooksSpacing.space16) {
+                                        AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                             HStack(spacing: AppleBooksSpacing.space12) {
                                                 Image(systemName: "crown.fill")
                                                     .font(AppleBooksTypography.bodyLarge)

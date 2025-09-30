@@ -147,6 +147,15 @@ class ABTestingService: ObservableObject {
                 let assignment = try document.data(as: UserExperimentAssignment.self)
                 print("DEBUG ABTestingService: Successfully decoded UserExperimentAssignment: \(assignment)")
                 return assignment
+            } catch let error as DecodingError {
+                print("DEBUG ABTestingService: Decoding error for UserExperimentAssignment: \(error)")
+                // Handle decoding errors gracefully - return nil to allow fallback to new assignment
+                if case .valueNotFound = error {
+                    print("DEBUG ABTestingService: Value not found in document - may be missing fields, returning nil")
+                    return nil
+                } else {
+                    throw error // Re-throw other decoding errors
+                }
             } catch {
                 print("DEBUG ABTestingService: Failed to decode UserExperimentAssignment: \(error)")
                 throw error
