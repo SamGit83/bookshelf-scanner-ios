@@ -36,6 +36,49 @@ struct ReadingProgressBookCard: View {
                             .frame(width: 60, height: 90)
                             .cornerRadius(8)
                             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    } else if let coverURL = book.coverImageURL,
+                              let url = URL(string: coverURL) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 60, height: 90)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        ProgressView()
+                                            .scaleEffect(0.5)
+                                    )
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 60, height: 90)
+                                    .cornerRadius(8)
+                                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                            case .failure:
+                                Rectangle()
+                                    .fill(Color.red.opacity(0.3))
+                                    .frame(width: 60, height: 90)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        VStack(spacing: 2) {
+                                            Image(systemName: "xmark.circle")
+                                                .foregroundColor(.red)
+                                                .font(.system(size: 16))
+                                            Text("Failed")
+                                                .font(.system(size: 8))
+                                                .foregroundColor(.red)
+                                        }
+                                    )
+                            @unknown default:
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 60, height: 90)
+                                    .cornerRadius(8)
+                            }
+                        }
+                        .id(book.coverImageURL)
                     } else {
                         Rectangle()
                             .fill(Color.gray.opacity(0.3))
@@ -100,13 +143,6 @@ struct ReadingProgressBookCard: View {
                             Text("\(Int(progress * 100))%")
                                 .font(AppleBooksTypography.captionBold)
                                 .foregroundColor(AppleBooksColors.success)
-                        }
-                        .onAppear {
-                            if book.coverImageData != nil {
-                                print("DEBUG ReadingView: Book has coverImageData - \(book.title ?? "Unknown")")
-                            } else {
-                                print("DEBUG ReadingView: Book missing coverImageData, coverImageURL: \(book.coverImageURL ?? "nil") - \(book.title ?? "Unknown")")
-                            }
                         }
                     }
                 }

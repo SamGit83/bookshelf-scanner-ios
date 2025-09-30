@@ -42,9 +42,19 @@ class CostTracker {
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
         let actualCost = cost ?? (costRates[service] ?? 0.0) * Double(usage)
 
+        print("DEBUG: recordCost called on thread: \(Thread.current), service: \(service), actualCost: \(actualCost), usage: \(usage)")
+
         DispatchQueue.main.async {
+            print("DEBUG: Inside main.async, thread: \(Thread.current), self is nil: \(self == nil), currentCosts is nil: \(self.currentCosts == nil)")
+            if let currentTotal = self.currentCosts?.totalCost {
+                print("DEBUG: currentCosts.totalCost before update: \(currentTotal)")
+            } else {
+                print("DEBUG: currentCosts.totalCost is nil")
+            }
             self.currentCosts.totalCost += actualCost
+            print("DEBUG: After totalCost update: \(self.currentCosts.totalCost)")
             self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
+            print("DEBUG: After apiUsage update for \(service): \(self.currentCosts.apiUsage[service] ?? -1)")
 
             // Track daily costs
             let today = self.getCurrentDateString()

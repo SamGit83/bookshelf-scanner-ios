@@ -1286,15 +1286,6 @@ public struct AppleBooksBookCard: View {
             }
         }
         .onTapGesture(perform: onTap)
-        .onAppear {
-            if book.coverImageData != nil {
-                print("DEBUG LibraryView: Book has coverImageData - \(book.title ?? "Unknown")")
-            } else if book.coverImageURL != nil {
-                print("DEBUG LibraryView: Book has coverImageURL - \(book.title ?? "Unknown")")
-            } else {
-                print("DEBUG LibraryView: Book has no cover data - \(book.title ?? "Unknown")")
-            }
-        }
     }
 
     private func addToLibrary() {
