@@ -427,6 +427,11 @@ struct BookDetailView: View {
     }
 
     private func loadAuthorBiography(author: String) {
+        guard !author.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("DEBUG BookDetailView: Skipping author bio load - empty author")
+            isLoadingBio = false
+            return
+        }
         isLoadingBio = true
         let grokService = GrokAPIService()
         grokService.fetchAuthorBiography(author: author) { result in

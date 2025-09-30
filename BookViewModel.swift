@@ -568,10 +568,17 @@ class BookViewModel: ObservableObject {
                 // Cache the books for offline use
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
-
-                // Fetch missing covers for existing books (includes migration of HTTP URLs)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { // Small delay to avoid overwhelming the API
-                    self?.refreshBookCovers()
+ 
+                // Fetch missing covers only if not recently refreshed (e.g., within last 5 minutes)
+                let lastCoverRefresh = UserDefaults.standard.double(forKey: "lastCoverRefreshTime")
+                let now = Date().timeIntervalSince1970
+                if now - lastCoverRefresh > 300 { // 5 minutes
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        self?.refreshBookCovers()
+                        UserDefaults.standard.set(now, forKey: "lastCoverRefreshTime")
+                    }
+                } else {
+                    print("DEBUG BookViewModel: Skipping cover refresh - recently done")
                 }
             }
     }
