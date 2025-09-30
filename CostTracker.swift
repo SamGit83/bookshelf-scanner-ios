@@ -8,17 +8,19 @@ import FirebaseFirestore
  * Tracks API usage costs, calculates real-time profitability,
  * and provides insights for cost optimization.
  */
-class CostTracker {
+class CostTracker: ObservableObject {
     static let shared = CostTracker()
 
     // MARK: - Private Properties
     private let db = Firestore.firestore()
     private var cancellables = Set<AnyCancellable>()
+    private let costUpdateQueue = DispatchQueue(label: "com.costtracker.updates", qos: .userInitiated)
+    private let objectWillChange = PassthroughSubject<Void, Never>()
 
     // MARK: - Public Properties
-    @Published var currentCosts = CostMetrics()
-    @Published var revenueMetrics = RevenueMetrics()
-    @Published var profitabilityAnalysis = ProfitabilityAnalysis()
+    var currentCosts = CostMetrics()
+    var revenueMetrics = RevenueMetrics()
+    var profitabilityAnalysis = ProfitabilityAnalysis()
 
     // MARK: - Cost Rates (per API call)
     private let costRates: [String: Double] = [
@@ -42,15 +44,9 @@ class CostTracker {
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
         let actualCost = cost ?? (costRates[service] ?? 0.0) * Double(usage)
 
-        print("DEBUG: recordCost called on thread: \(Thread.current), service: \(service), actualCost: \(actualCost), usage: \(usage)")
-
-        DispatchQueue.main.async {
-            print("DEBUG: Inside main.async, thread: \(Thread.current)")
-            print("DEBUG: currentCosts.totalCost before update: \(self.currentCosts.totalCost)")
+        costUpdateQueue.async {
             self.currentCosts.totalCost += actualCost
-            print("DEBUG: After totalCost update: \(self.currentCosts.totalCost)")
             self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
-            print("DEBUG: After apiUsage update for \(service): \(self.currentCosts.apiUsage[service] ?? -1)")
 
             // Track daily costs
             let today = self.getCurrentDateString()
@@ -59,8 +55,10 @@ class CostTracker {
             }
             self.currentCosts.dailyCosts[today]! += actualCost
 
-            // Update profitability
-            self.updateProfitability()
+            DispatchQueue.main.async {
+                self.updateProfitability()
+                self.objectWillChange.send()
+            }
         }
 
         // Track in performance monitoring
@@ -100,7 +98,7 @@ class CostTracker {
     }
 
     func recordRevenue(tier: UserTier, amount: Double, subscriptionType: SubscriptionType = .monthly) {
-        DispatchQueue.main.async {
+        costUpdateQueue.async {
             self.revenueMetrics.totalRevenue += amount
             self.revenueMetrics.activeSubscriptions += 1
 
@@ -115,7 +113,10 @@ class CostTracker {
             }
             self.revenueMetrics.dailyRevenue[today]! += amount
 
-            self.updateProfitability()
+            DispatchQueue.main.async {
+                self.updateProfitability()
+                self.objectWillChange.send()
+            }
         }
 
         // Track in analytics
@@ -151,6 +152,8 @@ class CostTracker {
 
         // Cost efficiency rating
         profitabilityAnalysis.costEfficiencyRating = calculateCostEfficiencyRating()
+
+        objectWillChange.send()
     }
 
     private func calculateCostEfficiencyRating() -> Double {
