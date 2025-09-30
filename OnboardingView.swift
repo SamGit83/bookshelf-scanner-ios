@@ -1,7 +1,5 @@
 import SwiftUI
-#if canImport(RevenueCat)
 import RevenueCat
-#endif
 
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
@@ -123,10 +121,10 @@ struct OnboardingView: View {
                                     .padding(AppleBooksSpacing.space8)
 
                                     // Find selected package
-                                    if let package = offering.availablePackages.first(where: { pkg in
-                                        let period = pkg.subscriptionPeriod?.unit.rawValue ?? ""
-                                        return (selectedPeriod == "month" && period.contains("month")) || (selectedPeriod == "year" && period.contains("year"))
-                                    }) {
+                                     if let package = offering.availablePackages.first(where: { pkg in
+                                         let period = pkg.storeProduct?.subscriptionPeriod?.unit.rawValue ?? (pkg.identifier.contains("monthly") ? "month" : pkg.identifier.contains("yearly") ? "year" : "")
+                                         return (selectedPeriod == "month" && period.contains("month")) || (selectedPeriod == "year" && period.contains("year"))
+                                     }) {
                                         VStack(spacing: AppleBooksSpacing.space16) {
                                             Text(package.storeProduct.localizedTitle)
                                                 .font(AppleBooksTypography.bodyLarge)
