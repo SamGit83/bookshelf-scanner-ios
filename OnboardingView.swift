@@ -1,14 +1,23 @@
 import SwiftUI
-import Purchases
+
+struct SubscriptionOption {
+    let name: String
+    let price: String
+    let period: String
+}
 
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
     @ObservedObject private var accentColorManager = AccentColorManager.shared
-    @ObservedObject private var revenueCatManager = RevenueCatManager.shared
     @State private var currentPage = 0
     @State private var showMainApp = false
     @State private var selectedPeriod: String = "year"
-    @State private var isPurchasing = false
+    @State private var showSuccess = false
+
+    let subscriptionOptions: [SubscriptionOption] = [
+        SubscriptionOption(name: "Monthly Premium", price: "$9.99", period: "month"),
+        SubscriptionOption(name: "Yearly Premium", price: "$99.99", period: "year")
+    ]
 
     let pages: [OnboardingPage] = [
         OnboardingPage(
@@ -111,78 +120,60 @@ struct OnboardingView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, AppleBooksSpacing.space16)
 
-                                if let offering = revenueCatManager.offerings["default"] ?? revenueCatManager.offerings["premium"] {
-                                    // Billing Period Picker
-                                    Picker("Billing Period", selection: $selectedPeriod) {
-                                        Text("Monthly").tag("month")
-                                        Text("Yearly").tag("year")
-                                    }
-                                    .pickerStyle(.segmented)
-                                    .padding(AppleBooksSpacing.space8)
+                                // Billing Period Picker
+                                Picker("Billing Period", selection: $selectedPeriod) {
+                                    Text("Monthly").tag("month")
+                                    Text("Yearly").tag("year")
+                                }
+                                .pickerStyle(.segmented)
+                                .padding(AppleBooksSpacing.space8)
 
-                                    // Find selected package
-                                     if let package = offering.availablePackages.first(where: { pkg in
-                                         let period = pkg.storeProduct?.subscriptionPeriod?.unit.description ?? (pkg.identifier.contains("monthly") ? "month" : pkg.identifier.contains("yearly") ? "year" : "")
-                                         return (selectedPeriod == "month" && period.contains("month")) || (selectedPeriod == "year" && period.contains("year"))
-                                     }) {
-                                        VStack(spacing: AppleBooksSpacing.space16) {
-                                            Text(package.storeProduct.localizedTitle)
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.text)
-
-                                            Text("\(package.storeProduct.price, specifier: "%.2f") \(package.storeProduct.currencyCode)/\(selectedPeriod == "month" ? "month" : "year")")
-                                                .font(AppleBooksTypography.displayLarge)
-                                                .foregroundColor(AppleBooksColors.accent)
-                                                .bold()
-
-                                            if selectedPeriod == "year" {
-                                                let monthlyEquivalent = package.storeProduct.price.doubleValue / 12
-                                                Text("Just \(monthlyEquivalent, specifier: "%.2f") per month")
-                                                    .font(AppleBooksTypography.bodyLarge)
-                                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                            }
-
-                                            Button(action: {
-                                                purchaseSubscription(package: package)
-                                            }) {
-                                                Text(isPurchasing ? "Processing..." : "Subscribe & Get Started")
-                                                    .font(AppleBooksTypography.buttonLarge)
-                                                    .foregroundColor(.white)
-                                                    .frame(maxWidth: .infinity)
-                                                    .padding(.vertical, AppleBooksSpacing.space16)
-                                            }
-                                            .disabled(isPurchasing || revenueCatManager.isSubscribed)
-                                            .background(revenueCatManager.isSubscribed ? AppleBooksColors.textTertiary : AppleBooksColors.accent)
-                                            .cornerRadius(12)
-                                            .opacity(isPurchasing ? 0.7 : 1.0)
-
-                                            if revenueCatManager.isSubscribed {
-                                                Text("Already Premium - Tap to Continue")
-                                                    .font(AppleBooksTypography.caption)
-                                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                            } else {
-                                                Button("Skip for Free Tier") {
-                                                    completeOnboarding()
-                                                }
-                                                .font(AppleBooksTypography.buttonMedium)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                            }
-                                        }
-                                    } else {
-                                        Text("Loading plans...")
+                                // Find selected option
+                                if let selectedOption = subscriptionOptions.first(where: { $0.period == selectedPeriod }) {
+                                    VStack(spacing: AppleBooksSpacing.space16) {
+                                        Text(selectedOption.name)
                                             .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.text)
+
+                                        Text("\(selectedOption.price)/\(selectedOption.period)")
+                                            .font(AppleBooksTypography.displayLarge)
+                                            .foregroundColor(AppleBooksColors.accent)
+                                            .bold()
+
+                                        if selectedPeriod == "year" {
+                                            Text("Just $8.33 per month")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                        }
+
+                                        Button(action: {
+                                            showSuccess = true
+                                        }) {
+                                            Text("Subscribe & Get Started")
+                                                .font(AppleBooksTypography.buttonLarge)
+                                                .foregroundColor(.white)
+                                                .frame(maxWidth: .infinity)
+                                                .padding(.vertical, AppleBooksSpacing.space16)
+                                        }
+                                        .background(AppleBooksColors.accent)
+                                        .cornerRadius(12)
+
+                                        if showSuccess {
+                                            Text("Subscription successful!")
+                                                .font(AppleBooksTypography.caption)
+                                                .foregroundColor(AppleBooksColors.success)
+                                        } else {
+                                            Button("Skip for Free Tier") {
+                                                completeOnboarding()
+                                            }
+                                            .font(AppleBooksTypography.buttonMedium)
                                             .foregroundColor(AppleBooksColors.textSecondary)
+                                        }
                                     }
                                 } else {
-                                    VStack(spacing: AppleBooksSpacing.space16) {
-                                        ProgressView()
-                                            .scaleEffect(1.2)
-                                            .tint(AppleBooksColors.accent)
-
-                                        Text("Loading subscription options...")
-                                            .font(AppleBooksTypography.bodyLarge)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
+                                    Text("Loading plans...")
+                                        .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
                                 }
                             }
                         }
@@ -241,22 +232,6 @@ struct OnboardingView: View {
         authService.completeOnboarding()
         withAnimation(.easeInOut(duration: 0.5)) {
             showMainApp = true
-        }
-    }
-
-    private func purchaseSubscription(package: Purchases.Package) {
-        isPurchasing = true
-        revenueCatManager.purchase(package: package) { result in
-            DispatchQueue.main.async {
-                self.isPurchasing = false
-                switch result {
-                case .success:
-                    self.completeOnboarding()
-                case .failure(let error):
-                    print("Subscription purchase failed: \(error.localizedDescription)")
-                    // Optionally show alert, but for now just log
-                }
-            }
         }
     }
 }
