@@ -3,8 +3,11 @@ import SwiftUI
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
     @ObservedObject private var accentColorManager = AccentColorManager.shared
+    @ObservedObject private var revenueCatManager = RevenueCatManager.shared
     @State private var currentPage = 0
     @State private var showMainApp = false
+    @State private var selectedPeriod: String = "year"
+    @State private var isPurchasing = false
 
     let pages: [OnboardingPage] = [
         OnboardingPage(
@@ -38,10 +41,10 @@ struct OnboardingView: View {
             accentColor: AppleBooksColors.promotional
         ),
         OnboardingPage(
-            title: "Ready to Begin!",
-            description: "Let's start building your digital bookshelf. You can always access this tutorial from settings.",
-            imageName: "checkmark.circle.fill",
-            accentColor: AppleBooksColors.success
+            title: "Choose Your Plan",
+            description: "Unlock premium features with a subscription. Select monthly or yearly for the best value.",
+            imageName: "crown.fill",
+            accentColor: AppleBooksColors.promotional
         )
     ]
 
@@ -71,26 +74,116 @@ struct OnboardingView: View {
                             }
                         }
 
-                        // Icon
-                        Image(systemName: pages[currentPage].imageName)
-                            .font(.system(size: 80, weight: .light))
-                            .foregroundColor(pages[currentPage].accentColor)
-                            .frame(height: 120)
+                        if currentPage < pages.count - 1 {
+                            // Icon
+                            Image(systemName: pages[currentPage].imageName)
+                                .font(.system(size: 80, weight: .light))
+                                .foregroundColor(pages[currentPage].accentColor)
+                                .frame(height: 120)
 
-                        // Text Content
-                        VStack(spacing: AppleBooksSpacing.space16) {
-                            Text(pages[currentPage].title)
-                                .font(AppleBooksTypography.displayLarge)
-                                .foregroundColor(AppleBooksColors.text)
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(6)
+                            // Text Content
+                            VStack(spacing: AppleBooksSpacing.space16) {
+                                Text(pages[currentPage].title)
+                                    .font(AppleBooksTypography.displayLarge)
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .multilineTextAlignment(.center)
+                                    .lineSpacing(6)
 
-                            Text(pages[currentPage].description)
-                                .font(AppleBooksTypography.bodyLarge)
-                                .foregroundColor(AppleBooksColors.textSecondary)
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(4)
-                                .padding(.horizontal, AppleBooksSpacing.space16)
+                                Text(pages[currentPage].description)
+                                    .font(AppleBooksTypography.bodyLarge)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                    .multilineTextAlignment(.center)
+                                    .lineSpacing(4)
+                                    .padding(.horizontal, AppleBooksSpacing.space16)
+                            }
+                        } else {
+                            // Subscription Selection UI
+                            VStack(spacing: AppleBooksSpacing.space24) {
+                                Text("Unlock Premium")
+                                    .font(AppleBooksTypography.displayLarge)
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .multilineTextAlignment(.center)
+
+                                Text("Choose your subscription plan to get unlimited scans and features.")
+                                    .font(AppleBooksTypography.bodyLarge)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, AppleBooksSpacing.space16)
+
+                                if let offering = revenueCatManager.offerings["default"] ?? revenueCatManager.offerings["premium"] {
+                                    // Billing Period Picker
+                                    Picker("Billing Period", selection: $selectedPeriod) {
+                                        Text("Monthly").tag("month")
+                                        Text("Yearly").tag("year")
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .padding(AppleBooksSpacing.space8)
+
+                                    // Find selected package
+                                    if let package = offering.availablePackages.first(where: { pkg in
+                                        let period = pkg.storeProduct.subscriptionPeriod?.unit.rawValue ?? ""
+                                        return (selectedPeriod == "month" && period.contains("month")) || (selectedPeriod == "year" && period.contains("year"))
+                                    }) {
+                                        VStack(spacing: AppleBooksSpacing.space16) {
+                                            Text(package.storeProduct.localizedTitle)
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(AppleBooksColors.text)
+
+                                            Text("\(package.storeProduct.price, specifier: "%.2f") \(package.storeProduct.currencyCode)/\(selectedPeriod == "month" ? "month" : "year")")
+                                                .font(AppleBooksTypography.displayLarge)
+                                                .foregroundColor(AppleBooksColors.accent)
+                                                .bold()
+
+                                            if selectedPeriod == "year" {
+                                                let monthlyEquivalent = package.storeProduct.price.doubleValue / 12
+                                                Text("Just \(monthlyEquivalent, specifier: "%.2f") per month")
+                                                    .font(AppleBooksTypography.bodyLarge)
+                                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                            }
+
+                                            Button(action: {
+                                                purchaseSubscription(package: package)
+                                            }) {
+                                                Text(isPurchasing ? "Processing..." : "Subscribe & Get Started")
+                                                    .font(AppleBooksTypography.buttonLarge)
+                                                    .foregroundColor(.white)
+                                                    .frame(maxWidth: .infinity)
+                                                    .padding(.vertical, AppleBooksSpacing.space16)
+                                            }
+                                            .disabled(isPurchasing || revenueCatManager.isSubscribed)
+                                            .background(revenueCatManager.isSubscribed ? AppleBooksColors.textTertiary : AppleBooksColors.accent)
+                                            .cornerRadius(12)
+                                            .opacity(isPurchasing ? 0.7 : 1.0)
+
+                                            if revenueCatManager.isSubscribed {
+                                                Text("Already Premium - Tap to Continue")
+                                                    .font(AppleBooksTypography.caption)
+                                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                            } else {
+                                                Button("Skip for Free Tier") {
+                                                    completeOnboarding()
+                                                }
+                                                .font(AppleBooksTypography.buttonMedium)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                            }
+                                        }
+                                    } else {
+                                        Text("Loading plans...")
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                } else {
+                                    VStack(spacing: AppleBooksSpacing.space16) {
+                                        ProgressView()
+                                            .scaleEffect(1.2)
+                                            .tint(AppleBooksColors.accent)
+
+                                        Text("Loading subscription options...")
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -132,18 +225,6 @@ struct OnboardingView: View {
                                 .background(pages[currentPage].accentColor)
                                 .cornerRadius(12)
                         }
-                    } else {
-                        Button(action: {
-                            completeOnboarding()
-                        }) {
-                            Text("Get Started")
-                                .font(AppleBooksTypography.buttonLarge)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppleBooksSpacing.space16)
-                                .background(AppleBooksColors.accent)
-                                .cornerRadius(12)
-                        }
                     }
                 }
                 .padding(.horizontal, AppleBooksSpacing.space24)
@@ -159,6 +240,22 @@ struct OnboardingView: View {
         authService.completeOnboarding()
         withAnimation(.easeInOut(duration: 0.5)) {
             showMainApp = true
+        }
+    }
+
+    private func purchaseSubscription(package: PurchasesPackage) {
+        isPurchasing = true
+        revenueCatManager.purchase(package: package) { result in
+            DispatchQueue.main.async {
+                self.isPurchasing = false
+                switch result {
+                case .success:
+                    self.completeOnboarding()
+                case .failure(let error):
+                    print("Subscription purchase failed: \(error.localizedDescription)")
+                    // Optionally show alert, but for now just log
+                }
+            }
         }
     }
 }
