@@ -257,7 +257,7 @@ struct ProfileView: View {
                                             Spacer()
                                         }
 
-                                        HStack(spacing: AppleBooksSpacing.space12) {
+                                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: AppleBooksSpacing.space12) {
                                             ForEach(AccentColorScheme.allCases) { colorScheme in
                                                 AccentColorOption(
                                                     colorScheme: colorScheme,
