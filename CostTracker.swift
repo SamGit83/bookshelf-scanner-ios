@@ -45,12 +45,8 @@ class CostTracker {
         print("DEBUG: recordCost called on thread: \(Thread.current), service: \(service), actualCost: \(actualCost), usage: \(usage)")
 
         DispatchQueue.main.async {
-            print("DEBUG: Inside main.async, thread: \(Thread.current), self is nil: \(self == nil), currentCosts is nil: \(self.currentCosts == nil)")
-            if let currentTotal = self.currentCosts?.totalCost {
-                print("DEBUG: currentCosts.totalCost before update: \(currentTotal)")
-            } else {
-                print("DEBUG: currentCosts.totalCost is nil")
-            }
+            print("DEBUG: Inside main.async, thread: \(Thread.current)")
+            print("DEBUG: currentCosts.totalCost before update: \(self.currentCosts.totalCost)")
             self.currentCosts.totalCost += actualCost
             print("DEBUG: After totalCost update: \(self.currentCosts.totalCost)")
             self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
