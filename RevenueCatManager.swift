@@ -20,7 +20,9 @@ class Entitlements {
     var active: [String: EntitlementInfo] = [:]
 }
 
-class Offering {}
+class Offering {
+    var availablePackages: [Package] = []
+}
 
 class CustomerInfo {
     var originalAppUserId: String = ""
