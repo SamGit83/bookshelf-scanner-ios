@@ -1,6 +1,7 @@
 import SwiftUI
 
-struct SubscriptionOption {
+struct SubscriptionOption: Identifiable {
+    let id = UUID()
     let name: String
     let price: String
     let period: String
@@ -11,7 +12,7 @@ struct OnboardingView: View {
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var currentPage = 0
     @State private var showMainApp = false
-    @State private var selectedOption = SubscriptionOption(name: "Yearly Premium", price: "$99.99", period: "year")
+    @State private var selectedOption: SubscriptionOption? = SubscriptionOption(name: "Yearly Premium", price: "$99.99", period: "year")
     @State private var showSuccess = false
 
     let subscriptionOptions: [SubscriptionOption] = [
@@ -122,39 +123,39 @@ struct OnboardingView: View {
 
                                 // Subscription Options Buttons
                                 HStack(spacing: AppleBooksSpacing.space16) {
-                                    ForEach(subscriptionOptions, id: \.period) { option in
+                                    ForEach(subscriptionOptions) { option in
                                         Button(action: {
                                             selectedOption = option
                                         }) {
                                             VStack(spacing: AppleBooksSpacing.space8) {
                                                 Text(option.name)
                                                     .font(AppleBooksTypography.bodyLarge)
-                                                    .foregroundColor(selectedOption.period == option.period ? AppleBooksColors.accent : AppleBooksColors.text)
+                                                    .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.text)
                                                 Text("\(option.price)/\(option.period)")
                                                     .font(AppleBooksTypography.headline)
-                                                    .foregroundColor(selectedOption.period == option.period ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+                                                    .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
                                             }
                                             .padding(.vertical, AppleBooksSpacing.space16)
                                             .padding(.horizontal, AppleBooksSpacing.space24)
-                                            .background(selectedOption.period == option.period ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
+                                            .background(selectedOption == option ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
                                             .cornerRadius(12)
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(selectedOption.period == option.period ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
+                                                    .stroke(selectedOption == option ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
                                             )
                                         }
                                     }
                                 }
                                 
                                 VStack(spacing: AppleBooksSpacing.space16) {
-                                    Text(selectedOption.name)
+                                    Text(selectedOption?.name ?? "Select a Plan")
                                         .font(AppleBooksTypography.bodyLarge)
                                         .foregroundColor(AppleBooksColors.text)
-                                    Text("\(selectedOption.price)/\(selectedOption.period)")
+                                    Text("\(selectedOption?.price ?? "")/\(selectedOption?.period ?? "")")
                                         .font(AppleBooksTypography.displayLarge)
                                         .foregroundColor(AppleBooksColors.accent)
                                         .bold()
-                                    if selectedOption.period == "year" {
+                                    if selectedOption?.period == "year" {
                                         Text("Just $8.33 per month")
                                             .font(AppleBooksTypography.bodyLarge)
                                             .foregroundColor(AppleBooksColors.textSecondary)
