@@ -905,7 +905,7 @@ struct EnhancedUsageRow: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(current >= limit ? Color.orange : Color.systemBlue)
+                                .background(current >= limit ? Color.orange : Color.blue)
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                         }
                         .glassBackground()

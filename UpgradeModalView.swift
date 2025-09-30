@@ -53,13 +53,13 @@ struct UpgradeModalView: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Color.systemGray6)
+                    .fill(Color.gray.opacity(0.4))
                     .frame(width: 120, height: 120)
                     .glassBackground()
 
                 Image(systemName: "crown.fill")
                     .font(.system(size: 48, weight: .medium))
-                    .foregroundColor(Color.systemGray)
+                    .foregroundColor(Color.gray)
                     .accessibilityLabel("Premium Crown Icon")
             }
 
@@ -86,7 +86,7 @@ struct UpgradeModalView: View {
             HStack(spacing: 4) {
                 ForEach(0..<5) { _ in
                     Image(systemName: "star.fill")
-                        .foregroundColor(Color.systemGray3)
+                        .foregroundColor(Color.gray.opacity(0.5))
                         .font(.system(size: 16))
                 }
                 Text("4.9/5")
