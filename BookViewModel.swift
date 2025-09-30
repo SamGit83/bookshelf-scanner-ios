@@ -14,19 +14,20 @@ class BookViewModel: ObservableObject {
     @Published var books: [Book] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var totalBooks: Int = 0
+    @Published var hasMoreBooks = true
+    @Published var isLoadingMore = false
 
     private let apiService = GeminiAPIService()
     private let grokService = GrokAPIService()
     private let googleBooksService = GoogleBooksAPIService()
     private let db = FirebaseConfig.shared.db
-    private var listener: ListenerRegistration?
+    private var lastDocument: QueryDocumentSnapshot?
+    private var isOfflineMode = false
+    private var currentCachePage = 1
 
     init() {
-        setupFirestoreListener()
-    }
-
-    deinit {
-        listener?.remove()
+        loadFirstPage()
     }
 
     func scanBookshelf(image: UIImage) {
@@ -184,7 +185,7 @@ class BookViewModel: ObservableObject {
     }
 
     func refreshData() {
-        setupFirestoreListener()
+        loadFirstPage()
     }
 
     func refreshBookCovers() {
@@ -320,12 +321,13 @@ class BookViewModel: ObservableObject {
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
-        bookRef.updateData(["status": status.rawValue]) { error in
+        bookRef.updateData(["status": status.rawValue]) { [weak self] error in
             if let error = error {
-                self.errorMessage = "Failed to update book: \(error.localizedDescription)"
+                self?.errorMessage = "Failed to update book: \(error.localizedDescription)"
             } else {
                 // Track book status change
                 AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
+                self?.loadFirstPage()
             }
         }
     }
@@ -338,9 +340,11 @@ class BookViewModel: ObservableObject {
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
-        bookRef.delete { error in
+        bookRef.delete { [weak self] error in
             if let error = error {
-                self.errorMessage = "Failed to delete book: \(error.localizedDescription)"
+                self?.errorMessage = "Failed to delete book: \(error.localizedDescription)"
+            } else {
+                self?.loadFirstPage()
             }
         }
     }
@@ -353,14 +357,15 @@ class BookViewModel: ObservableObject {
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
-        bookRef.updateData(["teaser": teaser]) { error in
+        bookRef.updateData(["teaser": teaser]) { [weak self] error in
             if let error = error {
-                self.errorMessage = "Failed to update teaser: \(error.localizedDescription)"
+                self?.errorMessage = "Failed to update teaser: \(error.localizedDescription)"
             } else {
                 // Update local book
                 if let index = self.books.firstIndex(where: { $0.id == book.id }) {
                     self.books[index].teaser = teaser
                 }
+                self?.loadFirstPage()
             }
         }
     }
@@ -373,14 +378,15 @@ class BookViewModel: ObservableObject {
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
-        bookRef.updateData(["authorBio": authorBio]) { error in
+        bookRef.updateData(["authorBio": authorBio]) { [weak self] error in
             if let error = error {
-                self.errorMessage = "Failed to update author bio: \(error.localizedDescription)"
+                self?.errorMessage = "Failed to update author bio: \(error.localizedDescription)"
             } else {
                 // Update local book
                 if let index = self.books.firstIndex(where: { $0.id == book.id }) {
                     self.books[index].authorBio = authorBio
                 }
+                self?.loadFirstPage()
             }
         }
     }
@@ -400,9 +406,9 @@ class BookViewModel: ObservableObject {
             updateData["dateStartedReading"] = Timestamp(date: Date())
         }
 
-        bookRef.updateData(updateData) { error in
+        bookRef.updateData(updateData) { [weak self] error in
             if let error = error {
-                self.errorMessage = "Failed to update reading progress: \(error.localizedDescription)"
+                self?.errorMessage = "Failed to update reading progress: \(error.localizedDescription)"
             } else {
                 // Update local book
                 if let index = self.books.firstIndex(where: { $0.id == book.id }) {
@@ -416,6 +422,7 @@ class BookViewModel: ObservableObject {
                 if pagesRead > 0 {
                     AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: 0, pagesRead: pagesRead) // Duration not tracked here
                 }
+                self?.loadFirstPage()
             }
         }
     }
@@ -434,9 +441,9 @@ class BookViewModel: ObservableObject {
             "currentPage": book.totalPages ?? book.currentPage
         ]
 
-        bookRef.updateData(updateData) { error in
+        bookRef.updateData(updateData) { [weak self] error in
             if let error = error {
-                self.errorMessage = "Failed to mark book as complete: \(error.localizedDescription)"
+                self?.errorMessage = "Failed to mark book as complete: \(error.localizedDescription)"
             } else {
                 // Update local book
                 if let index = self.books.firstIndex(where: { $0.id == book.id }) {
@@ -449,6 +456,7 @@ class BookViewModel: ObservableObject {
                 let pagesRead = (book.totalPages ?? book.currentPage) - book.currentPage
                 AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: sessionDuration, pagesRead: pagesRead)
                 AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: .read)
+                self?.loadFirstPage()
             }
         }
     }
@@ -571,6 +579,8 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel Memory: \(booksWithCoverData.count) books with cover data, total size: \(String(format: "%.2f", totalCoverDataSizeMB)) MB")
 
                 self?.books = loadedBooks
+                let totalImageSize = books.reduce(0) { $0 + ($1.coverImageData?.count ?? 0) }
+                print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
                 // Sync book count with UsageTracker
                 UsageTracker.shared.syncBookCount(loadedBooks.count)
                 // Cache the books for offline use
@@ -660,6 +670,201 @@ class BookViewModel: ObservableObject {
     
     var readBooks: [Book] {
         books.filter { $0.status == .read }
+    }
+
+    // MARK: - Pagination
+
+    private func loadFirstPage() {
+        books = []
+        lastDocument = nil
+        isOfflineMode = false
+        currentCachePage = 1
+        isLoading = true
+        errorMessage = nil
+        totalBooks = OfflineCache.shared.getTotalBooks()
+        hasMoreBooks = totalBooks > 0
+
+        guard let userId = FirebaseConfig.shared.currentUserId else {
+            print("DEBUG BookViewModel: loadFirstPage - user not authenticated, loading from cache")
+            loadFromCachePaginated(page: 1, limit: 20)
+            isLoading = false
+            return
+        }
+
+        let query = db.collection("users").document(userId).collection("books")
+            .order(by: "dateAdded", descending: true)
+            .limit(to: 20)
+
+        query.getDocuments { [weak self] snapshot, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                if let error = error {
+                    print("DEBUG BookViewModel: Firestore loadFirstPage error: \(error.localizedDescription), falling back to cache")
+                    self?.isOfflineMode = true
+                    self?.loadFromCachePaginated(page: 1, limit: 20)
+                    ErrorHandler.shared.handle(error, context: "Loading Books")
+                    return
+                }
+
+                guard let documents = snapshot?.documents else {
+                    print("DEBUG BookViewModel: No documents in first page snapshot")
+                    self?.hasMoreBooks = false
+                    return
+                }
+
+                let loadedBooks = self?.decodeBooks(from: documents) ?? []
+                self?.books = loadedBooks
+                let totalImageSize = books.reduce(0) { $0 + ($1.coverImageData?.count ?? 0) }
+                print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
+                self?.lastDocument = documents.last
+                self?.hasMoreBooks = documents.count == 20
+                print("DEBUG BookViewModel: Loaded first page: \(loadedBooks.count) books, hasMore: \(self?.hasMoreBooks ?? false)")
+
+                // Sync cache in background if online
+                DispatchQueue.global(qos: .background).async {
+                    self?.syncCache()
+                }
+            }
+        }
+    }
+
+    func loadNextPage() {
+        guard hasMoreBooks && !isLoadingMore else { return }
+        isLoadingMore = true
+
+        if isOfflineMode {
+            currentCachePage += 1
+            loadFromCachePaginated(page: currentCachePage, limit: 20)
+        } else {
+            guard let userId = FirebaseConfig.shared.currentUserId, let last = lastDocument else { return }
+
+            let query = db.collection("users").document(userId).collection("books")
+                .order(by: "dateAdded", descending: true)
+                .start(afterDocument: last)
+                .limit(to: 20)
+
+            query.getDocuments { [weak self] snapshot, error in
+                DispatchQueue.main.async {
+                    self?.isLoadingMore = false
+                    if let error = error {
+                        print("DEBUG BookViewModel: Firestore loadNextPage error: \(error.localizedDescription), falling back to cache")
+                        self?.isOfflineMode = true
+                        self?.currentCachePage += 1
+                        self?.loadFromCachePaginated(page: self?.currentCachePage ?? 1, limit: 20)
+                        return
+                    }
+
+                    guard let documents = snapshot?.documents else {
+                        self?.hasMoreBooks = false
+                        return
+                    }
+
+                    let loadedBooks = self?.decodeBooks(from: documents) ?? []
+                    self?.books.append(contentsOf: loadedBooks)
+                    let totalImageSize = books.reduce(0) { $0 + ($1.coverImageData?.count ?? 0) }
+                    print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
+                    self?.lastDocument = documents.last
+                    self?.hasMoreBooks = documents.count == 20
+                    print("DEBUG BookViewModel: Loaded next page: \(loadedBooks.count) books, hasMore: \(self?.hasMoreBooks ?? false)")
+                }
+            }
+        }
+    }
+
+    private func loadFromCachePaginated(page: Int, limit: Int) {
+        let loadedBooks = OfflineCache.shared.loadBooks(page: page, limit: limit) ?? []
+        if page == 1 {
+            books = loadedBooks
+            lastDocument = nil
+        } else {
+            books.append(contentsOf: loadedBooks)
+        }
+        let totalImageSize = books.reduce(0) { $0 + ($1.coverImageData?.count ?? 0) }
+        print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
+        totalBooks = OfflineCache.shared.getTotalBooks()
+        hasMoreBooks = (page * limit) < totalBooks
+        isLoadingMore = false
+        print("DEBUG BookViewModel: Loaded cache page \(page): \(loadedBooks.count) books, total: \(totalBooks), hasMore: \(hasMoreBooks)")
+    }
+
+    private func decodeBooks(from documents: [QueryDocumentSnapshot]) -> [Book] {
+        return documents.compactMap { document in
+            let data = document.data()
+            print("DEBUG BookViewModel: Processing document \(document.documentID), data keys: \(data.keys.sorted())")
+            let title = (data["title"] as? String) ?? ""
+            let author = (data["author"] as? String) ?? ""
+
+            let isbn = data["isbn"] as? String
+            let genre = data["genre"] as? String
+            let subGenre = data["subGenre"] as? String
+            let estimatedReadingTime = data["estimatedReadingTime"] as? String
+
+            let statusRaw = (data["status"] as? String) ?? BookStatus.library.rawValue
+            let status = BookStatus(rawValue: statusRaw) ?? .library
+
+            var dateAdded = Date()
+            if let ts = data["dateAdded"] as? Timestamp {
+                dateAdded = ts.dateValue()
+            } else if let d = data["dateAdded"] as? Date {
+                dateAdded = d
+            }
+
+            let coverData: Data? = nil // Compressed in Book init
+            let coverImageURL = data["coverImageURL"] as? String
+            let teaser = data["teaser"] as? String
+            let authorBio = data["authorBio"] as? String
+            let pageCount = data["pageCount"] as? Int
+            let currentPage = data["currentPage"] as? Int ?? 0
+            let totalPages = data["totalPages"] as? Int
+
+            var dateStartedReading: Date? = nil
+            if let ts = data["dateStartedReading"] as? Timestamp {
+                dateStartedReading = ts.dateValue()
+            }
+
+            var dateFinishedReading: Date? = nil
+            if let ts = data["dateFinishedReading"] as? Timestamp {
+                dateFinishedReading = ts.dateValue()
+            }
+
+            // Build Book
+            var book = Book(title: title, author: author, isbn: isbn, genre: genre, status: status, coverImageData: coverData, coverImageURL: coverImageURL)
+            book.subGenre = subGenre
+            book.estimatedReadingTime = estimatedReadingTime
+            // Assign id (from stored id or documentID) and date
+            if let idString = data["id"] as? String, let uuid = UUID(uuidString: idString) {
+                book.id = uuid
+            }
+            book.dateAdded = dateAdded
+            book.teaser = teaser
+            book.authorBio = authorBio
+            book.pageCount = pageCount
+            book.currentPage = currentPage
+            book.totalPages = totalPages
+            book.dateStartedReading = dateStartedReading
+            book.dateFinishedReading = dateFinishedReading
+            return book
+        }
+    }
+
+    private func syncCache() {
+        guard let userId = FirebaseConfig.shared.currentUserId, !isOfflineMode else { return }
+
+        db.collection("users").document(userId).collection("books").getDocuments { [weak self] snapshot, error in
+            if let error = error {
+                print("DEBUG BookViewModel: syncCache error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let documents = snapshot?.documents else { return }
+
+            let loadedBooks = self?.decodeBooks(from: documents) ?? []
+            OfflineCache.shared.cacheBooks(loadedBooks)
+            print("DEBUG BookViewModel: Synced cache with \(loadedBooks.count) books")
+            DispatchQueue.main.async {
+                self?.totalBooks = loadedBooks.count
+            }
+        }
     }
 
     // MARK: - Recommendations

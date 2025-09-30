@@ -1,4 +1,6 @@
 import Foundation
+import Darwin
+import MachO
 #if canImport(FirebaseCore)
 import FirebaseCore
 #endif
@@ -63,7 +65,7 @@ class PerformanceMonitoringService {
     private func setupDefaultThresholds() {
         alertThresholds = [
             .apiResponseTime: 5.0, // 5 seconds
-            .memoryUsage: 100.0, // 100 MB
+            .memoryUsage: 500.0, // 500 MB
             .batteryDrain: 10.0, // 10% per hour
             .crashRate: 5.0, // 5% crash rate
             .conversionRate: 10.0, // 10% conversion rate minimum
@@ -301,8 +303,28 @@ class PerformanceMonitoringService {
     }
 
     // MARK: - System Monitoring
+    public func getAppMemoryUsage() -> Double {
+        var taskInfo = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
+        let kerr: kern_return_t = withUnsafeMutablePointer(to: &taskInfo) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_,
+                          task_flavor_t(MACH_TASK_BASIC_INFO),
+                          $0, &count)
+            }
+        }
+        if kerr == KERN_SUCCESS {
+            let appMemoryMB = Double(taskInfo.resident_size) / 1024.0 / 1024.0
+            print("DEBUG PerformanceMonitoringService: App Memory Usage (resident_size): \(appMemoryMB) MB")
+            return appMemoryMB
+        } else {
+            print("DEBUG PerformanceMonitoringService: Failed to get app memory info")
+            return 0.0
+        }
+    }
+
     private func updateSystemMetrics() {
-        let memoryUsage = Double(ProcessInfo.processInfo.physicalMemory) / 1024.0 / 1024.0 // MB
+        let memoryUsage = getAppMemoryUsage()
         trackMemoryUsage(currentUsage: memoryUsage, peakUsage: memoryUsage)
 
         updateBatteryMetrics()
@@ -331,7 +353,7 @@ class PerformanceMonitoringService {
         trackMetric(metric)
 
         // Trigger alert
-        createAlert(type: .memoryUsage, value: currentMetrics.memoryUsage, threshold: alertThresholds[.memoryUsage] ?? 0)
+        createAlert(type: .memoryUsage, value: getAppMemoryUsage(), threshold: alertThresholds[.memoryUsage] ?? 0)
     }
 
     // MARK: - Alert System

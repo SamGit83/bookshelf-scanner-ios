@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct Book: Identifiable, Codable, Hashable {
     var id = UUID()
@@ -36,7 +39,15 @@ struct Book: Identifiable, Codable, Hashable {
         self.genre = genre
         self.status = status
         self.dateAdded = Date()
-        self.coverImageData = coverImageData
+        if let data = coverImageData {
+            if let image = UIImage(data: data), let compressed = image.jpegData(compressionQuality: 0.5) {
+                self.coverImageData = compressed
+            } else {
+                self.coverImageData = data
+            }
+        } else {
+            self.coverImageData = nil
+        }
         self.coverImageURL = coverImageURL
     }
 
@@ -82,8 +93,15 @@ struct Book: Identifiable, Codable, Hashable {
         // Default to current date if 'dateAdded' is missing
         self.dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
 
-        // self.coverImageData = try container.decodeIfPresent(Data.self, forKey: .coverImageData) // Commented out to reduce memory usage
-        self.coverImageData = nil
+        if let rawData = try? container.decodeIfPresent(Data.self, forKey: .coverImageData) {
+            if let image = UIImage(data: rawData), let compressed = image.jpegData(compressionQuality: 0.5) {
+                self.coverImageData = compressed
+            } else {
+                self.coverImageData = rawData
+            }
+        } else {
+            self.coverImageData = nil
+        }
         self.coverImageURL = try container.decodeIfPresent(String.self, forKey: .coverImageURL)
 
         // Reading Progress - use defaults

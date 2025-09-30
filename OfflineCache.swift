@@ -55,6 +55,19 @@ class OfflineCache {
         }
     }
 
+    /// Paginated load from cache - loads full array and slices for efficiency in small caches
+    func loadBooks(page: Int, limit: Int) -> [Book]? {
+        guard let allBooks = loadCachedBooks() else { return nil }
+        let startIndex = (page - 1) * limit
+        let endIndex = min(startIndex + limit, allBooks.count)
+        return Array(allBooks[startIndex..<endIndex])
+    }
+
+    func getTotalBooks() -> Int {
+        guard let allBooks = loadCachedBooks() else { return 0 }
+        return allBooks.count
+    }
+
     func clearBooksCache() {
         try? FileManager.default.removeItem(at: booksCacheFile)
     }

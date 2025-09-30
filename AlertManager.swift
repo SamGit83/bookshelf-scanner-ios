@@ -71,15 +71,16 @@ class AlertManager {
             )
             handleAlert(alert)
         }
-
+    
         // Check memory usage
-        if metrics.memoryUsage > 100.0 {
+        let appMemoryUsage = PerformanceMonitoringService.shared.getAppMemoryUsage()
+        if appMemoryUsage > 500.0 {
             let alert = PerformanceAlert(
                 id: UUID().uuidString,
                 type: .memoryUsage,
-                message: "Memory usage exceeded threshold: \(String(format: "%.1f", metrics.memoryUsage))MB",
-                value: metrics.memoryUsage,
-                threshold: 100.0,
+                message: "Memory usage exceeded threshold: \(String(format: "%.1f", appMemoryUsage))MB",
+                value: appMemoryUsage,
+                threshold: 500.0,
                 timestamp: Date()
             )
             handleAlert(alert)
@@ -100,7 +101,7 @@ class AlertManager {
             ),
             .memoryUsage: AlertConfiguration(
                 type: .memoryUsage,
-                threshold: 100.0,
+                threshold: 500.0,
                 condition: .greaterThan,
                 severity: .high,
                 enabled: true,
