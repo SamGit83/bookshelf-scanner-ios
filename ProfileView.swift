@@ -346,7 +346,6 @@ struct ProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showUpgradeModal) {
-                print("DEBUG ProfileView: Presenting UpgradeModal sheet")
                 UpgradeModalView()
             }
             .animation(.easeInOut(duration: 0.3), value: showUpgradeModal)
