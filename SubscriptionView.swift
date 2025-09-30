@@ -110,14 +110,14 @@ struct SubscriptionView: View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
-                    .fill(Color.systemGray6)
+                    .fill(Color.gray.opacity(0.4))
                     .frame(width: 120, height: 120)
                     .blur(radius: 10)
                     .glassBackground()
 
                 Image(systemName: "star.fill")
                     .font(.system(size: 48, weight: .medium))
-                    .foregroundColor(Color.systemGray)
+                    .foregroundColor(Color.gray)
                     .accessibilityLabel("Premium Star Icon")
             }
 
@@ -208,7 +208,7 @@ struct SubscriptionView: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.systemGray4, lineWidth: 1)
+                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
             )
 
             // Pricing cards with savings highlight
@@ -428,12 +428,12 @@ struct SubscriptionView: View {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 20, weight: .medium))
                 .foregroundColor(Color.secondary)
-                .background(Color.systemGray6)
+                .background(Color.gray.opacity(0.4))
                 .clipShape(Circle())
                 .padding(8)
                 .overlay(
                     Circle()
-                        .stroke(Color.systemGray4, lineWidth: 1)
+                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
                 )
         }
         .accessibilityLabel("Close Button")
@@ -720,11 +720,11 @@ struct PremiumFeatureRow: View {
         HStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Color.systemGray6)
+                    .fill(Color.gray.opacity(0.4))
                     .frame(width: 40, height: 40)
                 Image(systemName: icon)
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(Color.systemGray)
+                    .foregroundColor(Color.gray)
                     .accessibilityLabel("\(title) Icon")
             }
 
