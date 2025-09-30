@@ -52,7 +52,7 @@ struct SubscriptionView: View {
                     VStack(spacing: 24) {
                         ProgressView()
                             .scaleEffect(1.5)
-                            .tint(Color.systemBlue)
+                            .tint(Color.blue)
                         Text("Loading subscription options...")
                             .font(.body)
                             .foregroundColor(Color.secondary)
@@ -173,10 +173,10 @@ struct SubscriptionView: View {
                         if subscription.isTrial {
                             Text("Free Trial")
                                 .font(.caption)
-                                .foregroundColor(Color.systemBlue)
+                                .foregroundColor(Color.blue)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.systemBlue.opacity(0.1))
+                                .background(Color.blue.opacity(0.1))
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                         }
                     }
@@ -404,7 +404,7 @@ struct SubscriptionView: View {
                     .padding()
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color.systemBlue)
+            .tint(Color.blue)
             .disabled(isPurchasing)
             .accessibilityLabel("Restore Purchases Button")
 
@@ -419,7 +419,7 @@ struct SubscriptionView: View {
     }
 
     private var closeButton: some View {
-        Button(action: {
+        Button(role: .cancel, action: {
             withAnimation(.easeOut(duration: 0.15)) {
                 trackDismiss()
                 presentationMode.wrappedValue.dismiss()
@@ -807,7 +807,7 @@ struct SocialProofBadge: View {
         VStack(spacing: 4) {
             Text(count)
                 .font(.headline)
-                .foregroundColor(Color.systemBlue)
+                .foregroundColor(Color.blue)
                 .bold()
 
             Text(label)
@@ -817,11 +817,11 @@ struct SocialProofBadge: View {
         }
         .frame(maxWidth: .infinity)
         .padding(8)
-        .background(Color.systemBlue.opacity(0.1))
+        .background(Color.blue.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.systemBlue.opacity(0.2), lineWidth: 1)
+                .stroke(Color.blue.opacity(0.2), lineWidth: 1)
         )
         .accessibilityLabel("\(count) \(label)")
     }
