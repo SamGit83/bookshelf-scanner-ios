@@ -392,7 +392,6 @@ struct BookDetailView: View {
         }
         .onAppear {
             loadBookDetails()
-            loadRecommendations()
         }
     }
 
@@ -460,6 +459,8 @@ struct BookDetailView: View {
     }
 
     private func loadRecommendations() {
+        print("DEBUG BookDetailView: loadRecommendations called, recommendations count: \(recommendations.count), isLoading: \(isLoadingRecommendations)")
+        guard !isLoadingRecommendations && recommendations.isEmpty else { return }
         isLoadingRecommendations = true
         viewModel.generateRecommendations(for: currentBook) { result in
             DispatchQueue.main.async {
@@ -468,6 +469,7 @@ struct BookDetailView: View {
                 case .success(let recs):
                     // Filter out the current book
                     self.recommendations = recs.filter { $0.title != (currentBook.title ?? "") || $0.author != (currentBook.author ?? "") }
+                    print("DEBUG BookDetailView: Loaded \(self.recommendations.count) recommendations")
                 case .failure(let error):
                     print("Failed to load recommendations: \(error.localizedDescription)")
                 }
