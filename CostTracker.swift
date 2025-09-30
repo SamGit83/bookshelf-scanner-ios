@@ -18,9 +18,9 @@ class CostTracker: ObservableObject {
     let objectWillChange = PassthroughSubject<Void, Never>()
 
     // MARK: - Public Properties
-    var currentCosts = CostMetrics()
-    var revenueMetrics = RevenueMetrics()
-    var profitabilityAnalysis = ProfitabilityAnalysis()
+    @Published var currentCosts = CostMetrics()
+    @Published var revenueMetrics = RevenueMetrics()
+    @Published var profitabilityAnalysis = ProfitabilityAnalysis()
 
     // MARK: - Cost Rates (per API call)
     private let costRates: [String: Double] = [
