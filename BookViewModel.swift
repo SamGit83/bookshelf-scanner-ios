@@ -26,11 +26,11 @@ class BookViewModel: ObservableObject {
     private var listener: ListenerRegistration?
 
     init() {
-        loadBooksPaginated(page: 0)
         setupFirestoreListener()
+        Task { await loadBooksPaginated(page: 0) }
     }
 
-    func loadBooksPaginated(page: Int, limit: Int = 20) {
+    func loadBooksPaginated(page: Int, limit: Int = 20) async {
         print("DEBUG BookViewModel: loadBooksPaginated called with page=\(page), limit=\(limit)")
         if page == 0 {
             isLoading = true
@@ -41,6 +41,7 @@ class BookViewModel: ObservableObject {
         if let loadedBooks = OfflineCache.shared.loadBooks(page: page, limit: limit) {
             if page == 0 {
                 books = loadedBooks
+                print("DEBUG BookViewModel: loadBooksPaginated loaded \(books.count) books")
             } else {
                 books.append(contentsOf: loadedBooks)
             }
@@ -593,6 +594,7 @@ class BookViewModel: ObservableObject {
                 }
 
                 print("DEBUG BookViewModel: Successfully loaded \(loadedBooks.count) books from Firestore for user \(userId)")
+                print("DEBUG BookViewModel: Listener received \(loadedBooks.count) books")
                 let libraryBooksCount = loadedBooks.filter { $0.status == .library }.count
                 print("DEBUG BookViewModel: Library books count: \(libraryBooksCount)")
 
