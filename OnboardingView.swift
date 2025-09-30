@@ -186,6 +186,71 @@ struct SubscriptionSelectionView: View {
     @Binding var showSuccess: Bool
     let subscriptionOptions: [SubscriptionOption]
     let completeOnboarding: () -> Void
+    private var subscriptionButtons: some View {
+        HStack(spacing: AppleBooksSpacing.space16) {
+            ForEach(subscriptionOptions) { option in
+                Button(action: {
+                    selectedOption = option
+                }) {
+                    VStack(spacing: AppleBooksSpacing.space8) {
+                        Text(option.name)
+                            .font(AppleBooksTypography.bodyLarge)
+                            .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.text)
+                        Text("\(option.price)/\(option.period)")
+                            .font(AppleBooksTypography.headline)
+                            .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+                    }
+                    .padding(.vertical, AppleBooksSpacing.space16)
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .background(selectedOption == option ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(selectedOption == option ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
+                    )
+                }
+            }
+        }
+    }
+
+    private var subscriptionDetails: some View {
+        VStack(spacing: AppleBooksSpacing.space16) {
+            Text(selectedOption?.name ?? "Select a Plan")
+                .font(AppleBooksTypography.bodyLarge)
+                .foregroundColor(AppleBooksColors.text)
+            Text("\(selectedOption?.price ?? "")/\(selectedOption?.period ?? "")")
+                .font(AppleBooksTypography.displayLarge)
+                .foregroundColor(AppleBooksColors.accent)
+                .bold()
+            if selectedOption?.period == "year" {
+                Text("Just $8.33 per month")
+                    .font(AppleBooksTypography.bodyLarge)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+            }
+            Button(action: {
+                showSuccess = true
+            }) {
+                Text("Subscribe & Get Started")
+                    .font(AppleBooksTypography.buttonLarge)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppleBooksSpacing.space16)
+            }
+            .background(AppleBooksColors.accent)
+            .cornerRadius(12)
+            if showSuccess {
+                Text("Subscription successful!")
+                    .font(AppleBooksTypography.caption)
+                    .foregroundColor(AppleBooksColors.success)
+            } else {
+                Button("Skip for Free Tier") {
+                    completeOnboarding()
+                }
+                .font(AppleBooksTypography.buttonMedium)
+                .foregroundColor(AppleBooksColors.textSecondary)
+            }
+        }
+    }
 
     var body: some View {
         VStack(spacing: AppleBooksSpacing.space24) {
@@ -200,68 +265,9 @@ struct SubscriptionSelectionView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppleBooksSpacing.space16)
 
-            // Subscription Options Buttons
-            HStack(spacing: AppleBooksSpacing.space16) {
-                ForEach(subscriptionOptions) { option in
-                    Button(action: {
-                        selectedOption = option
-                    }) {
-                        VStack(spacing: AppleBooksSpacing.space8) {
-                            Text(option.name)
-                                .font(AppleBooksTypography.bodyLarge)
-                                .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.text)
-                            Text("\(option.price)/\(option.period)")
-                                .font(AppleBooksTypography.headline)
-                                .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
-                        }
-                        .padding(.vertical, AppleBooksSpacing.space16)
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                        .background(selectedOption == option ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(selectedOption == option ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
-                        )
-                    }
-                }
-            }
+            subscriptionButtons
 
-            VStack(spacing: AppleBooksSpacing.space16) {
-                Text(selectedOption?.name ?? "Select a Plan")
-                    .font(AppleBooksTypography.bodyLarge)
-                    .foregroundColor(AppleBooksColors.text)
-                Text("\(selectedOption?.price ?? "")/\(selectedOption?.period ?? "")")
-                    .font(AppleBooksTypography.displayLarge)
-                    .foregroundColor(AppleBooksColors.accent)
-                    .bold()
-                if selectedOption?.period == "year" {
-                    Text("Just $8.33 per month")
-                        .font(AppleBooksTypography.bodyLarge)
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                }
-                Button(action: {
-                    showSuccess = true
-                }) {
-                    Text("Subscribe & Get Started")
-                        .font(AppleBooksTypography.buttonLarge)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, AppleBooksSpacing.space16)
-                }
-                .background(AppleBooksColors.accent)
-                .cornerRadius(12)
-                if showSuccess {
-                    Text("Subscription successful!")
-                        .font(AppleBooksTypography.caption)
-                        .foregroundColor(AppleBooksColors.success)
-                } else {
-                    Button("Skip for Free Tier") {
-                        completeOnboarding()
-                    }
-                    .font(AppleBooksTypography.buttonMedium)
-                    .foregroundColor(AppleBooksColors.textSecondary)
-                }
-            }
+            subscriptionDetails
         }
     }
 }
