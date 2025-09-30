@@ -499,7 +499,7 @@ struct SubscriptionView: View {
 
     private func loadSimulatedOfferings() {
         let monthlyPackage = SubscriptionPackage(
-            id: "monthly",
+            id: "premium_monthly",
             productId: "bookshelf_scanner_monthly",
             title: "Monthly",
             price: variantConfig?.monthlyPrice ?? 2.99,
@@ -509,7 +509,7 @@ struct SubscriptionView: View {
         )
 
         let annualPackage = SubscriptionPackage(
-            id: "annual",
+            id: "premium_yearly",
             productId: "bookshelf_scanner_annual",
             title: "Annual",
             price: variantConfig?.annualPrice ?? 29.99,

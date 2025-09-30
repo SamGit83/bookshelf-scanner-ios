@@ -20,6 +20,8 @@ struct LoginView: View {
     @State private var city = ""
     @State private var favoriteBookGenre = ""
     @State private var selectedTier: UserTier = .free
+    @ObservedObject private var revenueCatManager = RevenueCatManager.shared
+    @State private var showUpgradeModal = false
 
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
@@ -436,6 +438,9 @@ struct LoginView: View {
         .sheet(isPresented: $showPasswordReset) {
             PasswordResetView()
         }
+        .sheet(isPresented: $showUpgradeModal) {
+            UpgradeModalView()
+        }
     }
 
     private func signIn() {
@@ -492,6 +497,9 @@ struct LoginView: View {
             isLoading = false
             switch result {
             case .success:
+                if selectedTier == .premium && !revenueCatManager.isSubscribed {
+                    showUpgradeModal = true
+                }
                 // Navigation will be handled by the parent view
                 break
             case .failure:

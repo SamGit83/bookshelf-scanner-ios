@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
+import RevenueCatManager
 
 struct UpgradeModalView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -306,22 +307,36 @@ struct UpgradeModalView: View {
         print("DEBUG UpgradeModal: Starting subscription for plan \(selectedPlan)")
         isLoading = true
         trackCTAClick()
-    
-        // TODO: Integrate with RevenueCat
-        // For now, simulate subscription process
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+
+        // Get the package
+        guard let offering = RevenueCatManager.shared.offerings["default"] else {
+            errorMessage = "Offerings not loaded"
+            showError = true
             isLoading = false
-            let success = Bool.random()
-            print("DEBUG UpgradeModal: Simulated subscription \(success ? "success" : "failure")")
-            // Simulate success/failure
-            if success {
+            trackSubscriptionFailure()
+            return
+        }
+
+        let packageId = selectedPlan == .monthly ? "premium_monthly" : "premium_yearly"
+        guard let package = offering.availablePackages.first(where: { $0.identifier == packageId }) else {
+            errorMessage = "Package not found"
+            showError = true
+            isLoading = false
+            trackSubscriptionFailure()
+            return
+        }
+
+        RevenueCatManager.shared.purchase(package: package) { result in
+            switch result {
+            case .success:
                 trackSubscriptionSuccess()
                 presentationMode.wrappedValue.dismiss()
-            } else {
-                errorMessage = "Subscription failed. Please try again."
+            case .failure(let error):
+                errorMessage = error.localizedDescription
                 showError = true
                 trackSubscriptionFailure()
             }
+            isLoading = false
         }
     }
 
