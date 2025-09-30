@@ -202,22 +202,30 @@ struct ReadingView: View {
 
     private var readingBooksSection: some View {
         ScrollView {
-            VStack(spacing: AppleBooksSpacing.space16) {
-                ForEach(viewModel.readingBooks) { book in
-                    ReadingProgressBookCard(
-                        book: book,
-                        onTap: {
-                            selectedBook = book
-                            showingProgressView = true
-                        },
-                        onMarkComplete: {
-                            // Mark book as read and remove from reading list
-                            viewModel.moveBook(book, to: .read)
-                        }
-                    )
+            VStack(spacing: AppleBooksSpacing.space32) {
+                AppleBooksSectionHeader(
+                    title: "Currently Reading",
+                    subtitle: "\(viewModel.readingBooks.count) books",
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+                LazyVStack(spacing: AppleBooksSpacing.space16) {
+                    ForEach(viewModel.readingBooks) { book in
+                        ReadingProgressBookCard(
+                            book: book,
+                            onTap: {
+                                selectedBook = book
+                                showingProgressView = true
+                            },
+                            onMarkComplete: {
+                                // Mark book as read and remove from reading list
+                                viewModel.moveBook(book, to: .read)
+                            }
+                        )
+                    }
                 }
+                .padding(.horizontal, AppleBooksSpacing.space24)
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
             .padding(.vertical, AppleBooksSpacing.space24)
         }
     }
