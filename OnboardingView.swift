@@ -1,52 +1,5 @@
 import SwiftUI
-
-#if canImport(RevenueCat)
-import RevenueCat
-#else
-// Stub types for when RevenueCat is not available
-enum PeriodType {
-    case intro, normal, trial
-}
-
-class EntitlementInfo {
-    var isActive: Bool = false
-    var productIdentifier: String = ""
-    var expirationDate: Date?
-    var periodType: PeriodType = .normal
-}
-
-class Entitlements {
-    var active: [String: EntitlementInfo] = [:]
-}
-
-class SubscriptionPeriod {
-    var unit: Unit = .month
-    enum Unit {
-        case day, week, month, year
-    }
-}
-
-class StoreProduct {
-    var price: NSDecimalNumber = 0
-    var currencyCode: String = ""
-    var localizedTitle: String = ""
-    var subscriptionPeriod: SubscriptionPeriod?
-}
-
-class Package {
-    var storeProduct: StoreProduct?
-    var identifier: String = ""
-}
-
-class Offering {
-    var availablePackages: [Package] = []
-}
-
-class CustomerInfo {
-    var originalAppUserId: String = ""
-    var entitlements: Entitlements = Entitlements()
-}
-#endif
+import Purchases
 
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
@@ -291,7 +244,7 @@ struct OnboardingView: View {
         }
     }
 
-    private func purchaseSubscription(package: Package) {
+    private func purchaseSubscription(package: Purchases.Package) {
         isPurchasing = true
         revenueCatManager.purchase(package: package) { result in
             DispatchQueue.main.async {
