@@ -20,6 +20,91 @@ struct OnboardingView: View {
         SubscriptionOption(name: "Yearly Premium", price: "$99.99", period: "year")
     ]
 
+    private var pageContent: some View {
+        VStack(spacing: AppleBooksSpacing.space32) {
+            // Page Indicator
+            HStack(spacing: AppleBooksSpacing.space8) {
+                ForEach(0..<pages.count, id: \.self) { index in
+                    Circle()
+                        .fill(index == currentPage ? pages[currentPage].accentColor : AppleBooksColors.textTertiary)
+                        .frame(width: index == currentPage ? 10 : 8, height: index == currentPage ? 10 : 8)
+                        .animation(.easeInOut(duration: 0.3), value: currentPage)
+                }
+            }
+
+            if currentPage < pages.count - 1 {
+                // Icon
+                Image(systemName: pages[currentPage].imageName)
+                    .font(.system(size: 80, weight: .light))
+                    .foregroundColor(pages[currentPage].accentColor)
+                    .frame(height: 120)
+
+                // Text Content
+                VStack(spacing: AppleBooksSpacing.space16) {
+                    Text(pages[currentPage].title)
+                        .font(AppleBooksTypography.displayLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(6)
+
+                    Text(pages[currentPage].description)
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, AppleBooksSpacing.space16)
+                }
+            } else {
+                SubscriptionSelectionView(
+                    selectedOption: $selectedOption,
+                    showSuccess: $showSuccess,
+                    subscriptionOptions: subscriptionOptions,
+                    completeOnboarding: completeOnboarding
+                )
+            }
+        }
+    }
+
+    private var navigationButtons: some View {
+        HStack(spacing: AppleBooksSpacing.space16) {
+            if currentPage > 0 {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        currentPage -= 1
+                    }
+                }) {
+                    Text("Previous")
+                        .font(AppleBooksTypography.buttonMedium)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, AppleBooksSpacing.space16)
+                        .background(AppleBooksColors.card)
+                        .cornerRadius(12)
+                }
+            } else {
+                Spacer()
+            }
+
+            if currentPage < pages.count - 1 {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        currentPage += 1
+                    }
+                }) {
+                    Text("Next")
+                        .font(AppleBooksTypography.buttonLarge)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, AppleBooksSpacing.space16)
+                        .background(pages[currentPage].accentColor)
+                        .cornerRadius(12)
+                }
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+        .padding(.bottom, AppleBooksSpacing.space48)
+    }
+
     let pages: [OnboardingPage] = [
         OnboardingPage(
             title: "Welcome to Bookshelf Scanner",
@@ -74,161 +159,13 @@ struct OnboardingView: View {
                     padding: AppleBooksSpacing.space32,
                     shadowStyle: .medium
                 ) {
-                    VStack(spacing: AppleBooksSpacing.space32) {
-                        // Page Indicator
-                        HStack(spacing: AppleBooksSpacing.space8) {
-                            ForEach(0..<pages.count, id: \.self) { index in
-                                Circle()
-                                    .fill(index == currentPage ? pages[currentPage].accentColor : AppleBooksColors.textTertiary)
-                                    .frame(width: index == currentPage ? 10 : 8, height: index == currentPage ? 10 : 8)
-                                    .animation(.easeInOut(duration: 0.3), value: currentPage)
-                            }
-                        }
-
-                        if currentPage < pages.count - 1 {
-                            // Icon
-                            Image(systemName: pages[currentPage].imageName)
-                                .font(.system(size: 80, weight: .light))
-                                .foregroundColor(pages[currentPage].accentColor)
-                                .frame(height: 120)
-
-                            // Text Content
-                            VStack(spacing: AppleBooksSpacing.space16) {
-                                Text(pages[currentPage].title)
-                                    .font(AppleBooksTypography.displayLarge)
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(6)
-
-                                Text(pages[currentPage].description)
-                                    .font(AppleBooksTypography.bodyLarge)
-                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(4)
-                                    .padding(.horizontal, AppleBooksSpacing.space16)
-                            }
-                        } else {
-                            // Subscription Selection UI
-                            VStack(spacing: AppleBooksSpacing.space24) {
-                                Text("Unlock Premium")
-                                    .font(AppleBooksTypography.displayLarge)
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .multilineTextAlignment(.center)
-
-                                Text("Choose your subscription plan to get unlimited scans and features.")
-                                    .font(AppleBooksTypography.bodyLarge)
-                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, AppleBooksSpacing.space16)
-
-                                // Subscription Options Buttons
-                                HStack(spacing: AppleBooksSpacing.space16) {
-                                    ForEach(subscriptionOptions) { option in
-                                        Button(action: {
-                                            selectedOption = option
-                                        }) {
-                                            VStack(spacing: AppleBooksSpacing.space8) {
-                                                Text(option.name)
-                                                    .font(AppleBooksTypography.bodyLarge)
-                                                    .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.text)
-                                                Text("\(option.price)/\(option.period)")
-                                                    .font(AppleBooksTypography.headline)
-                                                    .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
-                                            }
-                                            .padding(.vertical, AppleBooksSpacing.space16)
-                                            .padding(.horizontal, AppleBooksSpacing.space24)
-                                            .background(selectedOption == option ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
-                                            .cornerRadius(12)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(selectedOption == option ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
-                                            )
-                                        }
-                                    }
-                                }
-                                
-                                VStack(spacing: AppleBooksSpacing.space16) {
-                                    Text(selectedOption?.name ?? "Select a Plan")
-                                        .font(AppleBooksTypography.bodyLarge)
-                                        .foregroundColor(AppleBooksColors.text)
-                                    Text("\(selectedOption?.price ?? "")/\(selectedOption?.period ?? "")")
-                                        .font(AppleBooksTypography.displayLarge)
-                                        .foregroundColor(AppleBooksColors.accent)
-                                        .bold()
-                                    if selectedOption?.period == "year" {
-                                        Text("Just $8.33 per month")
-                                            .font(AppleBooksTypography.bodyLarge)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
-                                    Button(action: {
-                                        showSuccess = true
-                                    }) {
-                                        Text("Subscribe & Get Started")
-                                            .font(AppleBooksTypography.buttonLarge)
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, AppleBooksSpacing.space16)
-                                    }
-                                    .background(AppleBooksColors.accent)
-                                    .cornerRadius(12)
-                                    if showSuccess {
-                                        Text("Subscription successful!")
-                                            .font(AppleBooksTypography.caption)
-                                            .foregroundColor(AppleBooksColors.success)
-                                    } else {
-                                        Button("Skip for Free Tier") {
-                                            completeOnboarding()
-                                        }
-                                        .font(AppleBooksTypography.buttonMedium)
-                                        .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    pageContent
                 }
                 .padding(.horizontal, AppleBooksSpacing.space24)
 
                 Spacer()
 
-                // Navigation Buttons
-                HStack(spacing: AppleBooksSpacing.space16) {
-                    if currentPage > 0 {
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                currentPage -= 1
-                            }
-                        }) {
-                            Text("Previous")
-                                .font(AppleBooksTypography.buttonMedium)
-                                .foregroundColor(AppleBooksColors.textSecondary)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppleBooksSpacing.space16)
-                                .background(AppleBooksColors.card)
-                                .cornerRadius(12)
-                        }
-                    } else {
-                        Spacer()
-                    }
-
-                    if currentPage < pages.count - 1 {
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                currentPage += 1
-                            }
-                        }) {
-                            Text("Next")
-                                .font(AppleBooksTypography.buttonLarge)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppleBooksSpacing.space16)
-                                .background(pages[currentPage].accentColor)
-                                .cornerRadius(12)
-                        }
-                    }
-                }
-                .padding(.horizontal, AppleBooksSpacing.space24)
-                .padding(.bottom, AppleBooksSpacing.space48)
+                navigationButtons
             }
         }
         .fullScreenCover(isPresented: $showMainApp) {
@@ -240,6 +177,91 @@ struct OnboardingView: View {
         authService.completeOnboarding()
         withAnimation(.easeInOut(duration: 0.5)) {
             showMainApp = true
+        }
+    }
+}
+
+struct SubscriptionSelectionView: View {
+    @Binding var selectedOption: SubscriptionOption?
+    @Binding var showSuccess: Bool
+    let subscriptionOptions: [SubscriptionOption]
+    let completeOnboarding: () -> Void
+
+    var body: some View {
+        VStack(spacing: AppleBooksSpacing.space24) {
+            Text("Unlock Premium")
+                .font(AppleBooksTypography.displayLarge)
+                .foregroundColor(AppleBooksColors.text)
+                .multilineTextAlignment(.center)
+
+            Text("Choose your subscription plan to get unlimited scans and features.")
+                .font(AppleBooksTypography.bodyLarge)
+                .foregroundColor(AppleBooksColors.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppleBooksSpacing.space16)
+
+            // Subscription Options Buttons
+            HStack(spacing: AppleBooksSpacing.space16) {
+                ForEach(subscriptionOptions) { option in
+                    Button(action: {
+                        selectedOption = option
+                    }) {
+                        VStack(spacing: AppleBooksSpacing.space8) {
+                            Text(option.name)
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.text)
+                            Text("\(option.price)/\(option.period)")
+                                .font(AppleBooksTypography.headline)
+                                .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+                        }
+                        .padding(.vertical, AppleBooksSpacing.space16)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+                        .background(selectedOption == option ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(selectedOption == option ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
+                        )
+                    }
+                }
+            }
+
+            VStack(spacing: AppleBooksSpacing.space16) {
+                Text(selectedOption?.name ?? "Select a Plan")
+                    .font(AppleBooksTypography.bodyLarge)
+                    .foregroundColor(AppleBooksColors.text)
+                Text("\(selectedOption?.price ?? "")/\(selectedOption?.period ?? "")")
+                    .font(AppleBooksTypography.displayLarge)
+                    .foregroundColor(AppleBooksColors.accent)
+                    .bold()
+                if selectedOption?.period == "year" {
+                    Text("Just $8.33 per month")
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                }
+                Button(action: {
+                    showSuccess = true
+                }) {
+                    Text("Subscribe & Get Started")
+                        .font(AppleBooksTypography.buttonLarge)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, AppleBooksSpacing.space16)
+                }
+                .background(AppleBooksColors.accent)
+                .cornerRadius(12)
+                if showSuccess {
+                    Text("Subscription successful!")
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(AppleBooksColors.success)
+                } else {
+                    Button("Skip for Free Tier") {
+                        completeOnboarding()
+                    }
+                    .font(AppleBooksTypography.buttonMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                }
+            }
         }
     }
 }
