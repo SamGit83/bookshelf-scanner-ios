@@ -189,26 +189,7 @@ struct SubscriptionSelectionView: View {
     private var subscriptionButtons: some View {
         HStack(spacing: AppleBooksSpacing.space16) {
             ForEach(subscriptionOptions) { option in
-                Button(action: {
-                    selectedOption = option
-                }) {
-                    VStack(spacing: AppleBooksSpacing.space8) {
-                        Text(option.name)
-                            .font(AppleBooksTypography.bodyLarge)
-                            .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.text)
-                        Text("\(option.price)/\(option.period)")
-                            .font(AppleBooksTypography.headline)
-                            .foregroundColor(selectedOption == option ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
-                    }
-                    .padding(.vertical, AppleBooksSpacing.space16)
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                    .background(selectedOption == option ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(selectedOption == option ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
-                    )
-                }
+                SubscriptionButton(option: option, selectedOption: $selectedOption)
             }
         }
     }
@@ -283,5 +264,36 @@ struct OnboardingPage {
 struct OnboardingView_Previews: PreviewProvider {
     static var previews: some View {
         OnboardingView()
+    }
+}
+struct SubscriptionButton: View {
+    let option: SubscriptionOption
+    @Binding var selectedOption: SubscriptionOption?
+
+    var body: some View {
+        Button(action: {
+            selectedOption = option
+        }) {
+            VStack(spacing: AppleBooksSpacing.space8) {
+                Text(option.name)
+                    .font(AppleBooksTypography.bodyLarge)
+                    .foregroundColor(isSelected ? AppleBooksColors.accent : AppleBooksColors.text)
+                Text("\(option.price)/\(option.period)")
+                    .font(AppleBooksTypography.headline)
+                    .foregroundColor(isSelected ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+            }
+            .padding(.vertical, AppleBooksSpacing.space16)
+            .padding(.horizontal, AppleBooksSpacing.space24)
+            .background(isSelected ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
+            )
+        }
+    }
+
+    private var isSelected: Bool {
+        selectedOption == option
     }
 }
