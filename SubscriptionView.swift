@@ -642,7 +642,7 @@ struct SubscriptionPackage: Identifiable {
 }
 
 
-struct SubscriptionVariantConfig {
+struct SubscriptionVariantConfig: Equatable {
     let variantId: String
     let headerTitle: String
     let headerSubtitle: String
