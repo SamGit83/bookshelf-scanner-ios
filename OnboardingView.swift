@@ -11,7 +11,7 @@ struct OnboardingView: View {
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var currentPage = 0
     @State private var showMainApp = false
-    @State private var selectedPeriod: String = "year"
+    @State private var selectedOption = SubscriptionOption(name: "Yearly Premium", price: "$99.99", period: "year")
     @State private var showSuccess = false
 
     let subscriptionOptions: [SubscriptionOption] = [
@@ -120,60 +120,67 @@ struct OnboardingView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, AppleBooksSpacing.space16)
 
-                                // Billing Period Picker
-                                Picker("Billing Period", selection: $selectedPeriod) {
-                                    Text("Monthly").tag("month")
-                                    Text("Yearly").tag("year")
-                                }
-                                .pickerStyle(.segmented)
-                                .padding(AppleBooksSpacing.space8)
-
-                                // Find selected option
-                                if let selectedOption = subscriptionOptions.first(where: { $0.period == selectedPeriod }) {
-                                    VStack(spacing: AppleBooksSpacing.space16) {
-                                        Text(selectedOption.name)
-                                            .font(AppleBooksTypography.bodyLarge)
-                                            .foregroundColor(AppleBooksColors.text)
-
-                                        Text("\(selectedOption.price)/\(selectedOption.period)")
-                                            .font(AppleBooksTypography.displayLarge)
-                                            .foregroundColor(AppleBooksColors.accent)
-                                            .bold()
-
-                                        if selectedPeriod == "year" {
-                                            Text("Just $8.33 per month")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-
+                                // Subscription Options Buttons
+                                HStack(spacing: AppleBooksSpacing.space16) {
+                                    ForEach(subscriptionOptions, id: \.period) { option in
                                         Button(action: {
-                                            showSuccess = true
+                                            selectedOption = option
                                         }) {
-                                            Text("Subscribe & Get Started")
-                                                .font(AppleBooksTypography.buttonLarge)
-                                                .foregroundColor(.white)
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, AppleBooksSpacing.space16)
-                                        }
-                                        .background(AppleBooksColors.accent)
-                                        .cornerRadius(12)
-
-                                        if showSuccess {
-                                            Text("Subscription successful!")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.success)
-                                        } else {
-                                            Button("Skip for Free Tier") {
-                                                completeOnboarding()
+                                            VStack(spacing: AppleBooksSpacing.space8) {
+                                                Text(option.name)
+                                                    .font(AppleBooksTypography.bodyLarge)
+                                                    .foregroundColor(selectedOption.period == option.period ? AppleBooksColors.accent : AppleBooksColors.text)
+                                                Text("\(option.price)/\(option.period)")
+                                                    .font(AppleBooksTypography.headline)
+                                                    .foregroundColor(selectedOption.period == option.period ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
                                             }
-                                            .font(AppleBooksTypography.buttonMedium)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                            .padding(.vertical, AppleBooksSpacing.space16)
+                                            .padding(.horizontal, AppleBooksSpacing.space24)
+                                            .background(selectedOption.period == option.period ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
+                                            .cornerRadius(12)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(selectedOption.period == option.period ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
+                                            )
                                         }
                                     }
-                                } else {
-                                    Text("Loading plans...")
+                                }
+                                
+                                VStack(spacing: AppleBooksSpacing.space16) {
+                                    Text(selectedOption.name)
                                         .font(AppleBooksTypography.bodyLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+                                    Text("\(selectedOption.price)/\(selectedOption.period)")
+                                        .font(AppleBooksTypography.displayLarge)
+                                        .foregroundColor(AppleBooksColors.accent)
+                                        .bold()
+                                    if selectedOption.period == "year" {
+                                        Text("Just $8.33 per month")
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                    Button(action: {
+                                        showSuccess = true
+                                    }) {
+                                        Text("Subscribe & Get Started")
+                                            .font(AppleBooksTypography.buttonLarge)
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, AppleBooksSpacing.space16)
+                                    }
+                                    .background(AppleBooksColors.accent)
+                                    .cornerRadius(12)
+                                    if showSuccess {
+                                        Text("Subscription successful!")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.success)
+                                    } else {
+                                        Button("Skip for Free Tier") {
+                                            completeOnboarding()
+                                        }
+                                        .font(AppleBooksTypography.buttonMedium)
                                         .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
                                 }
                             }
                         }
