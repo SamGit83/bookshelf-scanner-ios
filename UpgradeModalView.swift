@@ -227,18 +227,30 @@ struct UpgradeModalView: View {
                 if isLoading {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.8)
                 } else {
                     Text(variantConfig?.ctaText ?? "Start Premium Trial")
                         .frame(maxWidth: .infinity)
-                        .padding(24)
-                        .background(Color.orange)
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 32)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.orange, Color.orange.opacity(0.8)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                         .foregroundColor(.white)
-                        .cornerRadius(16)
-                        .font(.headline)
-                        .shadow(color: Color.orange.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .cornerRadius(20)
+                        .font(.headline.weight(.semibold))
+                        .shadow(color: Color.orange.opacity(0.4), radius: 12, x: 0, y: 6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
                 }
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PlainButtonStyle())
             .disabled(isLoading)
             .padding(.horizontal, 16)
             .accessibilityLabel("Start Premium Trial Button")
@@ -249,7 +261,11 @@ struct UpgradeModalView: View {
                 Text("Maybe Later")
                     .font(.body)
                     .foregroundColor(Color.secondary)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 24)
+                    .background(Color.clear)
             }
+            .buttonStyle(PlainButtonStyle())
             .accessibilityLabel("Maybe Later Button")
         }
         .glassBackground()
@@ -416,7 +432,7 @@ struct PricingCard: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 if let savings = savings {
                     Text(savings)
                         .font(.system(size: 12, weight: .semibold))
@@ -425,11 +441,14 @@ struct PricingCard: View {
                         .padding(.vertical, 4)
                         .background(Color.green.opacity(0.1))
                         .cornerRadius(8)
+                } else {
+                    Spacer(minLength: 20) // Balance height for monthly card
                 }
 
                 Text("$\(String(format: "%.2f", price))")
                     .font(.largeTitle)
                     .foregroundColor(Color.primary)
+                    .bold()
 
                 Text("per \(period)")
                     .font(.caption)
@@ -439,9 +458,11 @@ struct PricingCard: View {
                     Text("$\(String(format: "%.2f", price/12))/month")
                         .font(.caption2)
                         .foregroundColor(Color.secondary)
+                } else {
+                    Spacer(minLength: 10) // Additional balance
                 }
             }
-            .frame(maxWidth: .infinity)
+            .frame(minHeight: 140, maxWidth: .infinity) // Fixed height for consistency
             .padding(24)
             .glassBackground()
             .overlay(
