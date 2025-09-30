@@ -15,7 +15,7 @@ class CostTracker: ObservableObject {
     private let db = Firestore.firestore()
     private var cancellables = Set<AnyCancellable>()
     private let costUpdateQueue = DispatchQueue(label: "com.costtracker.updates", qos: .userInitiated)
-    private let objectWillChange = PassthroughSubject<Void, Never>()
+    let objectWillChange = PassthroughSubject<Void, Never>()
 
     // MARK: - Public Properties
     var currentCosts = CostMetrics()
