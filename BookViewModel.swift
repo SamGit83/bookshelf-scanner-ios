@@ -31,7 +31,6 @@ class BookViewModel: ObservableObject {
     print("DEBUG BookViewModel: Task started")
     }
 
-    print("DEBUG BookViewModel: loadBooksPaginated called, loaded \(books.count) books")
     func loadBooksPaginated(page: Int, limit: Int = 20) async {
         print("DEBUG BookViewModel: loadBooksPaginated called with page=\(page), limit=\(limit)")
         if page == 0 {
