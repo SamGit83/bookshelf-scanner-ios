@@ -210,7 +210,7 @@ class BookViewModel: ObservableObject {
     }
 
     func refreshData() {
-        loadBooksPaginated(page: 0)
+        Task { await loadBooksPaginated(page: 0) }
     }
 
     func refreshBookCovers() {
@@ -352,7 +352,7 @@ class BookViewModel: ObservableObject {
             } else {
                 // Track book status change
                 AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
-                self?.loadBooksPaginated(page: 0)
+                Task { await self?.loadBooksPaginated(page: 0) }
             }
         }
     }
@@ -369,7 +369,7 @@ class BookViewModel: ObservableObject {
             if let error = error {
                 self?.errorMessage = "Failed to delete book: \(error.localizedDescription)"
             } else {
-                self?.loadBooksPaginated(page: 0)
+                Task { await self?.loadBooksPaginated(page: 0) }
             }
         }
     }
@@ -612,7 +612,7 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
                 if self?.books.isEmpty == true {
-                    self?.loadBooksPaginated(page: 0)
+                    Task { await self?.loadBooksPaginated(page: 0) }
                 }
  
                 // Fetch missing covers only if not recently refreshed (e.g., within last 5 minutes)
