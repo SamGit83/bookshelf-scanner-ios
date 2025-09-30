@@ -495,11 +495,20 @@ struct ProfilePictureView: View {
         .frame(width: 120, height: 120)
         .photosPicker(isPresented: $showImagePicker, selection: $selectedItem, matching: .images)
         .onChange(of: selectedItem) { newItem in
+            print("DEBUG ProfilePictureView: onChange triggered with newItem: \(newItem != nil ? "not nil" : "nil")")
             Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                   let uiImage = UIImage(data: data) {
-                    selectedImage = uiImage
-                    saveImageToFile(uiImage)
+                print("DEBUG ProfilePictureView: Starting Task to load transferable")
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    print("DEBUG ProfilePictureView: Loaded transferable data, size: \(data.count) bytes")
+                    if let uiImage = UIImage(data: data) {
+                        print("DEBUG ProfilePictureView: Created UIImage from data, size: \(uiImage.size)")
+                        selectedImage = uiImage
+                        saveImageToFile(uiImage)
+                    } else {
+                        print("DEBUG ProfilePictureView: Failed to create UIImage from data")
+                    }
+                } else {
+                    print("DEBUG ProfilePictureView: Failed to load transferable data")
                 }
             }
         }
@@ -520,29 +529,56 @@ struct ProfilePictureView: View {
     }
 
     private func loadImageFromFile() -> UIImage? {
-        guard let path = UserDefaults.standard.string(forKey: userDefaultsKey) else { return nil }
+        print("DEBUG ProfilePictureView: loadImageFromFile called")
+        guard let path = UserDefaults.standard.string(forKey: userDefaultsKey) else {
+            print("DEBUG ProfilePictureView: No path found in UserDefaults for key \(userDefaultsKey)")
+            return nil
+        }
+        print("DEBUG ProfilePictureView: Path from UserDefaults: \(path)")
         let url = URL(fileURLWithPath: path)
+        print("DEBUG ProfilePictureView: URL: \(url)")
         do {
             let data = try Data(contentsOf: url)
-            return UIImage(data: data)
+            print("DEBUG ProfilePictureView: Successfully loaded data, size: \(data.count) bytes")
+            guard let image = UIImage(data: data) else {
+                print("DEBUG ProfilePictureView: Failed to create UIImage from data")
+                return nil
+            }
+            print("DEBUG ProfilePictureView: Successfully created UIImage, size: \(image.size)")
+            return image
         } catch {
-            print("Error loading image from file: \(error)")
+            print("DEBUG ProfilePictureView: Error loading image from file: \(error)")
             return nil
         }
     }
 
     private func saveImageToFile(_ image: UIImage) {
-        guard let data = image.jpegData(compressionQuality: 0.8) else { return }
+        print("DEBUG ProfilePictureView: saveImageToFile called")
+        guard let data = image.jpegData(compressionQuality: 1.0) else {
+            print("DEBUG ProfilePictureView: Failed to get JPEG data from image")
+            return
+        }
+        print("DEBUG ProfilePictureView: JPEG data size: \(data.count) bytes")
         let fileManager = FileManager.default
-        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("DEBUG ProfilePictureView: Failed to get documents directory URL")
+            return
+        }
+        print("DEBUG ProfilePictureView: Documents URL: \(documentsURL)")
         let fileURL = documentsURL.appendingPathComponent("profile_image.jpg")
+        print("DEBUG ProfilePictureView: File URL: \(fileURL)")
         // Remove old file if exists
-        try? fileManager.removeItem(at: fileURL)
+        if fileManager.fileExists(atPath: fileURL.path) {
+            print("DEBUG ProfilePictureView: Removing old file")
+            try? fileManager.removeItem(at: fileURL)
+        }
         do {
             try data.write(to: fileURL)
+            print("DEBUG ProfilePictureView: Successfully wrote data to file")
             UserDefaults.standard.set(fileURL.path, forKey: userDefaultsKey)
+            print("DEBUG ProfilePictureView: Set UserDefaults key \(userDefaultsKey) to \(fileURL.path)")
         } catch {
-            print("Error saving image to file: \(error)")
+            print("DEBUG ProfilePictureView: Error saving image to file: \(error)")
         }
     }
 }
