@@ -435,11 +435,11 @@ struct ProfilePictureView: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var showImagePicker = false
 
-    private let userDefaultsKey = "profileImageData"
+    private let userDefaultsKey = "profileImagePath"
 
     init(authService: AuthService) {
         self._authService = ObservedObject(wrappedValue: authService)
-        _selectedImage = State(initialValue: loadImageFromUserDefaults())
+        _selectedImage = State(initialValue: loadImageFromFile())
     }
 
     private var initialsTextColor: Color {
@@ -499,7 +499,7 @@ struct ProfilePictureView: View {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {
                     selectedImage = uiImage
-                    saveImageToUserDefaults(uiImage)
+                    saveImageToFile(uiImage)
                 }
             }
         }
@@ -519,17 +519,30 @@ struct ProfilePictureView: View {
         return "?"
     }
 
-    private func loadImageFromUserDefaults() -> UIImage? {
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-           let image = UIImage(data: data) {
-            return image
+    private func loadImageFromFile() -> UIImage? {
+        guard let path = UserDefaults.standard.string(forKey: userDefaultsKey) else { return nil }
+        let url = URL(fileURLWithPath: path)
+        do {
+            let data = try Data(contentsOf: url)
+            return UIImage(data: data)
+        } catch {
+            print("Error loading image from file: \(error)")
+            return nil
         }
-        return nil
     }
 
-    private func saveImageToUserDefaults(_ image: UIImage) {
-        if let data = image.jpegData(compressionQuality: 0.8) {
-            UserDefaults.standard.set(data, forKey: userDefaultsKey)
+    private func saveImageToFile(_ image: UIImage) {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return }
+        let fileManager = FileManager.default
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let fileURL = documentsURL.appendingPathComponent("profile_image.jpg")
+        // Remove old file if exists
+        try? fileManager.removeItem(at: fileURL)
+        do {
+            try data.write(to: fileURL)
+            UserDefaults.standard.set(fileURL.path, forKey: userDefaultsKey)
+        } catch {
+            print("Error saving image to file: \(error)")
         }
     }
 }
