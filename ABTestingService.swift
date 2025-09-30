@@ -137,9 +137,24 @@ class ABTestingService: ObservableObject {
 
     private func fetchUserAssignment(experimentId: String, userId: String) async throws -> UserExperimentAssignment? {
         #if canImport(FirebaseFirestore)
-        let docRef = db.collection("userExperimentAssignments").document("\(userId)_\(experimentId)")
+        let docId = "\(userId)_\(experimentId)"
+        print("DEBUG ABTestingService: Fetching user assignment for docId: \(docId)")
+        let docRef = db.collection("userExperimentAssignments").document(docId)
         let document = try await docRef.getDocument()
-        return try document.data(as: UserExperimentAssignment.self)
+        print("DEBUG ABTestingService: Document exists: \(document.exists), data: \(document.data() ?? [:])")
+        if document.exists {
+            do {
+                let assignment = try document.data(as: UserExperimentAssignment.self)
+                print("DEBUG ABTestingService: Successfully decoded UserExperimentAssignment: \(assignment)")
+                return assignment
+            } catch {
+                print("DEBUG ABTestingService: Failed to decode UserExperimentAssignment: \(error)")
+                throw error
+            }
+        } else {
+            print("DEBUG ABTestingService: Document does not exist for \(docId)")
+            return nil
+        }
         #else
         return nil
         #endif
@@ -155,8 +170,15 @@ class ABTestingService: ObservableObject {
     // MARK: - Configuration Retrieval
 
     func getConfigValue<T>(for experimentId: String, userId: String, key: String) async throws -> T? {
-        guard let variant = try await getVariant(for: experimentId, userId: userId) else { return nil }
-        return variant.config[key]?.value as? T
+        print("DEBUG ABTestingService: Getting config value for experiment: \(experimentId), key: \(key), userId: \(userId)")
+        guard let variant = try await getVariant(for: experimentId, userId: userId) else {
+            print("DEBUG ABTestingService: No variant found for experiment \(experimentId)")
+            return nil
+        }
+        print("DEBUG ABTestingService: Found variant: \(variant.id), config: \(variant.config)")
+        let value = variant.config[key]?.value as? T
+        print("DEBUG ABTestingService: Config value for key '\(key)': \(String(describing: value))")
+        return value
     }
 
     func getScanLimit(for userId: String) async throws -> Int {

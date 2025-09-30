@@ -431,6 +431,7 @@ class FeedbackManager: ObservableObject {
     }
 
     private func getLastSurveyCompletion(type: SurveyType, userId: String) async -> Date? {
+        print("DEBUG FeedbackManager: Getting last survey completion for type: \(type.rawValue), userId: \(userId)")
         do {
             let snapshot = try await db.collection("surveyResponses")
                 .whereField("userId", isEqualTo: userId)
@@ -439,18 +440,32 @@ class FeedbackManager: ObservableObject {
                 .limit(to: 1)
                 .getDocuments()
 
-            if let doc = snapshot.documents.first,
-               let response = SurveyResponse.fromDictionary(doc.data()) {
-                return response.completedAt
+            print("DEBUG FeedbackManager: Found \(snapshot.documents.count) survey responses for type \(type.rawValue)")
+            if let doc = snapshot.documents.first {
+                print("DEBUG FeedbackManager: Latest response data: \(doc.data())")
+                if let response = SurveyResponse.fromDictionary(doc.data()) {
+                    print("DEBUG FeedbackManager: Successfully decoded response, completedAt: \(response.completedAt)")
+                    return response.completedAt
+                } else {
+                    print("DEBUG FeedbackManager: Failed to decode SurveyResponse from document")
+                }
+            } else {
+                print("DEBUG FeedbackManager: No documents found for survey type \(type.rawValue)")
             }
         } catch {
-            print("Failed to get last survey completion: \(error)")
+            print("DEBUG FeedbackManager: Failed to get last survey completion: \(error)")
+            print("DEBUG FeedbackManager: Error details - domain: \((error as NSError).domain), code: \((error as NSError).code)")
         }
         return nil
     }
 
     private func loadPendingSurveys() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("DEBUG FeedbackManager: No userId available for loading pending surveys")
+            return
+        }
+
+        print("DEBUG FeedbackManager: Loading pending surveys for userId: \(userId)")
 
         Task {
             do {
@@ -460,9 +475,12 @@ class FeedbackManager: ObservableObject {
                     .whereField("expiresAt", isGreaterThan: Timestamp(date: Date()))
                     .getDocuments()
 
+                print("DEBUG FeedbackManager: Found \(snapshot.documents.count) pending surveys")
                 self.surveyQueue = snapshot.documents.compactMap { Survey.fromDictionary($0.data()) }
+                print("DEBUG FeedbackManager: Successfully loaded \(self.surveyQueue.count) surveys")
             } catch {
-                print("Failed to load pending surveys: \(error)")
+                print("DEBUG FeedbackManager: Failed to load pending surveys: \(error)")
+                print("DEBUG FeedbackManager: Error details - domain: \((error as NSError).domain), code: \((error as NSError).code)")
             }
         }
     }
