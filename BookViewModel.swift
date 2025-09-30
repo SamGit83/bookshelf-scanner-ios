@@ -518,7 +518,7 @@ class BookViewModel: ObservableObject {
                     print("DEBUG BookViewModel: Firestore listener error: \(error.localizedDescription), loading from cache")
                     // Try to load from cache if Firestore fails
                     if let cachedBooks = OfflineCache.shared.loadCachedBooks() {
-                        self?.books = cachedBooks
+                        self.books = cachedBooks
                         print("DEBUG BookViewModel: Loaded \(cachedBooks.count) books from cache due to error")
                     } else {
                         print("DEBUG BookViewModel: No cached books, handling error")
