@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SubscriptionOption: Identifiable {
+struct SubscriptionOption: Identifiable, Equatable {
     let id = UUID()
     let name: String
     let price: String
@@ -279,7 +279,7 @@ struct SubscriptionButton: View {
                     .font(AppleBooksTypography.bodyLarge)
                     .foregroundColor(isSelected ? AppleBooksColors.accent : AppleBooksColors.text)
                 Text("\(option.price)/\(option.period)")
-                    .font(AppleBooksTypography.headline)
+                    .font(.headline)
                     .foregroundColor(isSelected ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
             }
             .padding(.vertical, AppleBooksSpacing.space16)
