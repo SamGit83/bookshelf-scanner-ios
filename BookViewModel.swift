@@ -15,6 +15,7 @@ class BookViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var totalBooks: Int = 0
+    @Published var currentPage = 0
     @Published var hasMoreBooks = true
     @Published var isLoadingMore = false
 
@@ -25,7 +26,30 @@ class BookViewModel: ObservableObject {
     private var listener: ListenerRegistration?
 
     init() {
-        loadFirstPage()
+        loadBooksPaginated(page: 0)
+    }
+
+    func loadBooksPaginated(page: Int, limit: Int = 20) {
+        if page == 0 {
+            isLoading = true
+        } else {
+            isLoadingMore = true
+        }
+        errorMessage = nil
+        if let loadedBooks = OfflineCache.shared.loadBooks(page: page, limit: limit) {
+            if page == 0 {
+                books = loadedBooks
+            } else {
+                books.append(contentsOf: loadedBooks)
+            }
+            currentPage = page + 1
+            totalBooks = OfflineCache.shared.getTotalBooks()
+            hasMoreBooks = (page + 1) * limit < totalBooks
+        } else {
+            errorMessage = "Failed to load books from cache"
+        }
+        isLoading = false
+        isLoadingMore = false
     }
 
     func scanBookshelf(image: UIImage) {
@@ -183,7 +207,7 @@ class BookViewModel: ObservableObject {
     }
 
     func refreshData() {
-        loadFirstPage()
+        loadBooksPaginated(page: 0)
     }
 
     func refreshBookCovers() {
@@ -325,7 +349,7 @@ class BookViewModel: ObservableObject {
             } else {
                 // Track book status change
                 AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
-                self?.loadFirstPage()
+                self?.loadBooksPaginated(page: 0)
             }
         }
     }
@@ -342,7 +366,7 @@ class BookViewModel: ObservableObject {
             if let error = error {
                 self?.errorMessage = "Failed to delete book: \(error.localizedDescription)"
             } else {
-                self?.loadFirstPage()
+                self?.loadBooksPaginated(page: 0)
             }
         }
     }
@@ -576,14 +600,16 @@ class BookViewModel: ObservableObject {
                 let totalCoverDataSizeMB = Double(totalCoverDataSize) / 1024.0 / 1024.0
                 print("DEBUG BookViewModel Memory: \(booksWithCoverData.count) books with cover data, total size: \(String(format: "%.2f", totalCoverDataSizeMB)) MB")
 
-                self?.books = loadedBooks
-                let totalImageSize = books.reduce(0) { $0 + ($1.coverImageData?.count ?? 0) }
+                let totalImageSize = loadedBooks.reduce(0) { $0 + ($1.coverImageData?.count ?? 0) }
                 print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
                 // Sync book count with UsageTracker
                 UsageTracker.shared.syncBookCount(loadedBooks.count)
                 // Cache the books for offline use
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
+                if self?.books.isEmpty == true {
+                    self?.loadBooksPaginated(page: 0)
+                }
  
                 // Fetch missing covers only if not recently refreshed (e.g., within last 5 minutes)
                 let lastCoverRefresh = UserDefaults.standard.double(forKey: "lastCoverRefreshTime")
