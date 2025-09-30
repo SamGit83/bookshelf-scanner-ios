@@ -13,7 +13,6 @@ class CostTracker {
 
     // MARK: - Private Properties
     private let db = Firestore.firestore()
-    private let queue = DispatchQueue(label: "com.bookshelfscanner.costtracker", qos: .utility)
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Public Properties
@@ -43,13 +42,7 @@ class CostTracker {
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
         let actualCost = cost ?? (costRates[service] ?? 0.0) * Double(usage)
 
-        print("DEBUG: recordCost called for service: \(service), cost: \(actualCost), usage: \(usage)")
-        print("DEBUG: self pointer: \(Unmanaged.passUnretained(self).toOpaque())")
-
-        queue.async {
-            print("DEBUG: Inside queue.async, self pointer: \(Unmanaged.passUnretained(self).toOpaque())")
-            print("DEBUG: currentCosts before: totalCost=\(self.currentCosts.totalCost), apiUsage count=\(self.currentCosts.apiUsage.count)")
-
+        DispatchQueue.main.async {
             self.currentCosts.totalCost += actualCost
             self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
 
@@ -60,11 +53,8 @@ class CostTracker {
             }
             self.currentCosts.dailyCosts[today]! += actualCost
 
-            print("DEBUG: currentCosts after: totalCost=\(self.currentCosts.totalCost), apiUsage count=\(self.currentCosts.apiUsage.count)")
-
             // Update profitability
             self.updateProfitability()
-            print("DEBUG: updateProfitability completed")
         }
 
         // Track in performance monitoring
@@ -104,7 +94,7 @@ class CostTracker {
     }
 
     func recordRevenue(tier: UserTier, amount: Double, subscriptionType: SubscriptionType = .monthly) {
-        queue.async {
+        DispatchQueue.main.async {
             self.revenueMetrics.totalRevenue += amount
             self.revenueMetrics.activeSubscriptions += 1
 
@@ -239,7 +229,7 @@ class CostTracker {
     private func setupPeriodicCalculations() {
         // Update calculations every hour
         Timer.scheduledTimer(withTimeInterval: 3600.0, repeats: true) { [weak self] _ in
-            self?.queue.async {
+            DispatchQueue.main.async {
                 self?.updateProfitability()
                 self?.saveHistoricalData()
             }

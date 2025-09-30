@@ -30,6 +30,7 @@ struct ReadingProgressBookCard: View {
                     // Book Cover
                     if let coverData = book.coverImageData,
                        let uiImage = UIImage(data: coverData) {
+                        print("DEBUG ReadingView: Displaying cover from coverImageData for book: \(book.title ?? "Unknown")")
                         Image(uiImage: uiImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
@@ -37,6 +38,7 @@ struct ReadingProgressBookCard: View {
                             .cornerRadius(8)
                             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                     } else {
+                        print("DEBUG ReadingView: No coverImageData for book: \(book.title ?? "Unknown"), coverImageURL: \(book.coverImageURL ?? "nil")")
                         Rectangle()
                             .fill(Color.gray.opacity(0.3))
                             .frame(width: 60, height: 90)

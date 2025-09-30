@@ -1153,6 +1153,7 @@ public struct AppleBooksBookCard: View {
                 // Book Cover
                 if let coverData = book.coverImageData,
                    let uiImage = UIImage(data: coverData) {
+                    print("DEBUG LibraryView: Displaying cover from coverImageData for book: \(book.title ?? "Unknown")")
                     Image(uiImage: uiImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -1161,6 +1162,7 @@ public struct AppleBooksBookCard: View {
                         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 } else if let coverURL = book.coverImageURL,
                           let url = URL(string: coverURL) {
+                    print("DEBUG LibraryView: Displaying cover from coverImageURL for book: \(book.title ?? "Unknown"), URL: \(coverURL)")
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .empty:
@@ -1203,6 +1205,7 @@ public struct AppleBooksBookCard: View {
                     }
                     .id(book.coverImageURL) // Force refresh when URL changes
                 } else {
+                    print("DEBUG LibraryView: No cover data for book: \(book.title ?? "Unknown"), coverImageData: \(book.coverImageData != nil ? "present" : "nil"), coverImageURL: \(book.coverImageURL ?? "nil")")
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))
                         .frame(width: 60, height: 90)
