@@ -1,5 +1,42 @@
 import SwiftUI
+#if canImport(RevenueCat)
 import RevenueCat
+#else
+// Stub types for when RevenueCat is not available
+enum PeriodType {
+    case intro, normal, trial
+}
+
+class EntitlementInfo {
+    var isActive: Bool = false
+    var productIdentifier: String = ""
+    var expirationDate: Date?
+    var periodType: PeriodType = .normal
+}
+
+class Entitlements {
+    var active: [String: EntitlementInfo] = [:]
+}
+
+class Offering {
+    var availablePackages: [Package] = []
+}
+
+class CustomerInfo {
+    var originalAppUserId: String = ""
+    var entitlements: Entitlements = Entitlements()
+}
+
+class StoreProduct {
+    var price: Decimal = 0
+    var currencyCode: String = ""
+}
+
+class Package {
+    var storeProduct: StoreProduct?
+    var identifier: String = ""
+}
+#endif
 
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
