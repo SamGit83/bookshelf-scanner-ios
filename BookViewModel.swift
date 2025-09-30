@@ -529,7 +529,7 @@ class BookViewModel: ObservableObject {
 
                 guard let documents = snapshot?.documents else {
                     print("DEBUG BookViewModel: No documents in snapshot")
-                    self?.books = []
+                    self.books = []
                     return
                 }
 
@@ -615,8 +615,8 @@ class BookViewModel: ObservableObject {
                 // Cache the books for offline use
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
-                if self?.books.isEmpty == true {
-                    Task { await self?.loadBooksPaginated(page: 0) }
+                if self.books.isEmpty == true {
+                    Task { await self.loadBooksPaginated(page: 0) }
                 }
  
                 // Fetch missing covers only if not recently refreshed (e.g., within last 5 minutes)
@@ -624,7 +624,7 @@ class BookViewModel: ObservableObject {
                 let now = Date().timeIntervalSince1970
                 if now - lastCoverRefresh > 300 { // 5 minutes
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        self?.refreshBookCovers()
+                        self.refreshBookCovers()
                         UserDefaults.standard.set(now, forKey: "lastCoverRefreshTime")
                     }
                 } else {
