@@ -757,6 +757,21 @@ extension View {
     }
 
 
+    func glassBackground() -> some View {
+        self
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(AdaptiveColors.glassBackground)
+                    .background(.ultraThinMaterial)
+                    .blur(radius: 10)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+    }
+    
     func vibrantBackground(_ gradient: LinearGradient) -> some View {
         self.background(gradient.ignoresSafeArea())
     }

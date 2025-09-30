@@ -91,6 +91,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.accent,
                                             showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
                                             onUpgradeTap: {
+                                                print("DEBUG ProfileView: Upgrade tap from scan teaser")
                                                 showUpgradeModal = true
                                                 AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "scan")
                                                 NotificationCenter.default.post(
@@ -110,6 +111,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.success,
                                             showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
                                             onUpgradeTap: {
+                                                print("DEBUG ProfileView: Upgrade tap from book teaser")
                                                 showUpgradeModal = true
                                                 AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "book")
                                                 NotificationCenter.default.post(
@@ -129,6 +131,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.promotional,
                                             showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
                                             onUpgradeTap: {
+                                                print("DEBUG ProfileView: Upgrade tap from recommendation teaser")
                                                 showUpgradeModal = true
                                                 AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "recommendation")
                                                 NotificationCenter.default.post(
@@ -150,6 +153,7 @@ struct ProfileView: View {
                                                     .foregroundColor(AppleBooksColors.accent)
 
                                                 Button(action: {
+                                                    print("DEBUG ProfileView: Upgrade tap from view plans button")
                                                     showUpgradeModal = true
                                                     AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_view_plans_button")
                                                     NotificationCenter.default.post(
@@ -159,13 +163,15 @@ struct ProfileView: View {
                                                     )
                                                 }) {
                                                     Text("View Premium Plans")
-                                                        .font(AppleBooksTypography.captionBold)
+                                                        .font(.caption.bold())
                                                         .foregroundColor(.white)
-                                                        .padding(.horizontal, AppleBooksSpacing.space12)
-                                                        .padding(.vertical, AppleBooksSpacing.space6)
-                                                        .background(AppleBooksColors.accent)
-                                                        .cornerRadius(6)
+                                                        .padding(.horizontal, 12)
+                                                        .padding(.vertical, 6)
+                                                        .background(Color.orange)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 6))
                                                 }
+                                                .glassBackground()
+                                                .accessibilityLabel("View Premium Plans Button")
                                             }
                                             .padding(.top, AppleBooksSpacing.space8)
                                         }
@@ -340,8 +346,10 @@ struct ProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showUpgradeModal) {
+                print("DEBUG ProfileView: Presenting UpgradeModal sheet")
                 UpgradeModalView()
             }
+            .animation(.easeInOut(duration: 0.3), value: showUpgradeModal)
             .alert(isPresented: $showSignOutAlert) {
                 Alert(
                     title: Text("Sign Out"),
@@ -893,13 +901,15 @@ struct EnhancedUsageRow: View {
 
                         Button(action: onUpgradeTap) {
                             Text(current >= limit ? "Upgrade Now" : "Upgrade")
-                                .font(AppleBooksTypography.captionBold)
+                                .font(.caption.bold())
                                 .foregroundColor(.white)
-                                .padding(.horizontal, AppleBooksSpacing.space8)
-                                .padding(.vertical, AppleBooksSpacing.space4)
-                                .background(current >= limit ? SemanticColors.warningPrimary : AppleBooksColors.accent)
-                                .cornerRadius(4)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(current >= limit ? Color.orange : Color.systemBlue)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
                         }
+                        .glassBackground()
+                        .accessibilityLabel("Upgrade Button")
                     }
 
                     // Urgency message for when very close to limit

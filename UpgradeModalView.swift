@@ -19,11 +19,12 @@ struct UpgradeModalView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                BackgroundGradients.heroGradient
+                Color.clear
+                    .background(.ultraThinMaterial)
                     .ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: SpacingSystem.xl) {
+                    VStack(spacing: 24) {
                         headerSection
                         socialProofSection
                         featureComparisonSection
@@ -31,12 +32,14 @@ struct UpgradeModalView: View {
                         urgencySection
                         ctaSection
                     }
-                    .padding(.vertical, SpacingSystem.xl)
+                    .padding(.vertical, 24)
+                    .padding(.horizontal, 16)
                 }
             }
             .navigationBarItems(trailing: closeButton)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
+                print("DEBUG UpgradeModal: Modal presented")
                 loadVariantConfig()
                 trackModalView()
             }
@@ -47,64 +50,73 @@ struct UpgradeModalView: View {
     }
 
     private var headerSection: some View {
-        VStack(spacing: SpacingSystem.md) {
+        VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(PrimaryColors.vibrantPurple.opacity(0.2))
+                    .fill(Color.systemGray6)
                     .frame(width: 120, height: 120)
+                    .glassBackground()
 
                 Image(systemName: "crown.fill")
-                    .font(.system(size: 48, weight: .bold))
-                    .foregroundColor(PrimaryColors.vibrantPurple)
+                    .font(.system(size: 48, weight: .medium))
+                    .foregroundColor(Color.systemGray)
+                    .accessibilityLabel("Premium Crown Icon")
             }
 
             Text(variantConfig?.headline ?? "Unlock Premium Features")
-                .font(TypographySystem.displayMedium)
-                .foregroundColor(AdaptiveColors.primaryText)
+                .font(.largeTitle)
+                .foregroundColor(Color.primary)
                 .multilineTextAlignment(.center)
+                .accessibilityLabel("Headline: Unlock Premium Features")
 
             Text(variantConfig?.subheadline ?? "Join thousands of readers who have upgraded to unlock unlimited access to all features.")
-                .font(TypographySystem.bodyLarge)
-                .foregroundColor(AdaptiveColors.secondaryText)
+                .font(.body)
+                .foregroundColor(Color.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, SpacingSystem.lg)
+                .padding(.horizontal, 24)
+                .accessibilityLabel("Subheadline: Join thousands of readers who have upgraded")
         }
-        .padding(.horizontal, SpacingSystem.lg)
+        .padding(.horizontal, 16)
+        .glassBackground()
+        .accessibilityElement(children: .combine)
     }
 
     private var socialProofSection: some View {
-        VStack(spacing: SpacingSystem.sm) {
-            HStack(spacing: SpacingSystem.xs) {
+        VStack(spacing: 8) {
+            HStack(spacing: 4) {
                 ForEach(0..<5) { _ in
                     Image(systemName: "star.fill")
-                        .foregroundColor(AccentColors.neonYellow)
+                        .foregroundColor(Color.systemGray3)
                         .font(.system(size: 16))
                 }
                 Text("4.9/5")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(AdaptiveColors.primaryText)
+                    .foregroundColor(Color.primary)
             }
 
             Text(variantConfig?.socialProof ?? "\"This app has transformed how I organize my library!\"")
-                .font(TypographySystem.bodyMedium)
-                .foregroundColor(AdaptiveColors.primaryText)
+                .font(.body)
+                .foregroundColor(Color.primary)
                 .italic()
                 .multilineTextAlignment(.center)
 
             Text("- Sarah M., Premium User")
-                .font(TypographySystem.captionMedium)
-                .foregroundColor(AdaptiveColors.secondaryText)
+                .font(.caption)
+                .foregroundColor(Color.secondary)
         }
-        .padding(.horizontal, SpacingSystem.lg)
+        .padding(.horizontal, 16)
+        .glassBackground()
+        .accessibilityLabel("Social Proof: 4.9/5 rating, quote from Sarah M.")
     }
 
     private var featureComparisonSection: some View {
-        VStack(spacing: SpacingSystem.lg) {
+        VStack(spacing: 24) {
             Text("Why Upgrade?")
-                .font(TypographySystem.headlineLarge)
-                .foregroundColor(AdaptiveColors.primaryText)
+                .font(.title2)
+                .foregroundColor(Color.primary)
+                .accessibilityLabel("Why Upgrade Section")
 
-            VStack(spacing: SpacingSystem.md) {
+            VStack(spacing: 16) {
                 FeatureComparisonRow(
                     icon: "camera.fill",
                     feature: "Unlimited AI Scans",
@@ -146,16 +158,19 @@ struct UpgradeModalView: View {
                 )
             }
         }
-        .padding(.horizontal, SpacingSystem.lg)
+        .padding(.horizontal, 16)
+        .glassBackground()
+        .accessibilityElement(children: .combine)
     }
 
     private var pricingSection: some View {
-        VStack(spacing: SpacingSystem.lg) {
+        VStack(spacing: 24) {
             Text("Choose Your Plan")
-                .font(TypographySystem.headlineLarge)
-                .foregroundColor(AdaptiveColors.primaryText)
+                .font(.title2)
+                .foregroundColor(Color.primary)
+                .accessibilityLabel("Choose Your Plan Section")
 
-            HStack(spacing: SpacingSystem.md) {
+            HStack(spacing: 16) {
                 PricingCard(
                     plan: .monthly,
                     price: variantConfig?.monthlyPrice ?? 2.99,
@@ -174,36 +189,40 @@ struct UpgradeModalView: View {
                     action: { selectedPlan = .annual }
                 )
             }
-            .padding(.horizontal, SpacingSystem.lg)
+            .padding(.horizontal, 16)
         }
+        .glassBackground()
+        .accessibilityElement(children: .combine)
     }
 
     private var urgencySection: some View {
-        VStack(spacing: SpacingSystem.sm) {
+        VStack(spacing: 8) {
             HStack {
                 Image(systemName: "clock.fill")
-                    .foregroundColor(SemanticColors.warningPrimary)
+                    .foregroundColor(Color.orange)
                 Text(variantConfig?.urgencyMessage ?? "Limited Time: 50% off your first month!")
-                    .font(TypographySystem.bodyMedium)
-                    .foregroundColor(SemanticColors.warningPrimary)
+                    .font(.body)
+                    .foregroundColor(Color.orange)
                     .bold()
             }
 
             Text("Offer ends in 24 hours")
-                .font(TypographySystem.captionMedium)
-                .foregroundColor(AdaptiveColors.secondaryText)
+                .font(.caption)
+                .foregroundColor(Color.secondary)
         }
-        .padding(.horizontal, SpacingSystem.lg)
-        .padding(.vertical, SpacingSystem.md)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(SemanticColors.warningSecondary)
+                .fill(Color.orange.opacity(0.1))
         )
-        .padding(.horizontal, SpacingSystem.lg)
+        .padding(.horizontal, 16)
+        .glassBackground()
+        .accessibilityLabel("Urgency: Limited Time Offer ends in 24 hours")
     }
 
     private var ctaSection: some View {
-        VStack(spacing: SpacingSystem.md) {
+        VStack(spacing: 16) {
             Button(action: startSubscription) {
                 if isLoading {
                     ProgressView()
@@ -211,25 +230,29 @@ struct UpgradeModalView: View {
                 } else {
                     Text(variantConfig?.ctaText ?? "Start Premium Trial")
                         .frame(maxWidth: .infinity)
-                        .padding(SpacingSystem.lg)
-                        .background(UIGradients.primaryButton)
+                        .padding(24)
+                        .background(Color.orange)
                         .foregroundColor(.white)
                         .cornerRadius(16)
-                        .font(TypographySystem.buttonLarge)
-                        .shadow(color: Color(hex: "FF2D92").opacity(0.3), radius: 8, x: 0, y: 4)
+                        .font(.headline)
+                        .shadow(color: Color.orange.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
             }
+            .buttonStyle(.borderedProminent)
             .disabled(isLoading)
-            .padding(.horizontal, SpacingSystem.lg)
+            .padding(.horizontal, 16)
+            .accessibilityLabel("Start Premium Trial Button")
 
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Maybe Later")
-                    .font(TypographySystem.buttonMedium)
-                    .foregroundColor(AdaptiveColors.secondaryText)
+                    .font(.body)
+                    .foregroundColor(Color.secondary)
             }
+            .accessibilityLabel("Maybe Later Button")
         }
+        .glassBackground()
     }
 
     private var closeButton: some View {
@@ -245,27 +268,37 @@ struct UpgradeModalView: View {
 
     private func loadVariantConfig() {
         Task {
-            guard let userId = AuthService.shared.currentUser?.id else { return }
+            print("DEBUG UpgradeModal: Loading variant config for user \(AuthService.shared.currentUser?.id ?? "nil")")
+            guard let userId = AuthService.shared.currentUser?.id else {
+                print("DEBUG UpgradeModal: No user ID, skipping variant load")
+                return
+            }
             do {
                 if let variant = try await abTestingService.getVariant(for: "upgrade_flow_experiment", userId: userId) {
                     variantConfig = UpgradeVariantConfig.fromVariant(variant)
+                    print("DEBUG UpgradeModal: Loaded variant \(variant.id)")
+                } else {
+                    print("DEBUG UpgradeModal: No variant assigned")
                 }
             } catch {
-                print("Failed to load variant config: \(error)")
+                print("DEBUG UpgradeModal: Failed to load variant config: \(error)")
             }
         }
     }
 
     private func startSubscription() {
+        print("DEBUG UpgradeModal: Starting subscription for plan \(selectedPlan)")
         isLoading = true
         trackCTAClick()
-
+    
         // TODO: Integrate with RevenueCat
         // For now, simulate subscription process
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             isLoading = false
+            let success = Bool.random()
+            print("DEBUG UpgradeModal: Simulated subscription \(success ? "success" : "failure")")
             // Simulate success/failure
-            if Bool.random() {
+            if success {
                 trackSubscriptionSuccess()
                 presentationMode.wrappedValue.dismiss()
             } else {
@@ -329,28 +362,29 @@ struct FeatureComparisonRow: View {
     let isPremium: Bool
 
     var body: some View {
-        HStack(spacing: SpacingSystem.md) {
+        HStack(spacing: 16) {
             Image(systemName: icon)
-                .foregroundColor(isPremium ? Color(hex: "30D158") : AdaptiveColors.secondaryText)
+                .foregroundColor(isPremium ? Color.green : Color.secondary)
                 .frame(width: 24, height: 24)
+                .accessibilityLabel("\(feature) Icon")
 
-            VStack(alignment: .leading, spacing: SpacingSystem.xs) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(feature)
-                    .font(TypographySystem.bodyMedium)
-                    .foregroundColor(AdaptiveColors.primaryText)
+                    .font(.body)
+                    .foregroundColor(Color.primary)
 
                 HStack {
                     Text(freeText)
-                        .font(TypographySystem.captionMedium)
-                        .foregroundColor(AdaptiveColors.secondaryText)
+                        .font(.caption)
+                        .foregroundColor(Color.secondary)
 
                     Image(systemName: "arrow.right")
-                        .foregroundColor(AdaptiveColors.secondaryText)
+                        .foregroundColor(Color.secondary)
                         .font(.system(size: 12))
 
                     Text(premiumText)
-                        .font(TypographySystem.captionMedium)
-                        .foregroundColor(Color(hex: "30D158"))
+                        .font(.caption)
+                        .foregroundColor(Color.green)
                         .bold()
                 }
             }
@@ -358,16 +392,17 @@ struct FeatureComparisonRow: View {
             Spacer()
 
             if isPremium {
-                Image(systemName: "crown.fill")
-                    .foregroundColor(PrimaryColors.vibrantPurple)
+                Image(systemName: "star.fill")
+                    .foregroundColor(Color.orange)
                     .font(.system(size: 16))
+                    .accessibilityLabel("Premium Feature")
             }
         }
-        .padding(SpacingSystem.md)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(AdaptiveColors.glassBackground)
-        )
+        .padding(16)
+        .glassBackground()
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -381,43 +416,42 @@ struct PricingCard: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: SpacingSystem.sm) {
+            VStack(spacing: 8) {
                 if let savings = savings {
                     Text(savings)
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(SemanticColors.successPrimary)
-                        .padding(.horizontal, SpacingSystem.sm)
-                        .padding(.vertical, SpacingSystem.xs)
-                        .background(SemanticColors.successSecondary)
+                        .foregroundColor(Color.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.green.opacity(0.1))
                         .cornerRadius(8)
                 }
 
                 Text("$\(String(format: "%.2f", price))")
-                    .font(TypographySystem.displaySmall)
-                    .foregroundColor(AdaptiveColors.primaryText)
+                    .font(.largeTitle)
+                    .foregroundColor(Color.primary)
 
                 Text("per \(period)")
-                    .font(TypographySystem.captionMedium)
-                    .foregroundColor(AdaptiveColors.secondaryText)
+                    .font(.caption)
+                    .foregroundColor(Color.secondary)
 
                 if plan == .annual {
                     Text("$\(String(format: "%.2f", price/12))/month")
-                        .font(TypographySystem.captionSmall)
-                        .foregroundColor(AdaptiveColors.secondaryText)
+                        .font(.caption2)
+                        .foregroundColor(Color.secondary)
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(SpacingSystem.lg)
-            .background(
+            .padding(24)
+            .glassBackground()
+            .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(isSelected ? AnyShapeStyle(UIGradients.primaryButton) : AnyShapeStyle(AdaptiveColors.glassBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(isSelected ? Color(hex: "FF2D92") : AdaptiveColors.glassBorder, lineWidth: isSelected ? 2 : 1)
-                    )
+                    .stroke(isSelected ? Color.orange : Color.clear, lineWidth: isSelected ? 2 : 0)
             )
+            .background(isSelected ? Color.orange.opacity(0.1) : Color.clear)
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel("\(period.capitalized) Plan: $\(price) per \(period)")
     }
 }
 

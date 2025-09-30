@@ -44,23 +44,22 @@ struct SubscriptionView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                BackgroundGradients.heroGradient
-                    .ignoresSafeArea()
-                AnimatedBackground()
+                Color.clear
+                    .background(.ultraThinMaterial)
                     .ignoresSafeArea()
 
                 if isLoading {
-                    VStack(spacing: SpacingSystem.lg) {
+                    VStack(spacing: 24) {
                         ProgressView()
                             .scaleEffect(1.5)
-                            .tint(PrimaryColors.vibrantPurple)
+                            .tint(Color.systemBlue)
                         Text("Loading subscription options...")
-                            .font(TypographySystem.bodyLarge)
-                            .foregroundColor(AdaptiveColors.secondaryText)
+                            .font(.body)
+                            .foregroundColor(Color.secondary)
                     }
                 } else {
                     ScrollView {
-                        VStack(spacing: SpacingSystem.xxl) {
+                        VStack(spacing: 48) {
                             headerSection
                             currentPlanSection
                             offeringsSection
@@ -68,14 +67,20 @@ struct SubscriptionView: View {
                             faqSection
                             restorePurchasesSection
                         }
-                        .padding(.vertical, SpacingSystem.xl)
-                        .animation(AnimationTiming.pageTransition, value: isLoading)
+                        .padding(.vertical, 32)
+                        .animation(.easeInOut(duration: 0.5), value: isLoading)
                     }
                 }
             }
-            .navigationBarTitle("Premium Subscription", displayMode: .large)
-            .navigationBarItems(trailing: closeButton)
+            .navigationTitle("Premium Subscription")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    closeButton
+                }
+            }
             .onAppear {
+                print("DEBUG SubscriptionView: View presented")
                 logMemoryUsage("Before SubscriptionView onAppear")
                 loadVariantConfig()
                 loadOfferings()
@@ -102,103 +107,108 @@ struct SubscriptionView: View {
     }
 
     private var headerSection: some View {
-        VStack(spacing: SpacingSystem.lg) {
+        VStack(spacing: 24) {
             ZStack {
                 Circle()
-                    .fill(PrimaryColors.vibrantPurple.opacity(0.3))
+                    .fill(Color.systemGray6)
                     .frame(width: 120, height: 120)
                     .blur(radius: 10)
+                    .glassBackground()
 
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 48, weight: .bold))
-                    .foregroundColor(PrimaryColors.vibrantPurple)
-                    .shadow(color: PrimaryColors.vibrantPurple.opacity(0.3), radius: 8, x: 0, y: 4)
+                Image(systemName: "star.fill")
+                    .font(.system(size: 48, weight: .medium))
+                    .foregroundColor(Color.systemGray)
+                    .accessibilityLabel("Premium Star Icon")
             }
 
             Text(variantConfig?.headerTitle ?? "Unlock Unlimited Access")
-                .font(TypographySystem.displayLarge)
-                .foregroundColor(AdaptiveColors.primaryText)
+                .font(.largeTitle)
+                .foregroundColor(Color.primary)
                 .multilineTextAlignment(.center)
+                .accessibilityLabel("Header: Unlock Unlimited Access")
 
             Text(variantConfig?.headerSubtitle ?? "Get unlimited scans, recommendations, and premium features")
-                .font(TypographySystem.bodyLarge)
-                .foregroundColor(AdaptiveColors.secondaryText)
+                .font(.body)
+                .foregroundColor(Color.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, SpacingSystem.md)
+                .padding(.horizontal, 16)
 
             // Social proof badges
-            HStack(spacing: SpacingSystem.md) {
+            HStack(spacing: 16) {
                 SocialProofBadge(count: "10,000+", label: "Happy Readers")
                 SocialProofBadge(count: "4.9★", label: "App Store Rating")
                 SocialProofBadge(count: "95%", label: "Satisfaction")
             }
-            .padding(.top, SpacingSystem.lg)
+            .padding(.top, 24)
         }
-        .padding(.horizontal, SpacingSystem.xl)
-        .glassEffect()
-        .animation(AnimationTiming.feedback, value: variantConfig)
+        .padding(.horizontal, 32)
+        .glassBackground()
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: variantConfig)
+        .accessibilityElement(children: .combine)
     }
 
     private var currentPlanSection: some View {
         Group {
             if revenueCatManager.isSubscribed, let subscription = revenueCatManager.getSubscriptionInfo() {
-                GlassCard {
-                    VStack(spacing: SpacingSystem.md) {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(SemanticColors.successPrimary)
-                                .font(.system(size: 24))
-                            Text("Current Plan")
-                                .font(TypographySystem.headlineMedium)
-                                .foregroundColor(AdaptiveColors.primaryText)
-                            Spacer()
-                        }
+                VStack(spacing: 16) {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(Color.green)
+                            .font(.system(size: 24))
+                        Text("Current Plan")
+                            .font(.title3)
+                            .foregroundColor(Color.primary)
+                        Spacer()
+                    }
 
-                        VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                            Text(subscription.productName)
-                                .font(TypographySystem.bodyLarge)
-                                .foregroundColor(AdaptiveColors.primaryText)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(subscription.productName)
+                            .font(.body)
+                            .foregroundColor(Color.primary)
 
-                            Text("Renews on \(formattedDate(subscription.expirationDate))")
-                                .font(TypographySystem.captionMedium)
-                                .foregroundColor(AdaptiveColors.secondaryText)
+                        Text("Renews on \(formattedDate(subscription.expirationDate))")
+                            .font(.caption)
+                            .foregroundColor(Color.secondary)
 
-                            if subscription.isTrial {
-                                Text("Free Trial")
-                                    .font(TypographySystem.captionLarge)
-                                    .foregroundColor(SemanticColors.infoPrimary)
-                                    .padding(.horizontal, SpacingSystem.sm)
-                                    .padding(.vertical, SpacingSystem.xs)
-                                    .background(SemanticColors.infoSecondary)
-                                    .cornerRadius(SpacingSystem.xs)
-                            }
+                        if subscription.isTrial {
+                            Text("Free Trial")
+                                .font(.caption)
+                                .foregroundColor(Color.systemBlue)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.systemBlue.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
                         }
                     }
-                    .padding(SpacingSystem.lg)
                 }
-                .padding(.horizontal, SpacingSystem.xl)
+                .padding(24)
+                .glassBackground()
+                .cornerRadius(16)
+                .padding(.horizontal, 32)
+                .accessibilityLabel("Current Plan: \(subscription.productName), Renews on \(formattedDate(subscription.expirationDate))")
             }
         }
     }
 
     private var offeringsSection: some View {
-        VStack(spacing: SpacingSystem.xl) {
+        VStack(spacing: 32) {
             Text("Choose Your Plan")
-                .font(TypographySystem.headlineLarge)
-                .foregroundColor(AdaptiveColors.primaryText)
+                .font(.title2)
+                .foregroundColor(Color.primary)
+                .accessibilityLabel("Choose Your Plan Section")
 
             // Toggle for monthly/yearly
             Picker("Billing Period", selection: $selectedPeriod) {
                 Text("Monthly").tag("month")
                 Text("Yearly").tag("year")
             }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal, SpacingSystem.lg)
-            .background(AdaptiveColors.glassBackground)
-            .cornerRadius(SpacingSystem.md)
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .glassBackground()
+            .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(
-                RoundedRectangle(cornerRadius: SpacingSystem.md)
-                    .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.systemGray4, lineWidth: 1)
             )
 
             // Pricing cards with savings highlight
@@ -207,93 +217,107 @@ struct SubscriptionView: View {
                 let annualPrice = offering.packages.first(where: { $0.period == "year" })?.price ?? 29.99
                 let savings = ((2.99 * 12 - annualPrice) / (2.99 * 12)) * 100
 
-                VStack(spacing: SpacingSystem.lg) {
+                VStack(spacing: 24) {
                     // Monthly Card
-                    GlassCard {
-                        VStack(spacing: SpacingSystem.md) {
-                            Text(selectedPeriod == "month" ? "Selected" : "Monthly")
-                                .font(TypographySystem.headlineSmall)
-                                .foregroundColor(selectedPeriod == "month" ? PrimaryColors.vibrantPurple : AdaptiveColors.secondaryText)
+                    VStack(spacing: 16) {
+                        Text(selectedPeriod == "month" ? "Selected" : "Monthly")
+                            .font(.headline)
+                            .foregroundColor(selectedPeriod == "month" ? Color.orange : Color.secondary)
 
-                            Text("$\(String(format: "%.2f", monthlyPrice))")
-                                .font(TypographySystem.displayMedium)
-                                .foregroundColor(PrimaryColors.vibrantPurple)
-                                .bold()
+                        Text("$\(String(format: "%.2f", monthlyPrice))")
+                            .font(.largeTitle)
+                            .foregroundColor(Color.primary)
+                            .bold()
 
-                            Text("/month")
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(AdaptiveColors.secondaryText)
+                        Text("/month")
+                            .font(.body)
+                            .foregroundColor(Color.secondary)
 
-                            Button("Subscribe Monthly") {
-                                if let package = offering.packages.first(where: { $0.period == "month" }) {
-                                    purchasePackage(package)
-                                }
+                        Button("Subscribe Monthly") {
+                            if let package = offering.packages.first(where: { $0.period == "month" }) {
+                                purchasePackage(package)
                             }
-                            .primaryButtonStyle()
-                            .disabled(selectedPeriod != "month" || isPurchasing)
                         }
-                        .padding(SpacingSystem.lg)
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.orange)
+                        .disabled(selectedPeriod != "month" || isPurchasing)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(24)
+                    .glassBackground()
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(selectedPeriod == "month" ? Color.orange : Color.clear, lineWidth: 2)
+                    )
 
                     // Annual Card with savings
-                    GlassCard {
-                        VStack(spacing: SpacingSystem.md) {
-                            Text(selectedPeriod == "year" ? "Selected" : "Yearly (Most Popular)")
-                                .font(TypographySystem.headlineSmall)
-                                .foregroundColor(selectedPeriod == "year" ? PrimaryColors.vibrantPurple : AdaptiveColors.secondaryText)
+                    VStack(spacing: 16) {
+                        Text(selectedPeriod == "year" ? "Selected" : "Yearly (Most Popular)")
+                            .font(.headline)
+                            .foregroundColor(selectedPeriod == "year" ? Color.orange : Color.secondary)
 
-                            Text("$\(String(format: "%.2f", annualPrice))")
-                                .font(TypographySystem.displayMedium)
-                                .foregroundColor(PrimaryColors.vibrantPurple)
-                                .bold()
+                        Text("$\(String(format: "%.2f", annualPrice))")
+                            .font(.largeTitle)
+                            .foregroundColor(Color.primary)
+                            .bold()
 
-                            Text("/year")
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(AdaptiveColors.secondaryText)
+                        Text("/year")
+                            .font(.body)
+                            .foregroundColor(Color.secondary)
 
-                            Text("Save \(String(format: "%.0f", savings))%")
-                                .font(TypographySystem.captionLarge)
-                                .foregroundColor(SemanticColors.successPrimary)
-                                .padding(.horizontal, SpacingSystem.sm)
-                                .padding(.vertical, SpacingSystem.xs)
-                                .background(SemanticColors.successSecondary)
-                                .cornerRadius(SpacingSystem.xs)
+                        Text("Save \(String(format: "%.0f", savings))%")
+                            .font(.caption)
+                            .foregroundColor(Color.green)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.green.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
 
-                            Button("Subscribe Yearly") {
-                                if let package = offering.packages.first(where: { $0.period == "year" }) {
-                                    purchasePackage(package)
-                                }
+                        Button("Subscribe Yearly") {
+                            if let package = offering.packages.first(where: { $0.period == "year" }) {
+                                purchasePackage(package)
                             }
-                            .primaryButtonStyle()
-                            .disabled(selectedPeriod != "year" || isPurchasing)
                         }
-                        .padding(SpacingSystem.lg)
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color.orange)
+                        .disabled(selectedPeriod != "year" || isPurchasing)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(24)
+                    .glassBackground()
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(selectedPeriod == "year" ? Color.orange : Color.clear, lineWidth: 2)
+                    )
                     .overlay(
                         Text("Most Popular")
-                            .font(TypographySystem.captionLarge)
+                            .font(.caption)
                             .foregroundColor(.white)
-                            .padding(.horizontal, SpacingSystem.sm)
-                            .padding(.vertical, SpacingSystem.xs)
-                            .background(PrimaryColors.vibrantPurple)
-                            .cornerRadius(SpacingSystem.sm),
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.orange)
+                            .clipShape(RoundedRectangle(cornerRadius: 4)),
                         alignment: .topTrailing
                     )
-                    .padding(.top, SpacingSystem.sm)
+                    .padding(.top, 8)
                 }
-                .padding(.horizontal, SpacingSystem.xl)
+                .padding(.horizontal, 32)
             }
         }
-        .animation(AnimationTiming.transition, value: selectedPeriod)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedPeriod)
+        .accessibilityElement(children: .combine)
     }
 
     private var featuresSection: some View {
-        VStack(spacing: SpacingSystem.lg) {
+        VStack(spacing: 24) {
             Text("Premium Features")
-                .font(AppleBooksTypography.headlineLarge)
-                .foregroundColor(AppleBooksColors.text)
+                .font(.title2)
+                .foregroundColor(Color.primary)
+                .accessibilityLabel("Premium Features Section")
 
-            VStack(spacing: SpacingSystem.sm) {
+            VStack(spacing: 16) {
                 PremiumFeatureRow(
                     icon: "camera.fill",
                     title: "Unlimited AI Scans",
@@ -331,16 +355,19 @@ struct SubscriptionView: View {
                 )
             }
         }
-        .padding(.horizontal, SpacingSystem.lg)
+        .padding(.horizontal, 16)
+        .glassBackground()
+        .accessibilityElement(children: .combine)
     }
 
     private var faqSection: some View {
-        VStack(spacing: SpacingSystem.lg) {
+        VStack(spacing: 24) {
             Text("Frequently Asked Questions")
-                .font(AppleBooksTypography.headlineLarge)
-                .foregroundColor(AppleBooksColors.text)
+                .font(.title2)
+                .foregroundColor(Color.primary)
+                .accessibilityLabel("FAQ Section")
 
-            VStack(spacing: SpacingSystem.sm) {
+            VStack(spacing: 16) {
                 FAQItem(
                     question: "Can I cancel anytime?",
                     answer: "Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period."
@@ -362,59 +389,72 @@ struct SubscriptionView: View {
                 )
             }
         }
-        .padding(.horizontal, SpacingSystem.lg)
+        .padding(.horizontal, 16)
+        .glassBackground()
+        .accessibilityElement(children: .combine)
     }
 
     private var restorePurchasesSection: some View {
-        VStack(spacing: SpacingSystem.lg) {
+        VStack(spacing: 24) {
             Button(action: restorePurchases) {
                 Text("Restore Purchases")
-                    .font(TypographySystem.buttonMedium)
+                    .font(.body)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
             }
-            .buttonStyle(ButtonStyles.ghostButton())
+            .buttonStyle(.borderedProminent)
+            .tint(Color.systemBlue)
             .disabled(isPurchasing)
+            .accessibilityLabel("Restore Purchases Button")
 
             Text("If you've already purchased a subscription, tap here to restore your access.")
-                .font(TypographySystem.captionSmall)
-                .foregroundColor(AdaptiveColors.secondaryText)
+                .font(.caption)
+                .foregroundColor(Color.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, SpacingSystem.lg)
+                .padding(.horizontal, 16)
         }
-        .padding(.horizontal, SpacingSystem.xl)
+        .padding(.horizontal, 32)
+        .glassBackground()
     }
 
     private var closeButton: some View {
         Button(action: {
-            withAnimation(AnimationTiming.micro) {
+            withAnimation(.easeOut(duration: 0.15)) {
                 trackDismiss()
                 presentationMode.wrappedValue.dismiss()
             }
         }) {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 20, weight: .medium))
-                .foregroundColor(AdaptiveColors.secondaryText)
-                .background(AdaptiveColors.glassBackground)
+                .foregroundColor(Color.secondary)
+                .background(Color.systemGray6)
                 .clipShape(Circle())
-                .padding(SpacingSystem.sm)
+                .padding(8)
                 .overlay(
                     Circle()
-                        .stroke(AdaptiveColors.glassBorder, lineWidth: 1)
+                        .stroke(Color.systemGray4, lineWidth: 1)
                 )
         }
+        .accessibilityLabel("Close Button")
     }
 
     private func loadVariantConfig() {
         Task {
-            guard let userId = AuthService.shared.currentUser?.id else { return }
+            print("DEBUG SubscriptionView: Loading variant config for user \(AuthService.shared.currentUser?.id ?? "nil")")
+            guard let userId = AuthService.shared.currentUser?.id else {
+                print("DEBUG SubscriptionView: No user ID, skipping variant load")
+                return
+            }
             do {
                 if let variant = try await abTestingService.getVariant(for: "subscription_flow_experiment", userId: userId) {
                     variantConfig = SubscriptionVariantConfig.fromVariant(variant)
+                    print("DEBUG SubscriptionView: Loaded variant \(variant.id)")
+                } else {
+                    print("DEBUG SubscriptionView: No variant assigned")
                 }
             } catch {
-                print("Failed to load subscription variant config: \(error)")
+                print("DEBUG SubscriptionView: Failed to load subscription variant config: \(error)")
             }
         }
     }
@@ -513,29 +553,33 @@ struct SubscriptionView: View {
     }
 
     private func purchasePackage(_ package: SubscriptionPackage) {
+        print("DEBUG SubscriptionView: Starting purchase for package \(package.id) at $\(package.price)")
         isPurchasing = true
         trackPurchaseStart(package: package)
-
+    
         #if canImport(RevenueCat)
         // Find the corresponding RevenueCat package
         guard let offering = revenueCatManager.offerings["premium"],
               let rcPackage = offering.packages.first(where: { $0.identifier == package.id }) else {
+            print("DEBUG SubscriptionView: Package not found in RevenueCat offerings")
             self.isPurchasing = false
             self.errorMessage = "Package not found. Please try again."
             self.showError = true
             return
         }
-
+    
         revenueCatManager.purchase(package: rcPackage) { result in
             DispatchQueue.main.async {
                 self.isPurchasing = false
-
+    
                 switch result {
                 case .success(let customerInfo):
+                    print("DEBUG SubscriptionView: Purchase successful")
                     self.trackPurchaseSuccess(package: package)
                     self.presentationMode.wrappedValue.dismiss()
-
+    
                 case .failure(let error):
+                    print("DEBUG SubscriptionView: Purchase failed: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
                     self.showError = true
                     self.trackPurchaseFailure(package: package)
@@ -546,8 +590,10 @@ struct SubscriptionView: View {
         // Fallback for development - simulate purchase
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             self.isPurchasing = false
-
-            if Bool.random() { // Simulate success/failure
+            let success = Bool.random()
+            print("DEBUG SubscriptionView: Simulated purchase \(success ? "success" : "failure") for \(package.id)")
+    
+            if success { // Simulate success/failure
                 // Success
                 self.updateUserTierToPremium()
                 self.trackPurchaseSuccess(package: package)
@@ -671,37 +717,41 @@ struct PremiumFeatureRow: View {
     let description: String
 
     var body: some View {
-        GlassCard {
-            HStack(spacing: SpacingSystem.md) {
-                ZStack {
-                    Circle()
-                        .fill(PrimaryColors.vibrantPurple.opacity(0.2))
-                        .frame(width: 40, height: 40)
-                    Image(systemName: icon)
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(PrimaryColors.vibrantPurple)
-                }
-
-                VStack(alignment: .leading, spacing: SpacingSystem.sm) {
-                    Text(title)
-                        .font(TypographySystem.bodyLarge)
-                        .foregroundColor(AdaptiveColors.primaryText)
-
-                    Text(description)
-                        .font(TypographySystem.captionMedium)
-                        .foregroundColor(AdaptiveColors.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer()
-
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(SemanticColors.successPrimary)
-                    .font(.system(size: 20, weight: .semibold))
-                    .opacity(0.8)
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.systemGray6)
+                    .frame(width: 40, height: 40)
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(Color.systemGray)
+                    .accessibilityLabel("\(title) Icon")
             }
-            .padding(SpacingSystem.lg)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(.body)
+                    .foregroundColor(Color.primary)
+
+                Text(description)
+                    .font(.caption)
+                    .foregroundColor(Color.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(Color.green)
+                .font(.system(size: 20, weight: .semibold))
+                .opacity(0.8)
+                .accessibilityLabel("Included in Premium")
         }
+        .padding(24)
+        .glassBackground()
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -712,39 +762,40 @@ struct FAQItem: View {
     @State private var isExpanded = false
 
     var body: some View {
-        GlassCard {
-            VStack(spacing: SpacingSystem.md) {
-                Button(action: { withAnimation(AnimationTiming.micro) { isExpanded.toggle() } }) {
-                    HStack {
-                        Text(question)
-                            .font(TypographySystem.bodyLarge)
-                            .foregroundColor(AdaptiveColors.primaryText)
-                            .multilineTextAlignment(.leading)
-
-                        Spacer()
-
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(AdaptiveColors.secondaryText)
-                            .font(.system(size: 16, weight: .medium))
-                            .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                    }
-                    .padding(.vertical, SpacingSystem.sm)
-                }
-                .buttonStyle(PlainButtonStyle())
-
-                if isExpanded {
-                    Text(answer)
-                        .font(TypographySystem.bodyMedium)
-                        .foregroundColor(AdaptiveColors.secondaryText)
+        VStack(spacing: 16) {
+            Button(action: { withAnimation(.easeOut(duration: 0.15)) { isExpanded.toggle() } }) {
+                HStack {
+                    Text(question)
+                        .font(.body)
+                        .foregroundColor(Color.primary)
                         .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.top, SpacingSystem.sm)
-                        .transition(.opacity.combined(with: .slide))
+
+                    Spacer()
+
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .foregroundColor(Color.secondary)
+                        .font(.system(size: 16, weight: .medium))
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
+                .padding(.vertical, 8)
             }
-            .padding(SpacingSystem.lg)
+            .buttonStyle(PlainButtonStyle())
+
+            if isExpanded {
+                Text(answer)
+                    .font(.body)
+                    .foregroundColor(Color.secondary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 8)
+                    .transition(.opacity.combined(with: .slide))
+            }
         }
-        .animation(AnimationTiming.micro, value: isExpanded)
+        .padding(24)
+        .glassBackground()
+        .cornerRadius(12)
+        .animation(.easeOut(duration: 0.15), value: isExpanded)
+        .accessibilityLabel("\(question). \(isExpanded ? answer : "")")
     }
 }
 
@@ -753,25 +804,26 @@ struct SocialProofBadge: View {
     let label: String
 
     var body: some View {
-        VStack(spacing: SpacingSystem.xs) {
+        VStack(spacing: 4) {
             Text(count)
-                .font(TypographySystem.headlineMedium)
-                .foregroundColor(PrimaryColors.energeticPink)
+                .font(.headline)
+                .foregroundColor(Color.systemBlue)
                 .bold()
 
             Text(label)
-                .font(TypographySystem.captionMedium)
-                .foregroundColor(AdaptiveColors.secondaryText)
+                .font(.caption)
+                .foregroundColor(Color.secondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(SpacingSystem.sm)
-        .background(PrimaryColors.energeticPink.opacity(0.1))
-        .cornerRadius(SpacingSystem.md)
+        .padding(8)
+        .background(Color.systemBlue.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
-            RoundedRectangle(cornerRadius: SpacingSystem.md)
-                .stroke(PrimaryColors.energeticPink.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.systemBlue.opacity(0.2), lineWidth: 1)
         )
+        .accessibilityLabel("\(count) \(label)")
     }
 }
 
