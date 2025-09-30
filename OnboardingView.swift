@@ -1,4 +1,5 @@
 import SwiftUI
+import Purchases
 
 struct OnboardingView: View {
     @ObservedObject private var authService = AuthService.shared
@@ -243,7 +244,7 @@ struct OnboardingView: View {
         }
     }
 
-    private func purchaseSubscription(package: PurchasesPackage) {
+    private func purchaseSubscription(package: Purchases.Package) {
         isPurchasing = true
         revenueCatManager.purchase(package: package) { result in
             DispatchQueue.main.async {
