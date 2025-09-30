@@ -43,27 +43,31 @@ class CostTracker: ObservableObject {
     // MARK: - Cost Recording
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
         let actualCost = cost ?? (costRates[service] ?? 0.0) * Double(usage)
-
-        costUpdateQueue.async {
+        print("DEBUG: recordCost called for \(service) with cost \(actualCost) on thread \(Thread.current)")
+ 
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            print("DEBUG: Updating costs on main thread. Before: totalCost = \(self.currentCosts.totalCost)")
+            
             self.currentCosts.totalCost += actualCost
             self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
-
+ 
             // Track daily costs
             let today = self.getCurrentDateString()
             if self.currentCosts.dailyCosts[today] == nil {
                 self.currentCosts.dailyCosts[today] = 0.0
             }
             self.currentCosts.dailyCosts[today]! += actualCost
-
-            DispatchQueue.main.async {
-                self.updateProfitability()
-                self.objectWillChange.send()
-            }
+            
+            print("DEBUG: After update: totalCost = \(self.currentCosts.totalCost)")
+            
+            self.updateProfitability()
+            self.objectWillChange.send()
         }
-
+ 
         // Track in performance monitoring
         PerformanceMonitoringService.shared.trackAPICost(service: service, cost: actualCost, usage: usage)
-
+ 
         // Log to analytics
         AnalyticsManager.shared.trackPerformanceMetric(
             metricName: "api_cost",
