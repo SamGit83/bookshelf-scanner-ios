@@ -2,7 +2,6 @@ import SwiftUI
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
-import RevenueCatManager
 
 struct UpgradeModalView: View {
     @Environment(\.presentationMode) var presentationMode
