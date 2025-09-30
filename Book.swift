@@ -82,7 +82,8 @@ struct Book: Identifiable, Codable, Hashable {
         // Default to current date if 'dateAdded' is missing
         self.dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
 
-        self.coverImageData = try container.decodeIfPresent(Data.self, forKey: .coverImageData)
+        // self.coverImageData = try container.decodeIfPresent(Data.self, forKey: .coverImageData) // Commented out to reduce memory usage
+        self.coverImageData = nil
         self.coverImageURL = try container.decodeIfPresent(String.self, forKey: .coverImageURL)
 
         // Reading Progress - use defaults

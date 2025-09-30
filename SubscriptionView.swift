@@ -5,6 +5,7 @@ import FirebaseAnalytics
 #if canImport(RevenueCat)
 import RevenueCat
 #endif
+import Foundation
 
 struct SubscriptionView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -18,6 +19,27 @@ struct SubscriptionView: View {
     @State private var errorMessage = ""
     @State private var variantConfig: SubscriptionVariantConfig?
     @State private var selectedPeriod: String = "year" // For toggle
+
+    // Memory logging
+    private func logMemoryUsage(_ context: String) {
+        #if os(iOS)
+        var info = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
+        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
+        }
+        if kerr == KERN_SUCCESS {
+            let memoryUsage = Double(info.resident_size) / 1024.0 / 1024.0
+            print("DEBUG SubscriptionView Memory: \(context) - \(String(format: "%.2f", memoryUsage)) MB")
+        } else {
+            print("DEBUG SubscriptionView Memory: \(context) - Failed to get memory info")
+        }
+        #else
+        print("DEBUG SubscriptionView Memory: \(context) - Memory logging not available on this platform")
+        #endif
+    }
 
     var body: some View {
         NavigationView {
@@ -54,9 +76,14 @@ struct SubscriptionView: View {
             .navigationBarTitle("Premium Subscription", displayMode: .large)
             .navigationBarItems(trailing: closeButton)
             .onAppear {
+                logMemoryUsage("Before SubscriptionView onAppear")
                 loadVariantConfig()
                 loadOfferings()
                 trackView()
+                logMemoryUsage("After SubscriptionView onAppear")
+            }
+            .onDisappear {
+                logMemoryUsage("SubscriptionView onDisappear")
             }
             .onChange(of: selectedPeriod) { _ in
                 updateSelectedPackage()

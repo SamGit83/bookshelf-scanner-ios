@@ -129,8 +129,8 @@ class BookViewModel: ObservableObject {
                                     URLSession.shared.dataTask(with: imageURL) { data, response, error in
                                         DispatchQueue.main.async {
                                             if let data = data, error == nil {
-                                                updatedBook.coverImageData = data
-                                                print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "")")
+                                                // updatedBook.coverImageData = data // Commented out to reduce memory usage - rely on URL
+                                                print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "") (not storing in memory)")
                                             } else {
                                                 print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
                                             }
@@ -271,8 +271,8 @@ class BookViewModel: ObservableObject {
                         URLSession.shared.dataTask(with: imageURL) { data, response, error in
                             DispatchQueue.main.async {
                                 if let data = data, error == nil {
-                                    updatedBook.coverImageData = data
-                                    print("DEBUG BookViewModel: Downloaded cover image data for existing book")
+                                    // updatedBook.coverImageData = data // Commented out to reduce memory usage
+                                    print("DEBUG BookViewModel: Downloaded cover image data for existing book (not storing in memory)")
                                 } else {
                                     print("DEBUG BookViewModel: Failed to download cover for existing book: \(error?.localizedDescription ?? "Unknown error")")
                                 }
@@ -522,7 +522,8 @@ class BookViewModel: ObservableObject {
                         dateAdded = d
                     }
 
-                    let coverData = data["coverImageData"] as? Data
+                    // let coverData = data["coverImageData"] as? Data // Commented out to reduce memory usage - use URL instead
+                    let coverData: Data? = nil
                     let coverImageURL = data["coverImageURL"] as? String
                     let teaser = data["teaser"] as? String
                     let authorBio = data["authorBio"] as? String
@@ -562,6 +563,13 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Successfully loaded \(loadedBooks.count) books from Firestore for user \(userId)")
                 let libraryBooksCount = loadedBooks.filter { $0.status == .library }.count
                 print("DEBUG BookViewModel: Library books count: \(libraryBooksCount)")
+
+                // Memory logging for books
+                let booksWithCoverData = loadedBooks.filter { $0.coverImageData != nil }
+                let totalCoverDataSize = booksWithCoverData.reduce(0) { $0 + ($1.coverImageData?.count ?? 0) }
+                let totalCoverDataSizeMB = Double(totalCoverDataSize) / 1024.0 / 1024.0
+                print("DEBUG BookViewModel Memory: \(booksWithCoverData.count) books with cover data, total size: \(String(format: "%.2f", totalCoverDataSizeMB)) MB")
+
                 self?.books = loadedBooks
                 // Sync book count with UsageTracker
                 UsageTracker.shared.syncBookCount(loadedBooks.count)

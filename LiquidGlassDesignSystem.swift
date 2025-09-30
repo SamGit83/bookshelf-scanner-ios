@@ -510,7 +510,7 @@ struct AnimatedBackground: View {
                     .blur(radius: 30)
                     .offset(y: animate ? -15 : 15)
                     .animation(.easeInOut(duration: 3).repeatForever(), value: animate)
-                
+
                 // Third floating circle
                 Circle()
                     .fill(Color.white.opacity(colorScheme == .dark ? 0.05 : 0.08))
@@ -522,7 +522,11 @@ struct AnimatedBackground: View {
             }
         }
         .onAppear {
+            print("DEBUG AnimatedBackground: Starting animations")
             animate = true
+        }
+        .onDisappear {
+            print("DEBUG AnimatedBackground: Stopping animations")
         }
     }
 }
