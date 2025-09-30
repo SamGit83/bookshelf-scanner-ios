@@ -3,9 +3,32 @@ import Combine
 import StoreKit
 
 // Stub types for when Purchases is not available
-struct Offering {}
+struct StoreProduct {
+    var productIdentifier: String
+    var subscriptionPeriod: SubscriptionPeriod?
+}
+
+struct SubscriptionPeriod {
+    var unit: Unit
+}
+
+enum Unit: String {
+    case year = "year"
+    case month = "month"
+}
+
+struct Package {
+    var identifier: String
+    var storeProduct: StoreProduct
+}
+
+struct Offering {
+    var identifier: String
+    var availablePackages: [Package]
+    var packages: [Package] { availablePackages }
+}
+
 struct CustomerInfo {}
-struct Package {}
 
 class RevenueCatManager: ObservableObject {
     static let shared = RevenueCatManager()
@@ -31,8 +54,26 @@ class RevenueCatManager: ObservableObject {
     // MARK: - Offerings
 
     func loadOfferings() {
-        // Stub: set empty offerings
-        offerings = [:]
+        // Stub: create default offering with packages
+        let monthlyPackage = Package(
+            identifier: "premium_monthly",
+            storeProduct: StoreProduct(
+                productIdentifier: "premium_monthly",
+                subscriptionPeriod: SubscriptionPeriod(unit: .month)
+            )
+        )
+        let yearlyPackage = Package(
+            identifier: "premium_yearly",
+            storeProduct: StoreProduct(
+                productIdentifier: "premium_yearly",
+                subscriptionPeriod: SubscriptionPeriod(unit: .year)
+            )
+        )
+        let offering = Offering(
+            identifier: "default",
+            availablePackages: [monthlyPackage, yearlyPackage]
+        )
+        offerings = ["default": offering]
     }
 
     // MARK: - Customer Info
