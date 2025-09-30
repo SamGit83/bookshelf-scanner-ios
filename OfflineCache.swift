@@ -57,12 +57,25 @@ class OfflineCache {
 
     /// Paginated load from cache - loads full array and slices for efficiency in small caches
     func loadBooks(page: Int, limit: Int) -> [Book]? {
-        guard let allBooks = loadCachedBooks() else { return nil }
-        guard page > 0 else { return [] }
+        print("DEBUG OfflineCache: loadBooks called with page=\(page), limit=\(limit)")
+        guard let allBooks = loadCachedBooks() else {
+            print("DEBUG OfflineCache: loadCachedBooks returned nil")
+            return nil
+        }
+        print("DEBUG OfflineCache: allBooks count=\(allBooks.count)")
+        guard page >= 0 else {
+            print("DEBUG OfflineCache: page=0, returning [] due to guard")
+            return []
+        }
         let startIndex = (page - 1) * limit
-        guard startIndex >= 0 && startIndex < allBooks.count else { return [] }
+        guard startIndex >= 0 && startIndex < allBooks.count else {
+            print("DEBUG OfflineCache: invalid startIndex=\(startIndex), returning []")
+            return []
+        }
         let endIndex = min(startIndex + limit, allBooks.count)
-        return Array(allBooks[startIndex..<endIndex])
+        let result = Array(allBooks[startIndex..<endIndex])
+        print("DEBUG OfflineCache: returning \(result.count) books for page=\(page)")
+        return result
     }
 
     func getTotalBooks() -> Int {

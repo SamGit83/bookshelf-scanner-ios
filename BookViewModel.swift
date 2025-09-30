@@ -27,9 +27,11 @@ class BookViewModel: ObservableObject {
 
     init() {
         loadBooksPaginated(page: 0)
+        setupFirestoreListener()
     }
 
     func loadBooksPaginated(page: Int, limit: Int = 20) {
+        print("DEBUG BookViewModel: loadBooksPaginated called with page=\(page), limit=\(limit)")
         if page == 0 {
             isLoading = true
         } else {
