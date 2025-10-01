@@ -6,7 +6,7 @@ import UIKit
 /**
  * GeminiAPIService - AI-Powered Book Recognition
  *
- * UPGRADE: Now uses Gemini 1.5 Flash (May 2024) instead of Gemini Pro Vision
+ * UPGRADE: Now uses Gemini 2.0 Flash (2025) instead of Gemini 1.5 Flash
  *
  * Key Improvements:
  * - 2x faster processing (~1-2 seconds vs ~3-5 seconds)
@@ -27,7 +27,7 @@ class GeminiAPIService {
         }
         return SecureConfig.shared.geminiAPIKey
     }
-    private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
     func analyzeImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         let startTime = Date()
