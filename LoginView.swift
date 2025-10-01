@@ -706,7 +706,7 @@ struct ExpandableTierSelection: View {
                     icon: "📚",
                     title: "Free - Get Started",
                     badge: "Always Free",
-                    badgeColor: AppleBooksColors.success,
+                    badgeColor: Color.gray,
                     pricing: nil,
                     features: [
                         "20 scans per month",
