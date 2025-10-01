@@ -63,6 +63,12 @@ class CostTracker: ObservableObject {
                     print("DEBUG: self or currentCosts nil in main update for \(service)")
                     return
                 }
+                // Prevent recursive calls
+                if self.isUpdating {
+                    print("DEBUG: Skipping recursive update for \(service)")
+                    return
+                }
+                self.isUpdating = true
                 let selfPtrMain = String(describing: self)
                 print("DEBUG: Entered main update for \(service), self: \(selfPtrMain). Before: totalCost = \(self.currentCosts.totalCost)")
                 
@@ -76,14 +82,15 @@ class CostTracker: ObservableObject {
                    self.currentCosts.dailyCosts[today] = 0.0
                }
                self.currentCosts.dailyCosts[today]! += actualCost
-               
+                
                print("DEBUG: After all dailyCosts update: totalCost = \(self.currentCosts.totalCost)")
                
                self.updateProfitability()
                print("DEBUG: Called updateProfitability and objectWillChange for \(service)")
                self.objectWillChange.send()
                print("DEBUG: Exited main update for \(service)")
-           }
+               self.isUpdating = false
+            }
            
            // Track in performance monitoring (now inside queue for serialization)
            DispatchQueue.main.async {
