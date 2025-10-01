@@ -339,6 +339,104 @@ class GrokAPIService {
         }.resume()
     }
 
+    func analyzeAgeRating(title: String?, author: String?, description: String?, genre: String?, completion: @escaping (Result<String, Error>) -> Void) {
+        var prompt = """
+        Analyze the following book and determine its appropriate age rating based on content, themes, and target audience. Return only one of these categories: "Children", "Teen", "Adult", "Mature", or "Unknown" if insufficient information.
+
+        Book Details:
+        """
+
+        if let title = title {
+            prompt += "\nTitle: \(title)"
+        }
+        if let author = author {
+            prompt += "\nAuthor: \(author)"
+        }
+        if let description = description {
+            prompt += "\nDescription: \(description)"
+        }
+        if let genre = genre {
+            prompt += "\nGenre: \(genre)"
+        }
+
+        prompt += """
+
+        Age Rating Guidelines:
+        - Children: Books suitable for ages 8-12, with simple themes, no mature content
+        - Teen: Books for ages 13-17, may include coming-of-age themes, mild romance, some violence
+        - Adult: Books for ages 18+, with complex themes, mature relationships, moderate violence/language
+        - Mature: Books with explicit content, graphic violence, strong language, or controversial themes
+        - Unknown: Insufficient information to determine rating
+
+        Return only the category name, nothing else.
+        """
+
+        let requestBody: [String: Any] = [
+            "model": "grok-3-mini",
+            "messages": [
+                [
+                    "role": "user",
+                    "content": prompt
+                ]
+            ],
+            "max_tokens": 50,
+            "temperature": 0.3
+        ]
+
+        guard let url = URL(string: baseURL) else {
+            completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
+                return
+            }
+
+            do {
+                let grokResponse = try JSONDecoder().decode(GrokResponse.self, from: data)
+
+                if let error = grokResponse.error {
+                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
+                    return
+                }
+
+                if let choices = grokResponse.choices, let content = choices.first?.message.content {
+                    let rating = content.trimmingCharacters(in: .whitespacesAndNewlines)
+                    // Validate the response is one of the expected categories
+                    let validRatings = ["Children", "Teen", "Adult", "Mature", "Unknown"]
+                    if validRatings.contains(rating) {
+                        completion(.success(rating))
+                    } else {
+                        completion(.success("Unknown"))
+                    }
+                } else {
+                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
     private func parseRecommendations(from content: String, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
         // Extract JSON from response (might be wrapped in markdown)
         var jsonString = content

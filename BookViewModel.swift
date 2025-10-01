@@ -129,6 +129,7 @@ class BookViewModel: ObservableObject {
                 let coverImageURL = data["coverImageURL"] as? String
                 let teaser = data["teaser"] as? String
                 let authorBio = data["authorBio"] as? String
+                let ageRating = data["ageRating"] as? String
                 let pageCount = data["pageCount"] as? Int
                 let currentPage = data["currentPage"] as? Int ?? 0
                 let totalPages = data["totalPages"] as? Int
@@ -154,6 +155,7 @@ class BookViewModel: ObservableObject {
                 book.dateAdded = dateAdded
                 book.teaser = teaser
                 book.authorBio = authorBio
+                book.ageRating = ageRating
                 book.pageCount = pageCount
                 book.currentPage = currentPage
                 book.totalPages = totalPages
@@ -254,46 +256,46 @@ class BookViewModel: ObservableObject {
                     print("DEBUG BookViewModel: Fetching cover for book: \(book.title ?? "") by \(book.author ?? "")")
                     let coverFetchStartTime = Date()
                     googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
-                        let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
-                        var updatedBook = book
-                        switch result {
-                        case .success(let url):
-                            AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: true, responseTime: coverResponseTime)
-                            if let urlString = url {
-                                // Convert HTTP to HTTPS for security and iOS compatibility
-                                let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
-                                print("DEBUG BookViewModel: Fetched cover URL: \(secureURLString) for \(book.title ?? "")")
-                                updatedBook.coverImageURL = secureURLString
-                                // Try to download the image data for local storage
-                                if let imageURL = URL(string: urlString) {
-                                    URLSession.shared.dataTask(with: imageURL) { data, response, error in
-                                        DispatchQueue.main.async {
-                                            if let data = data, error == nil {
-                                                // updatedBook.coverImageData = data // Commented out to reduce memory usage - rely on URL
-                                                print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "") (not storing in memory)")
-                                            } else {
-                                                print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
-                                            }
-                                            // Save to Firestore and update local array
-                                            self?.saveBookToFirestore(updatedBook)
-                                            self?.updateLocalBook(updatedBook)
-                                        }
-                                    }.resume()
-                                } else {
-                                    // Save with URL even if download fails
-                                    self?.saveBookToFirestore(updatedBook)
-                                    self?.updateLocalBook(updatedBook)
-                                }
-                            } else {
-                                print("DEBUG BookViewModel: No cover URL found for \(book.title ?? "")")
-                                self?.saveBookToFirestore(updatedBook)
-                            }
-                        case .failure(let error):
-                            AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: false, responseTime: coverResponseTime, errorMessage: error.localizedDescription)
-                            print("DEBUG BookViewModel: Failed to fetch cover for \(book.title ?? ""): \(error.localizedDescription)")
-                            self?.saveBookToFirestore(updatedBook)
-                        }
-                    }
+                         let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
+                         var updatedBook = book
+                         switch result {
+                         case .success(let url):
+                             AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: true, responseTime: coverResponseTime)
+                             if let urlString = url {
+                                 // Convert HTTP to HTTPS for security and iOS compatibility
+                                 let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
+                                 print("DEBUG BookViewModel: Fetched cover URL: \(secureURLString) for \(book.title ?? "")")
+                                 updatedBook.coverImageURL = secureURLString
+                                 // Try to download the image data for local storage
+                                 if let imageURL = URL(string: urlString) {
+                                     URLSession.shared.dataTask(with: imageURL) { data, response, error in
+                                         DispatchQueue.main.async {
+                                             if let data = data, error == nil {
+                                                 // updatedBook.coverImageData = data // Commented out to reduce memory usage - rely on URL
+                                                 print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "") (not storing in memory)")
+                                             } else {
+                                                 print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
+                                             }
+                                             // Analyze age rating before saving
+                                             self?.analyzeAndSaveBook(updatedBook)
+                                         }
+                                     }.resume()
+                                 } else {
+                                     // Analyze age rating before saving
+                                     self?.analyzeAndSaveBook(updatedBook)
+                                 }
+                             } else {
+                                 print("DEBUG BookViewModel: No cover URL found for \(book.title ?? "")")
+                                 // Analyze age rating before saving
+                                 self?.analyzeAndSaveBook(updatedBook)
+                             }
+                         case .failure(let error):
+                             AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: false, responseTime: coverResponseTime, errorMessage: error.localizedDescription)
+                             print("DEBUG BookViewModel: Failed to fetch cover for \(book.title ?? ""): \(error.localizedDescription)")
+                             // Analyze age rating before saving
+                             self?.analyzeAndSaveBook(updatedBook)
+                         }
+                     }
                 }
                 // Track bookshelf scan completed
                 AnalyticsManager.shared.trackBookshelfScanCompleted(bookCount: decodedBooks.count)
@@ -703,6 +705,7 @@ class BookViewModel: ObservableObject {
                     let coverImageURL = data["coverImageURL"] as? String
                     let teaser = data["teaser"] as? String
                     let authorBio = data["authorBio"] as? String
+                    let ageRating = data["ageRating"] as? String
                     let pageCount = data["pageCount"] as? Int
                     let currentPage = data["currentPage"] as? Int ?? 0
                     let totalPages = data["totalPages"] as? Int
@@ -728,6 +731,7 @@ class BookViewModel: ObservableObject {
                     book.dateAdded = dateAdded
                     book.teaser = teaser
                     book.authorBio = authorBio
+                    book.ageRating = ageRating
                     book.pageCount = pageCount
                     book.currentPage = currentPage
                     book.totalPages = totalPages
@@ -801,6 +805,7 @@ class BookViewModel: ObservableObject {
             "coverImageURL": book.coverImageURL as Any,
             "teaser": book.teaser as Any,
             "authorBio": book.authorBio as Any,
+            "ageRating": book.ageRating as Any,
             "currentPage": book.currentPage,
             "totalPages": book.totalPages as Any,
             "dateStartedReading": book.dateStartedReading.map { Timestamp(date: $0) } as Any,
@@ -817,6 +822,24 @@ class BookViewModel: ObservableObject {
                     print("DEBUG BookViewModel: Successfully saved book to Firestore")
                 }
             }
+        }
+    }
+
+    private func analyzeAndSaveBook(_ book: Book) {
+        print("DEBUG BookViewModel: Analyzing age rating for book: \(book.title ?? "") by \(book.author ?? "")")
+        grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
+            var updatedBook = book
+            switch result {
+            case .success(let ageRating):
+                print("DEBUG BookViewModel: Age rating analysis successful: \(ageRating) for \(book.title ?? "")")
+                updatedBook.ageRating = ageRating
+            case .failure(let error):
+                print("DEBUG BookViewModel: Age rating analysis failed: \(error.localizedDescription) for \(book.title ?? ""), using Unknown")
+                updatedBook.ageRating = "Unknown"
+            }
+            // Save to Firestore and update local array
+            self?.saveBookToFirestore(updatedBook)
+            self?.updateLocalBook(updatedBook)
         }
     }
 
@@ -928,6 +951,49 @@ class BookViewModel: ObservableObject {
             }
             seen.insert(identifier)
             return true
+        }
+    }
+
+    func addBookFromRecommendation(_ recommendation: BookRecommendation, completion: @escaping (Result<Void, Error>) -> Void) {
+        print("DEBUG BookViewModel: Adding book from recommendation: \(recommendation.title) by \(recommendation.author)")
+
+        // Check for duplicates
+        let existingTitlesAndAuthors = Set(self.books.map {
+            ($0.title ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines) + "|" + ($0.author ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        })
+
+        let normalizedTitle = recommendation.title.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedAuthor = recommendation.author.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if existingTitlesAndAuthors.contains(normalizedTitle + "|" + normalizedAuthor) {
+            print("DEBUG BookViewModel: Skipping duplicate book from recommendation: \(recommendation.title) by \(recommendation.author)")
+            completion(.failure(NSError(domain: "DuplicateBook", code: 0, userInfo: [NSLocalizedDescriptionKey: "Book already exists in library"])))
+            return
+        }
+
+        let newBook = Book(
+            title: recommendation.title,
+            author: recommendation.author,
+            isbn: recommendation.id, // Using Google Books ID as ISBN fallback
+            genre: recommendation.genre,
+            status: .library
+        )
+
+        // Analyze age rating
+        grokService.analyzeAgeRating(title: recommendation.title, author: recommendation.author, description: recommendation.description, genre: recommendation.genre) { [weak self] result in
+            var bookToSave = newBook
+            switch result {
+            case .success(let ageRating):
+                print("DEBUG BookViewModel: Age rating analysis successful: \(ageRating) for \(recommendation.title)")
+                bookToSave.ageRating = ageRating
+            case .failure(let error):
+                print("DEBUG BookViewModel: Age rating analysis failed: \(error.localizedDescription) for \(recommendation.title), using Unknown")
+                bookToSave.ageRating = "Unknown"
+            }
+            // Save to Firestore and update local array
+            self?.saveBookToFirestore(bookToSave)
+            self?.updateLocalBook(bookToSave)
+            completion(.success(()))
         }
     }
 }

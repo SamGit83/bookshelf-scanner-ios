@@ -319,16 +319,20 @@ struct AddBookView: View {
             return
         }
 
-        let newBook = Book(
-            title: book.title,
-            author: book.author,
-            isbn: book.id, // Using Google Books ID as ISBN fallback
-            genre: book.genre,
-            status: .library
-        )
-
-        viewModel.saveBookToFirestore(newBook)
-        presentationMode.wrappedValue.dismiss()
+        viewModel.addBookFromRecommendation(book) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self?.presentationMode.wrappedValue.dismiss()
+                case .failure(let error):
+                    if let nsError = error as? NSError, nsError.domain == "DuplicateBook" {
+                        self?.errorMessage = "This book is already in your library"
+                    } else {
+                        self?.errorMessage = "Failed to add book: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     private func addBookManually() {
