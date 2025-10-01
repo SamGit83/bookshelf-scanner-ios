@@ -68,7 +68,7 @@ class OfflineCache {
             print("DEBUG OfflineCache: page=0, returning [] due to guard")
             return []
         }
-        let startIndex = (page - 1) * limit
+        let startIndex = page * limit
         guard startIndex >= 0 && startIndex < allBooks.count else {
             print("DEBUG OfflineCache: invalid startIndex=\(startIndex), returning []")
             return []
