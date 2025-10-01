@@ -1,10 +1,5 @@
 import SwiftUI
 
-// MARK: - Subscription Period Enum
-enum SubscriptionPeriod {
-    case monthly
-    case yearly
-}
 
 struct LoginView: View {
     @ObservedObject private var authService = AuthService.shared
@@ -26,7 +21,7 @@ struct LoginView: View {
     @State private var city = ""
     @State private var favoriteBookGenre = ""
     @State private var selectedTier: UserTier = .free
-    @State private var selectedPeriod: SubscriptionPeriod = .monthly
+    @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
     @ObservedObject private var revenueCatManager = RevenueCatManager.shared
     @State private var showUpgradeModal = false
 
@@ -762,7 +757,7 @@ struct ExpandableTierButton: View {
     @Binding var selectedPeriod: SubscriptionPeriod
     
     // Initialize with optional pricing subtext and period
-    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(.monthly)) {
+    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(SubscriptionPeriod(unit: .month))) {
         self.tier = tier
         self.icon = icon
         self.title = title
@@ -872,24 +867,24 @@ struct ExpandableTierButton: View {
                             HStack(spacing: AppleBooksSpacing.space12) {
                                 // Monthly Option
                                 PeriodSelectorCard(
-                                    period: .monthly,
+                                    period: SubscriptionPeriod(unit: .month),
                                     price: 2.99,
                                     priceLabel: "month",
                                     savings: nil,
                                     monthlyEquivalent: nil,
-                                    isSelected: selectedPeriod == .monthly,
-                                    action: { selectedPeriod = .monthly }
+                                    isSelected: selectedPeriod.unit == .month,
+                                    action: { selectedPeriod = SubscriptionPeriod(unit: .month) }
                                 )
                                 
                                 // Yearly Option
                                 PeriodSelectorCard(
-                                    period: .yearly,
+                                    period: SubscriptionPeriod(unit: .year),
                                     price: 29.99,
                                     priceLabel: "year",
                                     savings: "Save 17%",
                                     monthlyEquivalent: "$2.50/month",
-                                    isSelected: selectedPeriod == .yearly,
-                                    action: { selectedPeriod = .yearly }
+                                    isSelected: selectedPeriod.unit == .year,
+                                    action: { selectedPeriod = SubscriptionPeriod(unit: .year) }
                                 )
                             }
                         }
