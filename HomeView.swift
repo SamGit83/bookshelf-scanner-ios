@@ -7,38 +7,42 @@ struct HomeView: View {
     @State private var showSignup = false
     @State private var floatingOffset: CGFloat = 0
     @State private var sequenceOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
-    @State private var isAnimatingSequence = false
+    @State private var sequenceOffsets: [CGFloat] = Array(repeating: 20.0, count: 4)
 
     private func startSequenceCycle() {
         sequenceOpacities = Array(repeating: 0.0, count: 4)
+        sequenceOffsets = Array(repeating: 20.0, count: 4)
         
-        withAnimation(.easeInOut(duration: 0.5)) {
+        withAnimation(.easeInOut(duration: 0.8)) {
             sequenceOpacities[0] = 1.0
+            sequenceOffsets[0] = 0.0
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            withAnimation(.easeInOut(duration: 0.5)) {
+            withAnimation(.easeInOut(duration: 0.8)) {
                 sequenceOpacities[1] = 1.0
+                sequenceOffsets[1] = 0.0
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation(.easeInOut(duration: 0.5)) {
+                withAnimation(.easeInOut(duration: 0.8)) {
                     sequenceOpacities[2] = 1.0
+                    sequenceOffsets[2] = 0.0
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeInOut(duration: 0.5)) {
+                    withAnimation(.easeInOut(duration: 0.8)) {
                         sequenceOpacities[3] = 1.0
+                        sequenceOffsets[3] = 0.0
                     }
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         withAnimation(.easeInOut(duration: 0.8)) {
-                            isAnimatingSequence = true
                             sequenceOpacities = Array(repeating: 0.0, count: 4)
+                            sequenceOffsets = Array(repeating: 20.0, count: 4)
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            isAnimatingSequence = false
                             startSequenceCycle()
                         }
                     }
@@ -69,6 +73,7 @@ struct HomeView: View {
                                     .fill(AppleBooksColors.accent.opacity(0.1))
                             )
                             .offset(y: floatingOffset)
+                            .offset(y: floatingOffset)
 
                         // Title
                         Text("Bookshelf Scanner")
@@ -86,21 +91,18 @@ struct HomeView: View {
                             // Animated Sequence
                             VStack {
                                 let words = ["Scan", "catalog", "organize", "discover"]
-                                HStack(spacing: 12) {
+                                VStack(spacing: 8) {
                                     ForEach(0..<4, id: \.self) { index in
                                         Text(words[index])
                                             .font(.subheadline.weight(.medium))
                                             .foregroundColor(AppleBooksColors.text)
                                             .shadow(color: AppleBooksColors.accent.opacity(0.4), radius: 10 * sequenceOpacities[index])
                                             .opacity(sequenceOpacities[index])
-                                            .scaleEffect(sequenceOpacities[index])
-                                            .animation(.easeInOut(duration: 0.5), value: sequenceOpacities[index])
+                                            .offset(y: sequenceOffsets[index])
                                     }
                                 }
+                                .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.horizontal, AppleBooksSpacing.space24)
-                                .multilineTextAlignment(.center)
-                                .rotationEffect(.degrees(Double(isAnimatingSequence ? 360 : 0)))
-                                .animation(.easeInOut(duration: 0.8), value: isAnimatingSequence)
                             }
                         
                         // CTA Buttons
@@ -136,6 +138,15 @@ struct HomeView: View {
                         .padding(.horizontal, AppleBooksSpacing.space24)
 
                         Spacer(minLength: AppleBooksSpacing.space40)
+                    }
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
+                            floatingOffset = -8
+                        }
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            startSequenceCycle()
+                        }
                     }
                     .onAppear {
                         withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
