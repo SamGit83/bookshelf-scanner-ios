@@ -138,7 +138,7 @@ struct LibraryView: View {
                 }
             }
             .padding(.vertical, AppleBooksSpacing.space24)
-            .padding(.bottom, 90)
+            .padding(.bottom, 70)
         }
     }
 
@@ -185,7 +185,7 @@ struct LibraryView: View {
         .padding(.horizontal, AppleBooksSpacing.space24)
         .padding(.top, AppleBooksSpacing.space24)
         .padding(.bottom, AppleBooksSpacing.space32)
-        .padding(.bottom, 90)
+        .padding(.bottom, 70)
         .background(
             AppleBooksColors.background
                 .ignoresSafeArea(edges: .bottom)
