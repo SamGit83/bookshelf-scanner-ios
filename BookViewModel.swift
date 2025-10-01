@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import FirebaseFirestore
+import FirebaseAuth
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -19,6 +20,8 @@ class BookViewModel: ObservableObject {
     @Published var hasMoreBooks = true
     @Published var isLoadingMore = false
 
+    private var authStateCancellable: AnyCancellable?
+
     private let apiService = GeminiAPIService()
     private let grokService = GrokAPIService()
     private let googleBooksService = GoogleBooksAPIService()
@@ -26,9 +29,18 @@ class BookViewModel: ObservableObject {
     private var listener: ListenerRegistration?
 
     init() {
+        setupAuthStateObserver()
         setupFirestoreListener()
         Task { await loadBooksPaginated(page: 0) }
     print("DEBUG BookViewModel: Task started")
+    }
+
+    private func setupAuthStateObserver() {
+        authStateCancellable = Auth.auth().publisher(for: \.currentUser)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.setupFirestoreListener()
+            }
     }
 
     func loadBooksPaginated(page: Int, limit: Int = 20) async {
@@ -518,7 +530,9 @@ class BookViewModel: ObservableObject {
                     print("DEBUG BookViewModel: Firestore listener error: \(error.localizedDescription), loading from cache")
                     // Try to load from cache if Firestore fails
                     if let cachedBooks = OfflineCache.shared.loadCachedBooks() {
-                        self.books = cachedBooks
+                        DispatchQueue.main.async {
+                            self.books = cachedBooks
+                        }
                         print("DEBUG BookViewModel: Loaded \(cachedBooks.count) books from cache due to error")
                     } else {
                         print("DEBUG BookViewModel: No cached books, handling error")
@@ -529,7 +543,9 @@ class BookViewModel: ObservableObject {
 
                 guard let documents = snapshot?.documents else {
                     print("DEBUG BookViewModel: No documents in snapshot")
-                    self.books = []
+                    DispatchQueue.main.async {
+                        self.books = []
+                    }
                     return
                 }
 
@@ -611,7 +627,9 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
                 // Sync book count with UsageTracker
                 UsageTracker.shared.syncBookCount(loadedBooks.count)
-                self.books = loadedBooks
+                DispatchQueue.main.async {
+                    self.books = loadedBooks
+                }
                 // Cache the books for offline use
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
