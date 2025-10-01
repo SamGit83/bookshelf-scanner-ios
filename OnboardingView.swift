@@ -310,10 +310,10 @@ struct SubscriptionSelectionView: View {
         }
         .sheet(isPresented: $showWaitlistModal) {
             WaitlistModal(
-                initialFirstName: authService.currentUser?.firstName ?? "",
-                initialLastName: authService.currentUser?.lastName ?? "",
-                initialEmail: authService.currentUser?.email ?? "",
-                initialUserId: authService.currentUser?.id
+                initialFirstName: AuthService.shared.currentUser?.firstName ?? "",
+                initialLastName: AuthService.shared.currentUser?.lastName ?? "",
+                initialEmail: AuthService.shared.currentUser?.email ?? "",
+                initialUserId: AuthService.shared.currentUser?.id
             )
         }
     }
