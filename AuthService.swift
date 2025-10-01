@@ -9,6 +9,9 @@ import FirebaseAnalytics
 #endif
 
 class AuthService: ObservableObject {
+    enum WaitlistError: Error {
+        case alreadyJoined
+    }
     static let shared = AuthService()
 
     @Published var isAuthenticated = false
@@ -254,8 +257,21 @@ class AuthService: ObservableObject {
         }
     }
 
-    func joinWaitlist(firstName: String, lastName: String, email: String, userId: String? = nil) async throws {
+    func joinWaitlist(firstName: String, lastName: String, email: String, userId: String? = nil) async throws WaitlistError {
         let db = Firestore.firestore()
+        // Check for duplicates
+        let emailQuery = db.collection("waitlist").whereField("email", isEqualTo: email)
+        let emailSnapshot = try await emailQuery.getDocuments()
+        if !emailSnapshot.documents.isEmpty {
+            throw WaitlistError.alreadyJoined
+        }
+        if let userId = userId {
+            let userIdQuery = db.collection("waitlist").whereField("userId", isEqualTo: userId)
+            let userIdSnapshot = try await userIdQuery.getDocuments()
+            if !userIdSnapshot.documents.isEmpty {
+                throw WaitlistError.alreadyJoined
+            }
+        }
         var data: [String: Any] = [
             "firstName": firstName,
             "lastName": lastName,

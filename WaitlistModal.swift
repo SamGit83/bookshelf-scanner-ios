@@ -1,4 +1,5 @@
 import SwiftUI
+import AuthService
 
 struct WaitlistModal: View {
     @Environment(\.presentationMode) var presentationMode
@@ -106,7 +107,14 @@ struct WaitlistModal: View {
                                 print("Error joining waitlist: \(error.localizedDescription)")
                                 await MainActor.run {
                                     isSubmitting = false
-                                    authService.errorMessage = "Failed to join waitlist. Please try again."
+                                    if let waitlistError = error as? AuthService.WaitlistError {
+                                        switch waitlistError {
+                                        case .alreadyJoined:
+                                            authService.errorMessage = "You are already on the waitlist."
+                                        }
+                                    } else {
+                                        authService.errorMessage = "Failed to join waitlist. Please try again."
+                                    }
                                 }
                             }
                         }
