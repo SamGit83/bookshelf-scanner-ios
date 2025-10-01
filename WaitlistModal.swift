@@ -1,5 +1,4 @@
 import SwiftUI
-import AuthService
 
 struct WaitlistModal: View {
     @Environment(\.presentationMode) var presentationMode
