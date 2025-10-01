@@ -180,21 +180,6 @@ struct HomeView: View {
                                     nextOffset = 50
                                     currentOpacity = 1
                                     nextOpacity = 0
-                            timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
-                                withAnimation(.easeInOut(duration: 1.0)) {
-                                    currentOffset = -50
-                                    currentOpacity = 0
-                                    nextOffset = 0
-                                    nextOpacity = 1
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                    currentIndex = nextIndex
-                                    nextIndex = (nextIndex + 1) % 4
-                                    currentOffset = 0
-                                    nextOffset = 50
-                                    currentOpacity = 1
-                                    nextOpacity = 0
-                                }
                             }
                             }
                         }
