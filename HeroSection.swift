@@ -1,8 +1,50 @@
 import SwiftUI
+import Foundation
 
 struct HeroSection: View {
     @Binding var showSignup: Bool
     @State private var animateContent = false
+    @State private var floatingOffset: CGFloat = 0
+    @State private var sequenceOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
+    @State private var isAnimatingSequence = false
+    
+    private func startSequenceCycle() {
+        sequenceOpacities = Array(repeating: 0.0, count: 4)
+        
+        withAnimation(.easeInOut(duration: 0.5)) {
+            sequenceOpacities[0] = 1.0
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeInOut(duration: 0.5)) {
+                sequenceOpacities[1] = 1.0
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    sequenceOpacities[2] = 1.0
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        sequenceOpacities[3] = 1.0
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        withAnimation(.easeInOut(duration: 0.8)) {
+                            isAnimatingSequence = true
+                            sequenceOpacities = Array(repeating: 0.0, count: 4)
+                        }
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                            isAnimatingSequence = false
+                            startSequenceCycle()
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     var body: some View {
         VStack(spacing: 32) {
@@ -19,6 +61,7 @@ struct HeroSection: View {
                     .font(.system(size: 60))
                     .foregroundColor(.white)
                     .scaleEffect(animateContent ? 1.0 : 0.8)
+                    .offset(y: floatingOffset)
                     .animation(.spring().delay(0.3), value: animateContent)
             }
 
@@ -42,6 +85,26 @@ struct HeroSection: View {
                 .offset(y: animateContent ? 0 : 20)
                 .opacity(animateContent ? 1 : 0)
                 .animation(.spring().delay(0.2), value: animateContent)
+            
+            // Animated Sequence
+            VStack {
+                let words = ["Scan", "catalog", "organize", "discover"]
+                HStack(spacing: 12) {
+                    ForEach(0..<4, id: \.self) { index in
+                        Text(words[index])
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(.white)
+                            .shadow(color: .blue.opacity(0.4), radius: 10 * sequenceOpacities[index])
+                            .opacity(sequenceOpacities[index])
+                            .scaleEffect(sequenceOpacities[index])
+                            .animation(.easeInOut(duration: 0.5), value: sequenceOpacities[index])
+                    }
+                }
+                .padding(.horizontal, 32)
+                .multilineTextAlignment(.center)
+                .rotationEffect(.degrees(Double(isAnimatingSequence ? 360 : 0)))
+                .animation(.easeInOut(duration: 0.8), value: isAnimatingSequence)
+            }
 
             // CTA Button
             Button(action: {
@@ -68,6 +131,14 @@ struct HeroSection: View {
         .onAppear {
             withAnimation(.spring().delay(0.1)) {
                 animateContent = true
+            }
+            
+            withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
+                floatingOffset = -8
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                startSequenceCycle()
             }
         }
     }
