@@ -147,11 +147,6 @@ struct TransformationProgressIndicator: View {
             ZStack {
                 // Background track
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 280, height: 8)
-
-                // Progress fill
-                RoundedRectangle(cornerRadius: 4)
                     .fill(
                         LinearGradient(
                             colors: [Color(hex: "FF6B35"), Color(hex: "4A90E2")],
@@ -159,7 +154,7 @@ struct TransformationProgressIndicator: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: 280 * 0.7, height: 8, alignment: .leading)
+                    .frame(width: 280, height: 8)
 
                 // Arrow indicator
                 Image(systemName: "arrow.right")

@@ -42,7 +42,7 @@ struct HomeView: View {
 
                         // Title
                         Text("Book Shelfie")
-                            .font(.system(size: 48, weight: .bold))
+                            .font(.largeTitle.weight(.bold))
                             .foregroundColor(AppleBooksColors.text)
                             .multilineTextAlignment(.center)
 
@@ -254,35 +254,26 @@ struct FeatureRow: View {
     let description: String
 
     var body: some View {
-        GeometryReader { geometry in
-            let minY = geometry.frame(in: .global).minY
-            let screenHeight = UIScreen.main.bounds.height
-            let rowHeight = geometry.size.height
-            let visibility: Double = minY < 0 ? max(0, 1.0 + minY / rowHeight) : max(0, (screenHeight - minY) / screenHeight)
-            HStack(spacing: AppleBooksSpacing.space16) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(AppleBooksColors.accent)
-                    .frame(width: 40, height: 40)
-                    .background(AppleBooksColors.accent.opacity(0.1))
-                    .cornerRadius(8)
+        HStack(spacing: AppleBooksSpacing.space16) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(AppleBooksColors.accent)
+                .frame(width: 40, height: 40)
+                .background(AppleBooksColors.accent.opacity(0.1))
+                .cornerRadius(8)
 
-                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
-                    Text(title)
-                        .font(AppleBooksTypography.headlineSmall)
-                        .foregroundColor(AppleBooksColors.text)
+            VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                Text(title)
+                    .font(AppleBooksTypography.headlineSmall)
+                    .foregroundColor(AppleBooksColors.text)
 
-                    Text(description)
-                        .font(AppleBooksTypography.bodyMedium)
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                        .lineLimit(2)
-                }
-
-                Spacer()
+                Text(description)
+                    .font(AppleBooksTypography.bodyMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                    .lineLimit(2)
             }
-            .opacity(visibility)
-            .offset(y: (1 - visibility) * (minY < 0 ? -100 : 100))
-            .animation(.easeInOut(duration: 0.3), value: visibility)
+
+            Spacer()
         }
     }
 }
