@@ -863,13 +863,14 @@ struct EnhancedUsageRow: View {
                                 .font(.caption.bold())
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
+                                .padding(.vertical, 8)
                                 .background(current >= limit ? Color.orange : Color.blue)
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                         }
                         .glassBackground()
                         .accessibilityLabel("Upgrade Button")
                     }
+                    .padding(.vertical, 8)
 
                     // Urgency message for when very close to limit
                     if current >= limit * 9 / 10 && current < limit {

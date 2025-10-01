@@ -62,7 +62,6 @@ struct UpgradeModalView: View {
                         socialProofSection
                         featureComparisonSection
                         pricingSection
-                        urgencySection
                         ctaSection
                     }
                     .padding(.vertical, 24)
@@ -102,7 +101,7 @@ struct UpgradeModalView: View {
                 .multilineTextAlignment(.center)
                 .accessibilityLabel("Headline: Unlock Premium Features")
 
-            Text(variantConfig?.subheadline ?? "Join thousands of readers who have upgraded to unlock unlimited access to all features.")
+            Text(variantConfig?.subheadline ?? "Premium features are coming soon. Join the waitlist to be notified when available.")
                 .font(.body)
                 .foregroundColor(Color.secondary)
                 .multilineTextAlignment(.center)
@@ -154,7 +153,7 @@ struct UpgradeModalView: View {
                     icon: "camera.fill",
                     feature: "Unlimited AI Scans",
                     freeText: "\(UsageTracker.shared.variantScanLimit)/month",
-                    premiumText: "Unlimited",
+                    premiumText: "Coming Soon",
                     isPremium: true
                 )
 
@@ -162,7 +161,7 @@ struct UpgradeModalView: View {
                     icon: "book.fill",
                     feature: "Books in Library",
                     freeText: "\(UsageTracker.shared.variantBookLimit) books",
-                    premiumText: "Unlimited",
+                    premiumText: "Coming Soon",
                     isPremium: true
                 )
 
@@ -170,7 +169,7 @@ struct UpgradeModalView: View {
                     icon: "sparkles",
                     feature: "AI Recommendations",
                     freeText: "\(UsageTracker.shared.variantRecommendationLimit)/month",
-                    premiumText: "Unlimited",
+                    premiumText: "Coming Soon",
                     isPremium: true
                 )
 
@@ -178,7 +177,7 @@ struct UpgradeModalView: View {
                     icon: "chart.bar.fill",
                     feature: "Advanced Analytics",
                     freeText: "Basic",
-                    premiumText: "Detailed Insights",
+                    premiumText: "Coming Soon",
                     isPremium: true
                 )
 
@@ -186,7 +185,7 @@ struct UpgradeModalView: View {
                     icon: "square.and.arrow.up.fill",
                     feature: "Export Features",
                     freeText: "Limited",
-                    premiumText: "Full Export",
+                    premiumText: "Coming Soon",
                     isPremium: true
                 )
             }
@@ -220,7 +219,7 @@ struct UpgradeModalView: View {
                     plan: .annual,
                     price: variantConfig?.annualPrice ?? 29.99,
                     period: "year",
-                    savings: "Save 17%",
+                    savings: nil,
                     isSelected: selectedPlan == .annual,
                     action: {
                         // Premium coming soon - no action
@@ -234,31 +233,6 @@ struct UpgradeModalView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var urgencySection: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "clock.fill")
-                    .foregroundColor(Color.orange)
-                Text(variantConfig?.urgencyMessage ?? "Limited Time: 50% off your first month!")
-                    .font(.body)
-                    .foregroundColor(Color.orange)
-                    .bold()
-            }
-
-            Text("Offer ends in 24 hours")
-                .font(.caption)
-                .foregroundColor(Color.secondary)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.orange.opacity(0.1))
-        )
-        .padding(.horizontal, 16)
-        .glassBackground()
-        .accessibilityLabel("Urgency: Limited Time Offer ends in 24 hours")
-    }
 
     private var ctaSection: some View {
         VStack(spacing: 16) {
@@ -271,7 +245,7 @@ struct UpgradeModalView: View {
                     .padding(.horizontal, 32)
                     .background(
                         LinearGradient(
-                            colors: [PrimaryColors.vibrantPurple, PrimaryColors.vibrantPurple.opacity(0.8)],
+                            colors: [Color.blue, Color.blue.opacity(0.8)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -279,7 +253,7 @@ struct UpgradeModalView: View {
                     .foregroundColor(.white)
                     .cornerRadius(20)
                     .font(.headline.weight(.semibold))
-                    .shadow(color: PrimaryColors.vibrantPurple.opacity(0.4), radius: 12, x: 0, y: 6)
+                    .shadow(color: Color.blue.opacity(0.4), radius: 12, x: 0, y: 6)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(Color.white.opacity(0.2), lineWidth: 1)
@@ -413,7 +387,7 @@ struct FeatureComparisonRow: View {
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .foregroundColor(isPremium ? Color.green : Color.secondary)
+                .foregroundColor(Color.primary)
                 .frame(width: 24, height: 24)
                 .accessibilityLabel("\(feature) Icon")
 
@@ -433,19 +407,12 @@ struct FeatureComparisonRow: View {
 
                     Text(premiumText)
                         .font(.caption)
-                        .foregroundColor(Color.green)
+                        .foregroundColor(Color.primary)
                         .bold()
                 }
             }
 
             Spacer()
-
-            if isPremium {
-                Image(systemName: "star.fill")
-                    .foregroundColor(Color.orange)
-                    .font(.system(size: 16))
-                    .accessibilityLabel("Premium Feature")
-            }
         }
         .padding(16)
         .glassBackground()
@@ -466,19 +433,9 @@ struct PricingCard: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 12) {
-                if let savings = savings {
-                    Text(savings)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color.green)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.green.opacity(0.1))
-                        .cornerRadius(8)
-                } else {
-                    Spacer(minLength: 20) // Balance height for monthly card
-                }
+                Spacer(minLength: 20)
 
-                Text("$\(String(format: "%.2f", price))")
+                Text("Coming Soon")
                     .font(.largeTitle)
                     .foregroundColor(Color.primary)
                     .bold()
@@ -490,16 +447,7 @@ struct PricingCard: View {
                     .font(.caption)
                     .foregroundColor(Color.secondary)
 
-                if plan == .annual {
-                    Text("$\(String(format: "%.2f", price/12))/month")
-                        .font(.caption2)
-                        .foregroundColor(Color.secondary)
-                        .multilineTextAlignment(.center)
-                        .minimumScaleFactor(0.8)
-                        .lineLimit(1)
-                } else {
-                    Spacer(minLength: 10) // Additional balance
-                }
+                Spacer(minLength: 10)
             }
             .frame(maxWidth: .infinity, minHeight: 140) // Fixed height for consistency
             .padding(24)

@@ -145,7 +145,19 @@ struct WaitlistModal: View {
                         .padding(.vertical, AppleBooksSpacing.space16)
                     }
                 }
-                .primaryButtonStyle()
+                .background(
+                    LinearGradient(
+                        colors: [Color.blue, Color.blue.opacity(0.8)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(20)
+                .shadow(color: Color.blue.opacity(0.4), radius: 12, x: 0, y: 6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
                 .disabled(isSubmitting || !isValidEmail(email) || email.isEmpty || firstName.isEmpty || lastName.isEmpty)
                  
                 Button("Cancel") {
