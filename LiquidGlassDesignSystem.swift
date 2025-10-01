@@ -1347,25 +1347,7 @@ public struct AppleBooksBookCard: View {
             generator.impactOccurred()
             #endif
         })
-        .overlay(
-            Group {
-                if showMenu {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            showMenu = false
-                        }
-                        .transition(.opacity)
-                    
-                    RadialActionMenu(
-                        book: book,
-                        viewModel: viewModel,
-                        onDismiss: { showMenu = false }
-                    )
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .opacity))
-                }
-            }
-        )
+        .overlay(BookCardActionsOverlay(showMenu: $showMenu, book: book, viewModel: viewModel))
         .onChange(of: showMenu) { newValue in
             if !newValue {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
