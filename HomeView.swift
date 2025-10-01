@@ -8,6 +8,11 @@ struct HomeView: View {
     @State private var floatingOffset: CGFloat = 0
     @State private var currentIndex: Int = 0
     @State private var timer: Timer? = nil
+    @State private var currentOffset: CGFloat = 0
+    @State private var nextOffset: CGFloat = 50
+    @State private var currentOpacity: Double = 1
+    @State private var nextOpacity: Double = 0
+    @State private var nextIndex: Int = 1
     var body: some View {
         ZStack {
             // Apple Books clean background
@@ -32,6 +37,7 @@ struct HomeView: View {
                             .offset(y: floatingOffset)
                             .offset(y: floatingOffset)
                             .offset(y: floatingOffset)
+                            .offset(y: floatingOffset)
 
                         // Title
                         Text("Bookshelf Scanner")
@@ -48,17 +54,24 @@ struct HomeView: View {
                         
                             // Animated Hero Words
                             let words = ["Scan", "catalog", "organize", "discover"]
-                            Text(words[currentIndex])
-                                .font(.subheadline.weight(.medium))
-                                .foregroundColor(AppleBooksColors.text)
-                                .multilineTextAlignment(.center)
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .bottom).combined(with: .opacity),
-                                    removal: .move(edge: .top).combined(with: .opacity)
-                                ))
-                                .animation(.easeInOut(duration: 0.8), value: currentIndex)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.horizontal, AppleBooksSpacing.space24)
+                            ZStack {
+                                Text(words[currentIndex])
+                                    .font(.title.weight(.semibold))
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .multilineTextAlignment(.center)
+                                    .offset(y: currentOffset)
+                                    .opacity(currentOpacity)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.horizontal, AppleBooksSpacing.space24)
+                                Text(words[nextIndex])
+                                    .font(.title.weight(.semibold))
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .multilineTextAlignment(.center)
+                                    .offset(y: nextOffset)
+                                    .opacity(nextOpacity)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.horizontal, AppleBooksSpacing.space24)
+                            }
                         
                         // CTA Buttons
                         VStack(spacing: AppleBooksSpacing.space16) {
@@ -100,25 +113,20 @@ struct HomeView: View {
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                            timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { _ in
-                                withAnimation(.easeInOut(duration: 0.8)) {
-                                    currentIndex = (currentIndex + 1) % 4
+                            timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
+                                withAnimation(.easeInOut(duration: 1.0)) {
+                                    currentOffset = -50
+                                    currentOpacity = 0
+                                    nextOffset = 0
+                                    nextOpacity = 1
                                 }
-                            }
-                        }
-                    }
-                    .onDisappear {
-                        timer?.invalidate()
-                    }
-                    .onAppear {
-                        withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
-                            floatingOffset = -8
-                        }
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                            timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { _ in
-                                withAnimation(.easeInOut(duration: 0.8)) {
-                                    currentIndex = (currentIndex + 1) % 4
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                    currentIndex = nextIndex
+                                    nextIndex = (nextIndex + 1) % 4
+                                    currentOffset = 0
+                                    nextOffset = 50
+                                    currentOpacity = 1
+                                    nextOpacity = 0
                                 }
                             }
                         }
