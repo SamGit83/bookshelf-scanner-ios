@@ -1,5 +1,11 @@
 import SwiftUI
 
+// MARK: - Subscription Period Enum
+enum SubscriptionPeriod {
+    case monthly
+    case yearly
+}
+
 struct LoginView: View {
     @ObservedObject private var authService = AuthService.shared
     @State private var email = ""
@@ -20,6 +26,7 @@ struct LoginView: View {
     @State private var city = ""
     @State private var favoriteBookGenre = ""
     @State private var selectedTier: UserTier = .free
+    @State private var selectedPeriod: SubscriptionPeriod = .monthly
     @ObservedObject private var revenueCatManager = RevenueCatManager.shared
     @State private var showUpgradeModal = false
 
@@ -131,8 +138,11 @@ struct LoginView: View {
 
                             // Mobile-First Expandable Tier Selection (only for signup)
                             if isSignUp {
-                                ExpandableTierSelection(selectedTier: $selectedTier)
-                                    .padding(.bottom, AppleBooksSpacing.space24)
+                                ExpandableTierSelection(
+                                    selectedTier: $selectedTier,
+                                    selectedPeriod: $selectedPeriod
+                                )
+                                .padding(.bottom, AppleBooksSpacing.space24)
                             }
 
                             // Required Name Fields (only for signup)
@@ -685,6 +695,7 @@ struct PasswordResetView: View {
 
 struct ExpandableTierSelection: View {
     @Binding var selectedTier: UserTier
+    @Binding var selectedPeriod: SubscriptionPeriod
     @State private var expandedTier: UserTier? = nil
     
     var body: some View {
@@ -719,7 +730,7 @@ struct ExpandableTierSelection: View {
                     title: "Premium - Unlock Everything",
                     badge: "✨ RECOMMENDED",
                     badgeColor: AppleBooksColors.accent,
-                    pricing: "$2.99/month",
+                    pricing: nil, // Will be shown in period selector
                     pricingSubtext: "7-day free trial • Cancel anytime",
                     features: [
                         "Unlimited scans",
@@ -729,7 +740,8 @@ struct ExpandableTierSelection: View {
                         "Priority support"
                     ],
                     selectedTier: $selectedTier,
-                    expandedTier: $expandedTier
+                    expandedTier: $expandedTier,
+                    selectedPeriod: $selectedPeriod
                 )
             }
         }
@@ -747,9 +759,10 @@ struct ExpandableTierButton: View {
     let features: [String]
     @Binding var selectedTier: UserTier
     @Binding var expandedTier: UserTier?
+    @Binding var selectedPeriod: SubscriptionPeriod
     
-    // Initialize with optional pricing subtext
-    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>) {
+    // Initialize with optional pricing subtext and period
+    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(.monthly)) {
         self.tier = tier
         self.icon = icon
         self.title = title
@@ -760,6 +773,7 @@ struct ExpandableTierButton: View {
         self.features = features
         self._selectedTier = selectedTier
         self._expandedTier = expandedTier
+        self._selectedPeriod = selectedPeriod
     }
     
     private var isSelected: Bool { selectedTier == tier }
@@ -847,6 +861,41 @@ struct ExpandableTierButton: View {
             // Expandable Features Section
             if isExpanded {
                 VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+                    // Period Selector for Premium Tier
+                    if isPremium {
+                        VStack(spacing: AppleBooksSpacing.space12) {
+                            Text("Choose Your Plan")
+                                .font(AppleBooksTypography.headlineSmall)
+                                .foregroundColor(AppleBooksColors.text)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            HStack(spacing: AppleBooksSpacing.space12) {
+                                // Monthly Option
+                                PeriodSelectorCard(
+                                    period: .monthly,
+                                    price: 2.99,
+                                    priceLabel: "month",
+                                    savings: nil,
+                                    monthlyEquivalent: nil,
+                                    isSelected: selectedPeriod == .monthly,
+                                    action: { selectedPeriod = .monthly }
+                                )
+                                
+                                // Yearly Option
+                                PeriodSelectorCard(
+                                    period: .yearly,
+                                    price: 29.99,
+                                    priceLabel: "year",
+                                    savings: "Save 17%",
+                                    monthlyEquivalent: "$2.50/month",
+                                    isSelected: selectedPeriod == .yearly,
+                                    action: { selectedPeriod = .yearly }
+                                )
+                            }
+                        }
+                        .padding(.bottom, AppleBooksSpacing.space8)
+                    }
+                    
                     // Features List
                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                         ForEach(features, id: \.self) { feature in
@@ -940,6 +989,79 @@ struct ExpandableTierButton: View {
         } else {
             return Color.black.opacity(0.05)
         }
+    }
+}
+
+// MARK: - Period Selector Card Component
+
+struct PeriodSelectorCard: View {
+    let period: SubscriptionPeriod
+    let price: Double
+    let priceLabel: String
+    let savings: String?
+    let monthlyEquivalent: String?
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: AppleBooksSpacing.space8) {
+                // Savings Badge
+                if let savings = savings {
+                    Text(savings)
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, AppleBooksSpacing.space8)
+                        .padding(.vertical, AppleBooksSpacing.space4)
+                        .background(AppleBooksColors.success)
+                        .cornerRadius(8)
+                } else {
+                    Spacer(minLength: 24) // Balance height
+                }
+                
+                // Price
+                Text("$\(String(format: "%.2f", price))")
+                    .font(AppleBooksTypography.headlineLarge)
+                    .foregroundColor(AppleBooksColors.text)
+                    .bold()
+                
+                // Period Label
+                Text("per \(priceLabel)")
+                    .font(AppleBooksTypography.caption)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                
+                // Monthly Equivalent for Yearly
+                if let monthlyEquivalent = monthlyEquivalent {
+                    Text(monthlyEquivalent)
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                } else {
+                    Spacer(minLength: 16) // Balance height
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 120)
+            .padding(AppleBooksSpacing.space12)
+            .background(
+                isSelected ?
+                AppleBooksColors.accent.opacity(0.1) :
+                AppleBooksColors.background
+            )
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        isSelected ? AppleBooksColors.accent : Color.gray.opacity(0.3),
+                        lineWidth: isSelected ? 2 : 1
+                    )
+            )
+            .shadow(
+                color: isSelected ? AppleBooksColors.accent.opacity(0.2) : Color.clear,
+                radius: isSelected ? 4 : 0,
+                x: 0,
+                y: isSelected ? 2 : 0
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
