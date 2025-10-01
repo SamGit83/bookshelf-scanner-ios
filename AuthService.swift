@@ -257,7 +257,7 @@ class AuthService: ObservableObject {
         }
     }
 
-    func joinWaitlist(firstName: String, lastName: String, email: String, userId: String? = nil) async throws WaitlistError {
+    func joinWaitlist(firstName: String, lastName: String, email: String, userId: String? = nil) async throws {
         let db = Firestore.firestore()
         // Check for duplicates
         let emailQuery = db.collection("waitlist").whereField("email", isEqualTo: email)
