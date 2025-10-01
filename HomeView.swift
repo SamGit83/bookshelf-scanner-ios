@@ -24,8 +24,6 @@ struct HomeView: View {
         ("star.fill", "Discover New Books", "Get personalized recommendations powered by Grok AI")
     ]
 
-    @State private var rowOpacities: [Double] = Array(repeating: 0, count: 4)
-    @State private var rowOffsets: [CGFloat] = Array(repeating: -50, count: 4)
 
     var body: some View {
         ZStack {
@@ -183,34 +181,43 @@ struct HomeView: View {
                         Text("How It Works")
                             .font(AppleBooksTypography.headlineLarge)
                             .foregroundColor(AppleBooksColors.text)
-                            .padding(.bottom, 20)
+                            .padding(.bottom, AppleBooksSpacing.space40)
 
-                        VStack(spacing: AppleBooksSpacing.space20) {
+                        VStack(spacing: AppleBooksSpacing.space24) {
                             ForEach(features.indices, id: \.self) { index in
                                 let feature = features[index]
                                 GeometryReader { geometry in
                                     let minY = geometry.frame(in: .global).minY
+                                    let maxY = geometry.frame(in: .global).maxY
                                     let screenHeight = UIScreen.main.bounds.height
-                                    let visibility = min(max(0, (screenHeight - minY) / screenHeight), 1)
+                                    
+                                    // Calculate visibility: item is visible when it's in viewport
+                                    // Fade in starts when bottom of item enters screen (maxY < screenHeight)
+                                    // Full opacity when item is well within viewport
+                                    // Stay visible even when scrolling up past top
+                                    let fadeInThreshold: CGFloat = screenHeight * 0.9
+                                    let fadeInComplete: CGFloat = screenHeight * 0.7
+                                    
+                                    let visibility: Double = {
+                                        if maxY < fadeInComplete {
+                                            // Item is well within viewport - fully visible
+                                            return 1.0
+                                        } else if maxY < fadeInThreshold {
+                                            // Item is entering viewport - fade in
+                                            let progress = (fadeInThreshold - maxY) / (fadeInThreshold - fadeInComplete)
+                                            return Double(min(max(progress, 0), 1))
+                                        } else {
+                                            // Item is below viewport - hidden
+                                            return 0.0
+                                        }
+                                    }()
+                                    
                                     FeatureRow(icon: feature.0, title: feature.1, description: feature.2)
-                                        .opacity(rowOpacities[index])
-                                        .offset(y: rowOffsets[index])
-                                        .onAppear {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.2) {
-                                                withAnimation(.easeInOut) {
-                                                    rowOpacities[index] = 1
-                                                    rowOffsets[index] = 0
-                                                }
-                                            }
-                                        }
-                                        .onChange(of: visibility) { newValue in
-                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                rowOpacities[index] = newValue
-                                                rowOffsets[index] = -(1 - newValue) * 50
-                                            }
-                                        }
+                                        .opacity(visibility)
+                                        .offset(y: (1 - visibility) * 30)
+                                        .onChange(of: visibility) { _ in }
                                 }
-                                .frame(height: 60)
+                                .frame(height: 80)
                             }
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
