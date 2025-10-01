@@ -14,6 +14,7 @@ struct OnboardingView: View {
     @State private var showMainApp = false
     @State private var selectedOption: SubscriptionOption? = nil
     @State private var showSuccess = false
+    @State private var showWaitlistModal = false
 
     let subscriptionOptions: [SubscriptionOption] = [
         SubscriptionOption(name: "Monthly Premium", price: "$9.99", period: "month"),
@@ -58,6 +59,7 @@ struct OnboardingView: View {
                 SubscriptionSelectionView(
                     selectedOption: $selectedOption,
                     showSuccess: $showSuccess,
+                    showWaitlistModal: $showWaitlistModal,
                     subscriptionOptions: subscriptionOptions,
                     completeOnboarding: completeOnboarding
                 )
@@ -171,6 +173,14 @@ struct OnboardingView: View {
         .fullScreenCover(isPresented: $showMainApp) {
             ContentView()
         }
+        .sheet(isPresented: $showWaitlistModal) {
+            WaitlistModal(
+                initialFirstName: "",
+                initialLastName: "",
+                initialEmail: "",
+                initialUserId: nil
+            )
+        }
     }
 
     private func completeOnboarding() {
@@ -184,7 +194,7 @@ struct OnboardingView: View {
 struct SubscriptionSelectionView: View {
     @Binding var selectedOption: SubscriptionOption?
     @Binding var showSuccess: Bool
-    @State private var showWaitlistModal = false
+    @Binding var showWaitlistModal: Bool
     let subscriptionOptions: [SubscriptionOption]
     let completeOnboarding: () -> Void
     private var subscriptionButtons: some View {
@@ -307,14 +317,6 @@ struct SubscriptionSelectionView: View {
             subscriptionButtons
 
             subscriptionDetails
-        }
-        .sheet(isPresented: $showWaitlistModal) {
-            WaitlistModal(
-                initialFirstName: AuthService.shared.currentUser?.firstName ?? "",
-                initialLastName: AuthService.shared.currentUser?.lastName ?? "",
-                initialEmail: AuthService.shared.currentUser?.email ?? "",
-                initialUserId: AuthService.shared.currentUser?.id
-            )
         }
     }
 }

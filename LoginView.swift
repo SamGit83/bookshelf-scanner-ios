@@ -501,7 +501,8 @@ struct LoginView: View {
             WaitlistModal(
                 initialFirstName: firstName,
                 initialLastName: lastName,
-                initialEmail: email
+                initialEmail: email,
+                initialUserId: nil
             )
         }
     }
