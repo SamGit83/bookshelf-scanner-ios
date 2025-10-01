@@ -144,12 +144,12 @@ struct LoginView: View {
                             }
 
                             if isSignUp {
-                                ExpandableTierSelection(selectedTier: $selectedTier, selectedPeriod: $selectedPeriod)
+                                ExpandableTierSelection(selectedTier: $selectedTier, selectedPeriod: $selectedPeriod, showWaitlistModal: $showWaitlistModal)
                                 .padding(.bottom, AppleBooksSpacing.space16)
                             }
 
-                            // Required Name Fields (only for signup)
-                            if isSignUp {
+                            // Required Name Fields (only for signup and free tier)
+                            if isSignUp && selectedTier == .free {
                                 HStack(spacing: AppleBooksSpacing.space12) {
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                         HStack {
@@ -177,8 +177,8 @@ struct LoginView: View {
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                         HStack {
                                             Text("Last Name")
-                                                .font(AppleBooksTypography.headlineSmall)
-                                                .foregroundColor(AppleBooksColors.text)
+                                            .font(AppleBooksTypography.headlineSmall)
+                                            .foregroundColor(AppleBooksColors.text)
                                             Text("*")
                                                 .foregroundColor(AppleBooksColors.promotional)
                                                 .font(AppleBooksTypography.headlineSmall)
@@ -199,8 +199,8 @@ struct LoginView: View {
                                 }
                             }
 
-                            // Show More Button (only for signup)
-                            if isSignUp {
+                            // Show More Button (only for signup and free tier)
+                            if isSignUp && selectedTier == .free {
                                 Button(action: {
                                     withAnimation(AnimationTiming.transition) {
                                         showMoreFields.toggle()
@@ -219,8 +219,8 @@ struct LoginView: View {
                                 }
                             }
 
-                            // Additional Fields (shown when expanded)
-                            if isSignUp && showMoreFields {
+                            // Additional Fields (shown when expanded and free tier)
+                            if isSignUp && showMoreFields && selectedTier == .free {
                                 VStack(spacing: AppleBooksSpacing.space16) {
 
                                     // Date of Birth
@@ -304,9 +304,9 @@ struct LoginView: View {
                                                 .cornerRadius(8)
                                                 .overlay(
                                                     RoundedRectangle(cornerRadius: 8)
-                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                                )
-                                                .textContentType(.countryName)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                            )
+                                            .textContentType(.countryName)
                                         }
 
                                         VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
@@ -324,7 +324,7 @@ struct LoginView: View {
                                                     RoundedRectangle(cornerRadius: 8)
                                                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                                 )
-                                                .textContentType(.addressCity)
+                                            .textContentType(.addressCity)
                                         }
                                     }
 
@@ -363,29 +363,31 @@ struct LoginView: View {
                                 .transition(.slide)
                             }
 
-                            // Sign In/Sign Up Button
-                            Button(action: {
-                                if isSignUp {
-                                    signUp()
-                                } else {
-                                    signIn()
+                            // Sign In/Sign Up Button (only for login or free signup)
+                            if !(isSignUp && selectedTier == .premium) {
+                                Button(action: {
+                                    if isSignUp {
+                                        signUp()
+                                    } else {
+                                        signIn()
+                                    }
+                                }) {
+                                    if isLoading {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: AppleBooksColors.card))
+                                            .scaleEffect(1.2)
+                                    } else {
+                                        Text(isSignUp ? "Create Account" : "Sign In")
+                                            .font(AppleBooksTypography.buttonLarge)
+                                            .foregroundColor(AppleBooksColors.card)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(AppleBooksSpacing.space16)
+                                            .background(AppleBooksColors.accent)
+                                            .cornerRadius(12)
+                                    }
                                 }
-                            }) {
-                                if isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: AppleBooksColors.card))
-                                        .scaleEffect(1.2)
-                                } else {
-                                    Text(isSignUp ? "Create Account" : "Sign In")
-                                        .font(AppleBooksTypography.buttonLarge)
-                                        .foregroundColor(AppleBooksColors.card)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(AppleBooksSpacing.space16)
-                                        .background(AppleBooksColors.accent)
-                                        .cornerRadius(12)
-                                }
+                                .disabled(isLoading)
                             }
-                            .disabled(isLoading)
 
                             // Toggle between login and signup
                             Button(action: {
@@ -414,49 +416,6 @@ struct LoginView: View {
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.4), value: animateForm)
-
-                    // Premium Features Card
-                    AppleBooksCard(
-                        cornerRadius: 16,
-                        padding: AppleBooksSpacing.space24,
-                        shadowStyle: .subtle
-                    ) {
-                        VStack(spacing: AppleBooksSpacing.space16) {
-                            Text("Premium Features - Coming Soon")
-                                .font(AppleBooksTypography.headlineMedium)
-                                .foregroundColor(AppleBooksColors.text)
-
-                            ForEach(premiumFeatures, id: \.self) { feature in
-                                HStack(spacing: AppleBooksSpacing.space8) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundColor(AppleBooksColors.success)
-
-                                    Text(feature)
-                                        .font(AppleBooksTypography.bodyMedium)
-                                        .foregroundColor(AppleBooksColors.text)
-
-                                    Spacer()
-                                }
-                            }
-
-                            Button(action: {
-                                showWaitlistModal = true
-                            }) {
-                                Text("Join Waitlist")
-                                    .font(AppleBooksTypography.buttonLarge)
-                                    .foregroundColor(AppleBooksColors.card)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(AppleBooksSpacing.space16)
-                                    .background(AppleBooksColors.accent)
-                                    .cornerRadius(12)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                    .offset(y: animateForm ? 0 : 50)
-                    .opacity(animateForm ? 1 : 0)
-                    .animation(AnimationTiming.transition.delay(0.5), value: animateForm)
 
                     // Error message
                     if let error = authService.errorMessage {
@@ -744,8 +703,9 @@ struct PasswordResetView: View {
 struct ExpandableTierSelection: View {
     @Binding var selectedTier: UserTier
     @Binding var selectedPeriod: SubscriptionPeriod
+    @Binding var showWaitlistModal: Bool
     @State private var expandedTier: UserTier? = nil
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
             Text("Choose Your Plan")
@@ -758,7 +718,7 @@ struct ExpandableTierSelection: View {
                     tier: .free,
                     icon: "📚",
                     title: "Free - Get Started",
-                    badge: "Always Free",
+                    badge: "FREE",
                     badgeColor: Color.gray,
                     pricing: nil,
                     features: [
@@ -768,7 +728,22 @@ struct ExpandableTierSelection: View {
                         "Basic reading insights"
                     ],
                     selectedTier: $selectedTier,
-                    expandedTier: $expandedTier
+                    expandedTier: $expandedTier,
+                    showWaitlistModal: $showWaitlistModal
+                )
+
+                // Premium Tier Button
+                ExpandableTierButton(
+                    tier: .premium,
+                    icon: "👑",
+                    title: "Premium",
+                    badge: "PREMIUM",
+                    badgeColor: AppleBooksColors.accent,
+                    pricing: nil,
+                    features: premiumFeatures,
+                    selectedTier: $selectedTier,
+                    expandedTier: $expandedTier,
+                    showWaitlistModal: $showWaitlistModal
                 )
             }
         }
@@ -787,9 +762,10 @@ struct ExpandableTierButton: View {
     @Binding var selectedTier: UserTier
     @Binding var expandedTier: UserTier?
     @Binding var selectedPeriod: SubscriptionPeriod
-    
+    @Binding var showWaitlistModal: Bool
+
     // Initialize with optional pricing subtext and period
-    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(SubscriptionPeriod(unit: .month))) {
+    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(SubscriptionPeriod(unit: .month)), showWaitlistModal: Binding<Bool>) {
         self.tier = tier
         self.icon = icon
         self.title = title
@@ -801,6 +777,7 @@ struct ExpandableTierButton: View {
         self._selectedTier = selectedTier
         self._expandedTier = expandedTier
         self._selectedPeriod = selectedPeriod
+        self._showWaitlistModal = showWaitlistModal
     }
     
     private var isSelected: Bool { selectedTier == tier }
@@ -812,11 +789,6 @@ struct ExpandableTierButton: View {
             // Main Button
             Button(action: {
                 withAnimation(AnimationTiming.transition) {
-                    if tier == .premium {
-                        // Premium is coming soon - show alert or just prevent selection
-                        // For now, prevent selection and expansion
-                        return
-                    }
                     if selectedTier == tier && isExpanded {
                         // Collapse if tapping the same expanded tier
                         expandedTier = nil
@@ -893,43 +865,6 @@ struct ExpandableTierButton: View {
             // Expandable Features Section
             if isExpanded {
                 VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
-                    // Period Selector for Premium Tier (disabled)
-                    if isPremium {
-                        VStack(spacing: AppleBooksSpacing.space12) {
-                            Text("Coming Soon")
-                                .font(AppleBooksTypography.headlineSmall)
-                                .foregroundColor(AppleBooksColors.textTertiary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            HStack(spacing: AppleBooksSpacing.space12) {
-                                // Monthly Option (disabled)
-                                PeriodSelectorCard(
-                                    period: SubscriptionPeriod(unit: .month),
-                                    price: 2.99,
-                                    priceLabel: "month",
-                                    savings: nil,
-                                    monthlyEquivalent: nil,
-                                    isSelected: false,
-                                    action: { }
-                                )
-                                .disabled(true)
-                                
-                                // Yearly Option (disabled)
-                                PeriodSelectorCard(
-                                    period: SubscriptionPeriod(unit: .year),
-                                    price: 29.99,
-                                    priceLabel: "year",
-                                    savings: "Save 17%",
-                                    monthlyEquivalent: "$2.50/month",
-                                    isSelected: false,
-                                    action: { }
-                                )
-                                .disabled(true)
-                            }
-                        }
-                        .padding(.bottom, AppleBooksSpacing.space8)
-                    }
-                    
                     // Features List
                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                         ForEach(features, id: \.self) { feature in
@@ -937,16 +872,31 @@ struct ExpandableTierButton: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(AppleBooksColors.success)
-                                
+
                                 Text(feature)
                                     .font(AppleBooksTypography.bodyMedium)
                                     .foregroundColor(AppleBooksColors.text)
-                                
+
                                 Spacer()
                             }
                         }
                     }
-                    
+
+                    // Waitlist Button for Premium
+                    if isPremium {
+                        Button(action: {
+                            showWaitlistModal = true
+                        }) {
+                            Text("Join Waitlist")
+                                .font(AppleBooksTypography.buttonLarge)
+                                .foregroundColor(AppleBooksColors.card)
+                                .frame(maxWidth: .infinity)
+                                .padding(AppleBooksSpacing.space16)
+                                .background(AppleBooksColors.accent)
+                                .cornerRadius(12)
+                        }
+                    }
+
                     // Pricing Subtext for Premium
                     if let pricingSubtext = pricingSubtext {
                         Text(pricingSubtext)
