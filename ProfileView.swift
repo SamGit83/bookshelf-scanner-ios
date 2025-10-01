@@ -284,63 +284,6 @@ struct ProfileView: View {
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         }
 
-                        // Subscription Management Section (Premium coming soon)
-                        if let user = authService.currentUser, user.tier == .free {
-                            VStack(spacing: AppleBooksSpacing.space16) {
-                                AppleBooksSectionHeader(
-                                    title: "Premium Subscription",
-                                    subtitle: "Coming Soon",
-                                    showSeeAll: false,
-                                    seeAllAction: nil
-                                )
-                        
-                                VStack(spacing: AppleBooksSpacing.space16) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                        VStack(spacing: AppleBooksSpacing.space12) {
-                                            Image(systemName: "crown.fill")
-                                                .font(.system(size: 48, weight: .medium))
-                                                .foregroundColor(PrimaryColors.vibrantPurple.opacity(0.3))
-                                            
-                                            Text("Premium Coming Soon")
-                                                .font(AppleBooksTypography.headlineMedium)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .multilineTextAlignment(.center)
-                                            
-                                            Text("Stay tuned for unlimited scans, advanced analytics, and exclusive features!")
-                                                .font(AppleBooksTypography.bodyMedium)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                                .multilineTextAlignment(.center)
-                                        }
-                                    }
-                                    .frame(maxWidth: 350)
-
-                                    Button(action: {
-                                        showWaitlistModal = true
-                                    }) {
-                                        Text("Join Waitlist")
-                                            .font(AppleBooksTypography.buttonLarge)
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, AppleBooksSpacing.space16)
-                                            .padding(.horizontal, AppleBooksSpacing.space24)
-                                            .background(
-                                                LinearGradient(
-                                                    colors: [PrimaryColors.vibrantPurple, PrimaryColors.vibrantPurple.opacity(0.8)],
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                )
-                                            )
-                                            .cornerRadius(12)
-                                            .shadow(color: PrimaryColors.vibrantPurple.opacity(0.3), radius: 8, x: 0, y: 4)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
-                                    .glassBackground()
-                                    .accessibilityLabel("Upgrade Now Button")
-                                }
-                                .padding(.horizontal, AppleBooksSpacing.space24)
-                            }
-                        }
 
                         Spacer(minLength: AppleBooksSpacing.space64)
                     }
