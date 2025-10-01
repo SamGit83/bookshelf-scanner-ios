@@ -60,6 +60,36 @@ struct SubscriptionView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 48) {
+                            // Premium Coming Soon Banner
+                            VStack(spacing: 12) {
+                                Image(systemName: "clock.badge.checkmark")
+                                    .font(.system(size: 48, weight: .medium))
+                                    .foregroundColor(SemanticColors.warningPrimary.opacity(0.8))
+                                
+                                Text("Premium Coming Soon")
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text("Stay tuned for unlimited scans, advanced analytics, and exclusive features! We'll notify you when Premium is available.")
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 24)
+                            }
+                            .padding(24)
+                            .glassBackground()
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(SemanticColors.warningPrimary.opacity(0.3), lineWidth: 1)
+                            )
+                            .padding(.horizontal, 32)
+                            .padding(.bottom, 24)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("Premium Coming Soon Banner")
+                            
                             headerSection
                             currentPlanSection
                             offeringsSection
@@ -233,14 +263,14 @@ struct SubscriptionView: View {
                             .font(.body)
                             .foregroundColor(Color.secondary)
 
-                        Button("Subscribe Monthly") {
-                            if let package = offering.packages.first(where: { $0.period == "month" }) {
-                                purchasePackage(package)
-                            }
+                        Button("Coming Soon") {
+                            // Premium coming soon - no action
+                            print("DEBUG SubscriptionView: Premium coming soon - monthly subscribe tap ignored")
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(Color.orange)
-                        .disabled(selectedPeriod != "month" || isPurchasing)
+                        .tint(SemanticColors.warningPrimary)
+                        .disabled(true)
+                        .opacity(0.6)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(24)
@@ -274,14 +304,14 @@ struct SubscriptionView: View {
                             .background(Color.green.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 4))
 
-                        Button("Subscribe Yearly") {
-                            if let package = offering.packages.first(where: { $0.period == "year" }) {
-                                purchasePackage(package)
-                            }
+                        Button("Coming Soon") {
+                            // Premium coming soon - no action
+                            print("DEBUG SubscriptionView: Premium coming soon - yearly subscribe tap ignored")
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(Color.orange)
-                        .disabled(selectedPeriod != "year" || isPurchasing)
+                        .tint(SemanticColors.warningPrimary)
+                        .disabled(true)
+                        .opacity(0.6)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(24)
@@ -396,17 +426,21 @@ struct SubscriptionView: View {
 
     private var restorePurchasesSection: some View {
         VStack(spacing: 24) {
-            Button(action: restorePurchases) {
-                Text("Restore Purchases")
+            Button(action: {
+                // Premium coming soon - no action
+                print("DEBUG SubscriptionView: Premium coming soon - restore purchases tap ignored")
+            }) {
+                Text("Premium Coming Soon")
                     .font(.body)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color.blue)
-            .disabled(isPurchasing)
-            .accessibilityLabel("Restore Purchases Button")
+            .tint(SemanticColors.warningPrimary)
+            .disabled(true)
+            .opacity(0.6)
+            .accessibilityLabel("Premium Coming Soon")
 
             Text("If you've already purchased a subscription, tap here to restore your access.")
                 .font(.caption)
@@ -529,83 +563,19 @@ struct SubscriptionView: View {
     }
 
     private func restorePurchases() {
-        isPurchasing = true
-
-        revenueCatManager.restorePurchases { result in
-            DispatchQueue.main.async {
-                self.isPurchasing = false
-
-                switch result {
-                case .success:
-                    if self.revenueCatManager.isSubscribed {
-                        self.presentationMode.wrappedValue.dismiss()
-                    } else {
-                        self.errorMessage = "No previous purchases found to restore."
-                        self.showError = true
-                    }
-
-                case .failure(let error):
-                    self.errorMessage = "Restore failed: \(error.localizedDescription)"
-                    self.showError = true
-                }
-            }
-        }
+        print("DEBUG SubscriptionView: Premium coming soon - restore purchases ignored")
+        isPurchasing = false
+        errorMessage = "Premium features are coming soon! No purchases available yet."
+        showError = true
+        // No backend calls
     }
 
     private func purchasePackage(_ package: SubscriptionPackage) {
-        print("DEBUG SubscriptionView: Starting purchase for package \(package.id) at $\(package.price)")
-        isPurchasing = true
-        trackPurchaseStart(package: package)
-    
-        #if canImport(RevenueCat)
-        // Find the corresponding RevenueCat package
-        guard let offering = revenueCatManager.offerings["premium"],
-              let rcPackage = offering.packages.first(where: { $0.identifier == package.id }) else {
-            print("DEBUG SubscriptionView: Package not found in RevenueCat offerings")
-            self.isPurchasing = false
-            self.errorMessage = "Package not found. Please try again."
-            self.showError = true
-            return
-        }
-    
-        revenueCatManager.purchase(package: rcPackage) { result in
-            DispatchQueue.main.async {
-                self.isPurchasing = false
-    
-                switch result {
-                case .success(let customerInfo):
-                    print("DEBUG SubscriptionView: Purchase successful")
-                    self.trackPurchaseSuccess(package: package)
-                    self.presentationMode.wrappedValue.dismiss()
-    
-                case .failure(let error):
-                    print("DEBUG SubscriptionView: Purchase failed: \(error.localizedDescription)")
-                    self.errorMessage = error.localizedDescription
-                    self.showError = true
-                    self.trackPurchaseFailure(package: package)
-                }
-            }
-        }
-        #else
-        // Fallback for development - simulate purchase
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.isPurchasing = false
-            let success = Bool.random()
-            print("DEBUG SubscriptionView: Simulated purchase \(success ? "success" : "failure") for \(package.id)")
-    
-            if success { // Simulate success/failure
-                // Success
-                self.updateUserTierToPremium()
-                self.trackPurchaseSuccess(package: package)
-                self.presentationMode.wrappedValue.dismiss()
-            } else {
-                // Failure
-                self.errorMessage = "Purchase failed. Please try again or contact support."
-                self.showError = true
-                self.trackPurchaseFailure(package: package)
-            }
-        }
-        #endif
+        print("DEBUG SubscriptionView: Premium coming soon - purchase attempt ignored for \(package.id)")
+        isPurchasing = false
+        errorMessage = "Premium features are coming soon! Stay tuned for updates."
+        showError = true
+        // No backend calls or simulations
     }
 
     private func updateUserTierToPremium() {

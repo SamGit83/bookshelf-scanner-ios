@@ -191,16 +191,17 @@ struct SubscriptionSelectionView: View {
             SubscriptionButton(option: subscriptionOptions[0], selectedOption: $selectedOption)
             SubscriptionButton(option: subscriptionOptions[1], selectedOption: $selectedOption)
         }
+        .disabled(true)
     }
 
     private var subscriptionDetails: some View {
         VStack(spacing: AppleBooksSpacing.space16) {
-            Text(selectedOption?.name ?? "Select a Plan")
+            Text("Free Tier Selected")
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.text)
-            Text("\(selectedOption?.price ?? "")/\(selectedOption?.period ?? "")")
+            Text("Free Forever")
                 .font(AppleBooksTypography.displayLarge)
-                .foregroundColor(AppleBooksColors.accent)
+                .foregroundColor(AppleBooksColors.success)
                 .bold()
             if selectedOption?.period == "year" {
                 Text("Just $8.33 per month")
@@ -208,16 +209,17 @@ struct SubscriptionSelectionView: View {
                     .foregroundColor(AppleBooksColors.textSecondary)
             }
             Button(action: {
-                showSuccess = true
+                // Disabled for premium coming soon
             }) {
-                Text("Subscribe & Get Started")
+                Text("Premium Coming Soon")
                     .font(AppleBooksTypography.buttonLarge)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppleBooksColors.textTertiary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, AppleBooksSpacing.space16)
             }
-            .background(AppleBooksColors.accent)
+            .background(AppleBooksColors.card)
             .cornerRadius(12)
+            .disabled(true)
             if showSuccess {
                 Text("Subscription successful!")
                     .font(AppleBooksTypography.caption)
@@ -239,9 +241,15 @@ struct SubscriptionSelectionView: View {
                 .foregroundColor(AppleBooksColors.text)
                 .multilineTextAlignment(.center)
 
-            Text("Choose your subscription plan to get unlimited scans and features.")
+            Text("Premium features coming soon! Sign up for Free tier now to get started with basic features.")
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, AppleBooksSpacing.space16)
+
+            Text("Premium Coming Soon")
+                .font(AppleBooksTypography.bodyMedium)
+                .foregroundColor(AppleBooksColors.textTertiary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppleBooksSpacing.space16)
 

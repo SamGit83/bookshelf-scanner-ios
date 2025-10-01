@@ -26,6 +26,37 @@ struct UpgradeModalView: View {
                 ScrollView {
                     VStack(spacing: 24) {
                         headerSection
+                        
+                        // Premium Coming Soon Banner
+                        VStack(spacing: 12) {
+                            Image(systemName: "clock.badge.checkmark")
+                                .font(.system(size: 48, weight: .medium))
+                                .foregroundColor(SemanticColors.warningPrimary.opacity(0.8))
+                            
+                            Text("Premium Coming Soon")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.center)
+                            
+                            Text("Stay tuned for unlimited scans, advanced analytics, and exclusive features! We'll notify you when Premium is available.")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
+                        }
+                        .padding(24)
+                        .glassBackground()
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(SemanticColors.warningPrimary.opacity(0.3), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 24)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Premium Coming Soon Banner")
+                        
                         socialProofSection
                         featureComparisonSection
                         pricingSection
@@ -177,7 +208,10 @@ struct UpgradeModalView: View {
                     period: "month",
                     savings: nil,
                     isSelected: selectedPlan == .monthly,
-                    action: { selectedPlan = .monthly }
+                    action: {
+                        // Premium coming soon - no action
+                        print("DEBUG UpgradeModalView: Premium coming soon - monthly plan tap ignored")
+                    }
                 )
 
                 PricingCard(
@@ -186,7 +220,10 @@ struct UpgradeModalView: View {
                     period: "year",
                     savings: "Save 17%",
                     isSelected: selectedPlan == .annual,
-                    action: { selectedPlan = .annual }
+                    action: {
+                        // Premium coming soon - no action
+                        print("DEBUG UpgradeModalView: Premium coming soon - annual plan tap ignored")
+                    }
                 )
             }
             .padding(.horizontal, 16)
@@ -223,37 +260,35 @@ struct UpgradeModalView: View {
 
     private var ctaSection: some View {
         VStack(spacing: 16) {
-            Button(action: startSubscription) {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(0.8)
-                } else {
-                    Text(variantConfig?.ctaText ?? "Start Premium Trial")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                        .padding(.horizontal, 32)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.orange, Color.orange.opacity(0.8)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+            Button(action: {
+                // Premium coming soon - no action
+                print("DEBUG UpgradeModalView: Premium coming soon - CTA tap ignored")
+            }) {
+                Text("Coming Soon")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 32)
+                    .background(
+                        LinearGradient(
+                            colors: [SemanticColors.warningPrimary, SemanticColors.warningPrimary.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        .foregroundColor(.white)
-                        .cornerRadius(20)
-                        .font(.headline.weight(.semibold))
-                        .shadow(color: Color.orange.opacity(0.4), radius: 12, x: 0, y: 6)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                        )
-                }
+                    )
+                    .foregroundColor(.white)
+                    .cornerRadius(20)
+                    .font(.headline.weight(.semibold))
+                    .shadow(color: SemanticColors.warningPrimary.opacity(0.4), radius: 12, x: 0, y: 6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
             }
             .buttonStyle(PlainButtonStyle())
-            .disabled(isLoading)
+            .disabled(true)
+            .opacity(0.6)
             .padding(.horizontal, 16)
-            .accessibilityLabel("Start Premium Trial Button")
+            .accessibilityLabel("Premium Coming Soon")
 
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
@@ -303,40 +338,12 @@ struct UpgradeModalView: View {
     }
 
     private func startSubscription() {
-        print("DEBUG UpgradeModal: Starting subscription for plan \(selectedPlan)")
-        isLoading = true
-        trackCTAClick()
-
-        // Get the package
-        guard let offering = RevenueCatManager.shared.offerings["default"] else {
-            errorMessage = "Offerings not loaded"
-            showError = true
-            isLoading = false
-            trackSubscriptionFailure()
-            return
-        }
-
-        let packageId = selectedPlan == .monthly ? "premium_monthly" : "premium_yearly"
-        guard let package = offering.availablePackages.first(where: { $0.identifier == packageId }) else {
-            errorMessage = "Package not found"
-            showError = true
-            isLoading = false
-            trackSubscriptionFailure()
-            return
-        }
-
-        RevenueCatManager.shared.purchase(package: package) { result in
-            switch result {
-            case .success:
-                trackSubscriptionSuccess()
-                presentationMode.wrappedValue.dismiss()
-            case .failure(let error):
-                errorMessage = error.localizedDescription
-                showError = true
-                trackSubscriptionFailure()
-            }
-            isLoading = false
-        }
+        print("DEBUG UpgradeModal: Premium coming soon - subscription attempt ignored for plan \(selectedPlan)")
+        isLoading = false
+        errorMessage = "Premium features are coming soon! Stay tuned for updates."
+        showError = true
+        trackCTAClick() // Keep analytics if needed, but no backend
+        // No purchase or backend calls
     }
 
     // Analytics tracking

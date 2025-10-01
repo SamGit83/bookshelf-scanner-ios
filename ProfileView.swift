@@ -91,14 +91,8 @@ struct ProfileView: View {
                                             color: AppleBooksColors.accent,
                                             showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                print("DEBUG ProfileView: Upgrade tap from scan teaser")
-                                                showUpgradeModal = true
-                                                AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "scan")
-                                                NotificationCenter.default.post(
-                                                    name: Notification.Name("UpgradePromptShown"),
-                                                    object: nil,
-                                                    userInfo: ["source": "profile_usage_teaser", "limit_type": "scan"]
-                                                )
+                                                // Premium coming soon - no action
+                                                print("DEBUG ProfileView: Premium coming soon - scan teaser tap ignored")
                                             }
                                         )
 
@@ -111,14 +105,8 @@ struct ProfileView: View {
                                             color: AppleBooksColors.success,
                                             showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                print("DEBUG ProfileView: Upgrade tap from book teaser")
-                                                showUpgradeModal = true
-                                                AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "book")
-                                                NotificationCenter.default.post(
-                                                    name: Notification.Name("UpgradePromptShown"),
-                                                    object: nil,
-                                                    userInfo: ["source": "profile_usage_teaser", "limit_type": "book"]
-                                                )
+                                                // Premium coming soon - no action
+                                                print("DEBUG ProfileView: Premium coming soon - book teaser tap ignored")
                                             }
                                         )
 
@@ -131,14 +119,8 @@ struct ProfileView: View {
                                             color: AppleBooksColors.promotional,
                                             showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                print("DEBUG ProfileView: Upgrade tap from recommendation teaser")
-                                                showUpgradeModal = true
-                                                AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_usage_teaser", limitType: "recommendation")
-                                                NotificationCenter.default.post(
-                                                    name: Notification.Name("UpgradePromptShown"),
-                                                    object: nil,
-                                                    userInfo: ["source": "profile_usage_teaser", "limit_type": "recommendation"]
-                                                )
+                                                // Premium coming soon - no action
+                                                print("DEBUG ProfileView: Premium coming soon - recommendation teaser tap ignored")
                                             }
                                         )
 
@@ -146,32 +128,33 @@ struct ProfileView: View {
                                         if expandedUsageDetails && user.tier == .free {
                                             Divider()
                                                 .background(AppleBooksColors.textTertiary.opacity(0.3))
-
+                                            
                                             VStack(spacing: AppleBooksSpacing.space16) {
-                                                Text("Upgrade to Premium for unlimited access")
+                                                Text("Premium Features Coming Soon")
                                                     .font(AppleBooksTypography.captionBold)
                                                     .foregroundColor(AppleBooksColors.accent)
-
+                                                
+                                                Text("Unlock unlimited access to advanced analytics, unlimited scans, and more – stay tuned!")
+                                                    .font(AppleBooksTypography.caption)
+                                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                                    .multilineTextAlignment(.center)
+                                                
                                                 Button(action: {
-                                                    print("DEBUG ProfileView: Upgrade tap from view plans button")
-                                                    showUpgradeModal = true
-                                                    AnalyticsManager.shared.trackUpgradePromptShown(source: "profile_view_plans_button")
-                                                    NotificationCenter.default.post(
-                                                        name: Notification.Name("UpgradePromptShown"),
-                                                        object: nil,
-                                                        userInfo: ["source": "profile_view_plans_button"]
-                                                    )
+                                                    // Premium coming soon - no action
+                                                    print("DEBUG ProfileView: Premium coming soon - view plans button tap ignored")
                                                 }) {
-                                                    Text("View Premium Plans")
+                                                    Text("Coming Soon")
                                                         .font(.caption.bold())
                                                         .foregroundColor(.white)
                                                         .padding(.horizontal, 12)
                                                         .padding(.vertical, 6)
-                                                        .background(Color.orange)
+                                                        .background(AppleBooksColors.promotional.opacity(0.7))
                                                         .clipShape(RoundedRectangle(cornerRadius: 6))
                                                 }
+                                                .disabled(true)
                                                 .glassBackground()
-                                                .accessibilityLabel("View Premium Plans Button")
+                                                .opacity(0.6)
+                                                .accessibilityLabel("Premium Coming Soon")
                                             }
                                             .padding(.top, AppleBooksSpacing.space8)
                                         }
@@ -304,36 +287,35 @@ struct ProfileView: View {
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         }
 
-                        // Subscription Management Section (for Premium users)
-                        if let user = authService.currentUser, user.tier == .premium {
+                        // Subscription Management Section (Premium coming soon)
+                        if let user = authService.currentUser, user.tier == .free {
                             VStack(spacing: AppleBooksSpacing.space16) {
                                 AppleBooksSectionHeader(
-                                    title: "Subscription",
-                                    subtitle: "Manage your premium subscription",
+                                    title: "Premium Subscription",
+                                    subtitle: "Coming Soon",
                                     showSeeAll: false,
                                     seeAllAction: nil
                                 )
-
+                        
                                 VStack(spacing: AppleBooksSpacing.space16) {
-                                    NavigationLink(destination: SubscriptionView()) {
-                                        AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                            HStack(spacing: AppleBooksSpacing.space12) {
-                                                Image(systemName: "crown.fill")
-                                                    .font(AppleBooksTypography.bodyLarge)
-                                                    .foregroundColor(PrimaryColors.vibrantPurple)
-                                                    .frame(width: 24, height: 24)
-                                                Text("Manage Subscription")
-                                                    .font(AppleBooksTypography.bodyLarge)
-                                                    .foregroundColor(AppleBooksColors.text)
-                                                Spacer()
-                                                Image(systemName: "chevron.right")
-                                                    .font(AppleBooksTypography.caption)
-                                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                            }
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                                        VStack(spacing: AppleBooksSpacing.space12) {
+                                            Image(systemName: "crown.fill")
+                                                .font(.system(size: 48, weight: .medium))
+                                                .foregroundColor(PrimaryColors.vibrantPurple.opacity(0.3))
+                                            
+                                            Text("Premium Coming Soon")
+                                                .font(AppleBooksTypography.headlineMedium)
+                                                .foregroundColor(AppleBooksColors.text)
+                                                .multilineTextAlignment(.center)
+                                            
+                                            Text("Stay tuned for unlimited scans, advanced analytics, and exclusive features!")
+                                                .font(AppleBooksTypography.bodyMedium)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                                .multilineTextAlignment(.center)
                                         }
-                                        .frame(maxWidth: 350)
                                     }
-                                    .buttonStyle(PlainButtonStyle())
+                                    .frame(maxWidth: 350)
                                 }
                                 .padding(.horizontal, AppleBooksSpacing.space24)
                             }

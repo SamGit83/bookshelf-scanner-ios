@@ -502,9 +502,10 @@ struct LoginView: View {
             isLoading = false
             switch result {
             case .success:
-                if selectedTier == .premium && !revenueCatManager.isSubscribed {
-                    showUpgradeModal = true
-                }
+                // Premium not available yet, so no upgrade modal
+                // if selectedTier == .premium && !revenueCatManager.isSubscribed {
+                //     showUpgradeModal = true
+                // }
                 // Navigation will be handled by the parent view
                 break
             case .failure:
@@ -698,6 +699,11 @@ struct ExpandableTierSelection: View {
             Text("Choose Your Plan")
                 .font(AppleBooksTypography.headlineSmall)
                 .foregroundColor(AppleBooksColors.text)
+
+            Text("Premium features coming soon!")
+                .font(AppleBooksTypography.bodyMedium)
+                .foregroundColor(AppleBooksColors.textTertiary)
+                .multilineTextAlignment(.center)
             
             VStack(spacing: AppleBooksSpacing.space12) {
                 // Free Tier Button
@@ -722,11 +728,11 @@ struct ExpandableTierSelection: View {
                 ExpandableTierButton(
                     tier: .premium,
                     icon: "👑",
-                    title: "Premium - Unlock Everything",
-                    badge: "✨ RECOMMENDED",
-                    badgeColor: AppleBooksColors.accent,
-                    pricing: nil, // Will be shown in period selector
-                    pricingSubtext: "7-day free trial • Cancel anytime",
+                    title: "Premium - Coming Soon",
+                    badge: "Coming Soon",
+                    badgeColor: AppleBooksColors.textTertiary,
+                    pricing: nil,
+                    pricingSubtext: "Premium features will be available shortly",
                     features: [
                         "Unlimited scans",
                         "Unlimited books",
@@ -780,6 +786,11 @@ struct ExpandableTierButton: View {
             // Main Button
             Button(action: {
                 withAnimation(AnimationTiming.transition) {
+                    if tier == .premium {
+                        // Premium is coming soon - show alert or just prevent selection
+                        // For now, prevent selection and expansion
+                        return
+                    }
                     if selectedTier == tier && isExpanded {
                         // Collapse if tapping the same expanded tier
                         expandedTier = nil
@@ -856,36 +867,38 @@ struct ExpandableTierButton: View {
             // Expandable Features Section
             if isExpanded {
                 VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
-                    // Period Selector for Premium Tier
+                    // Period Selector for Premium Tier (disabled)
                     if isPremium {
                         VStack(spacing: AppleBooksSpacing.space12) {
-                            Text("Choose Your Plan")
+                            Text("Coming Soon")
                                 .font(AppleBooksTypography.headlineSmall)
-                                .foregroundColor(AppleBooksColors.text)
+                                .foregroundColor(AppleBooksColors.textTertiary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             HStack(spacing: AppleBooksSpacing.space12) {
-                                // Monthly Option
+                                // Monthly Option (disabled)
                                 PeriodSelectorCard(
                                     period: SubscriptionPeriod(unit: .month),
                                     price: 2.99,
                                     priceLabel: "month",
                                     savings: nil,
                                     monthlyEquivalent: nil,
-                                    isSelected: selectedPeriod.unit == .month,
-                                    action: { selectedPeriod = SubscriptionPeriod(unit: .month) }
+                                    isSelected: false,
+                                    action: { }
                                 )
+                                .disabled(true)
                                 
-                                // Yearly Option
+                                // Yearly Option (disabled)
                                 PeriodSelectorCard(
                                     period: SubscriptionPeriod(unit: .year),
                                     price: 29.99,
                                     priceLabel: "year",
                                     savings: "Save 17%",
                                     monthlyEquivalent: "$2.50/month",
-                                    isSelected: selectedPeriod.unit == .year,
-                                    action: { selectedPeriod = SubscriptionPeriod(unit: .year) }
+                                    isSelected: false,
+                                    action: { }
                                 )
+                                .disabled(true)
                             }
                         }
                         .padding(.bottom, AppleBooksSpacing.space8)
