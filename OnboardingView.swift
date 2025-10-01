@@ -188,9 +188,8 @@ struct SubscriptionSelectionView: View {
     let completeOnboarding: () -> Void
     private var subscriptionButtons: some View {
         HStack(spacing: AppleBooksSpacing.space16) {
-            ForEach(subscriptionOptions) { option in
-                SubscriptionButton(option: option, selectedOption: $selectedOption)
-            }
+            SubscriptionButton(option: subscriptionOptions[0], selectedOption: $selectedOption)
+            SubscriptionButton(option: subscriptionOptions[1], selectedOption: $selectedOption)
         }
     }
 
