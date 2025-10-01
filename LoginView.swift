@@ -66,23 +66,30 @@ struct LoginView: View {
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.2), value: animateForm)
 
-                    // Clean Login/Signup Form
-                    AppleBooksCard(
-                        cornerRadius: 16,
-                        padding: AppleBooksSpacing.space24,
-                        shadowStyle: .subtle
-                    ) {
-                        VStack(spacing: AppleBooksSpacing.space20) {
-                            // Form Header
-                            VStack(spacing: AppleBooksSpacing.space8) {
-                                Text(isSignUp ? "Create Account" : "Welcome Back")
-                                    .font(AppleBooksTypography.headlineLarge)
-                                    .foregroundColor(AppleBooksColors.text)
+                    if isSignUp {
+                        ExpandableTierSelection(selectedTier: $selectedTier, selectedPeriod: $selectedPeriod, showWaitlistModal: $showWaitlistModal)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+                        .padding(.bottom, AppleBooksSpacing.space16)
+                    }
 
-                                Text(isSignUp ? "Join our reading community" : "Sign in to your account")
-                                    .font(AppleBooksTypography.bodyMedium)
-                                    .foregroundColor(AppleBooksColors.textSecondary)
-                            }
+                    if !isSignUp || (isSignUp && selectedTier == .free) {
+                        // Clean Login/Signup Form
+                        AppleBooksCard(
+                            cornerRadius: 16,
+                            padding: AppleBooksSpacing.space24,
+                            shadowStyle: .subtle
+                        ) {
+                            VStack(spacing: AppleBooksSpacing.space20) {
+                                // Form Header
+                                VStack(spacing: AppleBooksSpacing.space8) {
+                                    Text(isSignUp ? "Create Account" : "Welcome Back")
+                                        .font(AppleBooksTypography.headlineLarge)
+                                        .foregroundColor(AppleBooksColors.text)
+
+                                    Text(isSignUp ? "Join our reading community" : "Sign in to your account")
+                                        .font(AppleBooksTypography.bodyMedium)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+                                }
 
                             // Email Field
                             VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
@@ -134,11 +141,6 @@ struct LoginView: View {
                                             .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                     )
                                     .textContentType(isSignUp ? .newPassword : .password)
-                            }
-
-                            if isSignUp {
-                                ExpandableTierSelection(selectedTier: $selectedTier, selectedPeriod: $selectedPeriod, showWaitlistModal: $showWaitlistModal)
-                                .padding(.bottom, AppleBooksSpacing.space16)
                             }
 
                             // Required Name Fields (only for signup and free tier)
@@ -409,6 +411,7 @@ struct LoginView: View {
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.4), value: animateForm)
+                    }
 
                     // Error message
                     if let error = authService.errorMessage {
