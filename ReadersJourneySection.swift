@@ -89,6 +89,11 @@ struct EnhancedJourneyCard: View {
     let cardType: CardType
     let bulletPoints: [BulletPoint]
 
+    @State private var animationTrigger = false
+    @State private var shakeTrigger = false
+    @State private var glowOpacity: Double = 0.0
+    @State private var shakeOffset: CGFloat = 0.0
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
             // Header
@@ -119,6 +124,12 @@ struct EnhancedJourneyCard: View {
                             .foregroundColor(AppleBooksColors.textSecondary)
                             .lineSpacing(4)
                     }
+                    .opacity(animationTrigger ? 1.0 : 0.0)
+                    .offset(
+                        x: cardType == .enhancements ? (animationTrigger ? 0 : 20) : 0,
+                        y: cardType == .struggles ? (animationTrigger ? 0 : 20) : 0
+                    )
+                    .animation(.easeInOut.delay(Double(index) * 0.3), value: animationTrigger)
                 }
             }
         }
@@ -130,13 +141,37 @@ struct EnhancedJourneyCard: View {
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(cardType.accentColor.opacity(0.2), lineWidth: 1)
                 )
-                .shadow(color: cardType.accentColor.opacity(0.1), radius: 8, x: 0, y: 4)
+                .shadow(color: cardType.accentColor.opacity(glowOpacity * 0.5), radius: 8, x: 0, y: 4)
         )
+        .offset(x: shakeOffset)
+        .animation(.spring(response: 0.1, dampingFraction: 0.5).repeatCount(5, autoreverses: true), value: shakeTrigger)
         .frame(maxWidth: .infinity)
+        .onAppear {
+            animationTrigger = true
+            if cardType == .struggles {
+                shakeTrigger = true
+                withAnimation(.spring(response: 0.1, dampingFraction: 0.5).repeatCount(5, autoreverses: true)) {
+                    shakeOffset = 5
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation {
+                        shakeOffset = 0
+                    }
+                }
+            }
+            if cardType == .enhancements {
+                withAnimation(.easeInOut(duration: 1.0)) {
+                    glowOpacity = 1.0
+                }
+            }
+        }
     }
 }
 
 struct TransformationProgressIndicator: View {
+    @State private var progress: CGFloat = 0.0
+    @State private var arrowScale: CGFloat = 1.0
+
     var body: some View {
         VStack(spacing: AppleBooksSpacing.space8) {
             Text("Transformation Progress")
@@ -144,6 +179,11 @@ struct TransformationProgressIndicator: View {
                 .foregroundColor(AppleBooksColors.textSecondary)
 
             ZStack {
+                // Background track
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 280, height: 8)
+
                 // Progress fill
                 RoundedRectangle(cornerRadius: 4)
                     .fill(
@@ -153,13 +193,14 @@ struct TransformationProgressIndicator: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: 280, height: 8) // Full width
+                    .frame(width: 280 * progress, height: 8, alignment: .leading)
 
                 // Arrow indicator
                 Image(systemName: "arrow.right")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                    .offset(x: 196) // Position at 70% of 280
+                    .scaleEffect(arrowScale)
+                    .offset(x: (progress - 0.5) * 280)
             }
             .frame(width: 280)
 
@@ -170,6 +211,14 @@ struct TransformationProgressIndicator: View {
                 Text("Success")
                     .font(AppleBooksTypography.caption)
                     .foregroundColor(Color(hex: "4A90E2"))
+            }
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.5)) {
+                progress = 0.7
+            }
+            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                arrowScale = 1.2
             }
         }
     }

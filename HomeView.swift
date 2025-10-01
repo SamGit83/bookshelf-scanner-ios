@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct HomeView: View {
     @ObservedObject private var authService = AuthService.shared
@@ -6,8 +7,10 @@ struct HomeView: View {
     @State private var showLogin = false
     @State private var showSignup = false
     @State private var floatingOffset: CGFloat = 0
+    @State private var flipAngle: Double = 0
     @State private var currentIndex: Int = 0
     @State private var timer: Timer? = nil
+    @State private var flipTimer: Timer? = nil
     @State private var currentOffset: CGFloat = 0
     @State private var nextOffset: CGFloat = 50
     @State private var currentOpacity: Double = 1
@@ -35,6 +38,7 @@ struct HomeView: View {
                                     .fill(AppleBooksColors.accent.opacity(0.1))
                             )
                             .offset(y: floatingOffset)
+                            .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
 
                         // Title
                         Text("Book Shelfie")
@@ -164,7 +168,7 @@ struct HomeView: View {
                         withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
                             floatingOffset = -20
                         }
-                        
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                             timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
                                 withAnimation(.easeInOut(duration: 1.0)) {
@@ -180,12 +184,21 @@ struct HomeView: View {
                                     nextOffset = 50
                                     currentOpacity = 1
                                     nextOpacity = 0
+                                }
                             }
+                        }
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            flipTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: true) { _ in
+                                withAnimation(.easeInOut(duration: 1.0)) {
+                                    flipAngle = flipAngle == 0 ? 180 : 0
+                                }
                             }
                         }
                     }
                     .onDisappear {
                         timer?.invalidate()
+                        flipTimer?.invalidate()
                     }
 
                     // Reader's Journey Section
@@ -244,26 +257,40 @@ struct FeatureRow: View {
     let description: String
 
     var body: some View {
-        HStack(spacing: AppleBooksSpacing.space16) {
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(AppleBooksColors.accent)
-                .frame(width: 40, height: 40)
-                .background(AppleBooksColors.accent.opacity(0.1))
-                .cornerRadius(8)
-
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
-                Text(title)
-                    .font(AppleBooksTypography.headlineSmall)
-                    .foregroundColor(AppleBooksColors.text)
-
-                Text(description)
-                    .font(AppleBooksTypography.bodyMedium)
-                    .foregroundColor(AppleBooksColors.textSecondary)
-                    .lineLimit(2)
+        GeometryReader { geometry in
+            let minY = geometry.frame(in: .global).minY
+            let screenHeight = UIScreen.main.bounds.height
+            let rowHeight = geometry.size.height
+            let visibility: Double
+            if minY < 0 {
+                visibility = max(0, 1 + minY / rowHeight)
+            } else {
+                visibility = max(0, (screenHeight - minY) / screenHeight)
             }
+            HStack(spacing: AppleBooksSpacing.space16) {
+                Image(systemName: icon)
+                    .font(.system(size: 24))
+                    .foregroundColor(AppleBooksColors.accent)
+                    .frame(width: 40, height: 40)
+                    .background(AppleBooksColors.accent.opacity(0.1))
+                    .cornerRadius(8)
 
-            Spacer()
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
+                    Text(title)
+                        .font(AppleBooksTypography.headlineSmall)
+                        .foregroundColor(AppleBooksColors.text)
+
+                    Text(description)
+                        .font(AppleBooksTypography.bodyMedium)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+            }
+            .opacity(visibility)
+            .offset(y: (1 - visibility) * (minY < 0 ? -100 : 100))
+            .animation(.easeInOut, value: visibility)
         }
     }
 }
