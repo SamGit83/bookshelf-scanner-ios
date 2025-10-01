@@ -249,16 +249,14 @@ class BookViewModel: ObservableObject {
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
                 print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
 
-                // Check for duplicates based on title and author (case-insensitive)
-                let existingTitlesAndAuthors = Set(self.books.map {
-                    ($0.title ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines) + "|" + ($0.author ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                })
+                // Check for duplicates based on title (case-insensitive) or ISBN
+                let existingTitles = Set(self.books.compactMap { $0.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
+                let existingISBNs = Set(self.books.compactMap { $0.isbn })
 
                 for book in decodedBooks {
-                    let normalizedTitle = (book.title ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                    let normalizedAuthor = (book.author ?? "").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                    let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
 
-                    if existingTitlesAndAuthors.contains(normalizedTitle + "|" + normalizedAuthor) {
+                    if (normalizedTitle != nil && existingTitles.contains(normalizedTitle!)) || (book.isbn != nil && existingISBNs.contains(book.isbn!)) {
                         print("DEBUG BookViewModel: Skipping duplicate book: \(book.title ?? "") by \(book.author ?? "")")
                         continue
                     }
