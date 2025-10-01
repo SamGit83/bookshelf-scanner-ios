@@ -259,7 +259,6 @@ struct FeatureRow: View {
             let screenHeight = UIScreen.main.bounds.height
             let rowHeight = geometry.size.height
             let visibility: Double = minY < 0 ? max(0, 1.0 + minY / rowHeight) : max(0, (screenHeight - minY) / screenHeight)
-            let visibility: Double = minY < 0 ? max(0, 1.0 + minY / rowHeight) : max(0, (screenHeight - minY) / screenHeight)
             HStack(spacing: AppleBooksSpacing.space16) {
                 Image(systemName: icon)
                     .font(.system(size: 24))
