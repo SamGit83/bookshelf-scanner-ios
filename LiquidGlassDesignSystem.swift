@@ -1152,83 +1152,6 @@ public struct AppleBooksCard<Content: View>: View {
             )
     }
 }
-public struct BookCardActionsOverlay: View {
-    @Binding var showMenu: Bool
-    let book: Book
-    let viewModel: BookViewModel?
-
-    public var body: some View {
-        if showMenu {
-            ZStack {
-                Color.black.opacity(0.3)
-                    .onTapGesture {
-                        showMenu = false
-                    }
-
-                VStack(spacing: 12) {
-                    if book.status != .reading {
-                        Button(action: {
-                            viewModel?.moveBook(book, to: .reading)
-                            showMenu = false
-                        }) {
-                            HStack {
-                                Image(systemName: "book")
-                                Text("Start Reading")
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .frame(maxWidth: .infinity)
-                            .background(PrimaryColors.electricBlue)
-                            .cornerRadius(8)
-                        }
-                    }
-
-                    if book.status != .read {
-                        Button(action: {
-                            viewModel?.markBookAsComplete(book)
-                            showMenu = false
-                        }) {
-                            HStack {
-                                Image(systemName: "checkmark.circle")
-                                Text("Mark as Read")
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .frame(maxWidth: .infinity)
-                            .background(PrimaryColors.freshGreen)
-                            .cornerRadius(8)
-                        }
-                    }
-
-                    Button(action: {
-                        viewModel?.deleteBook(book)
-                        showMenu = false
-                    }) {
-                        HStack {
-                            Image(systemName: "trash")
-                            Text("Delete")
-                        }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity)
-                        .background(SemanticColors.errorPrimary)
-                        .cornerRadius(8)
-                    }
-                }
-                .padding(16)
-                .background(AdaptiveColors.glassBackground)
-                .cornerRadius(16)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-                .padding(.horizontal, 40)
-            }
-            .transition(.scale.combined(with: .opacity))
-            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showMenu)
-        }
-    }
-}
 
 public struct AppleBooksBookCard: View {
     let book: Book
@@ -1238,7 +1161,6 @@ public struct AppleBooksBookCard: View {
     let viewModel: BookViewModel? // Add viewModel for adding to library
 
     @State private var isAddingToLibrary = false
-    @State private var showMenu = false
 
     public var body: some View {
         AppleBooksCard(
@@ -1414,24 +1336,36 @@ public struct AppleBooksBookCard: View {
                 }
             }
         }
-        .scaleEffect(showMenu ? 1.05 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showMenu)
         .onTapGesture(perform: onTap)
-        .onLongPressGesture(minimumDuration: 0.5, perform: {
-            showMenu = true
-            #if canImport(UIKit)
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
-            #endif
-        })
-        .overlay(BookCardActionsOverlay(showMenu: $showMenu, book: book, viewModel: viewModel))
-        .onChange(of: showMenu) { newValue in
-            if !newValue {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    // Ensure menu is fully dismissed
+        .contextMenu {
+            if book.status != .reading {
+                Button(action: {
+                    viewModel?.moveBook(book, to: .reading)
+                }) {
+                    Label("Start Reading", systemImage: "book")
                 }
             }
+
+            if book.status != .read {
+                Button(action: {
+                    viewModel?.markBookAsComplete(book)
+                }) {
+                    Label("Mark as Read", systemImage: "checkmark.circle")
+                }
+            }
+
+            Button(role: .destructive, action: {
+                viewModel?.deleteBook(book)
+            }) {
+                Label("Delete", systemImage: "trash")
+            }
         }
+        #if canImport(UIKit)
+        .onLongPressGesture(minimumDuration: 0.5) {
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        }
+        #endif
     }
 
     private func addToLibrary() {
