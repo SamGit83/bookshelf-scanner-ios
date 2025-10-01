@@ -91,8 +91,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.accent,
                                             showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                // Premium coming soon - no action
-                                                print("DEBUG ProfileView: Premium coming soon - scan teaser tap ignored")
+                                                showUpgradeModal = true
                                             }
                                         )
 
@@ -105,8 +104,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.success,
                                             showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                // Premium coming soon - no action
-                                                print("DEBUG ProfileView: Premium coming soon - book teaser tap ignored")
+                                                showUpgradeModal = true
                                             }
                                         )
 
@@ -119,8 +117,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.promotional,
                                             showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                // Premium coming soon - no action
-                                                print("DEBUG ProfileView: Premium coming soon - recommendation teaser tap ignored")
+                                                showUpgradeModal = true
                                             }
                                         )
 
@@ -316,6 +313,30 @@ struct ProfileView: View {
                                         }
                                     }
                                     .frame(maxWidth: 350)
+
+                                    Button(action: {
+                                        showUpgradeModal = true
+                                    }) {
+                                        Text("Upgrade Now")
+                                            .font(AppleBooksTypography.buttonLarge)
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, AppleBooksSpacing.space16)
+                                            .padding(.horizontal, AppleBooksSpacing.space24)
+                                            .background(
+                                                LinearGradient(
+                                                    colors: [PrimaryColors.vibrantPurple, PrimaryColors.vibrantPurple.opacity(0.8)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .cornerRadius(12)
+                                            .shadow(color: PrimaryColors.vibrantPurple.opacity(0.3), radius: 8, x: 0, y: 4)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                    .padding(.horizontal, AppleBooksSpacing.space24)
+                                    .glassBackground()
+                                    .accessibilityLabel("Upgrade Now Button")
                                 }
                                 .padding(.horizontal, AppleBooksSpacing.space24)
                             }

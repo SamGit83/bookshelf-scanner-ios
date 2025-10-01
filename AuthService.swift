@@ -253,4 +253,23 @@ class AuthService: ObservableObject {
             }
         }
     }
+
+    func joinWaitlist(email: String) async throws {
+        guard let userId = currentUser?.id else {
+            throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No user logged in"])
+        }
+
+        let db = Firestore.firestore()
+        do {
+            _ = try await db.collection("waitlist").addDocument(data: [
+                "email": email,
+                "userId": userId,
+                "timestamp": Timestamp()
+            ])
+            print("DEBUG AuthService: Successfully added user \(userId) to waitlist with email \(email)")
+        } catch {
+            print("DEBUG AuthService: Failed to add to waitlist: \(error)")
+            throw error
+        }
+    }
 }

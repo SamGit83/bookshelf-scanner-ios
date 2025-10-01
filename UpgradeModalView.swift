@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
+import FirebaseFirestore
 
 struct UpgradeModalView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -11,6 +12,11 @@ struct UpgradeModalView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var variantConfig: UpgradeVariantConfig?
+    @State private var email = ""
+    @State private var showEmailInput = false
+    @State private var isSubmitting = false
+    @State private var showEmailError = false
+    @State private var showSuccess = false
 
     enum SubscriptionPlan {
         case monthly, annual
@@ -261,16 +267,15 @@ struct UpgradeModalView: View {
     private var ctaSection: some View {
         VStack(spacing: 16) {
             Button(action: {
-                // Premium coming soon - no action
-                print("DEBUG UpgradeModalView: Premium coming soon - CTA tap ignored")
+                showEmailInput = true
             }) {
-                Text("Coming Soon")
+                Text("Join Waitlist")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 32)
                     .background(
                         LinearGradient(
-                            colors: [SemanticColors.warningPrimary, SemanticColors.warningPrimary.opacity(0.8)],
+                            colors: [PrimaryColors.vibrantPurple, PrimaryColors.vibrantPurple.opacity(0.8)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -278,24 +283,101 @@ struct UpgradeModalView: View {
                     .foregroundColor(.white)
                     .cornerRadius(20)
                     .font(.headline.weight(.semibold))
-                    .shadow(color: SemanticColors.warningPrimary.opacity(0.4), radius: 12, x: 0, y: 6)
+                    .shadow(color: PrimaryColors.vibrantPurple.opacity(0.4), radius: 12, x: 0, y: 6)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(Color.white.opacity(0.2), lineWidth: 1)
                     )
             }
             .buttonStyle(PlainButtonStyle())
-            .disabled(true)
-            .opacity(0.6)
             .padding(.horizontal, 16)
-            .accessibilityLabel("Premium Coming Soon")
+            .accessibilityLabel("Join Waitlist Button")
+
+            if showEmailInput {
+                VStack(spacing: 16) {
+                    Text("Enter your email to join the Premium waitlist")
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.center)
+
+                    TextField("your.email@example.com", text: $email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .keyboardType(.emailAddress)
+                        .glassFieldStyle(isValid: !showEmailError)
+
+                    if showEmailError {
+                        Text("Please enter a valid email address")
+                            .font(.caption)
+                            .foregroundColor(SemanticColors.errorPrimary)
+                    }
+
+                    Button(action: {
+                        if email.contains("@") && !email.isEmpty {
+                            showEmailError = false
+                            isSubmitting = true
+                            Task {
+                                do {
+                                    try await AuthService.shared.joinWaitlist(email: email)
+                                    isSubmitting = false
+                                    showSuccess = true
+                                    email = ""
+                                    showEmailInput = false
+                                } catch {
+                                    isSubmitting = false
+                                    showEmailError = true
+                                    errorMessage = error.localizedDescription
+                                    showError = true
+                                }
+                            }
+                        } else {
+                            showEmailError = true
+                        }
+                    }) {
+                        Text(isSubmitting ? "Joining..." : "Join Waitlist")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .padding(.horizontal, 24)
+                            .background(
+                                LinearGradient(
+                                    colors: [PrimaryColors.vibrantPurple, PrimaryColors.vibrantPurple.opacity(0.8)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                            .font(.headline.weight(.semibold))
+                    }
+                    .disabled(isSubmitting || email.isEmpty)
+                    .buttonStyle(PlainButtonStyle())
+
+                    Button(action: {
+                        showEmailInput = false
+                        email = ""
+                        showEmailError = false
+                    }) {
+                        Text("Cancel")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 24)
+                            .background(Color.clear)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 20)
+                .glassBackground()
+                .cornerRadius(16)
+            }
 
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Maybe Later")
                     .font(.body)
-                    .foregroundColor(Color.secondary)
+                    .foregroundColor(.secondary)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 24)
                     .background(Color.clear)
@@ -304,6 +386,15 @@ struct UpgradeModalView: View {
             .accessibilityLabel("Maybe Later Button")
         }
         .glassBackground()
+        .alert(isPresented: $showSuccess) {
+            Alert(
+                title: Text("Success"),
+                message: Text("Thanks for joining the waitlist! We'll notify you when Premium is available."),
+                dismissButton: .default(Text("OK")) {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            )
+        }
     }
 
     private var closeButton: some View {
