@@ -20,10 +20,6 @@ struct LoginView: View {
     @State private var country = ""
     @State private var city = ""
     @State private var favoriteBookGenre = ""
-    @State private var selectedTier: UserTier = .free
-    @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
-    @ObservedObject private var revenueCatManager = RevenueCatManager.shared
-    @State private var showUpgradeModal = false
     @State private var showWaitlistModal = false
 
     init(isSignUp: Bool = false) {
@@ -138,15 +134,6 @@ struct LoginView: View {
                                     .textContentType(isSignUp ? .newPassword : .password)
                             }
 
-                            // Mobile-First Expandable Tier Selection (only for signup)
-                            if isSignUp {
-                                ExpandableTierSelection(
-                                    selectedTier: $selectedTier,
-                                    selectedPeriod: $selectedPeriod
-                                )
-                                .padding(.bottom, AppleBooksSpacing.space24)
-                            }
-                            
                             if isSignUp {
                                 AppleBooksCard(
                                     cornerRadius: 12,
@@ -500,9 +487,6 @@ struct LoginView: View {
         .sheet(isPresented: $showPasswordReset) {
             PasswordResetView()
         }
-        .sheet(isPresented: $showUpgradeModal) {
-            UpgradeModalView()
-        }
         .sheet(isPresented: $showWaitlistModal) {
             WaitlistModal(
                 initialFirstName: firstName,
@@ -562,15 +546,11 @@ struct LoginView: View {
             country: country.isEmpty ? nil : country,
             city: city.isEmpty ? nil : city,
             favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre,
-            tier: selectedTier
+            tier: .free
         ) { result in
             isLoading = false
             switch result {
             case .success:
-                // Premium not available yet, so no upgrade modal
-                // if selectedTier == .premium && !revenueCatManager.isSubscribed {
-                //     showUpgradeModal = true
-                // }
                 // Navigation will be handled by the parent view
                 break
             case .failure:
