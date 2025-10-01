@@ -1,14 +1,15 @@
 import SwiftUI
 
 struct WaitlistModal: View {
-    @Environment(\.presentationMode) var presentationMode
-    @State private var firstName: String
-    @State private var lastName: String
-    @State private var email: String
-    @State private var userId: String = ""
-    @State private var isSubmitting = false
-    @State private var showSuccessAlert = false
-    @ObservedObject private var authService = AuthService.shared
+     @Environment(\.presentationMode) var presentationMode
+     @State private var firstName: String
+     @State private var lastName: String
+     @State private var email: String
+     @State private var selectedPlan: String = "monthly"
+     @State private var userId: String = ""
+     @State private var isSubmitting = false
+     @State private var showSuccessAlert = false
+     @ObservedObject private var authService = AuthService.shared
     
     init(initialFirstName: String? = nil, initialLastName: String? = nil, initialEmail: String? = nil, initialUserId: String? = nil) {
         _firstName = State(initialValue: initialFirstName ?? "")
@@ -76,6 +77,19 @@ struct WaitlistModal: View {
                 .autocapitalization(.none)
                 .textContentType(.emailAddress)
 
+                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                    Text("Select Plan")
+                        .font(AppleBooksTypography.bodyLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                    Picker("Plan", selection: $selectedPlan) {
+                        Text("Monthly").tag("monthly")
+                        Text("Yearly").tag("yearly")
+                    }
+                    .pickerStyle(.segmented)
+                    .background(AppleBooksColors.card)
+                    .cornerRadius(8)
+                }
+
                 if let errorMessage = authService.errorMessage, !errorMessage.isEmpty {
                     Text(errorMessage)
                         .font(.caption)
@@ -95,7 +109,7 @@ struct WaitlistModal: View {
                         Task {
                             print("Starting async task")
                             do {
-                                try await authService.joinWaitlist(firstName: firstName, lastName: lastName, email: email, userId: userId)
+                                try await authService.joinWaitlist(firstName: firstName, lastName: lastName, email: email, plan: selectedPlan, userId: userId)
                                 print("Join waitlist successful")
                                 authService.errorMessage = nil
                                 await MainActor.run {
@@ -131,8 +145,7 @@ struct WaitlistModal: View {
                         .padding(.vertical, AppleBooksSpacing.space16)
                     }
                 }
-                .background(AppleBooksColors.accent)
-                .cornerRadius(12)
+                .primaryButtonStyle()
                 .disabled(isSubmitting || !isValidEmail(email) || email.isEmpty || firstName.isEmpty || lastName.isEmpty)
                  
                 Button("Cancel") {

@@ -257,7 +257,7 @@ class AuthService: ObservableObject {
         }
     }
 
-    func joinWaitlist(firstName: String, lastName: String, email: String, userId: String? = nil) async throws {
+    func joinWaitlist(firstName: String, lastName: String, email: String, plan: String, userId: String? = nil) async throws {
         let db = Firestore.firestore()
         // Check for duplicates
         let emailQuery = db.collection("waitlist").whereField("email", isEqualTo: email)
@@ -276,6 +276,7 @@ class AuthService: ObservableObject {
             "firstName": firstName,
             "lastName": lastName,
             "email": email,
+            "plan": plan,
             "timestamp": Timestamp()
         ]
         if let userId = userId {
@@ -283,7 +284,7 @@ class AuthService: ObservableObject {
         }
         do {
             _ = try await db.collection("waitlist").addDocument(data: data)
-            print("DEBUG AuthService: Successfully added to waitlist with email \(email)")
+            print("DEBUG AuthService: Successfully added to waitlist with email \(email) for plan \(plan)")
         } catch {
             print("DEBUG AuthService: Failed to add to waitlist: \(error)")
             throw error
