@@ -10,7 +10,7 @@ struct SplashScreenView: View {
     @State private var letterScales: [CGFloat] = Array(repeating: 1.0, count: 12)
     
     private let appName = "Book Shelfie"
-    
+        
     var body: some View {
         ZStack {
             // Background matching LaunchScreen
@@ -45,6 +45,16 @@ struct SplashScreenView: View {
                             .opacity(opacity)
                     }
                 }
+                // App Name with letter-by-letter bounce animation
+                HStack(spacing: 0) {
+                    ForEach(Array(appName.enumerated()), id: \.offset) { index, character in
+                        Text(String(character))
+                            .font(.system(size: 48, weight: .bold))
+                            .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
+                            .scaleEffect(letterScales[index])
+                            .opacity(opacity)
+                    }
+                }
             }
         }
         .onAppear {
@@ -54,6 +64,7 @@ struct SplashScreenView: View {
                 opacity = 1.0
             }
             
+            // Add subtle bounce effect to icon
             // Add subtle bounce effect to icon
             // Add subtle bounce effect to icon
             withAnimation(.easeInOut(duration: 1.2).delay(0.8)) {
@@ -73,9 +84,17 @@ struct SplashScreenView: View {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
                         letterScales[index] = 1.3
                     }
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
+                        letterScales[index] = 1.3
+                    }
                 }
                 
                 // Bounce back down
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay + 0.15) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0)) {
+                        letterScales[index] = 1.0
+                    }
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay + 0.15) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0)) {
                         letterScales[index] = 1.0
