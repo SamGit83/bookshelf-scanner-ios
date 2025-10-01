@@ -12,7 +12,7 @@ struct OnboardingView: View {
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var currentPage = 0
     @State private var showMainApp = false
-    @State private var selectedOption: SubscriptionOption? = SubscriptionOption(name: "Yearly Premium", price: "$99.99", period: "year")
+    @State private var selectedOption: SubscriptionOption? = nil
     @State private var showSuccess = false
 
     let subscriptionOptions: [SubscriptionOption] = [
@@ -273,23 +273,66 @@ struct SubscriptionButton: View {
         Button(action: {
             selectedOption = option
         }) {
-            VStack(spacing: AppleBooksSpacing.space8) {
-                Text(option.name)
-                    .font(AppleBooksTypography.bodyLarge)
+            VStack(spacing: 12) {
+                // Savings badge for yearly plan
+                if option.period == "year" {
+                    Text("Save 17%")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(AppleBooksColors.success)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(AppleBooksColors.success.opacity(0.1))
+                        .cornerRadius(8)
+                } else {
+                    Spacer(minLength: 20) // Balance height for monthly card
+                }
+                
+                // Best Value badge for yearly plan
+                if option.period == "year" {
+                    Text("BEST VALUE")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(AppleBooksColors.promotional)
+                        .cornerRadius(6)
+                }
+                
+                // Price display
+                Text(option.price)
+                    .font(.system(size: 32, weight: .bold))
                     .foregroundColor(isSelected ? AppleBooksColors.accent : AppleBooksColors.text)
-                Text("\(option.price)/\(option.period)")
-                    .font(.headline)
-                    .foregroundColor(isSelected ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
+                
+                Text("per \(option.period)")
+                    .font(.caption)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                
+                // Monthly equivalent for yearly plan
+                if option.period == "year" {
+                    Text("$8.33/month")
+                        .font(.caption2)
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.8)
+                        .lineLimit(1)
+                } else {
+                    Spacer(minLength: 10) // Additional balance
+                }
             }
-            .padding(.vertical, AppleBooksSpacing.space16)
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .frame(maxWidth: .infinity, minHeight: 160) // Fixed height for consistency
+            .padding(20)
             .background(isSelected ? AppleBooksColors.accent.opacity(0.1) : AppleBooksColors.card)
-            .cornerRadius(12)
+            .cornerRadius(16)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? AppleBooksColors.accent : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? AppleBooksColors.accent : Color.clear, lineWidth: isSelected ? 3 : 0)
             )
+            .shadow(color: isSelected ? AppleBooksColors.accent.opacity(0.3) : Color.black.opacity(0.05), radius: isSelected ? 8 : 5, x: 0, y: isSelected ? 4 : 2)
         }
+        .buttonStyle(PlainButtonStyle())
     }
 
     private var isSelected: Bool {
