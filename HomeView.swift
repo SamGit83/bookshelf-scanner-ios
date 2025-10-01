@@ -13,6 +13,11 @@ struct HomeView: View {
     @State private var currentOpacity: Double = 1
     @State private var nextOpacity: Double = 0
     @State private var nextIndex: Int = 1
+    @State private var currentOffset: CGFloat = 0
+    @State private var nextOffset: CGFloat = 50
+    @State private var currentOpacity: Double = 1
+    @State private var nextOpacity: Double = 0
+    @State private var nextIndex: Int = 1
     var body: some View {
         ZStack {
             // Apple Books clean background
@@ -38,6 +43,7 @@ struct HomeView: View {
                             .offset(y: floatingOffset)
                             .offset(y: floatingOffset)
                             .offset(y: floatingOffset)
+                            .offset(y: floatingOffset)
 
                         // Title
                         Text("Bookshelf Scanner")
@@ -52,26 +58,82 @@ struct HomeView: View {
                             .multilineTextAlignment(.leading)
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         
-                            // Animated Hero Words
+                            // Animated Hero Words with Icons
                             let words = ["Scan", "catalog", "organize", "discover"]
+                            let icons = ["viewfinder", "books.vertical", "square.grid.2x2", "sparkles"]
+                            
                             ZStack {
-                                Text(words[currentIndex])
-                                    .font(.title.weight(.semibold))
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .multilineTextAlignment(.center)
-                                    .offset(y: currentOffset)
-                                    .opacity(currentOpacity)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
-                                Text(words[nextIndex])
-                                    .font(.title.weight(.semibold))
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .multilineTextAlignment(.center)
-                                    .offset(y: nextOffset)
-                                    .opacity(nextOpacity)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .padding(.horizontal, AppleBooksSpacing.space24)
+                                // Current word with icon
+                                HStack(spacing: 12) {
+                                    Image(systemName: icons[currentIndex])
+                                        .font(.system(size: 28, weight: .bold))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
+                                    
+                                    Text(words[currentIndex])
+                                        .font(.largeTitle.weight(.bold))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
+                                }
+                                .offset(y: currentOffset)
+                                .opacity(currentOpacity)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.horizontal, AppleBooksSpacing.space24)
+                                .padding(.vertical, 20)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(AppleBooksColors.accent.opacity(0.05))
+                                        .blur(radius: 8)
+                                )
+                                
+                                // Next word with icon
+                                HStack(spacing: 12) {
+                                    Image(systemName: icons[nextIndex])
+                                        .font(.system(size: 28, weight: .bold))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
+                                    
+                                    Text(words[nextIndex])
+                                        .font(.largeTitle.weight(.bold))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
+                                }
+                                .offset(y: nextOffset)
+                                .opacity(nextOpacity)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.horizontal, AppleBooksSpacing.space24)
+                                .padding(.vertical, 20)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(AppleBooksColors.accent.opacity(0.05))
+                                        .blur(radius: 8)
+                                )
                             }
+                            .frame(height: 80)
                         
                         // CTA Buttons
                         VStack(spacing: AppleBooksSpacing.space16) {
@@ -113,6 +175,20 @@ struct HomeView: View {
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
+                                withAnimation(.easeInOut(duration: 1.0)) {
+                                    currentOffset = -50
+                                    currentOpacity = 0
+                                    nextOffset = 0
+                                    nextOpacity = 1
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                    currentIndex = nextIndex
+                                    nextIndex = (nextIndex + 1) % 4
+                                    currentOffset = 0
+                                    nextOffset = 50
+                                    currentOpacity = 1
+                                    nextOpacity = 0
                             timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
                                 withAnimation(.easeInOut(duration: 1.0)) {
                                     currentOffset = -50
