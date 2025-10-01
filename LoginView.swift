@@ -496,6 +496,11 @@ struct LoginView: View {
             return
         }
 
+        guard let tier = selectedTier else {
+            authService.errorMessage = "Please select a tier"
+            return
+        }
+
         isLoading = true
         authService.signUp(
             email: email,
@@ -508,7 +513,7 @@ struct LoginView: View {
             country: country.isEmpty ? nil : country,
             city: city.isEmpty ? nil : city,
             favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre,
-            tier: selectedTier
+            tier: tier
         ) { result in
             isLoading = false
             switch result {
