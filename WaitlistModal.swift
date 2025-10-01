@@ -18,7 +18,7 @@ struct WaitlistModal: View {
     }
     
     private func isValidEmail(_ email: String) -> Bool {
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Z0-9a-z.-]+\\.[A-Z]{2,64}"
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Z0-9a-z.-]+\\.[A-Za-z]{2,64}"
         let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
     }
@@ -84,17 +84,26 @@ struct WaitlistModal: View {
                 }
 
                 Button(action: {
+                    print("Button tapped")
+                    print("firstName: \(firstName)")
+                    print("lastName: \(lastName)")
+                    print("email: \(email)")
+                    print("isValidEmail(email): \(isValidEmail(email))")
                     if isValidEmail(email) && !firstName.isEmpty && !lastName.isEmpty {
+                        print("Validation passed")
                         isSubmitting = true
                         Task {
+                            print("Starting async task")
                             do {
                                 try await authService.joinWaitlist(firstName: firstName, lastName: lastName, email: email, userId: userId)
+                                print("Join waitlist successful")
                                 authService.errorMessage = nil
                                 await MainActor.run {
                                     isSubmitting = false
                                     showSuccessAlert = true
                                 }
                             } catch {
+                                print("Error joining waitlist: \(error.localizedDescription)")
                                 await MainActor.run {
                                     isSubmitting = false
                                     authService.errorMessage = "Failed to join waitlist. Please try again."
