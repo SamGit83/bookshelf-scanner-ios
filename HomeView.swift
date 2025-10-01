@@ -51,7 +51,7 @@ struct HomeView: View {
                         
                         // Animated Hero Words with Icons
                         ZStack {
-                            let words = ["Scan", "catalog", "organize", "discover"]
+                            let words = ["Scan", "Catalog", "Organize", "Discover"]
                             let icons = ["viewfinder", "books.vertical", "square.grid.2x2", "sparkles"]
                             
                                 // Current word with icon
@@ -162,7 +162,7 @@ struct HomeView: View {
                     }
                     .onAppear {
                         withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
-                            floatingOffset = -8
+                            floatingOffset = -10
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
