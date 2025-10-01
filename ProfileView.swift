@@ -146,7 +146,7 @@ struct ProfileView: View {
                                                         .foregroundColor(.white)
                                                         .padding(.horizontal, 12)
                                                         .padding(.vertical, 6)
-                                                        .background(AppleBooksColors.promotional.opacity(0.7))
+                                                        .background(accentColorManager.currentAccentColor.opacity(0.7))
                                                         .clipShape(RoundedRectangle(cornerRadius: 6))
                                                 }
                                                 .disabled(true)
