@@ -360,7 +360,7 @@ struct ProfileView: View {
                     WaitlistModal()
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: showUpgradeModal)
+            .animation(.easeInOut(duration: 0.3), value: showWaitlistModal)
             .alert(isPresented: $showSignOutAlert) {
                 Alert(
                     title: Text("Sign Out"),
