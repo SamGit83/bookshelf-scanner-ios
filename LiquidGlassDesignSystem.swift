@@ -1246,7 +1246,7 @@ public struct AppleBooksBookCard: View {
                         .font(AppleBooksTypography.caption)
                         .foregroundColor(AppleBooksColors.text)
 
-                    // Row 1: Page count and reading time badges
+                    // Row 1: Page count, reading time, and age rating badges
                     HStack(spacing: AppleBooksSpacing.space6) {
                         if let pageCount = book.pageCount {
                             Text("\(pageCount) pages")
@@ -1264,6 +1264,28 @@ public struct AppleBooksBookCard: View {
                                 .padding(.horizontal, AppleBooksSpacing.space6)
                                 .padding(.vertical, AppleBooksSpacing.space2)
                                 .background(AppleBooksColors.success.opacity(0.1))
+                                .cornerRadius(4)
+                        }
+                        // Age rating badge
+                        if let ageRating = book.ageRating {
+                            let isChildren = ageRating.lowercased().contains("children") || ageRating.lowercased().contains("general")
+                            let isAdult = ageRating.lowercased().contains("adult") || ageRating.lowercased().contains("mature")
+                            let bgColor = isChildren ? AppleBooksColors.success.opacity(0.1) : isAdult ? Color(hex: "FF9500").opacity(0.1) : AppleBooksColors.card.opacity(0.8)
+                            let fgColor = isChildren ? AppleBooksColors.success : isAdult ? Color(hex: "FF9500") : AppleBooksColors.text
+                            Text(ageRating)
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(fgColor)
+                                .padding(.horizontal, AppleBooksSpacing.space6)
+                                .padding(.vertical, AppleBooksSpacing.space2)
+                                .background(bgColor)
+                                .cornerRadius(4)
+                        } else {
+                            Text("Unrated")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.text)
+                                .padding(.horizontal, AppleBooksSpacing.space6)
+                                .padding(.vertical, AppleBooksSpacing.space2)
+                                .background(AppleBooksColors.card.opacity(0.8))
                                 .cornerRadius(4)
                         }
                     }

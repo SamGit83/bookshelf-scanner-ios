@@ -19,6 +19,7 @@ struct Book: Identifiable, Codable, Hashable {
     var authorBio: String?
     var confidence: Double?
     var position: String?
+    var ageRating: String?
     var status: BookStatus
     var dateAdded: Date
     var coverImageData: Data?
@@ -32,7 +33,11 @@ struct Book: Identifiable, Codable, Hashable {
     var dateStartedReading: Date?
     var dateFinishedReading: Date?
 
-    init(title: String?, author: String?, isbn: String? = nil, genre: String? = nil, status: BookStatus = .toRead, coverImageData: Data? = nil, coverImageURL: String? = nil) {
+    enum CodingKeys: String, CodingKey {
+        case id, title, author, isbn, genre, subGenre, publisher, publicationYear, pageCount, estimatedReadingTime, authorBiography, teaser, authorBio, confidence, position, ageRating, status, dateAdded, coverImageData, coverImageURL, totalPages, currentPage, readingGoal, readingSessions, dateStartedReading, dateFinishedReading
+    }
+
+    init(title: String?, author: String?, isbn: String? = nil, genre: String? = nil, status: BookStatus = .toRead, coverImageData: Data? = nil, coverImageURL: String? = nil, ageRating: String? = nil) {
         self.title = title ?? ""
         self.author = author ?? ""
         self.isbn = isbn
@@ -49,6 +54,7 @@ struct Book: Identifiable, Codable, Hashable {
             self.coverImageData = nil
         }
         self.coverImageURL = coverImageURL
+        self.ageRating = ageRating
     }
 
     // Custom decoder to handle missing 'id', 'status', and 'dateAdded' from Gemini API
@@ -86,6 +92,7 @@ struct Book: Identifiable, Codable, Hashable {
         self.authorBio = try container.decodeIfPresent(String.self, forKey: .authorBio)
         self.confidence = try container.decodeIfPresent(Double.self, forKey: .confidence)
         self.position = try container.decodeIfPresent(String.self, forKey: .position)
+        self.ageRating = try container.decodeIfPresent(String.self, forKey: .ageRating)
 
         // Default to .toRead if 'status' is missing
         self.status = try container.decodeIfPresent(BookStatus.self, forKey: .status) ?? .toRead

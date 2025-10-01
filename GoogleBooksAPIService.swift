@@ -164,11 +164,24 @@ class GoogleBooksAPIService {
             description: volume.volumeInfo.description,
             thumbnailURL: thumbnailURL,
             publishedDate: volume.volumeInfo.publishedDate,
-            pageCount: volume.volumeInfo.pageCount
+            pageCount: volume.volumeInfo.pageCount,
+            ageRating: mapMaturityRating(volume.volumeInfo.maturityRating)
         )
 
         print("DEBUG GoogleBooksAPIService: Created recommendation: \(recommendation.title) by \(recommendation.author), thumbnail: \(recommendation.thumbnailURL ?? "nil")")
         return recommendation
+    }
+
+    private func mapMaturityRating(_ rating: String?) -> String? {
+        guard let rating = rating else { return nil }
+        switch rating {
+        case "NOT_MATURE":
+            return "General Audience"
+        case "MATURE":
+            return "Mature Content"
+        default:
+            return nil
+        }
     }
 
     func getRecommendationsBasedOnAuthor(_ author: String, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
@@ -484,6 +497,7 @@ struct GoogleBookVolumeInfo: Codable {
     let imageLinks: GoogleBookImageLinks?
     let publishedDate: String?
     let pageCount: Int?
+    let maturityRating: String?
 }
 
 struct GoogleBookImageLinks: Codable {
@@ -500,6 +514,7 @@ struct BookRecommendation: Identifiable, Codable {
     let thumbnailURL: String?
     let publishedDate: String?
     let pageCount: Int?
+    let ageRating: String?
 
     var displayDescription: String {
         if let description = description, !description.isEmpty {
