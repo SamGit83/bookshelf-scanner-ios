@@ -6,7 +6,7 @@ struct HomeView: View {
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var showLogin = false
     @State private var showSignup = false
-    @State private var floatingOffset: CGFloat = 0
+    @State private var floatingOffset: CGFloat = -20
     @State private var flipAngle: Double = 0
     @State private var currentIndex: Int = 0
     @State private var timer: Timer? = nil
@@ -205,7 +205,7 @@ struct HomeView: View {
                 }
                 .onAppear {
                     withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
-                        floatingOffset = -20
+                        floatingOffset = 20
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
@@ -282,7 +282,7 @@ struct FeatureRow: View {
             }
             .opacity(visibility)
             .offset(y: (1 - visibility) * (minY < 0 ? -100 : 100))
-            .animation(.easeInOut, value: visibility)
+            .animation(.easeInOut(duration: 0.3), value: visibility)
         }
     }
 }

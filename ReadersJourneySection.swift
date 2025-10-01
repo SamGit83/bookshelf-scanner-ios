@@ -144,17 +144,36 @@ struct EnhancedJourneyCard: View {
                 .shadow(color: cardType.accentColor.opacity(glowOpacity * 0.5), radius: 8, x: 0, y: 4)
         )
         .offset(x: shakeOffset)
-        .animation(.spring(response: 0.1, dampingFraction: 0.5).repeatCount(5, autoreverses: true), value: shakeTrigger)
         .frame(maxWidth: .infinity)
         .onAppear {
             animationTrigger = true
             if cardType == .struggles {
-                shakeTrigger = true
-                withAnimation(.spring(response: 0.1, dampingFraction: 0.5).repeatCount(5, autoreverses: true)) {
+                // Shake animation using explicit withAnimation blocks
+                withAnimation(.spring(response: 0.1, dampingFraction: 0.5)) {
                     shakeOffset = 5
                 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.spring(response: 0.1, dampingFraction: 0.5)) {
+                        shakeOffset = -5
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    withAnimation(.spring(response: 0.1, dampingFraction: 0.5)) {
+                        shakeOffset = 5
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation(.spring(response: 0.1, dampingFraction: 0.5)) {
+                        shakeOffset = -5
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    withAnimation(.spring(response: 0.1, dampingFraction: 0.5)) {
+                        shakeOffset = 5
+                    }
+                }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation {
+                    withAnimation(.spring(response: 0.1, dampingFraction: 0.5)) {
                         shakeOffset = 0
                     }
                 }
@@ -171,56 +190,79 @@ struct EnhancedJourneyCard: View {
 struct TransformationProgressIndicator: View {
     @State private var progress: CGFloat = 0.0
     @State private var arrowScale: CGFloat = 1.0
+    @State private var isVisible: Bool = false
 
     var body: some View {
-        VStack(spacing: AppleBooksSpacing.space8) {
-            Text("Transformation Progress")
-                .font(AppleBooksTypography.captionBold)
-                .foregroundColor(AppleBooksColors.textSecondary)
+        GeometryReader { geometry in
+            let minY = geometry.frame(in: .global).minY
+            let screenHeight = UIScreen.main.bounds.height
+            let visibility = minY < screenHeight && minY > -geometry.size.height
+            
+            VStack(spacing: AppleBooksSpacing.space8) {
+                Text("Transformation Progress")
+                    .font(AppleBooksTypography.captionBold)
+                    .foregroundColor(AppleBooksColors.textSecondary)
 
-            ZStack {
-                // Background track
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 280, height: 8)
+                ZStack {
+                    // Background track
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 280, height: 8)
 
-                // Progress fill
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(hex: "FF6B35"), Color(hex: "4A90E2")],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                    // Progress fill
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(hex: "FF6B35"), Color(hex: "4A90E2")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .frame(width: 280 * progress, height: 8, alignment: .leading)
+                        .frame(width: 280 * progress, height: 8, alignment: .leading)
 
-                // Arrow indicator
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .scaleEffect(arrowScale)
-                    .offset(x: (progress - 0.5) * 280)
+                    // Arrow indicator
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .scaleEffect(arrowScale)
+                        .offset(x: (progress - 0.5) * 280)
+                }
+                .frame(width: 280)
+
+                HStack(spacing: AppleBooksSpacing.space80) {
+                    Text("Struggles")
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(Color(hex: "FF6B35"))
+                    Text("Success")
+                        .font(AppleBooksTypography.caption)
+                        .foregroundColor(Color(hex: "4A90E2"))
+                }
             }
-            .frame(width: 280)
-
-            HStack(spacing: AppleBooksSpacing.space80) {
-                Text("Struggles")
-                    .font(AppleBooksTypography.caption)
-                    .foregroundColor(Color(hex: "FF6B35"))
-                Text("Success")
-                    .font(AppleBooksTypography.caption)
-                    .foregroundColor(Color(hex: "4A90E2"))
+            .onChange(of: visibility) { newValue in
+                if newValue && !isVisible {
+                    isVisible = true
+                    withAnimation(.easeInOut(duration: 1.5)) {
+                        progress = 0.7
+                    }
+                    withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                        arrowScale = 1.2
+                    }
+                }
+            }
+            .onAppear {
+                // Fallback if scroll detection doesn't trigger
+                if visibility {
+                    isVisible = true
+                    withAnimation(.easeInOut(duration: 1.5)) {
+                        progress = 0.7
+                    }
+                    withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                        arrowScale = 1.2
+                    }
+                }
             }
         }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 1.5)) {
-                progress = 0.7
-            }
-            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
-                arrowScale = 1.2
-            }
-        }
+        .frame(height: 80)
     }
 }
 
