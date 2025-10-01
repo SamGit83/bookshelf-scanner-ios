@@ -42,7 +42,7 @@ struct HomeView: View {
 
                         // Title
                         Text("Book Shelfie")
-                            .font(AppleBooksTypography.displayLarge)
+                            .font(.system(size: 48, weight: .bold))
                             .foregroundColor(AppleBooksColors.text)
                             .multilineTextAlignment(.center)
 
