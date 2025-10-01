@@ -245,7 +245,7 @@ struct UpgradeModalView: View {
                     .padding(.horizontal, 32)
                     .background(
                         LinearGradient(
-                            colors: [Color.blue, Color.blue.opacity(0.8)],
+                            colors: [Color.orange, Color.orange.opacity(0.8)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -253,7 +253,7 @@ struct UpgradeModalView: View {
                     .foregroundColor(.white)
                     .cornerRadius(20)
                     .font(.headline.weight(.semibold))
-                    .shadow(color: Color.blue.opacity(0.4), radius: 12, x: 0, y: 6)
+                    .shadow(color: Color.orange.opacity(0.4), radius: 12, x: 0, y: 6)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(Color.white.opacity(0.2), lineWidth: 1)
@@ -435,13 +435,13 @@ struct PricingCard: View {
             VStack(spacing: 12) {
                 Spacer(minLength: 20)
 
-                Text("Coming Soon")
-                    .font(.largeTitle)
-                    .foregroundColor(Color.primary)
-                    .bold()
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.8)
-                    .lineLimit(1)
+                Text("$\(price, specifier: "%.2f")")
+                .font(.largeTitle)
+                .foregroundColor(Color.primary)
+                .bold()
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.8)
+                .lineLimit(1)
 
                 Text("per \(period)")
                     .font(.caption)
