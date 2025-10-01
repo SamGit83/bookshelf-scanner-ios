@@ -8,7 +8,7 @@ struct ReadersJourneySection: View {
                 .foregroundColor(AppleBooksColors.text)
                 .padding(.horizontal, AppleBooksSpacing.space32)
 
-            Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Bookshelf Scanner, and how our app transformed her entire reading experience.")
+            Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.leading)

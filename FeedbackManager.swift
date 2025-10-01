@@ -249,7 +249,7 @@ class FeedbackManager: ObservableObject {
                 SurveyQuestion(
                     id: "nps_score",
                     type: .nps,
-                    question: "How likely are you to recommend Bookshelf Scanner to a friend?",
+                    question: "How likely are you to recommend Book Shelfie to a friend?",
                     required: true,
                     options: Array(0...10).map { "\($0)" }
                 ),

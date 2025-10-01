@@ -632,7 +632,7 @@ struct HelpView: View {
             ScrollView {
                 VStack(spacing: SpacingSystem.xl) {
                     VStack(alignment: .leading, spacing: SpacingSystem.lg) {
-                        Text("How to Use Bookshelf Scanner")
+                        Text("How to Use Book Shelfie")
                             .font(TypographySystem.displayMedium)
                             .foregroundColor(AdaptiveColors.primaryText)
                             .padding(.horizontal, SpacingSystem.md)

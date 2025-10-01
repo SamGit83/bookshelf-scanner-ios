@@ -37,7 +37,7 @@ struct HomeView: View {
                             .offset(y: floatingOffset)
 
                         // Title
-                        Text("Bookshelf Scanner")
+                        Text("Book Shelfie")
                             .font(AppleBooksTypography.displayLarge)
                             .foregroundColor(AppleBooksColors.text)
                             .multilineTextAlignment(.center)
@@ -162,7 +162,7 @@ struct HomeView: View {
                     }
                     .onAppear {
                         withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
-                            floatingOffset = -10
+                            floatingOffset = -20
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

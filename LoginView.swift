@@ -44,12 +44,18 @@ struct LoginView: View {
                     VStack(spacing: AppleBooksSpacing.space16) {
                         Image(systemName: "books.vertical.fill")
                             .font(.system(size: 56, weight: .medium))
-                            .foregroundColor(AppleBooksColors.text)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
                             .scaleEffect(animateForm ? 1.0 : 0.8)
                             .animation(AnimationTiming.transition.delay(0.3), value: animateForm)
 
                         VStack(spacing: AppleBooksSpacing.space8) {
-                            Text("Bookshelf Scanner")
+                            Text("Book Shelfie")
                                 .font(AppleBooksTypography.displayMedium)
                                 .foregroundColor(AppleBooksColors.text)
 

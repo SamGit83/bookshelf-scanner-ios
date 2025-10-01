@@ -14,7 +14,7 @@ import UIKit
  * PerformanceMonitoringService - Centralized Performance Monitoring
  *
  * Singleton service managing all performance monitoring, metrics collection,
- * and real-time analytics for the Bookshelf Scanner app.
+ * and real-time analytics for the Book Shelfie app.
  */
 class PerformanceMonitoringService {
     static let shared = PerformanceMonitoringService()

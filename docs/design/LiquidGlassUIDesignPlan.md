@@ -1,7 +1,7 @@
-# Liquid Glass UI Design Plan for Bookshelf Scanner
+# Liquid Glass UI Design Plan for Book Shelfie
 
 ## 🎨 Vision
-Transform the Bookshelf Scanner into a stunning, modern iOS app featuring Apple's Liquid Glass design language with glassmorphism effects, fluid animations, and sophisticated visual hierarchy.
+Transform the Book Shelfie into a stunning, modern iOS app featuring Apple's Liquid Glass design language with glassmorphism effects, fluid animations, and sophisticated visual hierarchy.
 
 ## 🌟 Design Principles
 
@@ -925,7 +925,7 @@ struct LiquidShadow {
 ## 🏠 Home Page Design Specification
 
 ## Overview
-This document outlines the detailed design specification for the Bookshelf Scanner iOS app's home page, serving as a landing page for unauthenticated users. The design follows the established Liquid Glass design system for consistency with the app's authenticated views.
+This document outlines the detailed design specification for the Book Shelfie iOS app's home page, serving as a landing page for unauthenticated users. The design follows the established Liquid Glass design system for consistency with the app's authenticated views.
 
 ## Layout Structure
 
@@ -935,13 +935,13 @@ This document outlines the detailed design specification for the Bookshelf Scann
 **Background**: Translucent with blur effect matching Liquid Glass system
 
 **Layout**:
-- **Left**: App logo and title "Bookshelf Scanner"
+- **Left**: App logo and title "Book Shelfie"
 - **Right**: Login and Signup buttons
 - **Center**: Empty for balance
 
 **Content**:
 - Logo: Books vertical icon (systemImage: "books.vertical.fill") with circular background
-- Title: "Bookshelf Scanner" in large title font
+- Title: "Book Shelfie" in large title font
 - Login Button: "Login" text, secondary style
 - Signup Button: "Sign Up" text, primary style (white background, blue text)
 
@@ -1016,7 +1016,7 @@ This document outlines the detailed design specification for the Bookshelf Scann
 **Layout**:
 - **Horizontal Stack**: Centered content
 - **Links**: Privacy Policy, Terms of Service, Contact, Social Media
-- **Copyright**: "© 2024 Bookshelf Scanner. All rights reserved."
+- **Copyright**: "© 2024 Book Shelfie. All rights reserved."
 
 **Content Suggestions**:
 - **Links**: Privacy Policy • Terms of Service • Contact Us • Twitter • Instagram
@@ -1167,4 +1167,4 @@ This document outlines the detailed design specification for the Bookshelf Scann
 - **Memory**: Efficient resource management
 - **Network**: Smooth loading states
 
-This comprehensive Liquid Glass UI overhaul will transform the Bookshelf Scanner into a visually stunning, modern iOS app that showcases Apple's latest design language while maintaining exceptional usability and performance.
+This comprehensive Liquid Glass UI overhaul will transform the Book Shelfie into a visually stunning, modern iOS app that showcases Apple's latest design language while maintaining exceptional usability and performance.

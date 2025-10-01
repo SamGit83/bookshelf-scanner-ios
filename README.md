@@ -1,4 +1,4 @@
-# Bookshelf Scanner iOS App
+# Book Shelfie iOS App
 
 A SwiftUI iOS application that allows users to scan bookshelves using their camera, extract book information via Google Gemini Vision AI, and organize their digital library with multi-user support through Firebase.
 

@@ -1,8 +1,8 @@
-# 📊 Bookshelf Scanner - Freemium Tier Specifications
+# 📊 Book Shelfie - Freemium Tier Specifications
 
 ## 🎯 Overview
 
-The Bookshelf Scanner adopts a freemium business model to balance user acquisition with sustainable revenue generation. This document outlines the tier specifications, cost estimates, revenue projections, and strategic considerations.
+The Book Shelfie adopts a freemium business model to balance user acquisition with sustainable revenue generation. This document outlines the tier specifications, cost estimates, revenue projections, and strategic considerations.
 
 This freemium model builds upon the core functionality outlined in the [MVP Plan and User Journey](MVP_Plan_and_User_Journey.md), which details the 90% complete bookshelf scanning and library management features.
 

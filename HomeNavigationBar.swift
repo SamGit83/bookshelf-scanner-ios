@@ -16,7 +16,7 @@ struct HomeNavigationBar: View {
                 Spacer()
 
                 // Centered Title
-                Text("Bookshelf Scanner")
+                Text("Book Shelfie")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)

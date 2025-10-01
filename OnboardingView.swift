@@ -109,7 +109,7 @@ struct OnboardingView: View {
 
     let pages: [OnboardingPage] = [
         OnboardingPage(
-            title: "Welcome to Bookshelf Scanner",
+            title: "Welcome to Book Shelfie",
             description: "Transform your physical book collection into a beautiful digital library with AI-powered recognition.",
             imageName: "books.vertical.fill",
             accentColor: AppleBooksColors.accent

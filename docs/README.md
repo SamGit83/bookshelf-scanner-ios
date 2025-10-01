@@ -1,11 +1,11 @@
-# Bookshelf Scanner Documentation
+# Book Shelfie Documentation
 
-This directory contains comprehensive documentation for the Bookshelf Scanner iOS application, organized into three main categories: Design, Planning, and Technical documentation.
+This directory contains comprehensive documentation for the Book Shelfie iOS application, organized into three main categories: Design, Planning, and Technical documentation.
 
 ## 📁 Documentation Structure
 
 ### 🎨 Design Documentation (`docs/design/`)
-Comprehensive design specifications and UI/UX guidelines for the Bookshelf Scanner app.
+Comprehensive design specifications and UI/UX guidelines for the Book Shelfie app.
 
 - **[Liquid Glass UI Design Plan](design/LiquidGlassUIDesignPlan.md)** - Complete design system specification featuring Apple's Liquid Glass design language with glassmorphism effects, component library, and screen-by-screen redesign plans
 - **[Home Page Design Specification](design/LiquidGlassUIDesignPlan.md#home-page-design-specification)** - Detailed specification for the unauthenticated landing page, including layout, components, and responsive design considerations

@@ -23,7 +23,7 @@
                                     <constraint firstAttribute="height" constant="80" id="ghi-23-456"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bookshelf Scanner" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jkl-45-678">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Book Shelfie" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jkl-45-678">
     <rect key="frame" x="20" y="451" width="353" height="50"/>
     <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
     <color key="textColor" red="1" green="0.4196078431372549" blue="0.4196078431372549" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

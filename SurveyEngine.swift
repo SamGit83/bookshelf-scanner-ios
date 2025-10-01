@@ -557,7 +557,7 @@ struct SurveyView_Previews: PreviewProvider {
                 SurveyQuestion(
                     id: "nps",
                     type: .nps,
-                    question: "How likely are you to recommend Bookshelf Scanner?",
+                    question: "How likely are you to recommend Book Shelfie?",
                     required: true,
                     options: Array(0...10).map { "\($0)" }
                 )

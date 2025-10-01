@@ -26,7 +26,7 @@ struct HomeFooter: View {
             }
 
             // Copyright
-            Text("© 2024 Bookshelf Scanner. All rights reserved.")
+            Text("© 2024 Book Shelfie. All rights reserved.")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.5))
         }

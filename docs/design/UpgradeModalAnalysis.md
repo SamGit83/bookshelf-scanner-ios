@@ -2,7 +2,7 @@
 
 ## Design System Overview
 
-The Bookshelf Scanner app follows the Liquid Glass design system, heavily inspired by Apple's Books app for a clean, minimalistic iOS experience. Key principles from `LiquidGlassDesignSystem.swift` and `docs/design/LiquidGlassUIDesignPlan.md` include:
+The Book Shelfie app follows the Liquid Glass design system, heavily inspired by Apple's Books app for a clean, minimalistic iOS experience. Key principles from `LiquidGlassDesignSystem.swift` and `docs/design/LiquidGlassUIDesignPlan.md` include:
 
 ### Core Design Principles
 - **Clean Minimalism**: Pure white cards on light gray backgrounds (`appleBooksBackground = Color(hex: "F2F2F7")`), with black primary text and subtle gray accents for hierarchy.
