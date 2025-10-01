@@ -21,7 +21,7 @@ struct LoginView: View {
     @State private var city = ""
     @State private var favoriteBookGenre = ""
     @State private var showWaitlistModal = false
-    @State private var selectedTier: UserTier = .free
+    @State private var selectedTier: UserTier = .premium
     @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
     
     init(isSignUp: Bool = false) {
