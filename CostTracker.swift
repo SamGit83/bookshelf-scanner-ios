@@ -63,7 +63,7 @@ class CostTracker: ObservableObject {
                     print("DEBUG: self or currentCosts nil in main update for \(service)")
                     return
                 }
-                let selfPtrMain = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+                let selfPtrMain = String(describing: self)
                 print("DEBUG: Entered main update for \(service), self: \(selfPtrMain). Before: totalCost = \(self.currentCosts.totalCost)")
                 
                 self.currentCosts.totalCost += actualCost
