@@ -21,7 +21,6 @@ struct BookshelfScannerApp: App {
                         .transition(.opacity)
                 }
             }
-            .background(Color(red: 0.949, green: 0.949, blue: 0.969))
             .onAppear {
                 // Transition to main content after splash animation completes
                 // Animation timing: 0.8s icon + 12 letters × 0.15s delay + 0.3s bounce + 0.7s buffer = 3.6s
