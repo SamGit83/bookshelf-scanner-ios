@@ -439,6 +439,18 @@ struct LoginView: View {
                                     Spacer()
                                 }
                             }
+
+                            Button(action: {
+                                showWaitlistModal = true
+                            }) {
+                                Text("Join Waitlist")
+                                    .font(AppleBooksTypography.buttonLarge)
+                                    .foregroundColor(AppleBooksColors.card)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(AppleBooksSpacing.space16)
+                                    .background(AppleBooksColors.accent)
+                                    .cornerRadius(12)
+                            }
                         }
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
