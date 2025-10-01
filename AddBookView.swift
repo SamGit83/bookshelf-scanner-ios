@@ -319,16 +319,16 @@ struct AddBookView: View {
             return
         }
 
-        viewModel.addBookFromRecommendation(book) { [weak self] result in
+        viewModel.addBookFromRecommendation(book) { [self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    self?.presentationMode.wrappedValue.dismiss()
+                    self.presentationMode.wrappedValue.dismiss()
                 case .failure(let error):
                     if let nsError = error as? NSError, nsError.domain == "DuplicateBook" {
-                        self?.errorMessage = "This book is already in your library"
+                        self.errorMessage = "This book is already in your library"
                     } else {
-                        self?.errorMessage = "Failed to add book: \(error.localizedDescription)"
+                        self.errorMessage = "Failed to add book: \(error.localizedDescription)"
                     }
                 }
             }
