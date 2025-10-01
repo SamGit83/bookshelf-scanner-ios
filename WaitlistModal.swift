@@ -145,9 +145,9 @@ struct WaitlistModal: View {
                         .padding(.vertical, AppleBooksSpacing.space16)
                     }
                 }
-                .background(AppleBooksColors.promotional)
+                .background(AppleBooksColors.accent)
                 .cornerRadius(20)
-                .shadow(color: AppleBooksColors.promotional.opacity(0.4), radius: 12, x: 0, y: 6)
+                .shadow(color: AppleBooksColors.accent.opacity(0.4), radius: 12, x: 0, y: 6)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
                     .stroke(Color.white.opacity(0.2), lineWidth: 1)

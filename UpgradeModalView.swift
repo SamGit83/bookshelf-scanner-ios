@@ -243,17 +243,11 @@ struct UpgradeModalView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 32)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.orange, Color.orange.opacity(0.8)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .background(AppleBooksColors.accent)
                     .foregroundColor(.white)
                     .cornerRadius(20)
                     .font(.headline.weight(.semibold))
-                    .shadow(color: Color.orange.opacity(0.4), radius: 12, x: 0, y: 6)
+                    .shadow(color: AppleBooksColors.accent.opacity(0.4), radius: 12, x: 0, y: 6)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(Color.white.opacity(0.2), lineWidth: 1)
