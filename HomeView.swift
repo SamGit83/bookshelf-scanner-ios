@@ -223,6 +223,7 @@ struct HomeView: View {
                         .padding(.horizontal, AppleBooksSpacing.space24)
                     }
                     .padding(.top, AppleBooksSpacing.space48)
+                    .padding(.leading, AppleBooksSpacing.space24)
 
                     Spacer(minLength: AppleBooksSpacing.space80)
                 }

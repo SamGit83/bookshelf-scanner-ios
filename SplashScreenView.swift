@@ -52,7 +52,7 @@ struct SplashScreenView: View {
 
             // Letter-by-letter bounce animation
             for index in 0..<appName.count {
-                let delay = 0.8 + Double(index) * 0.1
+                let delay = 0.8 + Double(index) * 0.15
 
                 // Bounce up
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
