@@ -32,8 +32,9 @@ class GeminiAPIService {
     func analyzeImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         let startTime = Date()
         let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "gemini", endpoint: "generateContent", method: "POST")
-
+    
         print("DEBUG GeminiAPIService: analyzeImage START, image size: \(image.size), timestamp: \(Date())")
+        print("DEBUG GeminiAPIService: isScanning from context (if available): Note - flag not directly accessible here")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             print("DEBUG GeminiAPIService: jpegData returned nil")
             let error = NSError(domain: "ImageConversion", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])
@@ -124,12 +125,12 @@ class GeminiAPIService {
             return
         }
 
-        print("DEBUG GeminiAPIService: Sending request to Gemini API")
+        print("DEBUG GeminiAPIService: Request body prepared, sending to Gemini API, timestamp: \(Date())")
         URLSession.shared.dataTask(with: request) { data, response, error in
             let responseTime = Date().timeIntervalSince(startTime)
             let dataSize = Int64(data?.count ?? 0)
 
-            print("DEBUG GeminiAPIService: Received response, error: \(error?.localizedDescription ?? "none"), data count: \(data?.count ?? 0)")
+            print("DEBUG GeminiAPIService: Received response from Gemini, error: \(error?.localizedDescription ?? "none"), data count: \(data?.count ?? 0), timestamp: \(Date())")
 
             if let error = error {
                 // Track failed API call
@@ -185,8 +186,8 @@ class GeminiAPIService {
                 let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
                 print("DEBUG GeminiAPIService: Decoded response successfully")
                 if let text = geminiResponse.candidates.first?.content.parts.first?.text {
-                    print("DEBUG GeminiAPIService: Extracted text, length: \(text.count)")
-                    print("DEBUG GeminiAPIService: Response text: \(text)")
+                    print("DEBUG GeminiAPIService: Extracted text, length: \(text.count), timestamp: \(Date())")
+                    print("DEBUG GeminiAPIService: Response text preview: \(String(text.prefix(200)))...")
 
                     // Track successful API call and cost
                     PerformanceMonitoringService.shared.completeAPICall(
@@ -197,9 +198,10 @@ class GeminiAPIService {
                     )
 
                     // Record API cost ($0.0025 per image for Gemini 1.5 Flash)
+                    print("DEBUG GeminiAPIService: Recording cost for gemini, timestamp: \(Date())")
                     CostTracker.shared.recordCost(service: "gemini", cost: 0.0025)
 
-                    print("DEBUG GeminiAPIService: SUCCESS completion called, timestamp: \(Date())")
+                    print("DEBUG GeminiAPIService: SUCCESS completion called with text length \(text.count), timestamp: \(Date())")
                     completion(.success(text))
                 } else {
                     print("DEBUG GeminiAPIService: No text in response, calling FAILURE completion, timestamp: \(Date())")
@@ -216,7 +218,7 @@ class GeminiAPIService {
                     completion(.failure(parseError))
                 }
             } catch {
-                print("DEBUG GeminiAPIService: JSON decode error: \(error)")
+                print("DEBUG GeminiAPIService: JSON decode error: \(error), timestamp: \(Date())")
 
                 PerformanceMonitoringService.shared.completeAPICall(
                     traceId: traceId,

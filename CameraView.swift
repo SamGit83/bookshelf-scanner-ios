@@ -122,7 +122,7 @@ struct CameraView: UIViewControllerRepresentable {
         }
 
         @objc func capturePhoto() {
-            print("DEBUG Coordinator: capturePhoto called")
+            print("DEBUG CameraView Coordinator: capturePhoto called, timestamp: \(Date())")
             let settings = AVCapturePhotoSettings()
             
             // Set flash mode based on current state
@@ -161,15 +161,16 @@ struct CameraView: UIViewControllerRepresentable {
         }
 
         func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-            print("DEBUG Coordinator: photoOutput didFinishProcessingPhoto, error: \(error?.localizedDescription ?? "none")")
+            print("DEBUG CameraView Coordinator: photoOutput didFinishProcessingPhoto, error: \(error?.localizedDescription ?? "none"), timestamp: \(Date())")
             if let imageData = photo.fileDataRepresentation() {
-                print("DEBUG Coordinator: imageData count: \(imageData.count)")
+                print("DEBUG CameraView Coordinator: imageData count: \(imageData.count)")
                 if let image = UIImage(data: imageData) {
-                    print("DEBUG Coordinator: Image captured successfully, size: \(image.size), setting capturedImage")
+                    print("DEBUG CameraView Coordinator: Image captured successfully, size: \(image.size), setting capturedImage, timestamp: \(Date())")
                     parent.capturedImage = image
-                    print("DEBUG Coordinator: Set capturedImage, now setting isShowingCamera to false")
+                    print("DEBUG CameraView Coordinator: capturedImage set, will trigger onChange in parent, timestamp: \(Date())")
                     // Turn off torch after capture
                     toggleTorch(false)
+                    print("DEBUG CameraView Coordinator: Setting isShowingCamera to false, timestamp: \(Date())")
                     parent.isShowingCamera = false
                 } else {
                     print("DEBUG Coordinator: Failed to create UIImage from imageData")

@@ -180,6 +180,7 @@ class BookViewModel: ObservableObject {
             print("DEBUG BookViewModel: Scan already in progress, ignoring")
             return
         }
+        print("DEBUG BookViewModel: isScanning was false, proceeding with scan, timestamp: \(Date())")
         isScanning = true
 
         // Check usage limits
@@ -200,13 +201,14 @@ class BookViewModel: ObservableObject {
         errorMessage = nil
         let scanStartTime = Date()
 
+        print("DEBUG BookViewModel: Calling Gemini analyzeImage, timestamp: \(Date())")
         apiService.analyzeImage(image) { [weak self] result in
             let responseTime = Date().timeIntervalSince(scanStartTime)
             DispatchQueue.main.async {
                 self?.isLoading = false
                 switch result {
                 case .success(let responseText):
-                    print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count), calling parseAndAddBooks")
+                    print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count), timestamp: \(Date())")
                     UsageTracker.shared.incrementScans()
                     // Track API call success
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: true, responseTime: responseTime)
@@ -218,6 +220,7 @@ class BookViewModel: ObservableObject {
                         userInfo: ["feature": "scan", "context": "successful_scan"]
                     )
 
+                    print("DEBUG BookViewModel: Calling parseAndAddBooks with response length \(responseText.count), timestamp: \(Date())")
                     self?.parseAndAddBooks(from: responseText)
                 case .failure(let error):
                     print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription), timestamp: \(Date())")
@@ -226,12 +229,14 @@ class BookViewModel: ObservableObject {
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
                 }
             }
+            print("DEBUG BookViewModel: Gemini completion finished, setting isScanning to false, timestamp: \(Date())")
             self?.isScanning = false
         }
     }
 
     private func parseAndAddBooks(from responseText: String) {
         print("DEBUG BookViewModel: parseAndAddBooks START, responseText length: \(responseText.count), timestamp: \(Date())")
+        print("DEBUG BookViewModel: isScanning during parse: \(isScanning)")
         // Extract JSON from markdown code block if present
         var jsonString = responseText
         if let jsonStart = responseText.range(of: "```json\n"), let jsonEnd = responseText.range(of: "\n```", options: .backwards) {
@@ -247,21 +252,24 @@ class BookViewModel: ObservableObject {
             if let data = jsonString.data(using: .utf8) {
                 print("DEBUG BookViewModel: Attempting to decode JSON: \(jsonString)")
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
-                print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books")
+                print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books, timestamp: \(Date())")
 
                 // Check for duplicates based on title (case-insensitive) or ISBN
                 let existingTitles = Set(self.books.compactMap { $0.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
                 let existingISBNs = Set(self.books.compactMap { $0.isbn })
+                print("DEBUG BookViewModel: Existing titles count: \(existingTitles.count), ISBNs count: \(existingISBNs.count)")
 
+                var bookIndex = 0
                 for book in decodedBooks {
+                    bookIndex += 1
                     let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
 
                     if (normalizedTitle != nil && existingTitles.contains(normalizedTitle!)) || (book.isbn != nil && existingISBNs.contains(book.isbn!)) {
-                        print("DEBUG BookViewModel: Skipping duplicate book: \(book.title ?? "") by \(book.author ?? "")")
+                        print("DEBUG BookViewModel: Skipping duplicate book #\(bookIndex): \(book.title ?? "") by \(book.author ?? "")")
                         continue
                     }
 
-                    print("DEBUG BookViewModel: Fetching cover for book: \(book.title ?? "") by \(book.author ?? "")")
+                    print("DEBUG BookViewModel: Processing new book #\(bookIndex)/\(decodedBooks.count): \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
                     let coverFetchStartTime = Date()
                     googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
                          let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
@@ -804,12 +812,15 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Total cover image data size: \(totalImageSize / 1024 / 1024) MB")
                 // Sync book count with UsageTracker
                 UsageTracker.shared.syncBookCount(loadedBooks.count)
+                print("DEBUG BookViewModel: Listener about to update books with \(loadedBooks.count) items, current count: \(self.books.count), timestamp: \(Date())")
                 DispatchQueue.main.async {
                     self.books = loadedBooks
+                    print("DEBUG BookViewModel: Listener updated books, new count: \(self.books.count), timestamp: \(Date())")
                 }
                 // Cache the books for offline use
                 print("DEBUG BookViewModel: Caching \(loadedBooks.count) books for offline use")
                 OfflineCache.shared.cacheBooks(loadedBooks)
+                print("DEBUG BookViewModel: Checking if books empty after update: \(self.books.isEmpty), timestamp: \(Date())")
                 if self.books.isEmpty == true {
                     Task { await self.loadBooksPaginated(page: 0) }
                 }
@@ -884,6 +895,7 @@ class BookViewModel: ObservableObject {
 
     private func analyzeAndSaveBook(_ book: Book) {
         print("DEBUG BookViewModel: analyzeAndSaveBook START for book: \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
+        print("DEBUG BookViewModel: isScanning during analyzeAndSaveBook: \(isScanning)")
         grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
             var updatedBook = book
             switch result {
@@ -894,6 +906,7 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Age rating analysis failed: \(error.localizedDescription) for \(book.title ?? ""), using Unknown")
                 updatedBook.ageRating = "Unknown"
             }
+            print("DEBUG BookViewModel: Saving book to Firestore: \(updatedBook.title ?? ""), timestamp: \(Date())")
             // Save to Firestore and update local array
             self?.saveBookToFirestore(updatedBook)
             self?.updateLocalBook(updatedBook)
