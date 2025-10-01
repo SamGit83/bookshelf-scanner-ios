@@ -145,15 +145,9 @@ struct WaitlistModal: View {
                         .padding(.vertical, AppleBooksSpacing.space16)
                     }
                 }
-                .background(
-                    LinearGradient(
-                        colors: [SemanticColors.warningPrimary, SemanticColors.warningPrimary.opacity(0.8)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .background(AppleBooksColors.promotional)
                 .cornerRadius(20)
-                .shadow(color: SemanticColors.warningPrimary.opacity(0.4), radius: 12, x: 0, y: 6)
+                .shadow(color: AppleBooksColors.promotional.opacity(0.4), radius: 12, x: 0, y: 6)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
                     .stroke(Color.white.opacity(0.2), lineWidth: 1)
