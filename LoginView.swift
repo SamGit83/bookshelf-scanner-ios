@@ -23,6 +23,13 @@ struct LoginView: View {
     @State private var showWaitlistModal = false
     @State private var selectedTier: UserTier = .free
     @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
+    private let premiumFeatures = [
+        "Unlimited scans",
+        "Unlimited books",
+        "Unlimited AI recommendations",
+        "Advanced reading analytics",
+        "Priority support"
+    ]
 
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
@@ -408,6 +415,37 @@ struct LoginView: View {
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.4), value: animateForm)
 
+                    // Premium Features Card
+                    AppleBooksCard(
+                        cornerRadius: 16,
+                        padding: AppleBooksSpacing.space24,
+                        shadowStyle: .subtle
+                    ) {
+                        VStack(spacing: AppleBooksSpacing.space16) {
+                            Text("Premium Features - Coming Soon")
+                                .font(AppleBooksTypography.headlineMedium)
+                                .foregroundColor(AppleBooksColors.text)
+
+                            ForEach(premiumFeatures, id: \.self) { feature in
+                                HStack(spacing: AppleBooksSpacing.space8) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(AppleBooksColors.success)
+
+                                    Text(feature)
+                                        .font(AppleBooksTypography.bodyMedium)
+                                        .foregroundColor(AppleBooksColors.text)
+
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .offset(y: animateForm ? 0 : 50)
+                    .opacity(animateForm ? 1 : 0)
+                    .animation(AnimationTiming.transition.delay(0.5), value: animateForm)
+
                     // Error message
                     if let error = authService.errorMessage {
                         AppleBooksCard(
@@ -702,11 +740,6 @@ struct ExpandableTierSelection: View {
                 .font(AppleBooksTypography.headlineSmall)
                 .foregroundColor(AppleBooksColors.text)
 
-            Text("Premium features coming soon!")
-                .font(AppleBooksTypography.bodyMedium)
-                .foregroundColor(AppleBooksColors.textTertiary)
-                .multilineTextAlignment(.center)
-            
             VStack(spacing: AppleBooksSpacing.space12) {
                 // Free Tier Button
                 ExpandableTierButton(
@@ -724,27 +757,6 @@ struct ExpandableTierSelection: View {
                     ],
                     selectedTier: $selectedTier,
                     expandedTier: $expandedTier
-                )
-                
-                // Premium Tier Button
-                ExpandableTierButton(
-                    tier: .premium,
-                    icon: "👑",
-                    title: "Premium - Coming Soon",
-                    badge: "Coming Soon",
-                    badgeColor: AppleBooksColors.textTertiary,
-                    pricing: nil,
-                    pricingSubtext: "Premium features will be available shortly",
-                    features: [
-                        "Unlimited scans",
-                        "Unlimited books",
-                        "Unlimited AI recommendations",
-                        "Advanced reading analytics",
-                        "Priority support"
-                    ],
-                    selectedTier: $selectedTier,
-                    expandedTier: $expandedTier,
-                    selectedPeriod: $selectedPeriod
                 )
             }
         }
