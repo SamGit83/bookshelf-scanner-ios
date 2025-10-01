@@ -8,7 +8,7 @@ struct ProfileView: View {
     @ObservedObject var accentColorManager = AccentColorManager.shared
     @ObservedObject var usageTracker = UsageTracker.shared
     @State private var showSignOutAlert = false
-    @State private var showUpgradeModal = false
+    @State private var showWaitlistModal = false
     @State private var showSubscriptionView = false
     @State private var expandedUsageDetails = false
 
@@ -91,7 +91,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.accent,
                                             showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                showUpgradeModal = true
+                                                showWaitlistModal = true
                                             }
                                         )
 
@@ -104,7 +104,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.success,
                                             showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                showUpgradeModal = true
+                                                showWaitlistModal = true
                                             }
                                         )
 
@@ -117,7 +117,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.promotional,
                                             showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                showUpgradeModal = true
+                                                showWaitlistModal = true
                                             }
                                         )
 
@@ -315,9 +315,9 @@ struct ProfileView: View {
                                     .frame(maxWidth: 350)
 
                                     Button(action: {
-                                        showUpgradeModal = true
+                                        showWaitlistModal = true
                                     }) {
-                                        Text("Upgrade Now")
+                                        Text("Join Waitlist")
                                             .font(AppleBooksTypography.buttonLarge)
                                             .foregroundColor(.white)
                                             .frame(maxWidth: .infinity)
@@ -348,8 +348,17 @@ struct ProfileView: View {
             }
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showUpgradeModal) {
-                UpgradeModalView()
+            .sheet(isPresented: $showWaitlistModal) {
+                if let user = authService.currentUser {
+                    WaitlistModal(
+                        initialFirstName: user.firstName ?? "",
+                        initialLastName: user.lastName ?? "",
+                        initialEmail: user.email ?? "",
+                        initialUserId: user.id
+                    )
+                } else {
+                    WaitlistModal()
+                }
             }
             .animation(.easeInOut(duration: 0.3), value: showUpgradeModal)
             .alert(isPresented: $showSignOutAlert) {
@@ -902,7 +911,7 @@ struct EnhancedUsageRow: View {
                         Spacer()
 
                         Button(action: onUpgradeTap) {
-                            Text(current >= limit ? "Upgrade Now" : "Upgrade")
+                            Text("Join Waitlist")
                                 .font(.caption.bold())
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8)
