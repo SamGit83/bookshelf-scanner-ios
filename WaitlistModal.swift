@@ -75,13 +75,21 @@ struct WaitlistModal: View {
                 .keyboardType(.emailAddress)
                 .autocapitalization(.none)
                 .textContentType(.emailAddress)
-                 
+
+                if let errorMessage = authService.errorMessage, !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                }
+
                 Button(action: {
                     if isValidEmail(email) && !firstName.isEmpty && !lastName.isEmpty {
                         isSubmitting = true
                         Task {
                             do {
                                 try await authService.joinWaitlist(firstName: firstName, lastName: lastName, email: email, userId: userId)
+                                authService.errorMessage = nil
                                 await MainActor.run {
                                     isSubmitting = false
                                     showSuccessAlert = true
@@ -132,6 +140,9 @@ struct WaitlistModal: View {
                     presentationMode.wrappedValue.dismiss()
                 }
             )
+        }
+        .onDisappear {
+            authService.errorMessage = nil
         }
     }
 }
