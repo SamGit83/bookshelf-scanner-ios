@@ -127,7 +127,6 @@ This document outlines the detailed design specification for the Book Shelfie iO
 - **Books Icon**: Floating animation (±20 offset, 2.5s duration) and 3D flipping (180-degree y-axis every 4s)
 - **Text Animation**: Sequential slide-up reveals of "Scan", "Catalog", "Organize", "Discover" with icons, gradients, glow, 1.5s intervals
 - **How It Works Section**: Scroll-based reveal animations for feature rows
-- **User Journey Section**: Progress bar fill expansion and pulsing arrow; staggered bullet reveals and shake for struggles card; staggered reveals and glow for enhanced card
 
 ### Spacing
 - **Section Margins**: 32pt horizontal, 64pt vertical between sections
