@@ -7,16 +7,13 @@ struct SplashScreenView: View {
     @State private var letterScales: [CGFloat] = Array(repeating: 1.0, count: 12)
     
     private let appName = "Book Shelfie"
-    @State private var letterScales: [CGFloat] = Array(repeating: 1.0, count: 12)
-    
-    private let appName = "Book Shelfie"
         
     var body: some View {
         ZStack {
             // Background matching LaunchScreen
             Color(red: 0.949, green: 0.949, blue: 0.969)
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 20) {
                 // App Icon with scale animation
                 Image(systemName: "books.vertical.fill")
@@ -24,27 +21,7 @@ struct SplashScreenView: View {
                     .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
                     .scaleEffect(scale)
                     .opacity(opacity)
-                
-                // App Name with letter-by-letter bounce animation
-                HStack(spacing: 0) {
-                    ForEach(Array(appName.enumerated()), id: \.offset) { index, character in
-                        Text(String(character))
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
-                            .scaleEffect(letterScales[index])
-                            .opacity(opacity)
-                    }
-                }
-                // App Name with letter-by-letter bounce animation
-                HStack(spacing: 0) {
-                    ForEach(Array(appName.enumerated()), id: \.offset) { index, character in
-                        Text(String(character))
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
-                            .scaleEffect(letterScales[index])
-                            .opacity(opacity)
-                    }
-                }
+
                 // App Name with letter-by-letter bounce animation
                 HStack(spacing: 0) {
                     ForEach(Array(appName.enumerated()), id: \.offset) { index, character in
@@ -63,38 +40,28 @@ struct SplashScreenView: View {
                 scale = 1.0
                 opacity = 1.0
             }
-            
-            // Add subtle bounce effect to icon
-            // Add subtle bounce effect to icon
+
             // Add subtle bounce effect to icon
             withAnimation(.easeInOut(duration: 1.2).delay(0.8)) {
                 scale = 1.05
             }
-            
+
             withAnimation(.easeInOut(duration: 0.3).delay(2.0)) {
                 scale = 1.0
             }
-            
+
             // Letter-by-letter bounce animation
             for index in 0..<appName.count {
                 let delay = 0.8 + Double(index) * 0.1
-                
+
                 // Bounce up
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
                         letterScales[index] = 1.3
                     }
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
-                        letterScales[index] = 1.3
-                    }
                 }
-                
+
                 // Bounce back down
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay + 0.15) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0)) {
-                        letterScales[index] = 1.0
-                    }
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay + 0.15) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0)) {
                         letterScales[index] = 1.0
