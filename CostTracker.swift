@@ -42,38 +42,79 @@ class CostTracker: ObservableObject {
 
     // MARK: - Cost Recording
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
-        let actualCost = cost ?? (costRates[service] ?? 0.0) * Double(usage)
-        print("DEBUG: recordCost called for \(service) with cost \(actualCost) on thread \(Thread.current)")
- 
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            print("DEBUG: Updating costs on main thread. Before: totalCost = \(self.currentCosts.totalCost)")
-            
-            self.currentCosts.totalCost += actualCost
-            self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
- 
-            // Track daily costs
-            let today = self.getCurrentDateString()
-            if self.currentCosts.dailyCosts[today] == nil {
-                self.currentCosts.dailyCosts[today] = 0.0
+        let actualCost = cost ?? (self.costRates[service] ?? 0.0) * Double(usage)
+        print("DEBUG: recordCost called for \(service) with cost \(actualCost) on thread \(Thread.current.name ?? "unknown")")
+        
+        costUpdateQueue.async { [weak self] in
+            guard let self = self else {
+                print("DEBUG: self is nil in recordCost async for \(service)")
+                return
             }
-            self.currentCosts.dailyCosts[today]! += actualCost
+            let selfPtr = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+            print("DEBUG: Entering recordCost for \(service), usage: \(usage), self: \(selfPtr) on queue thread \(Thread.current.name ?? "unknown")")
             
-            print("DEBUG: After update: totalCost = \(self.currentCosts.totalCost)")
+            guard self.currentCosts != nil else {
+                print("DEBUG: currentCosts is nil for \(service)")
+                return
+            }
             
-            self.updateProfitability()
-            self.objectWillChange.send()
-        }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.currentCosts != nil else {
+                    print("DEBUG: self or currentCosts nil in main update for \(service)")
+                    return
+                }
+                let selfPtrMain = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+                print("DEBUG: Entered main update for \(service), self: \(selfPtrMain). Before: totalCost = \(self.currentCosts.totalCost)")
+                
+                self.currentCosts.totalCost += actualCost
+                self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
+                print("DEBUG: Updated totalCost and apiUsage for \(service). After: totalCost = \(self.currentCosts.totalCost)")
  
-        // Track in performance monitoring
-        PerformanceMonitoringService.shared.trackAPICost(service: service, cost: actualCost, usage: usage)
+               // Track daily costs
+               let today = self.getCurrentDateString()
+               if self.currentCosts.dailyCosts[today] == nil {
+                   self.currentCosts.dailyCosts[today] = 0.0
+               }
+               self.currentCosts.dailyCosts[today]! += actualCost
+               
+               print("DEBUG: After all dailyCosts update: totalCost = \(self.currentCosts.totalCost)")
+               
+               self.updateProfitability()
+               print("DEBUG: Called updateProfitability and objectWillChange for \(service)")
+               self.objectWillChange.send()
+               print("DEBUG: Exited main update for \(service)")
+           }
+           
+           // Track in performance monitoring (now inside queue for serialization)
+           DispatchQueue.main.async {
+               PerformanceMonitoringService.shared.trackAPICost(service: service, cost: actualCost, usage: usage)
+           }
+           
+           // Log to analytics (now inside queue for serialization)
+           DispatchQueue.main.async {
+               AnalyticsManager.shared.trackPerformanceMetric(
+                   metricName: "api_cost",
+                   value: actualCost,
+                   unit: "USD"
+               )
+           }
+           
+           print("DEBUG: Exited queue for \(service)")
+       }
  
-        // Log to analytics
-        AnalyticsManager.shared.trackPerformanceMetric(
-            metricName: "api_cost",
-            value: actualCost,
-            unit: "USD"
-        )
+       // Track in performance monitoring (dispatch to main if needed, but assuming it's thread-safe)
+       DispatchQueue.main.async {
+           PerformanceMonitoringService.shared.trackAPICost(service: service, cost: actualCost, usage: usage)
+       }
+ 
+       // Log to analytics (dispatch to main if needed)
+       DispatchQueue.main.async {
+           AnalyticsManager.shared.trackPerformanceMetric(
+               metricName: "api_cost",
+               value: actualCost,
+               unit: "USD"
+           )
+       }
     }
 
     func recordBulkCost(service: String, totalCost: Double, usageCount: Int) {
@@ -102,7 +143,19 @@ class CostTracker: ObservableObject {
     }
 
     func recordRevenue(tier: UserTier, amount: Double, subscriptionType: SubscriptionType = .monthly) {
-        costUpdateQueue.async {
+        costUpdateQueue.async { [weak self] in
+            guard let self = self else {
+                print("DEBUG: self is nil in recordRevenue async")
+                return
+            }
+            let selfPtr = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+            print("DEBUG: Entering recordRevenue for tier \(tier), amount \(amount), self: \(selfPtr) on queue thread \(Thread.current.name ?? "unknown")")
+            
+            guard self.revenueMetrics != nil else {
+                print("DEBUG: revenueMetrics is nil")
+                return
+            }
+            
             self.revenueMetrics.totalRevenue += amount
             self.revenueMetrics.activeSubscriptions += 1
 
@@ -117,13 +170,20 @@ class CostTracker: ObservableObject {
             }
             self.revenueMetrics.dailyRevenue[today]! += amount
 
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else {
+                    print("DEBUG: self nil in main for recordRevenue")
+                    return
+                }
                 self.updateProfitability()
                 self.objectWillChange.send()
+                print("DEBUG: Exited main update for recordRevenue")
             }
+            
+            print("DEBUG: Exited queue for recordRevenue")
         }
 
-        // Track in analytics
+        // Track in analytics (synchronous, assuming AnalyticsManager is thread-safe)
         AnalyticsManager.shared.trackSubscriptionCompleted(
             tier: tier,
             subscriptionId: nil,
@@ -139,6 +199,13 @@ class CostTracker: ObservableObject {
 
     // MARK: - Profitability Analysis
     private func updateProfitability() {
+        guard currentCosts != nil, revenueMetrics != nil, profitabilityAnalysis != nil else {
+            print("DEBUG: Nil properties in updateProfitability")
+            return
+        }
+        let selfPtr = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+        print("DEBUG: updateProfitability called, self: \(selfPtr) on thread \(Thread.current.name ?? "unknown")")
+        
         profitabilityAnalysis.netProfit = revenueMetrics.totalRevenue - currentCosts.totalCost
         profitabilityAnalysis.profitMargin = revenueMetrics.totalRevenue > 0 ?
             (profitabilityAnalysis.netProfit / revenueMetrics.totalRevenue) * 100.0 : 0.0
@@ -157,7 +224,9 @@ class CostTracker: ObservableObject {
         // Cost efficiency rating
         profitabilityAnalysis.costEfficiencyRating = calculateCostEfficiencyRating()
 
-        objectWillChange.send()
+        DispatchQueue.main.async { [weak self] in
+            self?.objectWillChange.send()
+        }
     }
 
     private func calculateCostEfficiencyRating() -> Double {
