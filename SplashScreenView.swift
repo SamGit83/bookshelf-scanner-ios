@@ -33,6 +33,7 @@ struct SplashScreenView: View {
                     }
                 }
             }
+            .padding(.top, -20)
         }
         .onAppear {
             // Animate icon scale and fade-in
