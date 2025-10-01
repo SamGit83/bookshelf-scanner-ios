@@ -40,10 +40,6 @@ struct HomeView: View {
                                     .fill(AppleBooksColors.accent.opacity(0.1))
                             )
                             .offset(y: floatingOffset)
-                            .offset(y: floatingOffset)
-                            .offset(y: floatingOffset)
-                            .offset(y: floatingOffset)
-                            .offset(y: floatingOffset)
 
                         // Title
                         Text("Bookshelf Scanner")
@@ -58,11 +54,11 @@ struct HomeView: View {
                             .multilineTextAlignment(.leading)
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         
-                            // Animated Hero Words with Icons
+                        // Animated Hero Words with Icons
+                        ZStack {
                             let words = ["Scan", "catalog", "organize", "discover"]
                             let icons = ["viewfinder", "books.vertical", "square.grid.2x2", "sparkles"]
                             
-                            ZStack {
                                 // Current word with icon
                                 HStack(spacing: 12) {
                                     Image(systemName: icons[currentIndex])
