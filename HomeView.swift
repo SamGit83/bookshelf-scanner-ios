@@ -195,8 +195,8 @@ struct HomeView: View {
                                     // Fade in starts when bottom of item enters screen (maxY < screenHeight)
                                     // Full opacity when item is well within viewport
                                     // Stay visible even when scrolling up past top
-                                    let fadeInThreshold: CGFloat = screenHeight * 0.9
-                                    let fadeInComplete: CGFloat = screenHeight * 0.7
+                                    let fadeInThreshold: CGFloat = screenHeight * 0.95
+                                    let fadeInComplete: CGFloat = screenHeight * 0.90
                                     
                                     let visibility: Double = {
                                         if maxY < fadeInComplete {
