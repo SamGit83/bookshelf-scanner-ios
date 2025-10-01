@@ -106,10 +106,12 @@ struct ContentView: View {
             print("DEBUG: isShowingCamera changed to \(newValue)")
         }
         .onChange(of: capturedImage) { newImage in
+            print("DEBUG ContentView: onChange capturedImage triggered, newImage is nil: \(newImage == nil)")
             if let image = newImage {
-                print("DEBUG: Captured image received, scanning bookshelf")
+                print("DEBUG ContentView: Captured image received, calling scanBookshelf")
                 viewModel.scanBookshelf(image: image)
                 capturedImage = nil
+                print("DEBUG ContentView: Set capturedImage to nil after scanBookshelf")
             }
         }
     }

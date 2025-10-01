@@ -19,6 +19,7 @@ class BookViewModel: ObservableObject {
     @Published var currentPage = 0
     @Published var hasMoreBooks = true
     @Published var isLoadingMore = false
+    private var isScanning = false
 
     private var authStateCancellable: AnyCancellable?
 
@@ -172,7 +173,14 @@ class BookViewModel: ObservableObject {
     }
 
     func scanBookshelf(image: UIImage) {
-        print("DEBUG BookViewModel: scanBookshelf called")
+        print("DEBUG BookViewModel: scanBookshelf START, timestamp: \(Date())")
+
+        // Prevent multiple concurrent scans
+        guard !isScanning else {
+            print("DEBUG BookViewModel: Scan already in progress, ignoring")
+            return
+        }
+        isScanning = true
 
         // Check usage limits
         if !UsageTracker.shared.canPerformScan() {
@@ -184,6 +192,7 @@ class BookViewModel: ObservableObject {
                 object: nil,
                 userInfo: ["limit_type": "scan"]
             )
+            isScanning = false
             return
         }
 
@@ -197,7 +206,7 @@ class BookViewModel: ObservableObject {
                 self?.isLoading = false
                 switch result {
                 case .success(let responseText):
-                    print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count)")
+                    print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count), calling parseAndAddBooks")
                     UsageTracker.shared.incrementScans()
                     // Track API call success
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: true, responseTime: responseTime)
@@ -211,17 +220,18 @@ class BookViewModel: ObservableObject {
 
                     self?.parseAndAddBooks(from: responseText)
                 case .failure(let error):
-                    print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription)")
+                    print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription), timestamp: \(Date())")
                     ErrorHandler.shared.handle(error, context: "Image Analysis")
                     // Track API call failure
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
                 }
             }
+            self?.isScanning = false
         }
     }
 
     private func parseAndAddBooks(from responseText: String) {
-        print("DEBUG BookViewModel: parseAndAddBooks called, responseText: \(responseText)")
+        print("DEBUG BookViewModel: parseAndAddBooks START, responseText length: \(responseText.count), timestamp: \(Date())")
         // Extract JSON from markdown code block if present
         var jsonString = responseText
         if let jsonStart = responseText.range(of: "```json\n"), let jsonEnd = responseText.range(of: "\n```", options: .backwards) {
@@ -323,6 +333,7 @@ class BookViewModel: ObservableObject {
             // Fallback: try to extract basic info with regex or string parsing
             errorMessage = "Failed to parse book data. Please try again."
         }
+        print("DEBUG BookViewModel: parseAndAddBooks END, timestamp: \(Date())")
     }
 
     func refreshData() {
@@ -874,7 +885,7 @@ class BookViewModel: ObservableObject {
     }
 
     private func analyzeAndSaveBook(_ book: Book) {
-        print("DEBUG BookViewModel: Analyzing age rating for book: \(book.title ?? "") by \(book.author ?? "")")
+        print("DEBUG BookViewModel: analyzeAndSaveBook START for book: \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
         grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
             var updatedBook = book
             switch result {
@@ -888,6 +899,7 @@ class BookViewModel: ObservableObject {
             // Save to Firestore and update local array
             self?.saveBookToFirestore(updatedBook)
             self?.updateLocalBook(updatedBook)
+            print("DEBUG BookViewModel: analyzeAndSaveBook END for book: \(book.title ?? ""), timestamp: \(Date())")
         }
     }
 

@@ -33,7 +33,7 @@ class GeminiAPIService {
         let startTime = Date()
         let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "gemini", endpoint: "generateContent", method: "POST")
 
-        print("DEBUG GeminiAPIService: analyzeImage called, image size: \(image.size)")
+        print("DEBUG GeminiAPIService: analyzeImage START, image size: \(image.size), timestamp: \(Date())")
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             print("DEBUG GeminiAPIService: jpegData returned nil")
             let error = NSError(domain: "ImageConversion", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])
@@ -199,9 +199,10 @@ class GeminiAPIService {
                     // Record API cost ($0.0025 per image for Gemini 1.5 Flash)
                     CostTracker.shared.recordCost(service: "gemini", cost: 0.0025)
 
+                    print("DEBUG GeminiAPIService: SUCCESS completion called, timestamp: \(Date())")
                     completion(.success(text))
                 } else {
-                    print("DEBUG GeminiAPIService: No text in response")
+                    print("DEBUG GeminiAPIService: No text in response, calling FAILURE completion, timestamp: \(Date())")
                     let parseError = NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
 
                     PerformanceMonitoringService.shared.completeAPICall(

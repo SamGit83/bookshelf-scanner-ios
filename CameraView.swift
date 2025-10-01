@@ -165,8 +165,9 @@ struct CameraView: UIViewControllerRepresentable {
             if let imageData = photo.fileDataRepresentation() {
                 print("DEBUG Coordinator: imageData count: \(imageData.count)")
                 if let image = UIImage(data: imageData) {
-                    print("DEBUG Coordinator: Image captured successfully, size: \(image.size)")
+                    print("DEBUG Coordinator: Image captured successfully, size: \(image.size), setting capturedImage")
                     parent.capturedImage = image
+                    print("DEBUG Coordinator: Set capturedImage, now setting isShowingCamera to false")
                     // Turn off torch after capture
                     toggleTorch(false)
                     parent.isShowingCamera = false
