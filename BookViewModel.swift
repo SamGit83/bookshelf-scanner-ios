@@ -51,7 +51,9 @@ class BookViewModel: ObservableObject {
             isLoadingMore = true
         }
         errorMessage = nil
+        
         if let loadedBooks = OfflineCache.shared.loadBooks(page: page, limit: limit) {
+            // Cache success - existing logic
             if page == 0 {
                 books = loadedBooks
                 print("DEBUG BookViewModel: loadBooksPaginated loaded \(books.count) books")
@@ -59,13 +61,102 @@ class BookViewModel: ObservableObject {
                 books.append(contentsOf: loadedBooks)
             }
             currentPage = page + 1
-            totalBooks = OfflineCache.shared.getTotalBooks()
-            hasMoreBooks = (page + 1) * limit < totalBooks
+            totalBooks = OfflineCache.shared.getTotalBooksCount() ?? loadedBooks.count
+            hasMoreBooks = loadedBooks.count == limit
         } else {
-            errorMessage = "Failed to load books from cache"
+            // Cache failed - fallback to database
+            print("DEBUG BookViewModel: Cache failed, falling back to database")
+            if let dbBooks = await loadBooksFromFirestore(page: page, limit: limit) {
+                if page == 0 {
+                    books = dbBooks
+                } else {
+                    books.append(contentsOf: dbBooks)
+                }
+                currentPage = page + 1
+                // For now, assume we don't know total count without separate query
+                hasMoreBooks = dbBooks.count == limit
+                // Cache the database results
+                OfflineCache.shared.cacheBooks(books)
+            } else {
+                errorMessage = "Failed to load books from cache or database"
+            }
         }
+        
         isLoading = false
         isLoadingMore = false
+    }
+    private func loadBooksFromFirestore(page: Int, limit: Int) async -> [Book]? {
+        guard let userId = FirebaseConfig.shared.currentUserId else { return nil }
+        
+        do {
+            let query = db.collection("users").document(userId).collection("books")
+                .order(by: "dateAdded", descending: true)
+                .limit(to: limit)
+            
+            let snapshot = try await query.getDocuments()
+            
+            let books = snapshot.documents.compactMap { document -> Book? in
+                let data = document.data()
+                let title = (data["title"] as? String) ?? ""
+                let author = (data["author"] as? String) ?? ""
+
+                let isbn = data["isbn"] as? String
+                let genre = data["genre"] as? String
+                let subGenre = data["subGenre"] as? String
+                let estimatedReadingTime = data["estimatedReadingTime"] as? String
+
+                let statusRaw = (data["status"] as? String) ?? BookStatus.library.rawValue
+                let status = BookStatus(rawValue: statusRaw) ?? .library
+
+                var dateAdded = Date()
+                if let ts = data["dateAdded"] as? Timestamp {
+                    dateAdded = ts.dateValue()
+                } else if let d = data["dateAdded"] as? Date {
+                    dateAdded = d
+                }
+
+                let coverData: Data? = nil
+                let coverImageURL = data["coverImageURL"] as? String
+                let teaser = data["teaser"] as? String
+                let authorBio = data["authorBio"] as? String
+                let pageCount = data["pageCount"] as? Int
+                let currentPage = data["currentPage"] as? Int ?? 0
+                let totalPages = data["totalPages"] as? Int
+
+                var dateStartedReading: Date? = nil
+                if let ts = data["dateStartedReading"] as? Timestamp {
+                    dateStartedReading = ts.dateValue()
+                }
+
+                var dateFinishedReading: Date? = nil
+                if let ts = data["dateFinishedReading"] as? Timestamp {
+                    dateFinishedReading = ts.dateValue()
+                }
+
+                // Build Book
+                var book = Book(title: title, author: author, isbn: isbn, genre: genre, status: status, coverImageData: coverData, coverImageURL: coverImageURL)
+                book.subGenre = subGenre
+                book.estimatedReadingTime = estimatedReadingTime
+                // Assign id (from stored id or documentID) and date
+                if let idString = data["id"] as? String, let uuid = UUID(uuidString: idString) {
+                    book.id = uuid
+                }
+                book.dateAdded = dateAdded
+                book.teaser = teaser
+                book.authorBio = authorBio
+                book.pageCount = pageCount
+                book.currentPage = currentPage
+                book.totalPages = totalPages
+                book.dateStartedReading = dateStartedReading
+                book.dateFinishedReading = dateFinishedReading
+                return book
+            }
+            
+            return books
+        } catch {
+            print("DEBUG BookViewModel: Failed to load from Firestore: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     func scanBookshelf(image: UIImage) {
