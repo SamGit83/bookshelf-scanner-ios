@@ -21,6 +21,7 @@ class CostTracker: ObservableObject {
     @Published var currentCosts = CostMetrics()
     @Published var revenueMetrics = RevenueMetrics()
     @Published var profitabilityAnalysis = ProfitabilityAnalysis()
+    var isUpdating = false
 
     // MARK: - Cost Rates (per API call)
     private let costRates: [String: Double] = [
