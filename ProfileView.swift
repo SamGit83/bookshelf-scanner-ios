@@ -9,6 +9,7 @@ struct ProfileView: View {
     @ObservedObject var usageTracker = UsageTracker.shared
     @State private var showSignOutAlert = false
     @State private var showWaitlistModal = false
+    @State private var showUpgradeModal = false
     @State private var showSubscriptionView = false
     @State private var expandedUsageDetails = false
 
@@ -91,7 +92,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.accent,
                                             showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                showWaitlistModal = true
+                                                showUpgradeModal = true
                                             }
                                         )
 
@@ -104,7 +105,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.success,
                                             showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                showWaitlistModal = true
+                                                showUpgradeModal = true
                                             }
                                         )
 
@@ -117,7 +118,7 @@ struct ProfileView: View {
                                             color: AppleBooksColors.promotional,
                                             showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
                                             onUpgradeTap: {
-                                                showWaitlistModal = true
+                                                showUpgradeModal = true
                                             }
                                         )
 
@@ -304,6 +305,10 @@ struct ProfileView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.3), value: showWaitlistModal)
+            .sheet(isPresented: $showUpgradeModal) {
+                UpgradeModalView()
+            }
+            .animation(.easeInOut(duration: 0.3), value: showUpgradeModal)
             .alert(isPresented: $showSignOutAlert) {
                 Alert(
                     title: Text("Sign Out"),
