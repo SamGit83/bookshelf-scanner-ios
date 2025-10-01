@@ -175,9 +175,9 @@ struct LoginView: View {
                                             }
                                         }
                                         
-                                        Button("Join Waitlist for Premium") {
+                                        Button(action: {
                                             showWaitlistModal = true
-                                        } {
+                                        }) {
                                             Text("Join Waitlist for Premium")
                                             .font(AppleBooksTypography.buttonMedium)
                                             .foregroundColor(.white)
