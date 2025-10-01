@@ -174,6 +174,7 @@ struct HomeView: View {
                         }
 
 
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                             timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
                                 withAnimation(.easeInOut(duration: 1.0)) {
@@ -190,14 +191,6 @@ struct HomeView: View {
                                     currentOpacity = 1
                                     nextOpacity = 0
                                 }
-                                }
-                            }
-                        }
-
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                            flipTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: true) { _ in
-                                withAnimation(.easeInOut(duration: 1.0)) {
-                                    flipAngle = flipAngle == 0 ? 180 : 0
                                 }
                             }
                         }
@@ -276,6 +269,7 @@ struct FeatureRow: View {
             let minY = geometry.frame(in: .global).minY
             let screenHeight = UIScreen.main.bounds.height
             let rowHeight = geometry.size.height
+            let visibility: Double = minY < 0 ? max(0, 1 + minY / rowHeight) : max(0, (screenHeight - minY) / screenHeight)
             let visibility: Double = minY < 0 ? max(0, 1 + minY / rowHeight) : max(0, (screenHeight - minY) / screenHeight)
             HStack(spacing: AppleBooksSpacing.space16) {
                 Image(systemName: icon)
