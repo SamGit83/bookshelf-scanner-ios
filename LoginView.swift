@@ -23,14 +23,7 @@ struct LoginView: View {
     @State private var showWaitlistModal = false
     @State private var selectedTier: UserTier = .free
     @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
-    private let premiumFeatures = [
-        "Unlimited scans",
-        "Unlimited books",
-        "Unlimited AI recommendations",
-        "Advanced reading analytics",
-        "Priority support"
-    ]
-
+    
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
     }
@@ -705,6 +698,13 @@ struct ExpandableTierSelection: View {
     @Binding var selectedPeriod: SubscriptionPeriod
     @Binding var showWaitlistModal: Bool
     @State private var expandedTier: UserTier? = nil
+    private let premiumFeatures = [
+        "Unlimited scans",
+        "Unlimited books",
+        "Unlimited AI recommendations",
+        "Advanced reading analytics",
+        "Priority support"
+    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
