@@ -21,7 +21,7 @@ struct LoginView: View {
     @State private var city = ""
     @State private var favoriteBookGenre = ""
     @State private var showWaitlistModal = false
-    @State private var selectedTier: UserTier = .premium
+    @State private var selectedTier: UserTier? = nil
     @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
     
     init(isSignUp: Bool = false) {
@@ -697,7 +697,7 @@ struct PasswordResetView: View {
 // MARK: - Mobile-First Expandable Tier Selection
 
 struct ExpandableTierSelection: View {
-    @Binding var selectedTier: UserTier
+    @Binding var selectedTier: UserTier?
     @Binding var selectedPeriod: SubscriptionPeriod
     @Binding var showWaitlistModal: Bool
     @State private var expandedTier: UserTier? = nil
@@ -762,13 +762,13 @@ struct ExpandableTierButton: View {
     let pricing: String?
     let pricingSubtext: String?
     let features: [String]
-    @Binding var selectedTier: UserTier
+    @Binding var selectedTier: UserTier?
     @Binding var expandedTier: UserTier?
     @Binding var selectedPeriod: SubscriptionPeriod
     @Binding var showWaitlistModal: Bool
 
     // Initialize with optional pricing subtext and period
-    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(SubscriptionPeriod(unit: .month)), showWaitlistModal: Binding<Bool>) {
+    init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier?>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(SubscriptionPeriod(unit: .month)), showWaitlistModal: Binding<Bool>) {
         self.tier = tier
         self.icon = icon
         self.title = title
@@ -793,7 +793,8 @@ struct ExpandableTierButton: View {
             Button(action: {
                 withAnimation(AnimationTiming.transition) {
                     if selectedTier == tier && isExpanded {
-                        // Collapse if tapping the same expanded tier
+                        // Deselect
+                        selectedTier = nil
                         expandedTier = nil
                     } else {
                         // Select and expand
