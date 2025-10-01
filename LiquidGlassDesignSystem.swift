@@ -1161,6 +1161,7 @@ public struct AppleBooksBookCard: View {
     let viewModel: BookViewModel? // Add viewModel for adding to library
 
     @State private var isAddingToLibrary = false
+    @State private var showMenu = false
 
     public var body: some View {
         AppleBooksCard(
@@ -1336,7 +1337,42 @@ public struct AppleBooksBookCard: View {
                 }
             }
         }
+        .scaleEffect(showMenu ? 1.05 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showMenu)
         .onTapGesture(perform: onTap)
+        .onLongPressGesture(minimumDuration: 0.5, perform: {
+            showMenu = true
+            #if canImport(UIKit)
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+            #endif
+        })
+        .overlay(
+            Group {
+                if showMenu {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showMenu = false
+                        }
+                        .transition(.opacity)
+                    
+                    RadialActionMenu(
+                        book: book,
+                        viewModel: viewModel,
+                        onDismiss: { showMenu = false }
+                    )
+                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .opacity))
+                }
+            }
+        )
+        .onChange(of: showMenu) { newValue in
+            if !newValue {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    // Ensure menu is fully dismissed
+                }
+            }
+        }
     }
 
     private func addToLibrary() {
