@@ -6,51 +6,8 @@ struct HomeView: View {
     @State private var showLogin = false
     @State private var showSignup = false
     @State private var floatingOffset: CGFloat = 0
-    @State private var sequenceOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
-    @State private var sequenceOffsets: [CGFloat] = Array(repeating: 20.0, count: 4)
-
-    private func startSequenceCycle() {
-        sequenceOpacities = Array(repeating: 0.0, count: 4)
-        sequenceOffsets = Array(repeating: 20.0, count: 4)
-        
-        withAnimation(.easeInOut(duration: 0.8)) {
-            sequenceOpacities[0] = 1.0
-            sequenceOffsets[0] = 0.0
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            withAnimation(.easeInOut(duration: 0.8)) {
-                sequenceOpacities[1] = 1.0
-                sequenceOffsets[1] = 0.0
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation(.easeInOut(duration: 0.8)) {
-                    sequenceOpacities[2] = 1.0
-                    sequenceOffsets[2] = 0.0
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeInOut(duration: 0.8)) {
-                        sequenceOpacities[3] = 1.0
-                        sequenceOffsets[3] = 0.0
-                    }
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        withAnimation(.easeInOut(duration: 0.8)) {
-                            sequenceOpacities = Array(repeating: 0.0, count: 4)
-                            sequenceOffsets = Array(repeating: 20.0, count: 4)
-                        }
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            startSequenceCycle()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
+    @State private var currentIndex: Int = 0
+    @State private var timer: Timer? = nil
     var body: some View {
         ZStack {
             // Apple Books clean background
@@ -74,6 +31,7 @@ struct HomeView: View {
                             )
                             .offset(y: floatingOffset)
                             .offset(y: floatingOffset)
+                            .offset(y: floatingOffset)
 
                         // Title
                         Text("Bookshelf Scanner")
@@ -88,22 +46,19 @@ struct HomeView: View {
                             .multilineTextAlignment(.leading)
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         
-                            // Animated Sequence
-                            VStack {
-                                let words = ["Scan", "catalog", "organize", "discover"]
-                                VStack(spacing: 8) {
-                                    ForEach(0..<4, id: \.self) { index in
-                                        Text(words[index])
-                                            .font(.subheadline.weight(.medium))
-                                            .foregroundColor(AppleBooksColors.text)
-                                            .shadow(color: AppleBooksColors.accent.opacity(0.4), radius: 10 * sequenceOpacities[index])
-                                            .opacity(sequenceOpacities[index])
-                                            .offset(y: sequenceOffsets[index])
-                                    }
-                                }
+                            // Animated Hero Words
+                            let words = ["Scan", "catalog", "organize", "discover"]
+                            Text(words[currentIndex])
+                                .font(.subheadline.weight(.medium))
+                                .foregroundColor(AppleBooksColors.text)
+                                .multilineTextAlignment(.center)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                                    removal: .move(edge: .top).combined(with: .opacity)
+                                ))
+                                .animation(.easeInOut(duration: 0.8), value: currentIndex)
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.horizontal, AppleBooksSpacing.space24)
-                            }
                         
                         // CTA Buttons
                         VStack(spacing: AppleBooksSpacing.space16) {
@@ -145,8 +100,15 @@ struct HomeView: View {
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                            startSequenceCycle()
+                            timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { _ in
+                                withAnimation(.easeInOut(duration: 0.8)) {
+                                    currentIndex = (currentIndex + 1) % 4
+                                }
+                            }
                         }
+                    }
+                    .onDisappear {
+                        timer?.invalidate()
                     }
                     .onAppear {
                         withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
@@ -154,8 +116,15 @@ struct HomeView: View {
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                            startSequenceCycle()
+                            timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { _ in
+                                withAnimation(.easeInOut(duration: 0.8)) {
+                                    currentIndex = (currentIndex + 1) % 4
+                                }
+                            }
                         }
+                    }
+                    .onDisappear {
+                        timer?.invalidate()
                     }
 
                     // Reader's Journey Section
