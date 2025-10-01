@@ -1269,9 +1269,19 @@ public struct AppleBooksBookCard: View {
                         // Age rating badge
                         if let ageRating = book.ageRating {
                             let isChildren = ageRating.lowercased().contains("children") || ageRating.lowercased().contains("general")
+                            let isTeen = ageRating.lowercased().contains("teen")
                             let isAdult = ageRating.lowercased().contains("adult") || ageRating.lowercased().contains("mature")
-                            let bgColor = isChildren ? AppleBooksColors.success.opacity(0.1) : isAdult ? Color(hex: "FF9500").opacity(0.1) : AppleBooksColors.card.opacity(0.8)
-                            let fgColor = isChildren ? AppleBooksColors.success : isAdult ? Color(hex: "FF9500") : AppleBooksColors.text
+                            let (bgColor, fgColor): (Color, Color) = {
+                                if isChildren {
+                                    return (AppleBooksColors.success.opacity(0.1), AppleBooksColors.success)
+                                } else if isTeen {
+                                    return (AppleBooksColors.accent.opacity(0.1), AppleBooksColors.accent)
+                                } else if isAdult {
+                                    return (Color(hex: "FF9500").opacity(0.1), Color(hex: "FF9500"))
+                                } else {
+                                    return (AppleBooksColors.card.opacity(0.8), AppleBooksColors.text)
+                                }
+                            }()
                             Text(ageRating)
                                 .font(AppleBooksTypography.caption)
                                 .foregroundColor(fgColor)
@@ -1295,10 +1305,10 @@ public struct AppleBooksBookCard: View {
                         HStack(spacing: AppleBooksSpacing.space6) {
                             Text(subGenre)
                                 .font(AppleBooksTypography.caption)
-                                .foregroundColor(AppleBooksColors.text)
+                                .foregroundColor(Color(hex: "B19CD9"))
                                 .padding(.horizontal, AppleBooksSpacing.space6)
                                 .padding(.vertical, AppleBooksSpacing.space2)
-                                .background(AppleBooksColors.card.opacity(0.8))
+                                .background(Color(hex: "B19CD9").opacity(0.1))
                                 .cornerRadius(4)
                             Spacer()
                         }
