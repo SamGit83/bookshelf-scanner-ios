@@ -255,9 +255,9 @@ struct SubscriptionSelectionView: View {
                         }
                     }
                     
-                    Button("Join Waitlist for Premium") {
+                    Button(action: {
                         showWaitlistModal = true
-                    } {
+                    }) {
                         Text("Join Waitlist for Premium")
                         .font(AppleBooksTypography.buttonMedium)
                         .foregroundColor(.white)
@@ -274,11 +274,13 @@ struct SubscriptionSelectionView: View {
                     .font(AppleBooksTypography.caption)
                     .foregroundColor(AppleBooksColors.success)
             } else {
-                Button("Skip for Free Tier") {
+                Button(action: {
                     completeOnboarding()
+                }) {
+                    Text("Skip for Free Tier")
+                    .font(AppleBooksTypography.buttonMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
                 }
-                .font(AppleBooksTypography.buttonMedium)
-                .foregroundColor(AppleBooksColors.textSecondary)
             }
         }
     }
@@ -306,9 +308,9 @@ struct SubscriptionSelectionView: View {
 
             subscriptionDetails
         }
-    }
-    .sheet(isPresented: $showWaitlistModal) {
-        WaitlistModal()
+        .sheet(isPresented: $showWaitlistModal) {
+            WaitlistModal()
+        }
     }
 }
 
