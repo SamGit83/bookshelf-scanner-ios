@@ -155,12 +155,6 @@ struct TransformationProgressIndicator: View {
                         )
                     )
                     .frame(width: 280, height: 8)
-
-                // Arrow indicator
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .offset(x: (0.7 - 0.5) * 280)
             }
             .frame(width: 280)
 

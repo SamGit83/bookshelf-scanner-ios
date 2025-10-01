@@ -16,6 +16,17 @@ struct HomeView: View {
     @State private var currentOpacity: Double = 1
     @State private var nextOpacity: Double = 0
     @State private var nextIndex: Int = 1
+
+    private let features = [
+        ("camera.fill", "Scan Your Bookshelf", "Point your camera at your bookshelf and capture a photo"),
+        ("sparkles", "AI Recognition", "Our AI instantly identifies books using advanced computer vision"),
+        ("books.vertical.fill", "Organize & Track", "Automatically organize your library and track reading progress"),
+        ("star.fill", "Discover New Books", "Get personalized recommendations powered by Grok AI")
+    ]
+
+    @State private var rowOpacities: [Double] = Array(repeating: 0, count: 4)
+    @State private var rowOffsets: [CGFloat] = Array(repeating: -50, count: 4)
+
     var body: some View {
         ZStack {
             // Apple Books clean background
@@ -172,31 +183,35 @@ struct HomeView: View {
                         Text("How It Works")
                             .font(AppleBooksTypography.headlineLarge)
                             .foregroundColor(AppleBooksColors.text)
+                            .padding(.bottom, 20)
 
                         VStack(spacing: AppleBooksSpacing.space20) {
-                            FeatureRow(
-                                icon: "camera.fill",
-                                title: "Scan Your Bookshelf",
-                                description: "Point your camera at your bookshelf and capture a photo"
-                            )
-
-                            FeatureRow(
-                                icon: "sparkles",
-                                title: "AI Recognition",
-                                description: "Our AI instantly identifies books using advanced computer vision"
-                            )
-
-                            FeatureRow(
-                                icon: "books.vertical.fill",
-                                title: "Organize & Track",
-                                description: "Automatically organize your library and track reading progress"
-                            )
-
-                            FeatureRow(
-                                icon: "star.fill",
-                                title: "Discover New Books",
-                                description: "Get personalized recommendations powered by Grok AI"
-                            )
+                            ForEach(features.indices, id: \.self) { index in
+                                let feature = features[index]
+                                GeometryReader { geometry in
+                                    let minY = geometry.frame(in: .global).minY
+                                    let screenHeight = UIScreen.main.bounds.height
+                                    let visibility = min(max(0, (screenHeight - minY) / screenHeight), 1)
+                                    FeatureRow(icon: feature.0, title: feature.1, description: feature.2)
+                                        .opacity(rowOpacities[index])
+                                        .offset(y: rowOffsets[index])
+                                        .onAppear {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.2) {
+                                                withAnimation(.easeInOut) {
+                                                    rowOpacities[index] = 1
+                                                    rowOffsets[index] = 0
+                                                }
+                                            }
+                                        }
+                                        .onChange(of: visibility) { newValue in
+                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                rowOpacities[index] = newValue
+                                                rowOffsets[index] = -(1 - newValue) * 50
+                                            }
+                                        }
+                                }
+                                .frame(height: 60)
+                            }
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
                     }
