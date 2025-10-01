@@ -21,6 +21,8 @@ struct LoginView: View {
     @State private var city = ""
     @State private var favoriteBookGenre = ""
     @State private var showWaitlistModal = false
+    @State private var selectedTier: UserTier = .free
+    @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
 
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
@@ -135,52 +137,7 @@ struct LoginView: View {
                             }
 
                             if isSignUp {
-                                AppleBooksCard(
-                                    cornerRadius: 12,
-                                    padding: AppleBooksSpacing.space16,
-                                    shadowStyle: .subtle
-                                ) {
-                                    VStack(spacing: AppleBooksSpacing.space16) {
-                                        Text("Premium Coming Soon")
-                                        .font(AppleBooksTypography.headlineSmall)
-                                        .foregroundColor(AppleBooksColors.textTertiary)
-                                        .multilineTextAlignment(.center)
-                                        
-                                        let premiumFeatures = [
-                                            "Unlimited book scans",
-                                            "Advanced analytics",
-                                            "AI-powered recommendations"
-                                        ]
-                                        
-                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                            ForEach(premiumFeatures, id: \.self) { feature in
-                                                HStack(spacing: AppleBooksSpacing.space8) {
-                                                    Image(systemName: "checkmark.circle.fill")
-                                                    .foregroundColor(AppleBooksColors.success)
-                                                    .font(.system(size: 12, weight: .medium))
-                                                    
-                                                    Text(feature)
-                                                    .font(AppleBooksTypography.bodyMedium)
-                                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                                    
-                                                    Spacer()
-                                                }
-                                            }
-                                        }
-                                        
-                                        Button(action: {
-                                            showWaitlistModal = true
-                                        }) {
-                                            Text("Join Waitlist")
-                                            .font(AppleBooksTypography.buttonMedium)
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, AppleBooksSpacing.space12)
-                                            .background(AppleBooksColors.promotional)
-                                            .cornerRadius(8)
-                                        }
-                                    }
-                                }
+                                ExpandableTierSelection(selectedTier: $selectedTier, selectedPeriod: $selectedPeriod)
                                 .padding(.bottom, AppleBooksSpacing.space16)
                             }
 
@@ -546,7 +503,7 @@ struct LoginView: View {
             country: country.isEmpty ? nil : country,
             city: city.isEmpty ? nil : city,
             favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre,
-            tier: .free
+            tier: selectedTier
         ) { result in
             isLoading = false
             switch result {
