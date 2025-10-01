@@ -14,25 +14,25 @@ struct SplashScreenView: View {
             Color(red: 0.949, green: 0.949, blue: 0.969)
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                // App Icon with scale animation
-                Image(systemName: "books.vertical.fill")
-                    .font(.system(size: 80, weight: .light))
-                    .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
-                    .scaleEffect(scale)
-                    .opacity(opacity)
+            // App Icon with scale animation
+            Image(systemName: "books.vertical.fill")
+                .font(.system(size: 80, weight: .light))
+                .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
+                .position(x: 196.5, y: 376)
+                .scaleEffect(scale)
+                .opacity(opacity)
 
-                // App Name with letter-by-letter bounce animation
-                HStack(spacing: 0) {
-                    ForEach(Array(appName.enumerated()), id: \.offset) { index, character in
-                        Text(String(character))
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
-                            .scaleEffect(letterScales[index])
-                            .opacity(opacity)
-                    }
+            // App Name with letter-by-letter bounce animation
+            HStack(spacing: 0) {
+                ForEach(Array(appName.enumerated()), id: \.offset) { index, character in
+                    Text(String(character))
+                        .scaleEffect(letterScales[index])
+                        .opacity(opacity)
                 }
             }
+            .font(.system(size: 48, weight: .bold))
+            .foregroundColor(Color(red: 1.0, green: 0.42, blue: 0.42))
+            .position(x: 196.5, y: 476)
         }
         .onAppear {
             // Animate icon scale and fade-in
