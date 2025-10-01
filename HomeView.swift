@@ -1,6 +1,5 @@
 import SwiftUI
 import UIKit
-import UIKit
 
 struct HomeView: View {
     @ObservedObject private var authService = AuthService.shared
@@ -9,10 +8,8 @@ struct HomeView: View {
     @State private var showSignup = false
     @State private var floatingOffset: CGFloat = 0
     @State private var flipAngle: Double = 0
-    @State private var flipAngle: Double = 0
     @State private var currentIndex: Int = 0
     @State private var timer: Timer? = nil
-    @State private var flipTimer: Timer? = nil
     @State private var flipTimer: Timer? = nil
     @State private var currentOffset: CGFloat = 0
     @State private var nextOffset: CGFloat = 50
@@ -41,7 +38,6 @@ struct HomeView: View {
                                     .fill(AppleBooksColors.accent.opacity(0.1))
                             )
                             .offset(y: floatingOffset)
-                            .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
                             .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
 
                         // Title
@@ -206,7 +202,6 @@ struct HomeView: View {
                     .onDisappear {
                         timer?.invalidate()
                         flipTimer?.invalidate()
-                        flipTimer?.invalidate()
                     }
 
                     // Reader's Journey Section
@@ -283,27 +278,13 @@ struct FeatureRow: View {
                     Text(title)
                         .font(AppleBooksTypography.headlineSmall)
                         .foregroundColor(AppleBooksColors.text)
-                VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
-                    Text(title)
-                        .font(AppleBooksTypography.headlineSmall)
-                        .foregroundColor(AppleBooksColors.text)
 
                     Text(description)
                         .font(AppleBooksTypography.bodyMedium)
                         .foregroundColor(AppleBooksColors.textSecondary)
                         .lineLimit(2)
                 }
-                    Text(description)
-                        .font(AppleBooksTypography.bodyMedium)
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                        .lineLimit(2)
-                }
 
-                Spacer()
-            }
-            .opacity(visibility)
-            .offset(y: (1 - visibility) * (minY < 0 ? -100 : 100))
-            .animation(.easeInOut, value: visibility)
                 Spacer()
             }
             .opacity(visibility)
