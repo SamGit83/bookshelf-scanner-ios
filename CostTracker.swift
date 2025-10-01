@@ -44,7 +44,13 @@ class CostTracker: ObservableObject {
     // MARK: - Cost Recording
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
         let actualCost = cost ?? (self.costRates[service] ?? 0.0) * Double(usage)
-        print("DEBUG: recordCost called for \(service) with cost \(actualCost) on thread \(Thread.current.name ?? "unknown")")
+        let callStack = Thread.callStackSymbols.joined(separator: "\n")
+        print("DEBUG: recordCost called for \(service) with cost \(actualCost) on thread \(Thread.current.name ?? "unknown")\nCall stack:\n\(callStack)")
+        
+        if actualCost <= 0 {
+            print("DEBUG: Skipping recordCost for \(service) - zero or negative cost")
+            return
+        }
         
         costUpdateQueue.async { [weak self] in
             guard let self = self else {
@@ -66,7 +72,8 @@ class CostTracker: ObservableObject {
                 }
                 // Prevent recursive calls
                 if self.isUpdating {
-                    print("DEBUG: Skipping recursive update for \(service)")
+                    let callStackSkip = Thread.callStackSymbols.joined(separator: "\n")
+                    print("DEBUG: Skipping recursive update for \(service)\nCall stack:\n\(callStackSkip)")
                     return
                 }
                 self.isUpdating = true
@@ -84,13 +91,13 @@ class CostTracker: ObservableObject {
                }
                self.currentCosts.dailyCosts[today]! += actualCost
                 
-               print("DEBUG: After all dailyCosts update: totalCost = \(self.currentCosts.totalCost)")
-               
-               self.updateProfitability()
-               print("DEBUG: Called updateProfitability and objectWillChange for \(service)")
-               self.objectWillChange.send()
-               print("DEBUG: Exited main update for \(service)")
-               self.isUpdating = false
+                print("DEBUG: After all dailyCosts update: totalCost = \(self.currentCosts.totalCost)")
+                
+                self.updateProfitability()
+                print("DEBUG: Called updateProfitability and objectWillChange for \(service)")
+                self.objectWillChange.send()
+                print("DEBUG: Exited main update for \(service)")
+                self.isUpdating = false
             }
            
            // Track in performance monitoring (now inside queue for serialization)
@@ -108,21 +115,7 @@ class CostTracker: ObservableObject {
            }
            
            print("DEBUG: Exited queue for \(service)")
-       }
- 
-       // Track in performance monitoring (dispatch to main if needed, but assuming it's thread-safe)
-       DispatchQueue.main.async {
-           PerformanceMonitoringService.shared.trackAPICost(service: service, cost: actualCost, usage: usage)
-       }
- 
-       // Log to analytics (dispatch to main if needed)
-       DispatchQueue.main.async {
-           AnalyticsManager.shared.trackPerformanceMetric(
-               metricName: "api_cost",
-               value: actualCost,
-               unit: "USD"
-           )
-       }
+        }
     }
 
     func recordBulkCost(service: String, totalCost: Double, usageCount: Int) {
@@ -214,6 +207,7 @@ class CostTracker: ObservableObject {
         let selfPtr = String(describing: self)
         print("DEBUG: updateProfitability called, self: \(selfPtr) on thread \(Thread.current.name ?? "unknown")")
         
+        let oldNetProfit = profitabilityAnalysis.netProfit
         profitabilityAnalysis.netProfit = revenueMetrics.totalRevenue - currentCosts.totalCost
         profitabilityAnalysis.profitMargin = revenueMetrics.totalRevenue > 0 ?
             (profitabilityAnalysis.netProfit / revenueMetrics.totalRevenue) * 100.0 : 0.0
@@ -232,8 +226,10 @@ class CostTracker: ObservableObject {
         // Cost efficiency rating
         profitabilityAnalysis.costEfficiencyRating = calculateCostEfficiencyRating()
 
-        DispatchQueue.main.async { [weak self] in
-            self?.objectWillChange.send()
+        if profitabilityAnalysis.netProfit != oldNetProfit {
+            DispatchQueue.main.async { [weak self] in
+                self?.objectWillChange.send()
+            }
         }
     }
 

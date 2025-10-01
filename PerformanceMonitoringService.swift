@@ -407,7 +407,18 @@ class PerformanceMonitoringService {
 
     // MARK: - Cost Tracking Integration
     func trackAPICost(service: String, cost: Double, usage: Int = 1) {
-        CostTracker.shared.recordCost(service: service, cost: cost, usage: usage)
+        var metadata = ["service": service]
+        if usage > 1 {
+            metadata["usage"] = String(usage)
+        }
+
+        let metric = PerformanceMetric(
+            name: "api_cost",
+            value: cost,
+            unit: "USD",
+            metadata: metadata
+        )
+        trackMetric(metric)
     }
 
     // MARK: - Data Export
