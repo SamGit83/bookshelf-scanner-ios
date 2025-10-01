@@ -153,7 +153,7 @@ struct BookDetailView: View {
     }
 
     private var bookTeaserSection: AnyView {
-        if let teaser = book.teaser, !teaser.isEmpty {
+        if let teaser = currentBook.teaser, !teaser.isEmpty {
             AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "Book Teaser",
@@ -190,7 +190,7 @@ struct BookDetailView: View {
     }
 
     private var authorBiographySection: AnyView {
-        if let bio = book.authorBio ?? book.authorBiography, !bio.isEmpty {
+        if let bio = currentBook.authorBio ?? currentBook.authorBiography, !bio.isEmpty {
             AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "About the Author",

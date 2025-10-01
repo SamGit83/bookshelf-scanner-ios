@@ -335,6 +335,15 @@ class BookViewModel: ObservableObject {
         fetchMissingCoversForExistingBooks()
     }
 
+    func migrateAgeRatings() {
+        print("DEBUG BookViewModel: Manual age rating migration requested")
+        let booksWithoutAgeRating = books.filter { $0.ageRating == nil || $0.ageRating == "" }
+        print("DEBUG BookViewModel: Found \(booksWithoutAgeRating.count) books without age ratings for migration")
+        if !booksWithoutAgeRating.isEmpty {
+            processBooksForAgeRatings(Array(booksWithoutAgeRating), index: 0)
+        }
+    }
+
     private func migrateExistingHTTPURLs() {
         print("DEBUG BookViewModel: Starting migration of HTTP URLs to HTTPS")
         guard let userId = FirebaseConfig.shared.currentUserId else {
@@ -450,6 +459,36 @@ class BookViewModel: ObservableObject {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self?.processBooksForCovers(booksToProcess, index: index + 1)
                 }
+            }
+        }
+    }
+
+    private func processBooksForAgeRatings(_ booksToProcess: [Book], index: Int) {
+        guard index < booksToProcess.count else {
+            print("DEBUG BookViewModel: Finished processing all books for age ratings")
+            return
+        }
+
+        let book = booksToProcess[index]
+        print("DEBUG BookViewModel: Analyzing age rating for existing book (\(index + 1)/\(booksToProcess.count)): \(book.title ?? "") by \(book.author ?? "")")
+
+        grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
+            var updatedBook = book
+            switch result {
+            case .success(let ageRating):
+                print("DEBUG BookViewModel: Age rating analysis successful: \(ageRating) for \(book.title ?? "")")
+                updatedBook.ageRating = ageRating
+            case .failure(let error):
+                print("DEBUG BookViewModel: Age rating analysis failed: \(error.localizedDescription) for \(book.title ?? ""), using Unknown")
+                updatedBook.ageRating = "Unknown"
+            }
+            // Save to Firestore and update local array
+            self?.saveBookToFirestore(updatedBook)
+            self?.updateLocalBook(updatedBook)
+
+            // Process next book after a delay to rate limit API calls
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // 1 second delay for rate limiting
+                self?.processBooksForAgeRatings(booksToProcess, index: index + 1)
             }
         }
     }
@@ -776,6 +815,15 @@ class BookViewModel: ObservableObject {
                     }
                 } else {
                     print("DEBUG BookViewModel: Skipping cover refresh - recently done")
+                }
+
+                // Process age ratings for books without ratings
+                let booksWithoutAgeRating = loadedBooks.filter { $0.ageRating == nil || $0.ageRating == "" }
+                if !booksWithoutAgeRating.isEmpty {
+                    print("DEBUG BookViewModel: Found \(booksWithoutAgeRating.count) books without age ratings, starting lazy analysis")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // Delay to avoid overwhelming API
+                        self.processBooksForAgeRatings(Array(booksWithoutAgeRating), index: 0)
+                    }
                 }
             }
     }
