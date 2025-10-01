@@ -517,9 +517,9 @@ class BookViewModel: ObservableObject {
             }
             return
         }
-
+    
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
-
+    
         bookRef.updateData(["status": status.rawValue]) { [weak self] error in
             DispatchQueue.main.async {
                 if let error = error {
@@ -527,6 +527,42 @@ class BookViewModel: ObservableObject {
                 } else {
                     // Track book status change
                     AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
+                    Task { await self?.loadBooksPaginated(page: 0) }
+                }
+            }
+        }
+    }
+    
+    func markBookAsUnread(_ book: Book) {
+        guard let userId = FirebaseConfig.shared.currentUserId else {
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
+            return
+        }
+    
+        let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
+    
+        var updateData: [String: Any] = [
+            "status": BookStatus.toRead.rawValue,
+            "currentPage": 0
+        ]
+    
+        // Reset reading dates if they exist
+        if book.dateStartedReading != nil {
+            updateData["dateStartedReading"] = FieldValue.delete()
+        }
+        if book.dateFinishedReading != nil {
+            updateData["dateFinishedReading"] = FieldValue.delete()
+        }
+    
+        bookRef.updateData(updateData) { [weak self] error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = "Failed to mark book as unread: \(error.localizedDescription)"
+                } else {
+                    // Track book status change
+                    AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: .toRead)
                     Task { await self?.loadBooksPaginated(page: 0) }
                 }
             }

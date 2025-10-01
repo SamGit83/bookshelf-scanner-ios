@@ -1354,6 +1354,14 @@ public struct AppleBooksBookCard: View {
                 }
             }
 
+            if book.status == .reading || book.status == .read {
+                Button(action: {
+                    viewModel?.markBookAsUnread(book)
+                }) {
+                    Label("Mark as Unread", systemImage: "book.closed")
+                }
+            }
+
             Button(role: .destructive, action: {
                 viewModel?.deleteBook(book)
             }) {
