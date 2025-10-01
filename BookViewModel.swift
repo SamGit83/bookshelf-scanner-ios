@@ -61,7 +61,7 @@ class BookViewModel: ObservableObject {
                 books.append(contentsOf: loadedBooks)
             }
             currentPage = page + 1
-            totalBooks = OfflineCache.shared.getTotalBooksCount() ?? loadedBooks.count
+            totalBooks = loadedBooks.count
             hasMoreBooks = loadedBooks.count == limit
         } else {
             // Cache failed - fallback to database
