@@ -1164,6 +1164,8 @@ struct TierFeatureRow: View {
 
 struct WaitlistModal: View {
     @Environment(\.presentationMode) var presentationMode
+    @State private var firstName = ""
+    @State private var lastName = ""
     @State private var email = ""
     @State private var isSubmitting = false
     @State private var showSuccessAlert = false
@@ -1182,12 +1184,38 @@ struct WaitlistModal: View {
                 .font(AppleBooksTypography.headlineLarge)
                 .foregroundColor(AppleBooksColors.text)
                 .multilineTextAlignment(.center)
-                
-                Text("Enter your email to get notified when Premium is available.")
+
+                Text("Enter your details to get notified when Premium is available.")
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.center)
-                
+
+                TextField("First Name", text: $firstName)
+                .font(AppleBooksTypography.bodyLarge)
+                .foregroundColor(AppleBooksColors.text)
+                .padding(AppleBooksSpacing.space12)
+                .background(AppleBooksColors.card)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                    .stroke(firstName.isEmpty ? AppleBooksColors.textTertiary : AppleBooksColors.accent, lineWidth: 1)
+                )
+                .autocapitalization(.words)
+                .textContentType(.givenName)
+
+                TextField("Last Name", text: $lastName)
+                .font(AppleBooksTypography.bodyLarge)
+                .foregroundColor(AppleBooksColors.text)
+                .padding(AppleBooksSpacing.space12)
+                .background(AppleBooksColors.card)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                    .stroke(lastName.isEmpty ? AppleBooksColors.textTertiary : AppleBooksColors.accent, lineWidth: 1)
+                )
+                .autocapitalization(.words)
+                .textContentType(.familyName)
+
                 TextField("Enter your email", text: $email)
                 .font(AppleBooksTypography.bodyLarge)
                 .foregroundColor(AppleBooksColors.text)
@@ -1203,11 +1231,11 @@ struct WaitlistModal: View {
                 .textContentType(.emailAddress)
                 
                 Button(action: {
-                    if isValidEmail(email) {
+                    if isValidEmail(email) && !firstName.isEmpty && !lastName.isEmpty {
                         isSubmitting = true
                         Task {
                             do {
-                                try await authService.joinWaitlist(email: email)
+                                try await authService.joinWaitlist(firstName: firstName, lastName: lastName, email: email)
                                 await MainActor.run {
                                     isSubmitting = false
                                     showSuccessAlert = true
@@ -1215,7 +1243,7 @@ struct WaitlistModal: View {
                             } catch {
                                 await MainActor.run {
                                     isSubmitting = false
-                                    authService.errorMessage = "Failed to join waitlist. Please try after signing up."
+                                    authService.errorMessage = "Failed to join waitlist. Please try again."
                                 }
                             }
                         }
@@ -1235,7 +1263,7 @@ struct WaitlistModal: View {
                 }
                 .background(AppleBooksColors.accent)
                 .cornerRadius(12)
-                .disabled(isSubmitting || !isValidEmail(email) || email.isEmpty)
+                .disabled(isSubmitting || !isValidEmail(email) || email.isEmpty || firstName.isEmpty || lastName.isEmpty)
                 
                 Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()

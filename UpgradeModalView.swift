@@ -13,6 +13,8 @@ struct UpgradeModalView: View {
     @State private var errorMessage = ""
     @State private var variantConfig: UpgradeVariantConfig?
     @State private var email = ""
+    @State private var firstName = ""
+    @State private var lastName = ""
     @State private var showEmailInput = false
     @State private var isSubmitting = false
     @State private var showEmailError = false
@@ -79,6 +81,7 @@ struct UpgradeModalView: View {
                 print("DEBUG UpgradeModal: Modal presented")
                 loadVariantConfig()
                 trackModalView()
+                email = AuthService.shared.currentUser?.email ?? ""
             }
             .alert(isPresented: $showError) {
                 Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
@@ -295,10 +298,20 @@ struct UpgradeModalView: View {
 
             if showEmailInput {
                 VStack(spacing: 16) {
-                    Text("Enter your email to join the Premium waitlist")
+                    Text("Enter your details to join the Premium waitlist")
                         .font(.body)
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
+
+                    TextField("First Name", text: $firstName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.words)
+                        .glassFieldStyle(isValid: !showEmailError)
+
+                    TextField("Last Name", text: $lastName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.words)
+                        .glassFieldStyle(isValid: !showEmailError)
 
                     TextField("your.email@example.com", text: $email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -307,20 +320,22 @@ struct UpgradeModalView: View {
                         .glassFieldStyle(isValid: !showEmailError)
 
                     if showEmailError {
-                        Text("Please enter a valid email address")
+                        Text("Please enter first name, last name, and a valid email address")
                             .font(.caption)
                             .foregroundColor(SemanticColors.errorPrimary)
                     }
 
                     Button(action: {
-                        if email.contains("@") && !email.isEmpty {
+                        if email.contains("@") && !email.isEmpty && !firstName.isEmpty && !lastName.isEmpty {
                             showEmailError = false
                             isSubmitting = true
                             Task {
                                 do {
-                                    try await AuthService.shared.joinWaitlist(email: email)
+                                    try await AuthService.shared.joinWaitlist(firstName: firstName, lastName: lastName, email: email)
                                     isSubmitting = false
                                     showSuccess = true
+                                    firstName = ""
+                                    lastName = ""
                                     email = ""
                                     showEmailInput = false
                                 } catch {
@@ -349,11 +364,13 @@ struct UpgradeModalView: View {
                             .cornerRadius(12)
                             .font(.headline.weight(.semibold))
                     }
-                    .disabled(isSubmitting || email.isEmpty)
+                    .disabled(isSubmitting || email.isEmpty || firstName.isEmpty || lastName.isEmpty)
                     .buttonStyle(PlainButtonStyle())
 
                     Button(action: {
                         showEmailInput = false
+                        firstName = ""
+                        lastName = ""
                         email = ""
                         showEmailError = false
                     }) {
