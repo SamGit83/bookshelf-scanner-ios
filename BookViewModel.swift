@@ -45,45 +45,55 @@ class BookViewModel: ObservableObject {
 
     func loadBooksPaginated(page: Int, limit: Int = 20) async {
         print("DEBUG BookViewModel: loadBooksPaginated called with page=\(page), limit=\(limit)")
-        if page == 0 {
-            isLoading = true
-        } else {
-            isLoadingMore = true
+        DispatchQueue.main.async {
+            if page == 0 {
+                self.isLoading = true
+            } else {
+                self.isLoadingMore = true
+            }
+            self.errorMessage = nil
         }
-        errorMessage = nil
-        
+
         if let loadedBooks = OfflineCache.shared.loadBooks(page: page, limit: limit) {
             // Cache success - existing logic
-            if page == 0 {
-                books = loadedBooks
-                print("DEBUG BookViewModel: loadBooksPaginated loaded \(books.count) books")
-            } else {
-                books.append(contentsOf: loadedBooks)
+            DispatchQueue.main.async {
+                if page == 0 {
+                    self.books = loadedBooks
+                    print("DEBUG BookViewModel: loadBooksPaginated loaded \(self.books.count) books")
+                } else {
+                    self.books.append(contentsOf: loadedBooks)
+                }
+                self.currentPage = page + 1
+                self.totalBooks = loadedBooks.count
+                self.hasMoreBooks = loadedBooks.count == limit
             }
-            currentPage = page + 1
-            totalBooks = loadedBooks.count
-            hasMoreBooks = loadedBooks.count == limit
         } else {
             // Cache failed - fallback to database
             print("DEBUG BookViewModel: Cache failed, falling back to database")
             if let dbBooks = await loadBooksFromFirestore(page: page, limit: limit) {
-                if page == 0 {
-                    books = dbBooks
-                } else {
-                    books.append(contentsOf: dbBooks)
+                DispatchQueue.main.async {
+                    if page == 0 {
+                        self.books = dbBooks
+                    } else {
+                        self.books.append(contentsOf: dbBooks)
+                    }
+                    self.currentPage = page + 1
+                    // For now, assume we don't know total count without separate query
+                    self.hasMoreBooks = dbBooks.count == limit
                 }
-                currentPage = page + 1
-                // For now, assume we don't know total count without separate query
-                hasMoreBooks = dbBooks.count == limit
                 // Cache the database results
                 OfflineCache.shared.cacheBooks(books)
             } else {
-                errorMessage = "Failed to load books from cache or database"
+                DispatchQueue.main.async {
+                    self.errorMessage = "Failed to load books from cache or database"
+                }
             }
         }
-        
-        isLoading = false
-        isLoadingMore = false
+
+        DispatchQueue.main.async {
+            self.isLoading = false
+            self.isLoadingMore = false
+        }
     }
     private func loadBooksFromFirestore(page: Int, limit: Int) async -> [Book]? {
         guard let userId = FirebaseConfig.shared.currentUserId else { return nil }
@@ -444,56 +454,68 @@ class BookViewModel: ObservableObject {
 
     func moveBook(_ book: Book, to status: BookStatus) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            errorMessage = "User not authenticated"
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
             return
         }
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
         bookRef.updateData(["status": status.rawValue]) { [weak self] error in
-            if let error = error {
-                self?.errorMessage = "Failed to update book: \(error.localizedDescription)"
-            } else {
-                // Track book status change
-                AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
-                Task { await self?.loadBooksPaginated(page: 0) }
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = "Failed to update book: \(error.localizedDescription)"
+                } else {
+                    // Track book status change
+                    AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
+                    Task { await self?.loadBooksPaginated(page: 0) }
+                }
             }
         }
     }
 
     func deleteBook(_ book: Book) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            errorMessage = "User not authenticated"
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
             return
         }
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
         bookRef.delete { [weak self] error in
-            if let error = error {
-                self?.errorMessage = "Failed to delete book: \(error.localizedDescription)"
-            } else {
-                Task { await self?.loadBooksPaginated(page: 0) }
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = "Failed to delete book: \(error.localizedDescription)"
+                } else {
+                    Task { await self?.loadBooksPaginated(page: 0) }
+                }
             }
         }
     }
 
     func updateBookTeaser(_ book: Book, teaser: String) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            errorMessage = "User not authenticated"
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
             return
         }
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
         bookRef.updateData(["teaser": teaser]) { [weak self] error in
-            if let error = error {
-                self?.errorMessage = "Failed to update teaser: \(error.localizedDescription)"
-            } else {
-                guard let self = self else { return }
-                // Update local book
-                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
-                    self.books[index].teaser = teaser
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = "Failed to update teaser: \(error.localizedDescription)"
+                } else {
+                    guard let self = self else { return }
+                    // Update local book
+                    if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                        self.books[index].teaser = teaser
+                    }
                 }
             }
         }
@@ -501,20 +523,24 @@ class BookViewModel: ObservableObject {
 
     func updateBookAuthorBio(_ book: Book, authorBio: String) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            errorMessage = "User not authenticated"
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
             return
         }
 
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
 
         bookRef.updateData(["authorBio": authorBio]) { [weak self] error in
-            if let error = error {
-                self?.errorMessage = "Failed to update author bio: \(error.localizedDescription)"
-            } else {
-                guard let self = self else { return }
-                // Update local book
-                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
-                    self.books[index].authorBio = authorBio
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = "Failed to update author bio: \(error.localizedDescription)"
+                } else {
+                    guard let self = self else { return }
+                    // Update local book
+                    if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                        self.books[index].authorBio = authorBio
+                    }
                 }
             }
         }
@@ -522,7 +548,9 @@ class BookViewModel: ObservableObject {
 
     func updateReadingProgress(_ book: Book, currentPage: Int) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            errorMessage = "User not authenticated"
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
             return
         }
 
@@ -536,21 +564,23 @@ class BookViewModel: ObservableObject {
         }
 
         bookRef.updateData(updateData) { [weak self] error in
-            if let error = error {
-                self?.errorMessage = "Failed to update reading progress: \(error.localizedDescription)"
-            } else {
-                guard let self = self else { return }
-                // Update local book
-                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
-                    self.books[index].currentPage = currentPage
-                    if self.books[index].dateStartedReading == nil {
-                        self.books[index].dateStartedReading = Date()
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = "Failed to update reading progress: \(error.localizedDescription)"
+                } else {
+                    guard let self = self else { return }
+                    // Update local book
+                    if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                        self.books[index].currentPage = currentPage
+                        if self.books[index].dateStartedReading == nil {
+                            self.books[index].dateStartedReading = Date()
+                        }
                     }
-                }
-                // Track reading progress update
-                let pagesRead = currentPage - (book.currentPage)
-                if pagesRead > 0 {
-                    AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: 0, pagesRead: pagesRead) // Duration not tracked here
+                    // Track reading progress update
+                    let pagesRead = currentPage - (book.currentPage)
+                    if pagesRead > 0 {
+                        AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: 0, pagesRead: pagesRead) // Duration not tracked here
+                    }
                 }
             }
         }
@@ -558,7 +588,9 @@ class BookViewModel: ObservableObject {
 
     func markBookAsComplete(_ book: Book) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            errorMessage = "User not authenticated"
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
             return
         }
 
@@ -571,21 +603,23 @@ class BookViewModel: ObservableObject {
         ]
 
         bookRef.updateData(updateData) { [weak self] error in
-            if let error = error {
-                self?.errorMessage = "Failed to mark book as complete: \(error.localizedDescription)"
-            } else {
-                guard let self = self else { return }
-                // Update local book
-                if let index = self.books.firstIndex(where: { $0.id == book.id }) {
-                    self.books[index].status = .read
-                    self.books[index].dateFinishedReading = Date()
-                    self.books[index].currentPage = book.totalPages ?? book.currentPage
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = "Failed to mark book as complete: \(error.localizedDescription)"
+                } else {
+                    guard let self = self else { return }
+                    // Update local book
+                    if let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                        self.books[index].status = .read
+                        self.books[index].dateFinishedReading = Date()
+                        self.books[index].currentPage = book.totalPages ?? book.currentPage
+                    }
+                    // Track book completion
+                    let sessionDuration = book.dateStartedReading != nil ? Date().timeIntervalSince(book.dateStartedReading!) : 0
+                    let pagesRead = (book.totalPages ?? book.currentPage) - book.currentPage
+                    AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: sessionDuration, pagesRead: pagesRead)
+                    AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: .read)
                 }
-                // Track book completion
-                let sessionDuration = book.dateStartedReading != nil ? Date().timeIntervalSince(book.dateStartedReading!) : 0
-                let pagesRead = (book.totalPages ?? book.currentPage) - book.currentPage
-                AnalyticsManager.shared.trackReadingSessionCompleted(bookId: book.id.uuidString, sessionDuration: sessionDuration, pagesRead: pagesRead)
-                AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: .read)
             }
         }
     }
@@ -745,7 +779,9 @@ class BookViewModel: ObservableObject {
     func saveBookToFirestore(_ book: Book) {
         guard let userId = FirebaseConfig.shared.currentUserId else {
             print("DEBUG BookViewModel: saveBookToFirestore failed - user not authenticated")
-            errorMessage = "User not authenticated"
+            DispatchQueue.main.async {
+                self.errorMessage = "User not authenticated"
+            }
             return
         }
 
@@ -773,11 +809,13 @@ class BookViewModel: ObservableObject {
         print("DEBUG BookViewModel: saveBookToFirestore data keys: \(data.keys.sorted())")
         print("DEBUG BookViewModel: saveBookToFirestore pageCount value: \(String(describing: book.pageCount))")
         bookRef.setData(data) { error in
-            if let error = error {
-                print("DEBUG BookViewModel: Failed to save book to Firestore: \(error.localizedDescription)")
-                self.errorMessage = "Failed to save book: \(error.localizedDescription)"
-            } else {
-                print("DEBUG BookViewModel: Successfully saved book to Firestore")
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("DEBUG BookViewModel: Failed to save book to Firestore: \(error.localizedDescription)")
+                    self.errorMessage = "Failed to save book: \(error.localizedDescription)"
+                } else {
+                    print("DEBUG BookViewModel: Successfully saved book to Firestore")
+                }
             }
         }
     }
