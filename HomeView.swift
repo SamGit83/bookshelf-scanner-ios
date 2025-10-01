@@ -178,7 +178,7 @@ struct HomeView: View {
 
                     // How It Works Section
                     VStack(spacing: AppleBooksSpacing.space24) {
-                        Text("How It Works")
+                        Text("HOW IT WORKS")
                             .font(AppleBooksTypography.headlineLarge)
                             .foregroundColor(AppleBooksColors.text)
                             .padding(.bottom, AppleBooksSpacing.space40)
@@ -222,6 +222,8 @@ struct HomeView: View {
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
                     }
+                    .padding(.top, AppleBooksSpacing.space48)
+                    .padding(.leading, AppleBooksSpacing.space32)
 
                     Spacer(minLength: AppleBooksSpacing.space80)
                 }
