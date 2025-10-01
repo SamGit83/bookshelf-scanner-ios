@@ -254,7 +254,7 @@ class AuthService: ObservableObject {
         }
     }
 
-    func joinWaitlist(firstName: String, lastName: String, email: String) async throws {
+    func joinWaitlist(firstName: String, lastName: String, email: String, userId: String? = nil) async throws {
         let db = Firestore.firestore()
         var data: [String: Any] = [
             "firstName": firstName,
@@ -262,7 +262,7 @@ class AuthService: ObservableObject {
             "email": email,
             "timestamp": Timestamp()
         ]
-        if let userId = currentUser?.id {
+        if let userId = userId {
             data["userId"] = userId
         }
         do {

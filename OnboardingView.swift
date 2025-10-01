@@ -309,7 +309,12 @@ struct SubscriptionSelectionView: View {
             subscriptionDetails
         }
         .sheet(isPresented: $showWaitlistModal) {
-            WaitlistModal()
+            WaitlistModal(
+                initialFirstName: authService.currentUser?.firstName ?? "",
+                initialLastName: authService.currentUser?.lastName ?? "",
+                initialEmail: authService.currentUser?.email ?? "",
+                initialUserId: authService.currentUser?.id
+            )
         }
     }
 }

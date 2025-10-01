@@ -12,13 +12,7 @@ struct UpgradeModalView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var variantConfig: UpgradeVariantConfig?
-    @State private var email = ""
-    @State private var firstName = ""
-    @State private var lastName = ""
-    @State private var showEmailInput = false
-    @State private var isSubmitting = false
-    @State private var showEmailError = false
-    @State private var showSuccess = false
+    @State private var showWaitlistModal = false
 
     enum SubscriptionPlan {
         case monthly, annual
@@ -81,7 +75,6 @@ struct UpgradeModalView: View {
                 print("DEBUG UpgradeModal: Modal presented")
                 loadVariantConfig()
                 trackModalView()
-                email = AuthService.shared.currentUser?.email ?? ""
             }
             .alert(isPresented: $showError) {
                 Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
@@ -270,7 +263,7 @@ struct UpgradeModalView: View {
     private var ctaSection: some View {
         VStack(spacing: 16) {
             Button(action: {
-                showEmailInput = true
+                showWaitlistModal = true
             }) {
                 Text("Join Waitlist")
                     .frame(maxWidth: .infinity)
@@ -296,98 +289,6 @@ struct UpgradeModalView: View {
             .padding(.horizontal, 16)
             .accessibilityLabel("Join Waitlist Button")
 
-            if showEmailInput {
-                VStack(spacing: 16) {
-                    Text("Enter your details to join the Premium waitlist")
-                        .font(.body)
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
-
-                    TextField("First Name", text: $firstName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.words)
-                        .glassFieldStyle(isValid: !showEmailError)
-
-                    TextField("Last Name", text: $lastName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.words)
-                        .glassFieldStyle(isValid: !showEmailError)
-
-                    TextField("your.email@example.com", text: $email)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.none)
-                        .keyboardType(.emailAddress)
-                        .glassFieldStyle(isValid: !showEmailError)
-
-                    if showEmailError {
-                        Text("Please enter first name, last name, and a valid email address")
-                            .font(.caption)
-                            .foregroundColor(SemanticColors.errorPrimary)
-                    }
-
-                    Button(action: {
-                        if email.contains("@") && !email.isEmpty && !firstName.isEmpty && !lastName.isEmpty {
-                            showEmailError = false
-                            isSubmitting = true
-                            Task {
-                                do {
-                                    try await AuthService.shared.joinWaitlist(firstName: firstName, lastName: lastName, email: email)
-                                    isSubmitting = false
-                                    showSuccess = true
-                                    firstName = ""
-                                    lastName = ""
-                                    email = ""
-                                    showEmailInput = false
-                                } catch {
-                                    isSubmitting = false
-                                    showEmailError = true
-                                    errorMessage = error.localizedDescription
-                                    showError = true
-                                }
-                            }
-                        } else {
-                            showEmailError = true
-                        }
-                    }) {
-                        Text(isSubmitting ? "Joining..." : "Join Waitlist")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .padding(.horizontal, 24)
-                            .background(
-                                LinearGradient(
-                                    colors: [PrimaryColors.vibrantPurple, PrimaryColors.vibrantPurple.opacity(0.8)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                            .font(.headline.weight(.semibold))
-                    }
-                    .disabled(isSubmitting || email.isEmpty || firstName.isEmpty || lastName.isEmpty)
-                    .buttonStyle(PlainButtonStyle())
-
-                    Button(action: {
-                        showEmailInput = false
-                        firstName = ""
-                        lastName = ""
-                        email = ""
-                        showEmailError = false
-                    }) {
-                        Text("Cancel")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 24)
-                            .background(Color.clear)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 20)
-                .glassBackground()
-                .cornerRadius(16)
-            }
 
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
@@ -403,14 +304,17 @@ struct UpgradeModalView: View {
             .accessibilityLabel("Maybe Later Button")
         }
         .glassBackground()
-        .alert(isPresented: $showSuccess) {
-            Alert(
-                title: Text("Success"),
-                message: Text("Thanks for joining the waitlist! We'll notify you when Premium is available."),
-                dismissButton: .default(Text("OK")) {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            )
+        .sheet(isPresented: $showWaitlistModal) {
+            if let user = AuthService.shared.currentUser {
+                WaitlistModal(
+                    initialFirstName: user.firstName ?? "",
+                    initialLastName: user.lastName ?? "",
+                    initialEmail: user.email ?? "",
+                    initialUserId: user.id
+                )
+            } else {
+                WaitlistModal()
+            }
         }
     }
 
