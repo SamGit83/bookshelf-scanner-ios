@@ -13,11 +13,6 @@ struct HomeView: View {
     @State private var currentOpacity: Double = 1
     @State private var nextOpacity: Double = 0
     @State private var nextIndex: Int = 1
-    @State private var currentOffset: CGFloat = 0
-    @State private var nextOffset: CGFloat = 50
-    @State private var currentOpacity: Double = 1
-    @State private var nextOpacity: Double = 0
-    @State private var nextIndex: Int = 1
     var body: some View {
         ZStack {
             // Apple Books clean background
@@ -200,6 +195,7 @@ struct HomeView: View {
                                     currentOpacity = 1
                                     nextOpacity = 0
                                 }
+                            }
                             }
                         }
                     }
