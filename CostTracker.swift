@@ -50,7 +50,7 @@ class CostTracker: ObservableObject {
                 print("DEBUG: self is nil in recordCost async for \(service)")
                 return
             }
-            let selfPtr = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+            let selfPtr = String(describing: self)
             print("DEBUG: Entering recordCost for \(service), usage: \(usage), self: \(selfPtr) on queue thread \(Thread.current.name ?? "unknown")")
             
             guard self.currentCosts != nil else {
@@ -148,7 +148,7 @@ class CostTracker: ObservableObject {
                 print("DEBUG: self is nil in recordRevenue async")
                 return
             }
-            let selfPtr = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+            let selfPtr = String(describing: self)
             print("DEBUG: Entering recordRevenue for tier \(tier), amount \(amount), self: \(selfPtr) on queue thread \(Thread.current.name ?? "unknown")")
             
             guard self.revenueMetrics != nil else {
@@ -203,7 +203,7 @@ class CostTracker: ObservableObject {
             print("DEBUG: Nil properties in updateProfitability")
             return
         }
-        let selfPtr = String(format: "%p", Unmanaged.passUnretained(self).toOpaque())
+        let selfPtr = String(describing: self)
         print("DEBUG: updateProfitability called, self: \(selfPtr) on thread \(Thread.current.name ?? "unknown")")
         
         profitabilityAnalysis.netProfit = revenueMetrics.totalRevenue - currentCosts.totalCost
