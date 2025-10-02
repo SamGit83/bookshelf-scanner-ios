@@ -542,7 +542,7 @@ struct GlassCard<Content: View>: View {
     }
 
     private var glassColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.15)
+        colorScheme == .dark ? Color.black.opacity(0.3) : Color.white.opacity(0.15)
     }
 
     private var glassStrokeColor: Color {

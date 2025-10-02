@@ -18,6 +18,7 @@ struct UserJourneySection: View {
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
                 .foregroundColor(.primary)
+                .foregroundColor(.primary)
                 .offset(y: animateSection ? 0 : 30)
                 .opacity(animateSection ? 1 : 0)
                 .animation(.spring().delay(0.1), value: animateSection)
@@ -45,6 +46,7 @@ struct UserJourneySection: View {
             VStack(spacing: 16) {
                 Text("Save time cataloging • Never lose track of your books • Discover new favorites • Track reading goals")
                     .font(.title3)
+                    .foregroundColor(.secondary)
                     .foregroundColor(.secondary)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -80,37 +82,39 @@ struct StepCard: View {
                     Circle()
                         .fill(Color.black.opacity(0.1))
                         .fill(Color.black.opacity(0.1))
+                        .fill(Color.black.opacity(0.1))
                         .frame(width: 50, height: 50)
 
                     Text("\(stepNumber)")
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundStyle(Color.black)
+                        .foregroundStyle(Color.white)
                 }
 
                 // Icon
                 Image(systemName: icon)
                     .font(.system(size: 32))
-                    .foregroundStyle(Color.black)
+                    .foregroundStyle(Color.white)
                     .frame(height: 40)
 
                 // Title
                 Text(title)
                     .font(.title2)
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color.black)
+                    .foregroundStyle(Color.white)
                     .multilineTextAlignment(.center)
 
                 // Description
                 Text(description)
                     .font(.body)
-                    .foregroundStyle(Color.black)
+                    .foregroundStyle(Color.white)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
             }
             .padding(24)
             .frame(width: 280, height: 300)
         }
+        .colorScheme(.light)
         .colorScheme(.light)
         .offset(y: animateCard ? 0 : 30)
         .opacity(animateCard ? 1 : 0)
