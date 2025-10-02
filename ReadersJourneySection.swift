@@ -23,6 +23,8 @@ struct ReadersJourneySection: View {
                     .font(TypographySystem.bodyMedium)
                     .foregroundColor(AppleBooksColors.textSecondary)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, horizontalPadding)
                     .padding(.top, spacing.text)
                     .scaleEffect(textScale.body)
