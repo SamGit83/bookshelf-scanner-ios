@@ -5,7 +5,7 @@ struct ReadersJourneySection: View {
         VStack(spacing: AppleBooksSpacing.space32) {
             Text("Alex's Reading Journey")
                 .font(AppleBooksTypography.headlineLarge)
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
                 .padding(.horizontal, AppleBooksSpacing.space32)
 
             Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
