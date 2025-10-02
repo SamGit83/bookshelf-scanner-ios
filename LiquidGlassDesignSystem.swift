@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Theme Management
 enum ColorSchemePreference: String, CaseIterable {
