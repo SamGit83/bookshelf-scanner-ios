@@ -100,7 +100,7 @@ struct EnhancedJourneyCard: View {
                     .cornerRadius(8)
 
                 Text(title)
-                    .font(headerFont)
+                    .font(.title)
                     .foregroundColor(.black)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -115,7 +115,7 @@ struct EnhancedJourneyCard: View {
                             .frame(width: bulletFrameSize, height: bulletFrameSize)
 
                         Text(bulletPoints[index].text)
-                            .font(bulletFont)
+                            .font(.title3)
                             .foregroundColor(.black)
                             .lineSpacing(lineSpacing)
                             .fixedSize(horizontal: false, vertical: true)
@@ -231,7 +231,7 @@ struct FlipCard: View {
             }
         }
         .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-        .frame(width: 280, height: 400)
+        .frame(width: 320, height: 450)
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
