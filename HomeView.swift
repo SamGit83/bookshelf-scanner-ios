@@ -66,6 +66,7 @@ struct HomeView: View {
                         ZStack {
                             let words = ["Scan", "Catalog", "Organize", "Discover"]
                             let icons = ["viewfinder", "books.vertical", "square.grid.2x2", "sparkles"]
+                            let colors: [Color] = [Color(hex: "FF6B35"), Color(hex: "FF1493"), Color(hex: "00BFFF"), Color(hex: "32CD32")]
                             
                                 // Current word with icon
                                 HStack(spacing: 12) {
@@ -73,23 +74,23 @@ struct HomeView: View {
                                         .font(.system(size: 28, weight: .bold))
                                         .foregroundStyle(
                                             LinearGradient(
-                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                colors: [colors[currentIndex], colors[currentIndex].opacity(0.7)],
                                                 startPoint: .leading,
                                                 endPoint: .trailing
                                             )
                                         )
-                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
-                                    
+                                        .shadow(color: colors[currentIndex].opacity(0.3), radius: 10, x: 0, y: 0)
+
                                     Text(words[currentIndex])
                                         .font(.largeTitle.weight(.bold))
                                         .foregroundStyle(
                                             LinearGradient(
-                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                colors: [colors[currentIndex], colors[currentIndex].opacity(0.7)],
                                                 startPoint: .leading,
                                                 endPoint: .trailing
                                             )
                                         )
-                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
+                                        .shadow(color: colors[currentIndex].opacity(0.3), radius: 10, x: 0, y: 0)
                                 }
                                 .offset(y: currentOffset)
                                 .opacity(currentOpacity)
@@ -98,7 +99,7 @@ struct HomeView: View {
                                 .padding(.vertical, 20)
                                 .background(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .fill(AppleBooksColors.accent.opacity(0.05))
+                                        .fill(colors[currentIndex].opacity(0.05))
                                         .blur(radius: 8)
                                 )
                                 
@@ -108,23 +109,23 @@ struct HomeView: View {
                                         .font(.system(size: 28, weight: .bold))
                                         .foregroundStyle(
                                             LinearGradient(
-                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                colors: [colors[nextIndex], colors[nextIndex].opacity(0.7)],
                                                 startPoint: .leading,
                                                 endPoint: .trailing
                                             )
                                         )
-                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
-                                    
+                                        .shadow(color: colors[nextIndex].opacity(0.3), radius: 10, x: 0, y: 0)
+
                                     Text(words[nextIndex])
                                         .font(.largeTitle.weight(.bold))
                                         .foregroundStyle(
                                             LinearGradient(
-                                                colors: [AppleBooksColors.accent, AppleBooksColors.accent.opacity(0.7)],
+                                                colors: [colors[nextIndex], colors[nextIndex].opacity(0.7)],
                                                 startPoint: .leading,
                                                 endPoint: .trailing
                                             )
                                         )
-                                        .shadow(color: AppleBooksColors.accent.opacity(0.3), radius: 10, x: 0, y: 0)
+                                        .shadow(color: colors[nextIndex].opacity(0.3), radius: 10, x: 0, y: 0)
                                 }
                                 .offset(y: nextOffset)
                                 .opacity(nextOpacity)
@@ -133,7 +134,7 @@ struct HomeView: View {
                                 .padding(.vertical, 20)
                                 .background(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .fill(AppleBooksColors.accent.opacity(0.05))
+                                        .fill(colors[nextIndex].opacity(0.05))
                                         .blur(radius: 8)
                                 )
                             }
