@@ -30,6 +30,7 @@ struct ReadersJourneySection: View {
             FlipCard()
                 .padding(.horizontal, horizontalPadding)
         }
+        .padding(.top, 50)
     }
 }
 
@@ -219,9 +220,10 @@ struct FlipCard: View {
                 cardType: .enhancements,
                 bulletPoints: enhancementsBulletPoints
             )
-            .rotation3DEffect(.degrees(flipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
+            .rotation3DEffect(.degrees(flipped ? 0 : 180), axis: (x: 0, y: 1, z: 0))
+            .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 1, y: 0, z: 0))
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, height: 400)
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
