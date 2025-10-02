@@ -17,6 +17,7 @@ struct UserJourneySection: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(Color.primary)
+                .foregroundColor(Color.primary)
                 .offset(y: animateSection ? 0 : 30)
                 .opacity(animateSection ? 1 : 0)
                 .animation(.spring().delay(0.1), value: animateSection)
@@ -44,6 +45,7 @@ struct UserJourneySection: View {
             VStack(spacing: 16) {
                 Text("Save time cataloging • Never lose track of your books • Discover new favorites • Track reading goals")
                     .font(.title3)
+                    .foregroundColor(Color.secondary)
                     .foregroundColor(Color.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
@@ -77,30 +79,32 @@ struct StepCard: View {
                 ZStack {
                     Circle()
                         .fill(Color.primary.opacity(0.1))
+                        .fill(Color.primary.opacity(0.1))
                         .frame(width: 50, height: 50)
 
                     Text("\(stepNumber)")
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundColor(Color.primary)
+                        .foregroundColor(.black)
                 }
 
                 // Icon
                 Image(systemName: icon)
                     .font(.system(size: 32))
-                    .foregroundColor(Color.primary)
+                    .foregroundColor(.black)
                     .frame(height: 40)
 
                 // Title
                 Text(title)
                     .font(.title2)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.primary)
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.center)
 
                 // Description
                 Text(description)
                     .font(.body)
+                    .foregroundColor(Color.secondary)
                     .foregroundColor(Color.secondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
