@@ -14,6 +14,7 @@ struct ReadersJourneySection: View {
                 .font(titleFont)
                 .foregroundColor(.primary)
                 .padding(.horizontal, horizontalPadding)
+                .padding(.top, 20)
 
             Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
                 .font(bodyFont)
@@ -21,11 +22,13 @@ struct ReadersJourneySection: View {
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, horizontalPadding)
+                .padding(.top, 20)
 
             // Progress indicator showing transformation
             TransformationProgressIndicator()
                 .padding(.horizontal, horizontalPadding)
                 .padding(.vertical, verticalPadding)
+                .padding(.top, 20)
 
             FlipCard()
                 .padding(.horizontal, horizontalPadding)
