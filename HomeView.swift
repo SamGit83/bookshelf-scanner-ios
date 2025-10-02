@@ -214,19 +214,6 @@ struct HomeView: View {
                 VStack {
                     ReadersJourneySection()
                     Spacer()
-                    Button(action: {
-                        currentPage = 2
-                    }) {
-                        Text("Next")
-                            .font(AppleBooksTypography.buttonLarge)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, AppleBooksSpacing.space16)
-                            .background(AppleBooksColors.accent)
-                            .cornerRadius(12)
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                    .padding(.bottom, AppleBooksSpacing.space80)
                 }
                 .tag(1)
 
