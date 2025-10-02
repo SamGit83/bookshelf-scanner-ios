@@ -284,6 +284,8 @@ struct HomeView: View {
                 .tag(2)
             }
             .tabViewStyle(PageTabViewStyle())
+            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            .accentColor(AppleBooksColors.accent)
         }
         .sheet(isPresented: $showLogin) {
             LoginView(isSignUp: false)

@@ -2,37 +2,90 @@ import SwiftUI
 
 struct ReadersJourneySection: View {
     var body: some View {
-        let titleFont = TypographySystem.headlineMedium
-        let bodyFont = TypographySystem.bodyMedium
-        let spacing = AppleBooksSpacing.space24
-        let horizontalPadding = AppleBooksSpacing.space24
-        let cardSpacing = AppleBooksSpacing.space16
-        let verticalPadding = AppleBooksSpacing.space12
+        GeometryReader { geometry in
+            let screenWidth = geometry.size.width
+            
+            // Calculate responsive dimensions based on screen width
+            let cardDimensions = calculateCardDimensions(for: screenWidth)
+            let textScale = calculateTextScale(for: screenWidth)
+            let spacing = calculateSpacing(for: screenWidth)
+            let horizontalPadding = calculateHorizontalPadding(for: screenWidth)
+            
+            VStack(spacing: spacing.section) {
+                Text("Alex's Reading Journey")
+                    .font(TypographySystem.headlineMedium)
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.top, spacing.top)
+                    .scaleEffect(textScale.title)
 
-        VStack(spacing: spacing) {
-            Text("Alex's Reading Journey")
-                .font(titleFont)
-                .foregroundColor(.primary)
-                .padding(.horizontal, horizontalPadding)
-                .padding(.top, 20)
+                Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
+                    .font(TypographySystem.bodyMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.top, spacing.text)
+                    .scaleEffect(textScale.body)
 
-            Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
-                .font(bodyFont)
-                .foregroundColor(AppleBooksColors.textSecondary)
-                .multilineTextAlignment(.leading)
-                .padding(.horizontal, horizontalPadding)
-                .padding(.top, 20)
+                // Progress indicator showing transformation
+                TransformationProgressIndicator(screenWidth: screenWidth)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.vertical, spacing.vertical)
+                    .padding(.top, spacing.text)
 
-            // Progress indicator showing transformation
-            TransformationProgressIndicator()
-                .padding(.horizontal, horizontalPadding)
-                .padding(.vertical, verticalPadding)
-                .padding(.top, 20)
-
-            FlipCard()
-                .padding(.horizontal, horizontalPadding)
+                FlipCard(cardWidth: cardDimensions.width, cardHeight: cardDimensions.height, textScale: textScale)
+                    .padding(.horizontal, horizontalPadding)
+            }
+            .padding(.top, spacing.top)
         }
-        .padding(.top, 50)
+    }
+    
+    // Calculate card dimensions based on screen width
+    private func calculateCardDimensions(for width: CGFloat) -> (width: CGFloat, height: CGFloat) {
+        switch width {
+        case ..<375: // iPhone SE, small devices
+            return (300, 340)
+        case 375..<430: // iPhone 13/14/15 standard
+            return (340, 380)
+        default: // iPhone Pro Max, iPad, larger devices
+            return (min(400, width - 40), 450)
+        }
+    }
+    
+    // Calculate text scale based on screen width
+    private func calculateTextScale(for width: CGFloat) -> (title: CGFloat, body: CGFloat) {
+        switch width {
+        case ..<375: // Small devices
+            return (0.9, 0.9)
+        case 375..<430: // Standard devices
+            return (1.0, 1.0)
+        default: // Large devices
+            return (1.1, 1.05)
+        }
+    }
+    
+    // Calculate spacing based on screen width
+    private func calculateSpacing(for width: CGFloat) -> (section: CGFloat, text: CGFloat, vertical: CGFloat, top: CGFloat) {
+        switch width {
+        case ..<375: // Small devices
+            return (16, 12, 8, 30)
+        case 375..<430: // Standard devices
+            return (24, 20, 12, 50)
+        default: // Large devices
+            return (32, 24, 16, 60)
+        }
+    }
+    
+    // Calculate horizontal padding based on screen width
+    private func calculateHorizontalPadding(for width: CGFloat) -> CGFloat {
+        switch width {
+        case ..<375: // Small devices
+            return 16
+        case 375..<430: // Standard devices
+            return 24
+        default: // Large devices
+            return max(32, (width - 400) / 2)
+        }
     }
 }
 
@@ -73,20 +126,19 @@ struct EnhancedJourneyCard: View {
     let title: String
     let cardType: CardType
     let bulletPoints: [BulletPoint]
+    let textScale: (title: CGFloat, body: CGFloat)
 
     var body: some View {
-        let headerFont = AppleBooksTypography.headlineSmall
-        let bulletFont = AppleBooksTypography.bodySmall
-        let iconSize: CGFloat = 20
-        let frameSize: CGFloat = 32
-        let padding = AppleBooksSpacing.space16
-        let spacing = AppleBooksSpacing.space12
-        let bulletSpacing = AppleBooksSpacing.space8
-        let headerSpacing = AppleBooksSpacing.space8
-        let bulletIconSize: CGFloat = 14
-        let bulletFrameSize: CGFloat = 16
-        let bulletHSpacing = AppleBooksSpacing.space8
-        let lineSpacing: CGFloat = 2
+        let iconSize: CGFloat = 20 * textScale.body
+        let frameSize: CGFloat = 32 * textScale.body
+        let padding = AppleBooksSpacing.space16 * textScale.body
+        let spacing = AppleBooksSpacing.space12 * textScale.body
+        let bulletSpacing = AppleBooksSpacing.space8 * textScale.body
+        let headerSpacing = AppleBooksSpacing.space8 * textScale.body
+        let bulletIconSize: CGFloat = 14 * textScale.body
+        let bulletFrameSize: CGFloat = 16 * textScale.body
+        let bulletHSpacing = AppleBooksSpacing.space8 * textScale.body
+        let lineSpacing: CGFloat = 2 * textScale.body
 
         VStack(alignment: .leading, spacing: spacing) {
             // Header
@@ -96,11 +148,12 @@ struct EnhancedJourneyCard: View {
                     .foregroundColor(cardType.iconColor)
                     .frame(width: frameSize, height: frameSize)
                     .background(cardType.accentColor.opacity(0.1))
-                    .cornerRadius(8)
+                    .cornerRadius(8 * textScale.body)
 
                 Text(title)
                     .font(TypographySystem.headlineMedium)
                     .foregroundColor(.black)
+                    .scaleEffect(textScale.title)
             }
 
             // Bullet points
@@ -116,39 +169,52 @@ struct EnhancedJourneyCard: View {
                             .font(TypographySystem.bodyMedium)
                             .foregroundColor(.black)
                             .lineSpacing(lineSpacing)
+                            .scaleEffect(textScale.body)
                     }
                 }
             }
         }
         .padding(padding)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 16 * textScale.body)
                 .fill(cardType.backgroundColor)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 16 * textScale.body)
                         .stroke(cardType.accentColor.opacity(0.2), lineWidth: 1)
                 )
-                .shadow(color: cardType.accentColor.opacity(0.2), radius: 8, x: 0, y: 4)
+                .shadow(color: cardType.accentColor.opacity(0.2), radius: 8 * textScale.body, x: 0, y: 4 * textScale.body)
         )
     }
 }
 
 struct TransformationProgressIndicator: View {
+    let screenWidth: CGFloat
+    
     var body: some View {
-        let width: CGFloat = 240
-        let height: CGFloat = 60
-        let barHeight: CGFloat = 6
-        let spacing = AppleBooksSpacing.space6
-        let hSpacing = AppleBooksSpacing.space48
+        // Calculate responsive dimensions
+        let scale: CGFloat = {
+            switch screenWidth {
+            case ..<375: return 0.85
+            case 375..<430: return 1.0
+            default: return 1.15
+            }
+        }()
+        
+        let width: CGFloat = 240 * scale
+        let height: CGFloat = 60 * scale
+        let barHeight: CGFloat = 6 * scale
+        let spacing = AppleBooksSpacing.space6 * scale
+        let hSpacing = AppleBooksSpacing.space48 * scale
 
         VStack(spacing: spacing) {
             Text("Transformation Progress")
                 .font(AppleBooksTypography.captionBold)
                 .foregroundColor(AppleBooksColors.textSecondary)
+                .scaleEffect(scale)
 
             ZStack {
                 // Background track
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: 4 * scale)
                     .fill(
                         LinearGradient(
                             colors: [Color(hex: "FF6B35"), Color(hex: "4A90E2")],
@@ -164,9 +230,11 @@ struct TransformationProgressIndicator: View {
                 Text("Struggles")
                     .font(AppleBooksTypography.caption)
                     .foregroundColor(Color(hex: "FF6B35"))
+                    .scaleEffect(scale)
                 Text("Success")
                     .font(AppleBooksTypography.caption)
                     .foregroundColor(Color(hex: "4A90E2"))
+                    .scaleEffect(scale)
             }
         }
         .frame(height: height)
@@ -176,6 +244,10 @@ struct FlipCard: View {
     @State private var flipped = false
     @State private var isPressed = false
     @State private var timer: Timer?
+    
+    let cardWidth: CGFloat
+    let cardHeight: CGFloat
+    let textScale: (title: CGFloat, body: CGFloat)
 
     let strugglesBulletPoints = [
         BulletPoint(icon: "clock.fill", text: "Countless hours manually cataloging books"),
@@ -211,7 +283,8 @@ struct FlipCard: View {
                     icon: "exclamationmark.triangle.fill",
                     title: "Traditional Reading Struggles",
                     cardType: .struggles,
-                    bulletPoints: strugglesBulletPoints
+                    bulletPoints: strugglesBulletPoints,
+                    textScale: textScale
                 )
             }
             
@@ -221,12 +294,13 @@ struct FlipCard: View {
                     icon: "sparkles",
                     title: "Enhanced Reading Experience",
                     cardType: .enhancements,
-                    bulletPoints: enhancementsBulletPoints
+                    bulletPoints: enhancementsBulletPoints,
+                    textScale: textScale
                 )
                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
             }
         }
-        .frame(width: 340, height: 380)
+        .frame(width: cardWidth, height: cardHeight)
         .clipped()
         .layoutPriority(1)
         .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
