@@ -174,7 +174,7 @@ struct TransformationProgressIndicator: View {
         let height: CGFloat = isCompact ? 60 : 80
         let barHeight: CGFloat = isCompact ? 6 : 8
         let spacing = isCompact ? AppleBooksSpacing.space6 : AppleBooksSpacing.space8
-        let hSpacing = isCompact ? AppleBooksSpacing.space60 : AppleBooksSpacing.space80
+        let hSpacing = isCompact ? AppleBooksSpacing.space48 : AppleBooksSpacing.space80
 
         VStack(spacing: spacing) {
             Text("Transformation Progress")
