@@ -223,7 +223,7 @@ struct FlipCard: View {
             .rotation3DEffect(.degrees(flipped ? 0 : 180), axis: (x: 0, y: 1, z: 0))
             .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 1, y: 0, z: 0))
         }
-        .frame(maxWidth: .infinity, height: 400)
+        .frame(width: 280, height: 400)
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
