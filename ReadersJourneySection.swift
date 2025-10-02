@@ -2,8 +2,8 @@ import SwiftUI
 
 struct ReadersJourneySection: View {
     var body: some View {
-        let titleFont = AppleBooksTypography.headlineMedium
-        let bodyFont = AppleBooksTypography.bodyMedium
+        let titleFont = TypographySystem.headlineMedium
+        let bodyFont = TypographySystem.bodyMedium
         let spacing = AppleBooksSpacing.space24
         let horizontalPadding = AppleBooksSpacing.space24
         let cardSpacing = AppleBooksSpacing.space16
@@ -100,7 +100,7 @@ struct EnhancedJourneyCard: View {
                     .cornerRadius(8)
 
                 Text(title)
-                    .font(.title)
+                    .font(TypographySystem.headlineMedium)
                     .foregroundColor(.black)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -115,7 +115,7 @@ struct EnhancedJourneyCard: View {
                             .frame(width: bulletFrameSize, height: bulletFrameSize)
 
                         Text(bulletPoints[index].text)
-                            .font(.title3)
+                            .font(TypographySystem.bodyMedium)
                             .foregroundColor(.black)
                             .lineSpacing(lineSpacing)
                             .fixedSize(horizontal: false, vertical: true)
