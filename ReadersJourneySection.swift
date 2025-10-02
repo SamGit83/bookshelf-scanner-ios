@@ -206,23 +206,28 @@ struct FlipCard: View {
 
     var body: some View {
         ZStack {
-            EnhancedJourneyCard(
-                icon: "exclamationmark.triangle.fill",
-                title: "Traditional Reading Struggles",
-                cardType: .struggles,
-                bulletPoints: strugglesBulletPoints
-            )
-            .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
-
-            EnhancedJourneyCard(
-                icon: "sparkles",
-                title: "Enhanced Reading Experience",
-                cardType: .enhancements,
-                bulletPoints: enhancementsBulletPoints
-            )
-            .rotation3DEffect(.degrees(flipped ? 0 : 180), axis: (x: 0, y: 1, z: 0))
-            .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 1, y: 0, z: 0))
+            // Front card - Traditional Reading Struggles (coral)
+            if !flipped {
+                EnhancedJourneyCard(
+                    icon: "exclamationmark.triangle.fill",
+                    title: "Traditional Reading Struggles",
+                    cardType: .struggles,
+                    bulletPoints: strugglesBulletPoints
+                )
+            }
+            
+            // Back card - Enhanced Reading Experience (green)
+            if flipped {
+                EnhancedJourneyCard(
+                    icon: "sparkles",
+                    title: "Enhanced Reading Experience",
+                    cardType: .enhancements,
+                    bulletPoints: enhancementsBulletPoints
+                )
+                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+            }
         }
+        .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
         .frame(width: 280, height: 400)
         .gesture(
             DragGesture(minimumDistance: 0)
