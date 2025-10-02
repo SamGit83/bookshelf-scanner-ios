@@ -1,16 +1,13 @@
 import SwiftUI
 
 struct ReadersJourneySection: View {
-    @Environment(\.horizontalSizeClass) var sizeClass
-
     var body: some View {
-        let isCompact = sizeClass == .compact
-        let titleFont = isCompact ? AppleBooksTypography.headlineMedium : AppleBooksTypography.headlineLarge
-        let bodyFont = isCompact ? AppleBooksTypography.bodyMedium : AppleBooksTypography.bodyLarge
-        let spacing = isCompact ? AppleBooksSpacing.space24 : AppleBooksSpacing.space32
-        let horizontalPadding = isCompact ? AppleBooksSpacing.space24 : AppleBooksSpacing.space32
-        let cardSpacing = isCompact ? AppleBooksSpacing.space16 : AppleBooksSpacing.space20
-        let verticalPadding = isCompact ? AppleBooksSpacing.space12 : AppleBooksSpacing.space16
+        let titleFont = AppleBooksTypography.headlineMedium
+        let bodyFont = AppleBooksTypography.bodyMedium
+        let spacing = AppleBooksSpacing.space24
+        let horizontalPadding = AppleBooksSpacing.space24
+        let cardSpacing = AppleBooksSpacing.space16
+        let verticalPadding = AppleBooksSpacing.space12
 
         VStack(spacing: spacing) {
             Text("Alex's Reading Journey")
@@ -30,34 +27,8 @@ struct ReadersJourneySection: View {
                 .padding(.horizontal, horizontalPadding)
                 .padding(.vertical, verticalPadding)
 
-            VStack(spacing: cardSpacing) {
-                EnhancedJourneyCard(
-                    icon: "exclamationmark.triangle.fill",
-                    title: "Traditional Reading Struggles",
-                    cardType: .struggles,
-                    bulletPoints: [
-                        BulletPoint(icon: "clock.fill", text: "Countless hours manually cataloging books"),
-                        BulletPoint(icon: "square.stack.3d.up.slash", text: "Disorganized shelves and lost books"),
-                        BulletPoint(icon: "magnifyingglass", text: "Wasting time searching for titles"),
-                        BulletPoint(icon: "chart.bar.xaxis", text: "No progress tracking capabilities"),
-                        BulletPoint(icon: "lightbulb.slash", text: "Difficulty discovering new books")
-                    ]
-                )
-
-                EnhancedJourneyCard(
-                    icon: "sparkles",
-                    title: "Enhanced Reading Experience",
-                    cardType: .enhancements,
-                    bulletPoints: [
-                        BulletPoint(icon: "camera.viewfinder", text: "Instant AI-powered bookshelf scanning"),
-                        BulletPoint(icon: "folder.fill", text: "Digital organization of entire collection"),
-                        BulletPoint(icon: "chart.line.uptrend.xyaxis", text: "Effortless reading progress tracking"),
-                        BulletPoint(icon: "star.fill", text: "Personalized book recommendations"),
-                        BulletPoint(icon: "heart.fill", text: "Pure reading enjoyment and discovery")
-                    ]
-                )
-            }
-            .padding(.horizontal, horizontalPadding)
+            FlipCard()
+                .padding(.horizontal, horizontalPadding)
         }
     }
 }
@@ -100,22 +71,19 @@ struct EnhancedJourneyCard: View {
     let cardType: CardType
     let bulletPoints: [BulletPoint]
 
-    @Environment(\.horizontalSizeClass) var sizeClass
-
     var body: some View {
-        let isCompact = sizeClass == .compact
-        let headerFont = isCompact ? AppleBooksTypography.headlineSmall : AppleBooksTypography.headlineMedium
-        let bulletFont = isCompact ? AppleBooksTypography.bodySmall : AppleBooksTypography.bodyMedium
-        let iconSize: CGFloat = isCompact ? 20 : 24
-        let frameSize: CGFloat = isCompact ? 32 : 40
-        let padding = isCompact ? AppleBooksSpacing.space16 : AppleBooksSpacing.space20
-        let spacing = isCompact ? AppleBooksSpacing.space12 : AppleBooksSpacing.space16
-        let bulletSpacing = isCompact ? AppleBooksSpacing.space8 : AppleBooksSpacing.space12
-        let headerSpacing = isCompact ? AppleBooksSpacing.space8 : AppleBooksSpacing.space12
-        let bulletIconSize: CGFloat = isCompact ? 14 : 16
-        let bulletFrameSize: CGFloat = isCompact ? 16 : 20
-        let bulletHSpacing = isCompact ? AppleBooksSpacing.space8 : AppleBooksSpacing.space12
-        let lineSpacing: CGFloat = isCompact ? 2 : 4
+        let headerFont = AppleBooksTypography.headlineSmall
+        let bulletFont = AppleBooksTypography.bodySmall
+        let iconSize: CGFloat = 20
+        let frameSize: CGFloat = 32
+        let padding = AppleBooksSpacing.space16
+        let spacing = AppleBooksSpacing.space12
+        let bulletSpacing = AppleBooksSpacing.space8
+        let headerSpacing = AppleBooksSpacing.space8
+        let bulletIconSize: CGFloat = 14
+        let bulletFrameSize: CGFloat = 16
+        let bulletHSpacing = AppleBooksSpacing.space8
+        let lineSpacing: CGFloat = 2
 
         VStack(alignment: .leading, spacing: spacing) {
             // Header
@@ -166,15 +134,12 @@ struct EnhancedJourneyCard: View {
 }
 
 struct TransformationProgressIndicator: View {
-    @Environment(\.horizontalSizeClass) var sizeClass
-
     var body: some View {
-        let isCompact = sizeClass == .compact
-        let width: CGFloat = isCompact ? 240 : 280
-        let height: CGFloat = isCompact ? 60 : 80
-        let barHeight: CGFloat = isCompact ? 6 : 8
-        let spacing = isCompact ? AppleBooksSpacing.space6 : AppleBooksSpacing.space8
-        let hSpacing = isCompact ? AppleBooksSpacing.space48 : AppleBooksSpacing.space80
+        let width: CGFloat = 240
+        let height: CGFloat = 60
+        let barHeight: CGFloat = 6
+        let spacing = AppleBooksSpacing.space6
+        let hSpacing = AppleBooksSpacing.space48
 
         VStack(spacing: spacing) {
             Text("Transformation Progress")
@@ -207,6 +172,79 @@ struct TransformationProgressIndicator: View {
         .frame(height: height)
     }
 }
+struct FlipCard: View {
+    @State private var flipped = false
+    @State private var isPressed = false
+    @State private var timer: Timer?
+
+    let strugglesBulletPoints = [
+        BulletPoint(icon: "clock.fill", text: "Countless hours manually cataloging books"),
+        BulletPoint(icon: "square.stack.3d.up.slash", text: "Disorganized shelves and lost books"),
+        BulletPoint(icon: "magnifyingglass", text: "Wasting time searching for titles"),
+        BulletPoint(icon: "chart.bar.xaxis", text: "No progress tracking capabilities"),
+        BulletPoint(icon: "lightbulb.slash", text: "Difficulty discovering new books")
+    ]
+
+    let enhancementsBulletPoints = [
+        BulletPoint(icon: "camera.viewfinder", text: "Instant AI-powered bookshelf scanning"),
+        BulletPoint(icon: "folder.fill", text: "Digital organization of entire collection"),
+        BulletPoint(icon: "chart.line.uptrend.xyaxis", text: "Effortless reading progress tracking"),
+        BulletPoint(icon: "star.fill", text: "Personalized book recommendations"),
+        BulletPoint(icon: "heart.fill", text: "Pure reading enjoyment and discovery")
+    ]
+
+    func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
+            if !isPressed {
+                withAnimation(.easeInOut(duration: 0.6)) {
+                    flipped.toggle()
+                }
+            }
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            EnhancedJourneyCard(
+                icon: "exclamationmark.triangle.fill",
+                title: "Traditional Reading Struggles",
+                cardType: .struggles,
+                bulletPoints: strugglesBulletPoints
+            )
+            .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+
+            EnhancedJourneyCard(
+                icon: "sparkles",
+                title: "Enhanced Reading Experience",
+                cardType: .enhancements,
+                bulletPoints: enhancementsBulletPoints
+            )
+            .rotation3DEffect(.degrees(flipped ? 0 : -180), axis: (x: 0, y: 1, z: 0))
+        }
+        .frame(maxWidth: .infinity)
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    isPressed = true
+                    timer?.invalidate()
+                }
+                .onEnded { _ in
+                    isPressed = false
+                    startTimer()
+                    withAnimation(.easeInOut(duration: 0.6)) {
+                        flipped.toggle()
+                    }
+                }
+        )
+        .onAppear {
+            startTimer()
+        }
+        .onDisappear {
+            timer?.invalidate()
+        }
+    }
+}
+
 
 struct ReadersJourneySection_Previews: PreviewProvider {
     static var previews: some View {

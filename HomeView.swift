@@ -293,7 +293,7 @@ struct HomeView: View {
                     .padding(.bottom, AppleBooksSpacing.space80)
                 }
                 .padding(.top, AppleBooksSpacing.space48)
-                .padding(.leading, AppleBooksSpacing.space24)
+                .padding(.horizontal, AppleBooksSpacing.space24)
                 .tag(2)
             }
             .tabViewStyle(PageTabViewStyle())
