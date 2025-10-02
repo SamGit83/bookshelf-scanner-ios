@@ -1,4 +1,5 @@
 import SwiftUI
+import LiquidGlassDesignSystem
 
 struct SplashScreenView: View {
     @State private var isAnimating = false
@@ -11,7 +12,7 @@ struct SplashScreenView: View {
     var body: some View {
         ZStack {
             // Background matching LaunchScreen
-            Color(red: 0.949, green: 0.949, blue: 0.969)
+            AppleBooksColors.background
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
