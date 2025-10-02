@@ -226,7 +226,7 @@ struct HomeView: View {
                             .cornerRadius(12)
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
-                    .padding(.bottom, AppleBooksSpacing.space24)
+                    .padding(.bottom, AppleBooksSpacing.space80)
                 }
                 .tag(1)
 
@@ -290,7 +290,7 @@ struct HomeView: View {
                             .cornerRadius(12)
                     }
                     .padding(.horizontal, AppleBooksSpacing.space24)
-                    .padding(.bottom, AppleBooksSpacing.space24)
+                    .padding(.bottom, AppleBooksSpacing.space80)
                 }
                 .padding(.top, AppleBooksSpacing.space48)
                 .padding(.leading, AppleBooksSpacing.space24)

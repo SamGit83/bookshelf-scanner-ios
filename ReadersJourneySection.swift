@@ -1,25 +1,36 @@
 import SwiftUI
 
 struct ReadersJourneySection: View {
+    @Environment(\.horizontalSizeClass) var sizeClass
+
     var body: some View {
-        VStack(spacing: AppleBooksSpacing.space32) {
+        let isCompact = sizeClass == .compact
+        let titleFont = isCompact ? AppleBooksTypography.headlineMedium : AppleBooksTypography.headlineLarge
+        let bodyFont = isCompact ? AppleBooksTypography.bodyMedium : AppleBooksTypography.bodyLarge
+        let spacing = isCompact ? AppleBooksSpacing.space24 : AppleBooksSpacing.space32
+        let horizontalPadding = isCompact ? AppleBooksSpacing.space24 : AppleBooksSpacing.space32
+        let cardSpacing = isCompact ? AppleBooksSpacing.space16 : AppleBooksSpacing.space20
+        let verticalPadding = isCompact ? AppleBooksSpacing.space12 : AppleBooksSpacing.space16
+
+        VStack(spacing: spacing) {
             Text("Alex's Reading Journey")
-                .font(AppleBooksTypography.headlineLarge)
+                .font(titleFont)
                 .foregroundColor(.primary)
-                .padding(.horizontal, AppleBooksSpacing.space32)
+                .padding(.horizontal, horizontalPadding)
 
             Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
-                .font(AppleBooksTypography.bodyLarge)
+                .font(bodyFont)
                 .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.leading)
-                .padding(.horizontal, AppleBooksSpacing.space32)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, horizontalPadding)
 
             // Progress indicator showing transformation
             TransformationProgressIndicator()
-                .padding(.horizontal, AppleBooksSpacing.space32)
-                .padding(.vertical, AppleBooksSpacing.space16)
+                .padding(.horizontal, horizontalPadding)
+                .padding(.vertical, verticalPadding)
 
-            VStack(spacing: AppleBooksSpacing.space20) {
+            VStack(spacing: cardSpacing) {
                 EnhancedJourneyCard(
                     icon: "exclamationmark.triangle.fill",
                     title: "Traditional Reading Struggles",
@@ -46,7 +57,7 @@ struct ReadersJourneySection: View {
                     ]
                 )
             }
-            .padding(.horizontal, AppleBooksSpacing.space32)
+            .padding(.horizontal, horizontalPadding)
         }
     }
 }
@@ -89,41 +100,58 @@ struct EnhancedJourneyCard: View {
     let cardType: CardType
     let bulletPoints: [BulletPoint]
 
+    @Environment(\.horizontalSizeClass) var sizeClass
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+        let isCompact = sizeClass == .compact
+        let headerFont = isCompact ? AppleBooksTypography.headlineSmall : AppleBooksTypography.headlineMedium
+        let bulletFont = isCompact ? AppleBooksTypography.bodySmall : AppleBooksTypography.bodyMedium
+        let iconSize: CGFloat = isCompact ? 20 : 24
+        let frameSize: CGFloat = isCompact ? 32 : 40
+        let padding = isCompact ? AppleBooksSpacing.space16 : AppleBooksSpacing.space20
+        let spacing = isCompact ? AppleBooksSpacing.space12 : AppleBooksSpacing.space16
+        let bulletSpacing = isCompact ? AppleBooksSpacing.space8 : AppleBooksSpacing.space12
+        let headerSpacing = isCompact ? AppleBooksSpacing.space8 : AppleBooksSpacing.space12
+        let bulletIconSize: CGFloat = isCompact ? 14 : 16
+        let bulletFrameSize: CGFloat = isCompact ? 16 : 20
+        let bulletHSpacing = isCompact ? AppleBooksSpacing.space8 : AppleBooksSpacing.space12
+        let lineSpacing: CGFloat = isCompact ? 2 : 4
+
+        VStack(alignment: .leading, spacing: spacing) {
             // Header
-            HStack(spacing: AppleBooksSpacing.space12) {
+            HStack(spacing: headerSpacing) {
                 Image(systemName: icon)
-                    .font(.system(size: 24))
+                    .font(.system(size: iconSize))
                     .foregroundColor(cardType.iconColor)
-                    .frame(width: 40, height: 40)
+                    .frame(width: frameSize, height: frameSize)
                     .background(cardType.accentColor.opacity(0.1))
                     .cornerRadius(8)
 
                 Text(title)
-                    .font(AppleBooksTypography.headlineMedium)
+                    .font(headerFont)
                     .foregroundColor(.black)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             // Bullet points
-            VStack(alignment: .leading, spacing: AppleBooksSpacing.space12) {
+            VStack(alignment: .leading, spacing: bulletSpacing) {
                 ForEach(bulletPoints.indices, id: \.self) { index in
-                    HStack(alignment: .top, spacing: AppleBooksSpacing.space12) {
+                    HStack(alignment: .top, spacing: bulletHSpacing) {
                         Image(systemName: bulletPoints[index].icon)
-                            .font(.system(size: 16))
+                            .font(.system(size: bulletIconSize))
                             .foregroundColor(cardType.accentColor)
-                            .frame(width: 20, height: 20)
+                            .frame(width: bulletFrameSize, height: bulletFrameSize)
 
                         Text(bulletPoints[index].text)
-                            .font(AppleBooksTypography.bodyMedium)
+                            .font(bulletFont)
                             .foregroundColor(.black)
-                            .lineSpacing(4)
+                            .lineSpacing(lineSpacing)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
         }
-        .padding(AppleBooksSpacing.space20)
+        .padding(padding)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(cardType.backgroundColor)
@@ -138,8 +166,17 @@ struct EnhancedJourneyCard: View {
 }
 
 struct TransformationProgressIndicator: View {
+    @Environment(\.horizontalSizeClass) var sizeClass
+
     var body: some View {
-        VStack(spacing: AppleBooksSpacing.space8) {
+        let isCompact = sizeClass == .compact
+        let width: CGFloat = isCompact ? 240 : 280
+        let height: CGFloat = isCompact ? 60 : 80
+        let barHeight: CGFloat = isCompact ? 6 : 8
+        let spacing = isCompact ? AppleBooksSpacing.space6 : AppleBooksSpacing.space8
+        let hSpacing = isCompact ? AppleBooksSpacing.space60 : AppleBooksSpacing.space80
+
+        VStack(spacing: spacing) {
             Text("Transformation Progress")
                 .font(AppleBooksTypography.captionBold)
                 .foregroundColor(AppleBooksColors.textSecondary)
@@ -154,11 +191,11 @@ struct TransformationProgressIndicator: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: 280, height: 8)
+                    .frame(width: width, height: barHeight)
             }
-            .frame(width: 280)
+            .frame(width: width)
 
-            HStack(spacing: AppleBooksSpacing.space80) {
+            HStack(spacing: hSpacing) {
                 Text("Struggles")
                     .font(AppleBooksTypography.caption)
                     .foregroundColor(Color(hex: "FF6B35"))
@@ -167,7 +204,7 @@ struct TransformationProgressIndicator: View {
                     .foregroundColor(Color(hex: "4A90E2"))
             }
         }
-        .frame(height: 80)
+        .frame(height: height)
     }
 }
 
