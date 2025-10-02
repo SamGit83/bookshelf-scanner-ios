@@ -20,7 +20,6 @@ struct ReadersJourneySection: View {
                 .font(bodyFont)
                 .foregroundColor(AppleBooksColors.textSecondary)
                 .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, horizontalPadding)
                 .padding(.top, 20)
 
@@ -102,7 +101,6 @@ struct EnhancedJourneyCard: View {
                 Text(title)
                     .font(TypographySystem.headlineMedium)
                     .foregroundColor(.black)
-                    .fixedSize(horizontal: false, vertical: true)
             }
 
             // Bullet points
@@ -118,7 +116,6 @@ struct EnhancedJourneyCard: View {
                             .font(TypographySystem.bodyMedium)
                             .foregroundColor(.black)
                             .lineSpacing(lineSpacing)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
@@ -230,8 +227,10 @@ struct FlipCard: View {
                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
             }
         }
-        .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+        .clipped()
+        .layoutPriority(1)
         .frame(width: 300, height: 400)
+        .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
