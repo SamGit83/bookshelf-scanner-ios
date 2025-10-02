@@ -213,7 +213,6 @@ struct FlipCard: View {
                     cardType: .struggles,
                     bulletPoints: strugglesBulletPoints
                 )
-                .frame(width: 360, height: 400)
             }
             
             // Back card - Enhanced Reading Experience (green)
@@ -224,10 +223,10 @@ struct FlipCard: View {
                     cardType: .enhancements,
                     bulletPoints: enhancementsBulletPoints
                 )
-                .frame(width: 360, height: 400)
                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
             }
         }
+        .frame(width: 340, height: 380)
         .clipped()
         .layoutPriority(1)
         .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
