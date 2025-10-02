@@ -1,5 +1,4 @@
 import SwiftUI
-import LiquidGlassDesignSystem
 
 struct SplashScreenView: View {
     @State private var isAnimating = false
