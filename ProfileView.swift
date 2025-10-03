@@ -18,6 +18,7 @@ struct ProfileView: View {
     @State private var reAuthEmail = ""
     @State private var reAuthPassword = ""
     @State private var reAuthError: String? = nil
+    @State private var showTestAlert = false
 
     var body: some View {
             ZStack {
@@ -295,6 +296,30 @@ struct ProfileView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
+                                // Test Alert Button
+                                Button(action: {
+                                    print("DEBUG ProfileView: Test alert button tapped")
+                                    showTestAlert = true
+                                }) {
+                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                                        HStack(spacing: AppleBooksSpacing.space12) {
+                                            Image(systemName: "bell")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(.blue)
+                                                .frame(width: 24, height: 24)
+                                            Text("Test Alert")
+                                                .font(AppleBooksTypography.bodyLarge)
+                                                .foregroundColor(.blue)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(AppleBooksTypography.caption)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                        }
+                                    }
+                                    .frame(maxWidth: 350)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+
                                 // Delete Account
                                 Button(action: {
                                     print("DEBUG ProfileView: Delete account button tapped")
@@ -343,6 +368,17 @@ struct ProfileView: View {
                             }
                             .onChange(of: showSignOutAlert) { newValue in
                                 print("DEBUG ProfileView: showSignOutAlert changed to \(newValue)")
+                            }
+                            .alert(isPresented: $showTestAlert) {
+                                print("DEBUG ProfileView: Test alert is presented - showTestAlert is \(showTestAlert)")
+                                return Alert(
+                                    title: Text("Test Alert"),
+                                    message: Text("This is a test to verify if alerts work in this view."),
+                                    dismissButton: .default(Text("OK"))
+                                )
+                            }
+                            .onChange(of: showTestAlert) { newValue in
+                                print("DEBUG ProfileView: showTestAlert changed to \(newValue)")
                             }
                         }
 
