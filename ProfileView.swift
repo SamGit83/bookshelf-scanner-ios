@@ -10,7 +10,6 @@ struct ProfileView: View {
     @State private var showSignOutAlert = false
     @State private var showDeleteAccountAlert = false
     @State private var showDeleteConfirmationAlert = false
-    @State private var showDeletionSuccessAlert = false
     @State private var showWaitlistModal = false
     @State private var showUpgradeModal = false
     @State private var showSubscriptionView = false
@@ -377,7 +376,9 @@ struct ProfileView: View {
                                     switch result {
                                     case .success:
                                         showingReAuthSheet = false
-                                        showDeleteConfirmationAlert = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            self.showDeleteConfirmationAlert = true
+                                        }
                                     case .failure(let error):
                                         reAuthError = error.localizedDescription
                                     }
@@ -398,7 +399,7 @@ struct ProfileView: View {
             .animation(.easeInOut(duration: 0.3), value: showingReAuthSheet)
             .alert(isPresented: $showSignOutAlert) {
                 print("DEBUG ProfileView: Alert is presented")
-                Alert(
+                return Alert(
                     title: Text("Sign Out"),
                     message: Text("Are you sure you want to sign out?"),
                     primaryButton: .destructive(Text("Sign Out")) {
@@ -431,8 +432,6 @@ struct ProfileView: View {
                                 UsageTracker.shared.resetAllUsage()
                                 // Reset alert manager history
                                 AlertManager.shared.clearAlertHistory()
-                                // Show success message
-                                showDeletionSuccessAlert = true
                             case .failure(let error):
                                 reAuthError = "Deletion failed: \(error.localizedDescription)"
                                 showingReAuthSheet = true
@@ -441,13 +440,6 @@ struct ProfileView: View {
                         }
                     },
                     secondaryButton: .cancel()
-                )
-            }
-            .alert(isPresented: $showDeletionSuccessAlert) {
-                Alert(
-                    title: Text("Account Deleted"),
-                    message: Text("Your account has been successfully deleted."),
-                    dismissButton: .default(Text("OK"))
                 )
             }
     }
