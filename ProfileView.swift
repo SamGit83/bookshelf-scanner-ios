@@ -324,6 +324,26 @@ struct ProfileView: View {
                                 .buttonStyle(PlainButtonStyle())
                             }
                             .padding(.horizontal, AppleBooksSpacing.space24)
+                            .alert(isPresented: $showSignOutAlert) {
+                                print("DEBUG ProfileView: Alert is presented - showSignOutAlert is \(showSignOutAlert)")
+                                return Alert(
+                                    title: Text("Sign Out"),
+                                    message: Text("Are you sure you want to sign out?"),
+                                    primaryButton: .destructive(Text("Sign Out")) {
+                                        print("DEBUG ProfileView: Primary button (Sign Out) tapped at \(Date())")
+                                        print("DEBUG ProfileView: Sign out confirmed, calling authService.signOut()")
+                                        authService.signOut()
+                                        print("DEBUG ProfileView: authService.signOut() called")
+                                    },
+                                    secondaryButton: .cancel() {
+                                        print("DEBUG ProfileView: Secondary button (Cancel) tapped at \(Date())")
+                                        print("DEBUG ProfileView: Sign out cancelled")
+                                    }
+                                )
+                            }
+                            .onChange(of: showSignOutAlert) { newValue in
+                                print("DEBUG ProfileView: showSignOutAlert changed to \(newValue)")
+                            }
                         }
 
 
@@ -402,25 +422,8 @@ struct ProfileView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.3), value: showingReAuthSheet)
-            .alert(isPresented: $showSignOutAlert) {
-                print("DEBUG ProfileView: Alert is presented - showSignOutAlert is \(showSignOutAlert)")
-                return Alert(
-                    title: Text("Sign Out"),
-                    message: Text("Are you sure you want to sign out?"),
-                    primaryButton: .destructive(Text("Sign Out")) {
-                        print("DEBUG ProfileView: Sign out confirmed, calling authService.signOut()")
-                        authService.signOut()
-                    },
-                    secondaryButton: .cancel() {
-                        print("DEBUG ProfileView: Sign out cancelled")
-                    }
-                )
-            }
-            .onChange(of: showSignOutAlert) { newValue in
-                print("DEBUG ProfileView: showSignOutAlert changed to \(newValue)")
-            }
             .alert(isPresented: $showDeleteConfirmationAlert) {
-                Alert(
+                return Alert(
                     title: Text("Confirm Account Deletion"),
                     message: Text("This action will permanently delete all your books, reading progress, and your account. This cannot be undone."),
                     primaryButton: .destructive(Text("Delete Account")) {
