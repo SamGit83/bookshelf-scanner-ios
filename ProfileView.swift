@@ -413,9 +413,7 @@ struct ProfileView: View {
                                 // Reset usage tracker
                                 UsageTracker.shared.resetAllUsage()
                                 // Reset alert manager history
-                                AlertManager.shared.alertHistory = []
-                                AlertManager.shared.recentAlerts = []
-                                UserDefaults.standard.removeObject(forKey: "alertHistory")
+                                AlertManager.shared.clearAlertHistory()
                                 // Show success message
                                 showDeletionSuccessAlert = true
                             case .failure(let error):

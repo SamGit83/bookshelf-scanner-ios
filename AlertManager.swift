@@ -500,6 +500,15 @@ class AlertManager {
             self.saveAlertHistory()
         }
     }
+
+    // MARK: - Clear Alert History
+    func clearAlertHistory() {
+        queue.async {
+            self.alertHistory = []
+            self.recentAlerts = []
+            self.saveAlertHistory()
+        }
+    }
 }
 
 // MARK: - Supporting Types
