@@ -130,20 +130,20 @@ struct ProfileView: View {
                                         )
 
                                         // Progressive disclosure for detailed usage
-                                        if expandedUsageDetails && user.tier == .free {
+                                        if user.tier == .free {
                                             Divider()
                                                 .background(AppleBooksColors.textTertiary.opacity(0.3))
-                                            
+
                                             VStack(spacing: AppleBooksSpacing.space16) {
                                                 Text("Premium Features Coming Soon")
                                                     .font(AppleBooksTypography.captionBold)
                                                     .foregroundColor(AppleBooksColors.accent)
-                                                
+
                                                 Text("Unlock unlimited access to advanced analytics, unlimited scans, and more – stay tuned!")
                                                     .font(AppleBooksTypography.caption)
                                                     .foregroundColor(AppleBooksColors.textSecondary)
                                                     .multilineTextAlignment(.center)
-                                                
+
                                                 Button(action: {
                                                     // Premium coming soon - no action
                                                     print("DEBUG ProfileView: Premium coming soon - view plans button tap ignored")
@@ -269,6 +269,7 @@ struct ProfileView: View {
                                 // Sign Out
                                 Button(action: {
                                     print("DEBUG ProfileView: Sign out button tapped")
+                                    print("DEBUG ProfileView: Setting showSignOutAlert to true, alert should appear")
                                     showSignOutAlert = true
                                 }) {
                                     AppleBooksCard(padding: AppleBooksSpacing.space12) {
@@ -292,10 +293,12 @@ struct ProfileView: View {
 
                                 // Delete Account
                                 Button(action: {
+                                    print("DEBUG ProfileView: Delete account button tapped")
                                     reAuthEmail = authService.currentUser?.email ?? ""
                                     reAuthPassword = ""
                                     reAuthError = nil
                                     showingReAuthSheet = true
+                                    print("DEBUG ProfileView: Setting showingReAuthSheet to true, re-auth sheet should appear")
                                 }) {
                                     AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
@@ -394,6 +397,7 @@ struct ProfileView: View {
             }
             .animation(.easeInOut(duration: 0.3), value: showingReAuthSheet)
             .alert(isPresented: $showSignOutAlert) {
+                print("DEBUG ProfileView: Alert is presented")
                 Alert(
                     title: Text("Sign Out"),
                     message: Text("Are you sure you want to sign out?"),
