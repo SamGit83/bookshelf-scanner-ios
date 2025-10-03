@@ -221,6 +221,22 @@ This document outlines the detailed design specification for the Book Shelfie iO
 - Existing LiquidGlassDesignSystem components
 - AppDelegate for navigation coordination
 
+## Account Deletion for App Store Compliance
+
+### MVP Requirement Status
+Required for MVP to ensure compliance with App Store guidelines and privacy regulations (e.g., GDPR, CCPA).
+
+### Implementation Details
+- **UI Location**: Add "Delete Account" option in the ProfileView under account settings.
+- **Backend Implementation**: Implement `deleteAccount()` method in AuthService that:
+  - Deletes user from Firebase Authentication
+  - Removes all user data from Firestore (books, reading progress, preferences)
+  - Clears local cache and offline data
+- **User Experience**: 
+  - Confirmation dialog with clear warning about permanent data loss
+  - Require re-authentication before deletion for security
+  - Navigate to onboarding screen after successful deletion
+- **Compliance**: Ensure complete data erasure within 30 days as per regulations.
 ## Success Metrics
 
 ### User Engagement

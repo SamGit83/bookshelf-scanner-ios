@@ -19,6 +19,7 @@ class AuthService: ObservableObject {
     @Published var hasCompletedOnboarding = false
     @Published var isLoadingOnboardingStatus = false
     @Published var errorMessage: String?
+    @Published var showLoginAfterDeletion = false
 
     private var authStateListener: AuthStateDidChangeListenerHandle?
     private var sessionStartTime: Date?
@@ -166,6 +167,82 @@ class AuthService: ObservableObject {
             AnalyticsManager.shared.trackFeatureUsage(feature: "sign_out")
         } catch let error {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            completion(.failure(NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in"])))
+            return
+        }
+
+        let userId = user.uid
+        let db = Firestore.firestore()
+
+        // First, delete all books in the user's books subcollection
+        let booksCollection = db.collection("users").document(userId).collection("books")
+        booksCollection.getDocuments { [weak self] snapshot, error in
+            if let error = error {
+                print("Error fetching books for deletion: \(error.localizedDescription)")
+                completion(.failure(error))
+                return
+            }
+
+            let batch = db.batch()
+            snapshot?.documents.forEach { document in
+                batch.deleteDocument(document.reference)
+            }
+
+            // Commit the batch deletion of books
+            batch.commit { error in
+                if let error = error {
+                    print("Error deleting books: \(error.localizedDescription)")
+                    completion(.failure(error))
+                    return
+                }
+
+                // Now delete the user document from Firestore
+                db.collection("users").document(userId).delete { error in
+                    if let error = error {
+                        print("Error deleting user document: \(error.localizedDescription)")
+                        completion(.failure(error))
+                        return
+                    }
+
+                    // Finally, delete the user from Firebase Auth
+                    user.delete { error in
+                        if let error = error {
+                            print("Error deleting user account: \(error.localizedDescription)")
+                            completion(.failure(error))
+                        } else {
+                            print("User account and all associated data deleted successfully")
+                            self?.errorMessage = nil
+                            // Clear cached books
+                            OfflineCache.shared.clearBooksCache()
+                            // Track account deletion
+                            AnalyticsManager.shared.trackFeatureUsage(feature: "delete_account")
+                            // Signal to show login screen
+                            self?.showLoginAfterDeletion = true
+                            completion(.success(()))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    func reAuthenticate(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            completion(.failure(NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in"])))
+            return
+        }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        user.reauthenticate(with: credential) { result, error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
         }
     }
 

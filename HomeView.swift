@@ -293,6 +293,12 @@ struct HomeView: View {
         .sheet(isPresented: $showSignup) {
             LoginView(isSignUp: true)
         }
+        .onChange(of: authService.showLoginAfterDeletion) { newValue in
+            if newValue {
+                showLogin = true
+                authService.showLoginAfterDeletion = false
+            }
+        }
     }
 }
 
