@@ -268,6 +268,7 @@ struct ProfileView: View {
 
                                 // Sign Out
                                 Button(action: {
+                                    print("DEBUG ProfileView: Sign out button tapped")
                                     showSignOutAlert = true
                                 }) {
                                     AppleBooksCard(padding: AppleBooksSpacing.space12) {
@@ -349,8 +350,18 @@ struct ProfileView: View {
                             TextField("Email", text: $reAuthEmail)
                                 .textContentType(.emailAddress)
                                 .autocapitalization(.none)
+                            if reAuthEmail.isEmpty {
+                                Text("Email is required")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
                             SecureField("Password", text: $reAuthPassword)
                                 .textContentType(.password)
+                            if reAuthPassword.isEmpty {
+                                Text("Password is required")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
                             if let error = reAuthError {
                                 Text(error)
                                     .foregroundColor(.red)
@@ -403,12 +414,13 @@ struct ProfileView: View {
                                 showingReAuthSheet = false
                                 showDeleteConfirmationAlert = false
                                 // Clear user-specific data
+                                let profileImagePath = UserDefaults.standard.string(forKey: "profileImagePath")
                                 UserDefaults.standard.removeObject(forKey: "profileImagePath")
                                 UserDefaults.standard.removeObject(forKey: "lastCoverRefreshTime")
                                 UserDefaults.standard.removeObject(forKey: "alertConfigurations")
                                 UserDefaults.standard.removeObject(forKey: "alertHistory")
                                 // Remove profile image file
-                                if let path = UserDefaults.standard.string(forKey: "profileImagePath") {
+                                if let path = profileImagePath {
                                     try? FileManager.default.removeItem(atPath: path)
                                 }
                                 // Reset usage tracker
@@ -419,6 +431,8 @@ struct ProfileView: View {
                                 showDeletionSuccessAlert = true
                             case .failure(let error):
                                 reAuthError = "Deletion failed: \(error.localizedDescription)"
+                                showingReAuthSheet = true
+                                showDeleteConfirmationAlert = false
                             }
                         }
                     },
