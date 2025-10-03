@@ -333,19 +333,16 @@ struct ProfileView: View {
             }
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
-            .alert(isPresented: $showSignOutAlert) {
-                print("DEBUG ProfileView: Alert is presented - showSignOutAlert is \(showSignOutAlert)")
-                return Alert(
-                    title: Text("Sign Out"),
-                    message: Text("Are you sure you want to sign out?"),
-                    primaryButton: .destructive(Text("Sign Out")) {
-                        print("DEBUG ProfileView: Sign out confirmed, calling authService.signOut()")
-                        authService.signOut()
-                    },
-                    secondaryButton: .cancel() {
-                        print("DEBUG ProfileView: Sign out cancelled")
-                    }
-                )
+            .alert("Sign Out", isPresented: $showSignOutAlert) {
+                Button("Sign Out", role: .destructive) {
+                    print("DEBUG ProfileView: Sign out confirmed, calling authService.signOut()")
+                    authService.signOut()
+                }
+                Button("Cancel", role: .cancel) {
+                    print("DEBUG ProfileView: Sign out cancelled")
+                }
+            } message: {
+                Text("Are you sure you want to sign out?")
             }
             .onChange(of: showSignOutAlert) { newValue in
                 print("DEBUG ProfileView: showSignOutAlert changed to \(newValue)")
