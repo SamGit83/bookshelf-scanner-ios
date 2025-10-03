@@ -362,6 +362,7 @@ struct ProfileView: View {
                                 authService.reAuthenticate(email: reAuthEmail, password: reAuthPassword) { result in
                                     switch result {
                                     case .success:
+                                        showingReAuthSheet = false
                                         showDeleteConfirmationAlert = true
                                     case .failure(let error):
                                         reAuthError = error.localizedDescription
