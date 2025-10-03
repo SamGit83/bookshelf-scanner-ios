@@ -268,6 +268,11 @@ struct ProfileView: View {
                                 // Sign Out
                                 Button(action: {
                                     print("DEBUG ProfileView: Sign out button tapped")
+                                    print("DEBUG ProfileView: Current modal states - showWaitlistModal: \(showWaitlistModal), showUpgradeModal: \(showUpgradeModal), showingReAuthSheet: \(showingReAuthSheet), showDeleteConfirmationAlert: \(showDeleteConfirmationAlert)")
+                                    if showingReAuthSheet || showWaitlistModal || showUpgradeModal {
+                                        print("DEBUG ProfileView: Cannot present sign out alert because a sheet is already presented")
+                                        return
+                                    }
                                     print("DEBUG ProfileView: Setting showSignOutAlert to true, alert should appear")
                                     showSignOutAlert = true
                                 }) {
@@ -398,15 +403,21 @@ struct ProfileView: View {
             }
             .animation(.easeInOut(duration: 0.3), value: showingReAuthSheet)
             .alert(isPresented: $showSignOutAlert) {
-                print("DEBUG ProfileView: Alert is presented")
+                print("DEBUG ProfileView: Alert is presented - showSignOutAlert is \(showSignOutAlert)")
                 return Alert(
                     title: Text("Sign Out"),
                     message: Text("Are you sure you want to sign out?"),
                     primaryButton: .destructive(Text("Sign Out")) {
+                        print("DEBUG ProfileView: Sign out confirmed, calling authService.signOut()")
                         authService.signOut()
                     },
-                    secondaryButton: .cancel()
+                    secondaryButton: .cancel() {
+                        print("DEBUG ProfileView: Sign out cancelled")
+                    }
                 )
+            }
+            .onChange(of: showSignOutAlert) { newValue in
+                print("DEBUG ProfileView: showSignOutAlert changed to \(newValue)")
             }
             .alert(isPresented: $showDeleteConfirmationAlert) {
                 Alert(
