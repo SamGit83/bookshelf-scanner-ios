@@ -14,10 +14,30 @@ class UsageTracker: ObservableObject {
     @Published private(set) var monthlyRecommendations: Int = 0
 
     private let userDefaults = UserDefaults.standard
-    private let scansKey = "monthlyScans"
-    private let booksKey = "totalBooks"
-    private let recommendationsKey = "monthlyRecommendations"
-    private let lastResetKey = "lastResetDate"
+
+    private var currentUserId: String? {
+        AuthService.shared.currentUser?.id
+    }
+
+    private var scansKey: String {
+        guard let userId = currentUserId else { return "monthlyScans" }
+        return "monthlyScans_\(userId)"
+    }
+
+    private var booksKey: String {
+        guard let userId = currentUserId else { return "totalBooks" }
+        return "totalBooks_\(userId)"
+    }
+
+    private var recommendationsKey: String {
+        guard let userId = currentUserId else { return "monthlyRecommendations" }
+        return "monthlyRecommendations_\(userId)"
+    }
+
+    private var lastResetKey: String {
+        guard let userId = currentUserId else { return "lastResetDate" }
+        return "lastResetDate_\(userId)"
+    }
 
     public init() {
         loadUsageData()
@@ -224,6 +244,13 @@ class UsageTracker: ObservableObject {
     }
 
     func refreshOnUserChange() {
+        // Reset counters for new user
+        monthlyScans = 0
+        totalBooks = 0
+        monthlyRecommendations = 0
+        // Reload usage data with user-specific keys
+        loadUsageData()
+        checkAndResetMonthlyUsage()
         Task {
             await refreshVariantLimits()
         }

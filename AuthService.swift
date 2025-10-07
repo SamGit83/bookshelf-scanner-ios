@@ -61,6 +61,8 @@ class AuthService: ObservableObject {
                 self?.currentUser = nil
                 self?.hasCompletedOnboarding = false
                 self?.isLoadingOnboardingStatus = false
+                // Reset usage tracker for signed out state
+                UsageTracker.shared.refreshOnUserChange()
             }
         }
     }
