@@ -177,7 +177,7 @@ struct CameraView: UIViewControllerRepresentable {
             let brightness = Double(bitmap[0]) / 255.0
 
             // Check if brightness is reasonable (not too dark or too bright)
-            if brightness < 0.2 || brightness > 0.8 {
+            if brightness < 0.1 || brightness > 0.9 {
                 return false
             }
 
@@ -186,13 +186,6 @@ struct CameraView: UIViewControllerRepresentable {
             // But for now, assume if brightness is ok, it's good
 
             return true
-        }
-
-        private func showValidationAlert(message: String) {
-            guard let vc = viewController else { return }
-            let alert = UIAlertController(title: "Image Quality Issue", message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Try Again", style: .default, handler: nil))
-            vc.present(alert, animated: true)
         }
 
         func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
@@ -210,8 +203,16 @@ struct CameraView: UIViewControllerRepresentable {
                         parent.isShowingCamera = false
                     } else {
                         print("DEBUG Coordinator: Image quality validation failed")
-                        showValidationAlert(message: "Image is too dark or too bright. Please ensure good lighting and try again.")
-                        // Do not set capturedImage or close camera, allow user to try again
+                        guard let vc = viewController else { return }
+                        let alert = UIAlertController(title: "Image Quality Issue", message: "The image may be too dark/bright. Ensure good lighting and try adjusting your distance from the bookshelf.\n\nTry moving closer or farther to fit the bookshelf in the frame", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "Try Again", style: .default, handler: nil))
+                        alert.addAction(UIAlertAction(title: "Proceed Anyway", style: .default) { _ in
+                            self.parent.capturedImage = image
+                            self.toggleTorch(false)
+                            self.parent.isShowingCamera = false
+                        })
+                        vc.present(alert, animated: true)
+                        // Do not set capturedImage or close camera by default, allow user to try again or proceed
                     }
                 } else {
                     print("DEBUG Coordinator: Failed to create UIImage from imageData")
@@ -288,14 +289,14 @@ class CameraViewController: UIViewController {
         NSLayoutConstraint.activate([
             framingView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             framingView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            framingView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 0.8),
-            framingView.heightAnchor.constraint(equalTo: containerView.heightAnchor, multiplier: 0.4)
+            framingView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 0.95),
+            framingView.heightAnchor.constraint(equalTo: containerView.heightAnchor, multiplier: 0.6)
         ])
 
         // Tips label at the top
         let tipsLabel = UILabel()
         tipsLabel.translatesAutoresizingMaskIntoConstraints = false
-        tipsLabel.text = "Position book within frame • Ensure good lighting • Hold steady for focus"
+        tipsLabel.text = "Adjust distance to fit bookshelf in frame • Ensure good lighting • Hold steady for focus"
         tipsLabel.textColor = .white
         tipsLabel.font = AppleBooksCameraTypography.caption
         tipsLabel.textAlignment = .center
