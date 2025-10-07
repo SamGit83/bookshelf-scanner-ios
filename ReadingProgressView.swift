@@ -17,6 +17,7 @@ struct ReadingProgressView: View {
         self.bookId = book.id
         self.viewModel = viewModel
         _currentPage = State(initialValue: String(book.currentPage))
+        print("DEBUG ReadingProgressView: init called with bookId: \(bookId)")
     }
 
     var body: some View {
@@ -24,7 +25,11 @@ struct ReadingProgressView: View {
             AppleBooksColors.background
                 .ignoresSafeArea()
 
-            if let book = book {
+            let foundBook = book
+            print("DEBUG ReadingProgressView: book found: \(foundBook != nil), bookId: \(bookId), viewModel.books.count: \(viewModel.books.count)")
+
+            if let book = foundBook {
+                print("DEBUG ReadingProgressView: rendering book view for: \(book.title ?? "unknown")")
                 ScrollView {
                     VStack(spacing: AppleBooksSpacing.space32) {
                         // Header
@@ -357,6 +362,7 @@ struct ReadingProgressView: View {
                 }
             } else {
                 // Book not found
+                print("DEBUG ReadingProgressView: showing 'Book not found' view")
                 VStack(spacing: AppleBooksSpacing.space24) {
                     Text("Book not found")
                         .font(AppleBooksTypography.headlineLarge)
