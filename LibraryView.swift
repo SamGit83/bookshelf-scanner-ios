@@ -36,6 +36,8 @@ struct LibraryView: View {
     @AppStorage("librarySortPreference") private var selectedSort: SortOption = .titleAZ
     @State private var selectedBook: Book?
     @State private var isShowingDetail = false
+    @State private var selectedBookForEdit: Book?
+    @State private var isShowingEditBook = false
 
     private var emptyStateView: some View {
         VStack(spacing: AppleBooksSpacing.space20) {
@@ -80,6 +82,7 @@ struct LibraryView: View {
                                 onTap: { selectedBook = book; isShowingDetail = true },
                                 showAddButton: false,
                                 onAddTap: nil,
+                                onEditTap: { selectedBookForEdit = book; isShowingEditBook = true },
                                 viewModel: viewModel
                             )
                         }
@@ -106,6 +109,7 @@ struct LibraryView: View {
                                 onTap: { selectedBook = book; isShowingDetail = true },
                                 showAddButton: false,
                                 onAddTap: nil,
+                                onEditTap: { selectedBookForEdit = book; isShowingEditBook = true },
                                 viewModel: viewModel
                             )
                         }
@@ -130,6 +134,7 @@ struct LibraryView: View {
                                 onTap: { selectedBook = book; isShowingDetail = true },
                                 showAddButton: false,
                                 onAddTap: nil,
+                                onEditTap: { selectedBookForEdit = book; isShowingEditBook = true },
                                 viewModel: viewModel
                             )
                         }
@@ -413,6 +418,11 @@ struct LibraryView: View {
         }
         .sheet(isPresented: $isShowingSearch) {
             SearchView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $isShowingEditBook) {
+            if let book = selectedBookForEdit {
+                EditBookView(book: book, viewModel: viewModel)
+            }
         }
         .alert(isPresented: $showingClearConfirmation) {
             Alert(

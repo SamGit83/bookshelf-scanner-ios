@@ -306,9 +306,7 @@ struct CurrentlyReadingView: View {
             }
         }
         .sheet(item: $progressBook) { book in
-            NavigationView { // Add NavigationView here
-                ReadingProgressView(book: book, viewModel: viewModel)
-            }
+            ReadingProgressView(book: book, viewModel: viewModel)
         }
     }
 }

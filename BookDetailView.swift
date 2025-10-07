@@ -109,7 +109,7 @@ struct BookDetailView: View {
     // Removed descriptionSection to avoid duplication with AI-generated teaser
 
     private var bookDetailsSection: AnyView {
-        if (currentBook.pageCount ?? bookDetails?.pageCount) != nil || currentBook.estimatedReadingTime != nil {
+        if (currentBook.pageCount ?? bookDetails?.pageCount) != nil || currentBook.estimatedReadingTime != nil || currentBook.isbn != nil {
             AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
                     title: "Book Details",
@@ -139,6 +139,18 @@ struct BookDetailView: View {
                                     .foregroundColor(AppleBooksColors.textSecondary)
                                 Spacer()
                                 Text(readingTime)
+                                    .font(AppleBooksTypography.bodyLarge)
+                                    .foregroundColor(AppleBooksColors.text)
+                            }
+                        }
+
+                        if let isbn = currentBook.isbn {
+                            HStack {
+                                Text("ISBN")
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                Spacer()
+                                Text(isbn)
                                     .font(AppleBooksTypography.bodyLarge)
                                     .foregroundColor(AppleBooksColors.text)
                             }
@@ -355,6 +367,7 @@ struct BookDetailView: View {
                                 onTap: {},
                                 showAddButton: false,
                                 onAddTap: {},
+                                onEditTap: nil,
                                 viewModel: viewModel
                             )
                         }
@@ -373,10 +386,10 @@ struct BookDetailView: View {
                 bookCoverSection
                 bookMetadataSection
                 bookDetailsSection
+                actionButtonsSection
                 bookTeaserSection
                 authorBiographySection
                 readingProgressSection
-                actionButtonsSection
                 recommendationsSection
                 Spacer(minLength: AppleBooksSpacing.space64)
             }

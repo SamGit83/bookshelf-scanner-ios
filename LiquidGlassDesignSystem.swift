@@ -1059,6 +1059,7 @@ public struct AppleBooksCollection: View {
     let subtitle: String?
     let onBookTap: (Book) -> Void
     let onSeeAllTap: (() -> Void)?
+    let onEditTap: ((Book) -> Void)?
     let viewModel: BookViewModel? // For adding books to library
 
     public var body: some View {
@@ -1078,6 +1079,7 @@ public struct AppleBooksCollection: View {
                             onTap: { onBookTap(book) },
                             showAddButton: viewModel != nil,
                             onAddTap: viewModel != nil ? { viewModel?.saveBookToFirestore(book) } : nil,
+                            onEditTap: onEditTap != nil ? { onEditTap?(book) } : nil,
                             viewModel: viewModel
                         )
                     }
@@ -1159,6 +1161,7 @@ public struct AppleBooksBookCard: View {
     let onTap: () -> Void
     let showAddButton: Bool
     let onAddTap: (() -> Void)?
+    let onEditTap: (() -> Void)?
     let viewModel: BookViewModel? // Add viewModel for adding to library
 
     @State private var isAddingToLibrary = false
@@ -1339,6 +1342,12 @@ public struct AppleBooksBookCard: View {
         }
         .onTapGesture(perform: onTap)
         .contextMenu {
+            Button(action: {
+                onEditTap?()
+            }) {
+                Label("Edit Book", systemImage: "pencil")
+            }
+
             if book.status != .reading {
                 Button(action: {
                     viewModel?.moveBook(book, to: .reading)
