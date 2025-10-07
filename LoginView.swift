@@ -433,6 +433,7 @@ struct LoginView: View {
                                     .font(AppleBooksTypography.bodyMedium)
                                     .foregroundColor(AppleBooksColors.text)
                                     .multilineTextAlignment(.leading)
+                                    .lineLimit(nil)
                             }
                         }
                         .padding(.horizontal, AppleBooksSpacing.space24)
@@ -600,6 +601,7 @@ struct PasswordResetView: View {
                                 .foregroundColor(.white.opacity(0.8))
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(2)
+                                .lineLimit(nil)
                         }
                     }
 
@@ -657,6 +659,7 @@ struct PasswordResetView: View {
                                 .font(TypographySystem.bodyMedium)
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.leading)
+                                .lineLimit(nil)
                         }
                         .padding(SpacingSystem.md)
                         .background(message.contains("sent") ? SemanticColors.successSecondary : SemanticColors.errorSecondary)
@@ -822,6 +825,7 @@ struct ExpandableTierButton: View {
                             .font(AppleBooksTypography.headlineMedium)
                             .foregroundColor(buttonTextColor)
                             .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
                         
                         HStack {
                             Text(badge)

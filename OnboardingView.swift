@@ -382,7 +382,7 @@ struct SubscriptionButton: View {
                     .foregroundColor(isSelected ? AppleBooksColors.accent : AppleBooksColors.text)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.8)
-                    .lineLimit(1)
+                    .lineLimit(nil)
 
                 Text("per \(option.period)")
                     .font(.system(size: 12))
@@ -396,7 +396,7 @@ struct SubscriptionButton: View {
                         .foregroundColor(AppleBooksColors.textSecondary)
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.8)
-                        .lineLimit(1)
+                        .lineLimit(nil)
                 } else {
                     Color.clear.frame(height: 10)
                 }
