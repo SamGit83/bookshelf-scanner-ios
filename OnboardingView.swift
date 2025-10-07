@@ -75,7 +75,7 @@ struct OnboardingView: View {
                         // Page Content in Apple Books Card
                         AppleBooksCard(
                             cornerRadius: 20,
-                            padding: AppleBooksSpacing.large,
+                            padding: AppleBooksSpacing.space24,
                             shadowStyle: .medium
                         ) {
                             VStack(spacing: AppleBooksSpacing.space24) {
@@ -99,7 +99,7 @@ struct OnboardingView: View {
                                         .frame(height: 120)
 
                                     // Text Content
-                                    VStack(spacing: AppleBooksSpacing.medium) {
+                                    VStack(spacing: AppleBooksSpacing.space16) {
                                         Text(pages[currentPage].title)
                                             .font(.system(size: 28, weight: .bold))
                                             .foregroundColor(AppleBooksColors.text)
@@ -113,7 +113,7 @@ struct OnboardingView: View {
                                             .multilineTextAlignment(.center)
                                             .lineLimit(nil)
                                             .minimumScaleFactor(0.8)
-                                            .padding(.horizontal, AppleBooksSpacing.medium)
+                                            .padding(.horizontal, AppleBooksSpacing.space16)
                                     }
                                 } else {
                                     SubscriptionSelectionView(
@@ -126,7 +126,7 @@ struct OnboardingView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, AppleBooksSpacing.large)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
                         Color.clear
                             .frame(height: AppleBooksSpacing.space32)
@@ -134,7 +134,7 @@ struct OnboardingView: View {
                 }
 
                 // Navigation Buttons
-                HStack(spacing: AppleBooksSpacing.medium) {
+                HStack(spacing: AppleBooksSpacing.space16) {
                     if currentPage > 0 {
                         Button(action: {
                             withAnimation(.easeInOut(duration: 0.3)) {
@@ -145,7 +145,7 @@ struct OnboardingView: View {
                                 .font(.system(size: 17, weight: .medium))
                                 .foregroundColor(AppleBooksColors.textSecondary)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppleBooksSpacing.medium)
+                                .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(AppleBooksColors.card)
                                 .cornerRadius(12)
                         }
@@ -163,13 +163,13 @@ struct OnboardingView: View {
                                 .font(.system(size: 17, weight: .medium))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppleBooksSpacing.medium)
+                                .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(pages[currentPage].accentColor)
                                 .cornerRadius(12)
                         }
                     }
                 }
-                .padding(.horizontal, AppleBooksSpacing.large)
+                .padding(.horizontal, AppleBooksSpacing.space24)
                 .padding(.bottom, AppleBooksSpacing.space32)
             }
         }
@@ -216,22 +216,22 @@ struct SubscriptionSelectionView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)
                 .minimumScaleFactor(0.8)
-                .padding(.horizontal, AppleBooksSpacing.medium)
+                .padding(.horizontal, AppleBooksSpacing.space16)
 
             Text("Premium Coming Soon")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(AppleBooksColors.textTertiary)
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)
-                .padding(.horizontal, AppleBooksSpacing.medium)
+                .padding(.horizontal, AppleBooksSpacing.space16)
 
-            HStack(spacing: AppleBooksSpacing.medium) {
+            HStack(spacing: AppleBooksSpacing.space16) {
                 SubscriptionButton(option: subscriptionOptions[0], selectedOption: $selectedOption)
                 SubscriptionButton(option: subscriptionOptions[1], selectedOption: $selectedOption)
             }
             .frame(height: 200)
 
-            VStack(spacing: AppleBooksSpacing.medium) {
+            VStack(spacing: AppleBooksSpacing.space16) {
                 Text("Free Tier Selected")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(AppleBooksColors.text)
@@ -257,7 +257,7 @@ struct SubscriptionSelectionView: View {
                         .font(.system(size: 17, weight: .medium))
                         .foregroundColor(AppleBooksColors.textTertiary)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, AppleBooksSpacing.medium)
+                        .padding(.vertical, AppleBooksSpacing.space16)
                 }
                 .background(AppleBooksColors.card)
                 .cornerRadius(12)
@@ -265,7 +265,7 @@ struct SubscriptionSelectionView: View {
 
                 AppleBooksCard(
                     cornerRadius: 12,
-                    padding: AppleBooksSpacing.medium,
+                    padding: AppleBooksSpacing.space16,
                     shadowStyle: .subtle
                 ) {
                     VStack(spacing: AppleBooksSpacing.small) {
@@ -311,7 +311,7 @@ struct SubscriptionSelectionView: View {
                         }
                     }
                 }
-                .padding(.top, AppleBooksSpacing.medium)
+                .padding(.top, AppleBooksSpacing.space16)
                 
                 if showSuccess {
                     Text("Subscription successful!")
