@@ -68,9 +68,9 @@ struct OnboardingView: View {
 
             VStack(spacing: 0) {
                 ScrollView {
-                    VStack(spacing: AppleBooksSpacing.large) {
+                    VStack(spacing: AppleBooksSpacing.space24) {
                         Color.clear
-                            .frame(height: AppleBooksSpacing.extraLarge)
+                            .frame(height: AppleBooksSpacing.space32)
 
                         // Page Content in Apple Books Card
                         AppleBooksCard(
@@ -78,7 +78,7 @@ struct OnboardingView: View {
                             padding: AppleBooksSpacing.large,
                             shadowStyle: .medium
                         ) {
-                            VStack(spacing: AppleBooksSpacing.large) {
+                            VStack(spacing: AppleBooksSpacing.space24) {
                                 // Page Indicator
                                 HStack(spacing: AppleBooksSpacing.small) {
                                     ForEach(0..<pages.count, id: \.self) { index in
@@ -129,7 +129,7 @@ struct OnboardingView: View {
                         .padding(.horizontal, AppleBooksSpacing.large)
 
                         Color.clear
-                            .frame(height: AppleBooksSpacing.extraLarge)
+                            .frame(height: AppleBooksSpacing.space32)
                     }
                 }
 
@@ -170,7 +170,7 @@ struct OnboardingView: View {
                     }
                 }
                 .padding(.horizontal, AppleBooksSpacing.large)
-                .padding(.bottom, AppleBooksSpacing.extraLarge)
+                .padding(.bottom, AppleBooksSpacing.space32)
             }
         }
         .fullScreenCover(isPresented: $showMainApp) {
@@ -202,7 +202,7 @@ struct SubscriptionSelectionView: View {
     let completeOnboarding: () -> Void
 
     var body: some View {
-        VStack(spacing: AppleBooksSpacing.large) {
+        VStack(spacing: AppleBooksSpacing.space24) {
             Text("Unlock Premium")
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(AppleBooksColors.text)
