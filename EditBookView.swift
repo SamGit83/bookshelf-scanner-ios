@@ -13,7 +13,7 @@ struct EditBookView: View {
     @State private var genre: String
     @State private var selectedStatus: BookStatus
     @State private var isLoading = false
-    @State private var errorMessage: String?
+    @State private var errorMessage: Error?
 
     init(book: Book, viewModel: BookViewModel) {
         self.book = book
@@ -209,17 +209,17 @@ struct EditBookView: View {
                 }
             }
             .alert(item: Binding(
-                get: { errorMessage.map { ErrorWrapper(error: $0) } },
+                get: { errorMessage.map { ErrorWrapper(error: $0, guidance: nil) } },
                 set: { _ in errorMessage = nil }
             )) { errorWrapper in
-                Alert(title: Text("Error"), message: Text(errorWrapper.error), dismissButton: .default(Text("OK")))
+                Alert(title: Text("Error"), message: Text(errorWrapper.error.localizedDescription), dismissButton: .default(Text("OK")))
             }
         }
     }
 
     private func saveChanges() {
         guard !title.isEmpty && !author.isEmpty else {
-            errorMessage = "Title and author are required"
+            errorMessage = NSError(domain: "ValidationError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Title and author are required"])
             return
         }
 
@@ -245,7 +245,7 @@ struct EditBookView: View {
                 DispatchQueue.main.async {
                     isLoading = false
                     if let error = error {
-                        errorMessage = "Failed to save changes: \(error.localizedDescription)"
+                        errorMessage = NSError(domain: "SaveError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to save changes: \(error.localizedDescription)"])
                     } else {
                         // If status changed, update it separately
                         if updatedBook.status != selectedStatus {
@@ -257,7 +257,12 @@ struct EditBookView: View {
             }
         } catch {
             isLoading = false
-            errorMessage = "Failed to encode book data: \(error.localizedDescription)"
+            errorMessage = NSError(domain: "EncodingError", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to encode book data: \(error.localizedDescription)"])
         }
+struct ErrorWrapper: Identifiable {
+    let id = UUID()
+    let error: Error
+    let guidance: String?
+}
     }
 }
