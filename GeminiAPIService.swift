@@ -64,6 +64,11 @@ class GeminiAPIService {
 
         TASK: Extract and analyze all visible books with maximum accuracy, regardless of their arrangement, orientation, or surroundings.
 
+        CRITICAL SAFEGUARDS:
+        - Only detect physical books that are clearly visible and identifiable as books
+        - Do not hallucinate or invent books that are not present in the image
+        - If no books are clearly visible, return an empty JSON array []
+
         ANALYSIS REQUIREMENTS:
         1. OCR Excellence: Read text from book spines, covers, or any visible surfaces, even if curved, angled, partially obscured, or in various orientations
         2. Detail Extraction: Capture titles, authors, ISBNs, publishers, publication years from any visible text
@@ -100,6 +105,7 @@ class GeminiAPIService {
         - Handle multiple books or single books
         - Extract as much metadata as possible
         - If image quality is poor, include guidance in the 'notes' field for better results
+        - Return empty array [] if no physical books are clearly visible in the image
         """
 
         let requestBody: [String: Any] = [

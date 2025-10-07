@@ -18,6 +18,7 @@ class BookViewModel: ObservableObject {
     @Published var scanFeedbackMessage: String?
     @Published var approachingLimitWarning: String?
     @Published var partialSuccessMessage: String?
+    @Published var successMessage: String?
     @Published var totalBooks: Int = 0
     @Published var currentPage = 0
     @Published var hasMoreBooks = true
@@ -217,6 +218,7 @@ class BookViewModel: ObservableObject {
         errorMessage = nil
         scanFeedbackMessage = "Scanning bookshelf..."
         partialSuccessMessage = nil
+        successMessage = nil
         performScanWithRetry(image: image)
     }
 
@@ -278,10 +280,22 @@ class BookViewModel: ObservableObject {
         let errorDescription = error.localizedDescription.lowercased()
         // Retry on network-related errors
         return errorDescription.contains("network") ||
-               errorDescription.contains("timeout") ||
-               errorDescription.contains("connection") ||
-               errorDescription.contains("unreachable") ||
-               errorDescription.contains("offline")
+                errorDescription.contains("timeout") ||
+                errorDescription.contains("connection") ||
+                errorDescription.contains("unreachable") ||
+                errorDescription.contains("offline")
+    }
+
+    private func normalizeAuthorName(_ author: String?) -> String {
+        guard let author = author else { return "" }
+        // Normalize author name: lowercase, trim whitespace, remove common prefixes/suffixes
+        var normalized = author.lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "^(by |written by |author: )", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "( jr\\.| sr\\.| iii| ii| iv)$", with: "", options: .regularExpression)
+        // Remove extra whitespace and normalize spaces
+        normalized = normalized.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+        return normalized.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func parseAndAddBooks(from responseText: String) {
@@ -313,15 +327,23 @@ class BookViewModel: ObservableObject {
                     return
                 }
 
-                // Check for duplicates based on title (case-insensitive) or ISBN
-                let existingTitles = Set(self.books.compactMap { $0.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
+                // Check for duplicates based on title + author combination (case-insensitive) or ISBN
+                let existingTitleAuthorCombinations = Set(self.books.compactMap { book in
+                    let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    let normalizedAuthor = normalizeAuthorName(book.author)
+                    return normalizedTitle + "|" + normalizedAuthor
+                })
                 let existingISBNs = Set(self.books.compactMap { $0.isbn })
-                print("DEBUG BookViewModel: Existing titles count: \(existingTitles.count), ISBNs count: \(existingISBNs.count)")
+                print("DEBUG BookViewModel: Existing title-author combinations count: \(existingTitleAuthorCombinations.count), ISBNs count: \(existingISBNs.count)")
 
                 // Filter out duplicates
                 let nonDuplicateBooks = decodedBooks.filter { book in
-                    let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                    return !(normalizedTitle != nil && existingTitles.contains(normalizedTitle!)) && !(book.isbn != nil && existingISBNs.contains(book.isbn!))
+                    let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    let normalizedAuthor = normalizeAuthorName(book.author)
+                    let titleAuthorKey = normalizedTitle + "|" + normalizedAuthor
+                    let isTitleAuthorDuplicate = existingTitleAuthorCombinations.contains(titleAuthorKey)
+                    let isISBNDuplicate = book.isbn != nil && existingISBNs.contains(book.isbn!)
+                    return !isTitleAuthorDuplicate && !isISBNDuplicate
                 }
                 let duplicateCount = decodedBooks.count - nonDuplicateBooks.count
                 print("DEBUG BookViewModel: Non-duplicate books: \(nonDuplicateBooks.count) out of \(decodedBooks.count), duplicates: \(duplicateCount)")
@@ -336,6 +358,8 @@ class BookViewModel: ObservableObject {
                         partialSuccessMessage = "Added \(booksToProcess.count) books to your library. \(duplicateCount) books were already in your collection."
                     } else if duplicateCount > 0 && booksToProcess.isEmpty {
                         partialSuccessMessage = "\(duplicateCount) books were already in your collection."
+                    } else if booksToProcess.count > 0 {
+                        successMessage = booksToProcess.count == 1 ? "Book added to your library." : "Added \(booksToProcess.count) books to your library."
                     } else {
                         partialSuccessMessage = nil
                     }
@@ -355,6 +379,8 @@ class BookViewModel: ObservableObject {
                         partialSuccessMessage = "Added \(booksToProcess.count) books to your library. \(skippedCount) books were detected but couldn't be added due to your 25-book limit. Consider upgrading for unlimited books."
                     } else if duplicateCount > 0 {
                         partialSuccessMessage = "Added \(booksToProcess.count) books to your library. \(duplicateCount) books were already in your collection."
+                    } else if booksToProcess.count > 0 {
+                        successMessage = booksToProcess.count == 1 ? "Book added to your library." : "Added \(booksToProcess.count) books to your library."
                     } else {
                         partialSuccessMessage = nil
                     }
@@ -1207,6 +1233,7 @@ class BookViewModel: ObservableObject {
             // Save to Firestore and update local array
             self?.saveBookToFirestore(bookToSave)
             self?.updateLocalBook(bookToSave)
+            self?.successMessage = "Book added to your library."
             completion(.success(()))
         }
     }

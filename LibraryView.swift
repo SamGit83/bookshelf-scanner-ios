@@ -298,6 +298,31 @@ struct LibraryView: View {
                     .padding(.top, AppleBooksSpacing.space16)
                 }
 
+                // Success banner for full success messages
+                if let successMessage = viewModel.successMessage {
+                    HStack(spacing: AppleBooksSpacing.space12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(SemanticColors.successPrimary)
+                        Text(successMessage)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.text)
+                        Spacer()
+                        Button(action: {
+                            viewModel.successMessage = nil
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .font(.system(size: 14))
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.vertical, AppleBooksSpacing.space12)
+                    .background(SemanticColors.successSecondary.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.top, AppleBooksSpacing.space16)
+                }
+
                 if viewModel.books.isEmpty {
                     Spacer()
                     emptyStateView
@@ -384,7 +409,7 @@ struct LibraryView: View {
             }
         }
         .sheet(isPresented: $isShowingAddBook) {
-            AddBookView()
+            AddBookView(viewModel: viewModel)
         }
         .sheet(isPresented: $isShowingSearch) {
             SearchView(viewModel: viewModel)

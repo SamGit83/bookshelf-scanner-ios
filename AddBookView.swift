@@ -5,7 +5,7 @@ import UIKit
 
 struct AddBookView: View {
     @Environment(\.presentationMode) var presentationMode
-    @StateObject private var viewModel = BookViewModel()
+    @ObservedObject var viewModel: BookViewModel
     @State private var title = ""
     @State private var author = ""
     @State private var isbn = ""
@@ -352,6 +352,7 @@ struct AddBookView: View {
         )
 
         viewModel.saveBookToFirestore(newBook)
+        viewModel.successMessage = "Book added to your library."
         presentationMode.wrappedValue.dismiss()
     }
 }
