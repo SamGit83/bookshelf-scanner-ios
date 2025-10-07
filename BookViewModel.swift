@@ -16,6 +16,8 @@ class BookViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var scanFeedbackMessage: String?
+    @Published var approachingLimitWarning: String?
+    @Published var partialSuccessMessage: String?
     @Published var totalBooks: Int = 0
     @Published var currentPage = 0
     @Published var hasMoreBooks = true
@@ -187,6 +189,15 @@ class BookViewModel: ObservableObject {
         isScanning = true
         retryCount = 0
 
+        // Check for approaching scan limit
+        if UsageTracker.shared.isApproachingScanLimit() {
+            let current = UsageTracker.shared.monthlyScans
+            let limit = UsageTracker.shared.variantScanLimit
+            approachingLimitWarning = "You're approaching your scan limit (\(current)/\(limit)). Consider upgrading soon."
+        } else {
+            approachingLimitWarning = nil
+        }
+
         // Check usage limits
         if !UsageTracker.shared.canPerformScan() {
             errorMessage = "Scan limit reached. Upgrade to Premium for unlimited scans."
@@ -205,6 +216,7 @@ class BookViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         scanFeedbackMessage = "Scanning bookshelf..."
+        partialSuccessMessage = nil
         performScanWithRetry(image: image)
     }
 
@@ -306,17 +318,51 @@ class BookViewModel: ObservableObject {
                 let existingISBNs = Set(self.books.compactMap { $0.isbn })
                 print("DEBUG BookViewModel: Existing titles count: \(existingTitles.count), ISBNs count: \(existingISBNs.count)")
 
-                var bookIndex = 0
-                for book in decodedBooks {
-                    bookIndex += 1
+                // Filter out duplicates
+                let nonDuplicateBooks = decodedBooks.filter { book in
                     let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                    return !(normalizedTitle != nil && existingTitles.contains(normalizedTitle!)) && !(book.isbn != nil && existingISBNs.contains(book.isbn!))
+                }
+                let duplicateCount = decodedBooks.count - nonDuplicateBooks.count
+                print("DEBUG BookViewModel: Non-duplicate books: \(nonDuplicateBooks.count) out of \(decodedBooks.count), duplicates: \(duplicateCount)")
 
-                    if (normalizedTitle != nil && existingTitles.contains(normalizedTitle!)) || (book.isbn != nil && existingISBNs.contains(book.isbn!)) {
-                        print("DEBUG BookViewModel: Skipping duplicate book #\(bookIndex): \(book.title ?? "") by \(book.author ?? "")")
-                        continue
+                // Check user tier and apply limit
+                let isPremium = AuthService.shared.currentUser?.tier == .premium
+                var booksToProcess: [Book]
+                if isPremium {
+                    booksToProcess = nonDuplicateBooks
+                    // Set success message for premium users
+                    if duplicateCount > 0 && !booksToProcess.isEmpty {
+                        partialSuccessMessage = "Added \(booksToProcess.count) books to your library. \(duplicateCount) books were already in your collection."
+                    } else if duplicateCount > 0 && booksToProcess.isEmpty {
+                        partialSuccessMessage = "\(duplicateCount) books were already in your collection."
+                    } else {
+                        partialSuccessMessage = nil
                     }
+                } else {
+                    let currentBookCount = self.books.count
+                    let remainingCapacity = 25 - currentBookCount
+                    if remainingCapacity <= 0 {
+                        partialSuccessMessage = "You've reached your 25-book limit. Upgrade to Premium for unlimited books."
+                        return
+                    }
+                    booksToProcess = Array(nonDuplicateBooks.prefix(remainingCapacity))
+                    let skippedCount = nonDuplicateBooks.count - booksToProcess.count
+                    // Set success message for free users
+                    if skippedCount > 0 && duplicateCount > 0 {
+                        partialSuccessMessage = "Added \(booksToProcess.count) books to your library. \(skippedCount) books were detected but couldn't be added due to your 25-book limit. \(duplicateCount) books were already in your collection. Consider upgrading for unlimited books."
+                    } else if skippedCount > 0 {
+                        partialSuccessMessage = "Added \(booksToProcess.count) books to your library. \(skippedCount) books were detected but couldn't be added due to your 25-book limit. Consider upgrading for unlimited books."
+                    } else if duplicateCount > 0 {
+                        partialSuccessMessage = "Added \(booksToProcess.count) books to your library. \(duplicateCount) books were already in your collection."
+                    } else {
+                        partialSuccessMessage = nil
+                    }
+                }
 
-                    print("DEBUG BookViewModel: Processing new book #\(bookIndex)/\(decodedBooks.count): \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
+                // Process the books to add
+                for (index, book) in booksToProcess.enumerated() {
+                    print("DEBUG BookViewModel: Processing new book #\(index + 1)/\(booksToProcess.count): \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
                     let coverFetchStartTime = Date()
                     googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
                           let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
@@ -361,7 +407,7 @@ class BookViewModel: ObservableObject {
                       }
                  }
                  // Track bookshelf scan completed
-                 AnalyticsManager.shared.trackBookshelfScanCompleted(bookCount: decodedBooks.count)
+                 AnalyticsManager.shared.trackBookshelfScanCompleted(bookCount: booksToProcess.count)
              } else {
                  print("DEBUG BookViewModel: Failed to convert jsonString to data")
                  errorMessage = "Failed to parse book data. Please try again."
@@ -1033,6 +1079,15 @@ class BookViewModel: ObservableObject {
     // MARK: - Recommendations
 
     func generateRecommendations(for currentBook: Book? = nil, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
+        // Check for approaching recommendation limit
+        if UsageTracker.shared.isApproachingRecommendationLimit() {
+            let current = UsageTracker.shared.monthlyRecommendations
+            let limit = UsageTracker.shared.variantRecommendationLimit
+            approachingLimitWarning = "You're approaching your recommendation limit (\(current)/\(limit)). Consider upgrading soon."
+        } else {
+            approachingLimitWarning = nil
+        }
+
         // Check limits first
         if !UsageTracker.shared.canGetRecommendation() {
             let error = NSError(domain: "BookshelfScanner", code: 1, userInfo: [NSLocalizedDescriptionKey: "Recommendation limit reached. Upgrade to Premium for unlimited recommendations."])

@@ -262,6 +262,48 @@ struct SubscriptionSelectionView: View {
                 .background(AppleBooksColors.card)
                 .cornerRadius(12)
                 .disabled(true)
+                AppleBooksCard(
+                    cornerRadius: 12,
+                    padding: AppleBooksSpacing.space16,
+                    shadowStyle: .subtle
+                ) {
+                    VStack(spacing: AppleBooksSpacing.space8) {
+                        Text("FREE Tier Features")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(AppleBooksColors.text)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(nil)
+
+                        let freeFeatures = [
+                            "Ad-free experience",
+                            "Basic bookshelf scanning (20 scans/month)",
+                            "Manual book addition (25 books limit)",
+                            "Reading progress tracking",
+                            "Offline functionality",
+                            "Cross-device synchronization",
+                            "Books metadata and AI features (5 recommendations/month)"
+                        ]
+
+                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                            ForEach(freeFeatures, id: \.self) { feature in
+                                HStack(spacing: AppleBooksSpacing.space8) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(AppleBooksColors.success)
+                                        .font(.system(size: 12, weight: .medium))
+
+                                    Text(feature)
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+                                        .lineLimit(nil)
+
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.top, AppleBooksSpacing.space16)
+
 
                 AppleBooksCard(
                     cornerRadius: 12,

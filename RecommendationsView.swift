@@ -20,7 +20,34 @@ struct RecommendationsView: View {
                 AppleBooksColors.background
                     .ignoresSafeArea()
 
-                if isLoading {
+                VStack(spacing: 0) {
+                    // Warning banner for approaching limits
+                    if let warning = viewModel.approachingLimitWarning {
+                        HStack(spacing: AppleBooksSpacing.space12) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(SemanticColors.warningPrimary)
+                            Text(warning)
+                                .font(AppleBooksTypography.bodyMedium)
+                                .foregroundColor(AppleBooksColors.text)
+                            Spacer()
+                            Button(action: {
+                                // Could navigate to upgrade or dismiss
+                                viewModel.approachingLimitWarning = nil
+                            }) {
+                                Image(systemName: "xmark")
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                    .font(.system(size: 14))
+                            }
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space16)
+                        .padding(.vertical, AppleBooksSpacing.space12)
+                        .background(SemanticColors.warningSecondary.opacity(0.1))
+                        .cornerRadius(8)
+                        .padding(.horizontal, AppleBooksSpacing.space16)
+                        .padding(.top, AppleBooksSpacing.space16)
+                    }
+
+                    if isLoading {
                     VStack(spacing: AppleBooksSpacing.space20) {
                         ProgressView()
                             .scaleEffect(1.5)
@@ -104,6 +131,8 @@ struct RecommendationsView: View {
                     }
                 }
             }
+            .padding(.bottom, 70) // Add bottom padding for tab bar
+        }
             .navigationTitle("Recommendations")
             .navigationBarItems(trailing: Button(action: loadRecommendations) {
                 Image(systemName: "arrow.clockwise")

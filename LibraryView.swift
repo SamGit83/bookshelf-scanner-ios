@@ -222,6 +222,82 @@ struct LibraryView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // Warning banner for approaching limits
+                if let warning = viewModel.approachingLimitWarning {
+                    HStack(spacing: AppleBooksSpacing.space12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(SemanticColors.warningPrimary)
+                        Text(warning)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.text)
+                        Spacer()
+                        Button(action: {
+                            // Could navigate to upgrade or dismiss
+                            viewModel.approachingLimitWarning = nil
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .font(.system(size: 14))
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.vertical, AppleBooksSpacing.space12)
+                    .background(SemanticColors.warningSecondary.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.top, AppleBooksSpacing.space16)
+                }
+
+                // Error banner for scan errors
+                if let errorMessage = viewModel.errorMessage {
+                    HStack(spacing: AppleBooksSpacing.space12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(SemanticColors.errorPrimary)
+                        Text(errorMessage)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.text)
+                        Spacer()
+                        Button(action: {
+                            viewModel.errorMessage = nil
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .font(.system(size: 14))
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.vertical, AppleBooksSpacing.space12)
+                    .background(SemanticColors.errorSecondary.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.top, AppleBooksSpacing.space16)
+                }
+
+                // Success banner for partial success messages
+                if let successMessage = viewModel.partialSuccessMessage {
+                    HStack(spacing: AppleBooksSpacing.space12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(SemanticColors.successPrimary)
+                        Text(successMessage)
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(AppleBooksColors.text)
+                        Spacer()
+                        Button(action: {
+                            viewModel.partialSuccessMessage = nil
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .font(.system(size: 14))
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.vertical, AppleBooksSpacing.space12)
+                    .background(SemanticColors.successSecondary.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .padding(.top, AppleBooksSpacing.space16)
+                }
+
                 if viewModel.books.isEmpty {
                     Spacer()
                     emptyStateView

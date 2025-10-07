@@ -41,6 +41,9 @@ class UsageTracker: ObservableObject {
     func canPerformScan() -> Bool {
         guard let tier = AuthService.shared.currentUser?.tier else { return false }
         if tier == .premium { return true }
+        // 20 scans per month are allowed for free users
+        // When monthlyScans >= 20, further attempts are blocked
+        // This means the 21st scan attempt will be rejected
         return monthlyScans < variantScanLimit
     }
 
@@ -240,5 +243,20 @@ class UsageTracker: ObservableObject {
     var recommendationLimit: Int {
         guard let tier = AuthService.shared.currentUser?.tier else { return variantRecommendationLimit }
         return tier == .premium ? Int.max : variantRecommendationLimit
+    }
+
+    func isApproachingScanLimit() -> Bool {
+        guard let tier = AuthService.shared.currentUser?.tier, tier != .premium else { return false }
+        return monthlyScans >= Int(0.8 * Double(variantScanLimit))
+    }
+
+    func isApproachingBookLimit() -> Bool {
+        guard let tier = AuthService.shared.currentUser?.tier, tier != .premium else { return false }
+        return totalBooks >= Int(0.8 * Double(variantBookLimit))
+    }
+
+    func isApproachingRecommendationLimit() -> Bool {
+        guard let tier = AuthService.shared.currentUser?.tier, tier != .premium else { return false }
+        return monthlyRecommendations >= Int(0.8 * Double(variantRecommendationLimit))
     }
 }

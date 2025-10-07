@@ -2,21 +2,12 @@ import SwiftUI
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
-import FirebaseFirestore
 
 struct UpgradeModalView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var abTestingService = ABTestingService.shared
-    @State private var selectedPlan: SubscriptionPlan = .monthly
-    @State private var isLoading = false
-    @State private var showError = false
-    @State private var errorMessage = ""
     @State private var variantConfig: UpgradeVariantConfig?
     @State private var showWaitlistModal = false
-
-    enum SubscriptionPlan {
-        case monthly, annual
-    }
 
     var body: some View {
         NavigationView {
@@ -61,7 +52,6 @@ struct UpgradeModalView: View {
                         
                         socialProofSection
                         featureComparisonSection
-                        pricingSection
                         ctaSection
                     }
                     .padding(.vertical, 24)
@@ -74,9 +64,6 @@ struct UpgradeModalView: View {
                 print("DEBUG UpgradeModal: Modal presented")
                 loadVariantConfig()
                 trackModalView()
-            }
-            .alert(isPresented: $showError) {
-                Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
             }
         }
     }
@@ -95,18 +82,18 @@ struct UpgradeModalView: View {
                     .accessibilityLabel("Premium Crown Icon")
             }
 
-            Text(variantConfig?.headline ?? "Unlock Premium Features")
+            Text(variantConfig?.headline ?? "Join the Premium Waitlist")
                 .font(.largeTitle)
                 .foregroundColor(Color.primary)
                 .multilineTextAlignment(.center)
-                .accessibilityLabel("Headline: Unlock Premium Features")
+                .accessibilityLabel("Headline: Join the Premium Waitlist")
 
             Text(variantConfig?.subheadline ?? "Premium features are coming soon. Join the waitlist to be notified when available.")
                 .font(.body)
                 .foregroundColor(Color.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
-                .accessibilityLabel("Subheadline: Join thousands of readers who have upgraded")
+                .accessibilityLabel("Subheadline: Premium features are coming soon. Join the waitlist to be notified when available.")
         }
         .padding(.horizontal, 16)
         .glassBackground()
@@ -143,10 +130,10 @@ struct UpgradeModalView: View {
 
     private var featureComparisonSection: some View {
         VStack(spacing: 24) {
-            Text("Why Upgrade?")
+            Text("What You'll Get")
                 .font(.title2)
                 .foregroundColor(Color.primary)
-                .accessibilityLabel("Why Upgrade Section")
+                .accessibilityLabel("What You'll Get Section")
 
             VStack(spacing: 16) {
                 FeatureComparisonRow(
@@ -194,45 +181,6 @@ struct UpgradeModalView: View {
         .glassBackground()
         .accessibilityElement(children: .combine)
     }
-
-    private var pricingSection: some View {
-        VStack(spacing: 24) {
-            Text("Choose Your Plan")
-                .font(.title2)
-                .foregroundColor(Color.primary)
-                .accessibilityLabel("Choose Your Plan Section")
-
-            HStack(spacing: 16) {
-                PricingCard(
-                    plan: .monthly,
-                    price: variantConfig?.monthlyPrice ?? 2.99,
-                    period: "month",
-                    savings: nil,
-                    isSelected: selectedPlan == .monthly,
-                    action: {
-                        // Premium coming soon - no action
-                        print("DEBUG UpgradeModalView: Premium coming soon - monthly plan tap ignored")
-                    }
-                )
-
-                PricingCard(
-                    plan: .annual,
-                    price: variantConfig?.annualPrice ?? 29.99,
-                    period: "year",
-                    savings: nil,
-                    isSelected: selectedPlan == .annual,
-                    action: {
-                        // Premium coming soon - no action
-                        print("DEBUG UpgradeModalView: Premium coming soon - annual plan tap ignored")
-                    }
-                )
-            }
-            .padding(.horizontal, 16)
-        }
-        .glassBackground()
-        .accessibilityElement(children: .combine)
-    }
-
 
     private var ctaSection: some View {
         VStack(spacing: 16) {
@@ -317,15 +265,6 @@ struct UpgradeModalView: View {
         }
     }
 
-    private func startSubscription() {
-        print("DEBUG UpgradeModal: Premium coming soon - subscription attempt ignored for plan \(selectedPlan)")
-        isLoading = false
-        errorMessage = "Premium features are coming soon! Stay tuned for updates."
-        showError = true
-        trackCTAClick() // Keep analytics if needed, but no backend
-        // No purchase or backend calls
-    }
-
     // Analytics tracking
     private func trackModalView() {
         #if canImport(FirebaseAnalytics)
@@ -346,26 +285,7 @@ struct UpgradeModalView: View {
     private func trackCTAClick() {
         #if canImport(FirebaseAnalytics)
         Analytics.logEvent("upgrade_cta_clicked", parameters: [
-            "variant_id": variantConfig?.variantId ?? "default",
-            "selected_plan": selectedPlan == .monthly ? "monthly" : "annual"
-        ])
-        #endif
-    }
-
-    private func trackSubscriptionSuccess() {
-        #if canImport(FirebaseAnalytics)
-        Analytics.logEvent("subscription_started", parameters: [
-            "variant_id": variantConfig?.variantId ?? "default",
-            "plan": selectedPlan == .monthly ? "monthly" : "annual"
-        ])
-        #endif
-    }
-
-    private func trackSubscriptionFailure() {
-        #if canImport(FirebaseAnalytics)
-        Analytics.logEvent("subscription_failed", parameters: [
-            "variant_id": variantConfig?.variantId ?? "default",
-            "plan": selectedPlan == .monthly ? "monthly" : "annual"
+            "variant_id": variantConfig?.variantId ?? "default"
         ])
         #endif
     }
@@ -416,55 +336,11 @@ struct FeatureComparisonRow: View {
     }
 }
 
-struct PricingCard: View {
-    let plan: UpgradeModalView.SubscriptionPlan
-    let price: Double
-    let period: String
-    let savings: String?
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 12) {
-                Spacer(minLength: 20)
-
-                Text("$\(price, specifier: "%.2f")")
-                .font(.largeTitle)
-                .foregroundColor(Color.primary)
-                .bold()
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.8)
-                .lineLimit(1)
-
-                Text("per \(period)")
-                    .font(.caption)
-                    .foregroundColor(Color.secondary)
-
-                Spacer(minLength: 10)
-            }
-            .frame(maxWidth: .infinity, minHeight: 140) // Fixed height for consistency
-            .padding(24)
-            .glassBackground()
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.orange : Color.clear, lineWidth: isSelected ? 2 : 0)
-            )
-            .background(isSelected ? Color.orange.opacity(0.1) : Color.clear)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .accessibilityLabel("\(period.capitalized) Plan: $\(price) per \(period)")
-    }
-}
-
 struct UpgradeVariantConfig {
     let variantId: String
     let headline: String
     let subheadline: String
     let socialProof: String
-    let monthlyPrice: Double
-    let annualPrice: Double
-    let urgencyMessage: String
     let ctaText: String
 
     static func fromVariant(_ variant: Variant) -> UpgradeVariantConfig {
@@ -472,13 +348,10 @@ struct UpgradeVariantConfig {
 
         return UpgradeVariantConfig(
             variantId: variant.id,
-            headline: config["headline"]?.value as? String ?? "Unlock Premium Features",
-            subheadline: config["subheadline"]?.value as? String ?? "Join thousands of readers who have upgraded",
+            headline: config["headline"]?.value as? String ?? "Join the Premium Waitlist",
+            subheadline: config["subheadline"]?.value as? String ?? "Premium features are coming soon. Join the waitlist to be notified when available.",
             socialProof: config["socialProof"]?.value as? String ?? "\"This app has transformed my library!\"",
-            monthlyPrice: config["monthlyPrice"]?.value as? Double ?? 2.99,
-            annualPrice: config["annualPrice"]?.value as? Double ?? 29.99,
-            urgencyMessage: config["urgencyMessage"]?.value as? String ?? "Limited Time: Special offer!",
-            ctaText: config["ctaText"]?.value as? String ?? "Start Premium Trial"
+            ctaText: config["ctaText"]?.value as? String ?? "Join Waitlist"
         )
     }
 }
