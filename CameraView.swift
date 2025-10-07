@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import UIKit
+import CoreImage
 
 // Apple Books Design System Constants for Camera Interface
 struct AppleBooksCameraColors {
@@ -89,6 +90,7 @@ struct CameraView: UIViewControllerRepresentable {
         // Setup the camera view controller
         viewController.setupUI(coordinator: context.coordinator, previewLayer: previewLayer, captureDevice: videoCaptureDevice)
 
+        context.coordinator.viewController = viewController
         context.coordinator.captureSession = captureSession
         context.coordinator.previewLayer = previewLayer
         context.coordinator.captureDevice = videoCaptureDevice
@@ -114,6 +116,7 @@ struct CameraView: UIViewControllerRepresentable {
         var photoOutput: AVCapturePhotoOutput?
         var captureDevice: AVCaptureDevice?
         var isFlashOn = false
+        weak var viewController: CameraViewController?
 
         init(_ parent: CameraView) {
             self.parent = parent
@@ -150,7 +153,7 @@ struct CameraView: UIViewControllerRepresentable {
         
         private func toggleTorch(_ on: Bool) {
             guard let device = captureDevice, device.hasTorch else { return }
-            
+
             do {
                 try device.lockForConfiguration()
                 device.torchMode = on ? .on : .off
@@ -160,18 +163,56 @@ struct CameraView: UIViewControllerRepresentable {
             }
         }
 
+        private func validateImageQuality(_ image: UIImage) -> Bool {
+            guard let ciImage = CIImage(image: image) else { return false }
+
+            // Check brightness
+            let brightnessFilter = CIFilter(name: "CIAreaAverage")!
+            brightnessFilter.setValue(ciImage, forKey: kCIInputImageKey)
+            guard let outputImage = brightnessFilter.outputImage else { return false }
+
+            let context = CIContext()
+            var bitmap = [UInt8](repeating: 0, count: 4)
+            context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
+            let brightness = Double(bitmap[0]) / 255.0
+
+            // Check if brightness is reasonable (not too dark or too bright)
+            if brightness < 0.2 || brightness > 0.8 {
+                return false
+            }
+
+            // Basic blur check using variance (simplified)
+            // For more accurate blur detection, would need Vision framework
+            // But for now, assume if brightness is ok, it's good
+
+            return true
+        }
+
+        private func showValidationAlert(message: String) {
+            guard let vc = viewController else { return }
+            let alert = UIAlertController(title: "Image Quality Issue", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Try Again", style: .default, handler: nil))
+            vc.present(alert, animated: true)
+        }
+
         func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
             print("DEBUG CameraView Coordinator: photoOutput didFinishProcessingPhoto, error: \(error?.localizedDescription ?? "none"), timestamp: \(Date())")
             if let imageData = photo.fileDataRepresentation() {
                 print("DEBUG CameraView Coordinator: imageData count: \(imageData.count)")
                 if let image = UIImage(data: imageData) {
-                    print("DEBUG CameraView Coordinator: Image captured successfully, size: \(image.size), setting capturedImage, timestamp: \(Date())")
-                    parent.capturedImage = image
-                    print("DEBUG CameraView Coordinator: capturedImage set, will trigger onChange in parent, timestamp: \(Date())")
-                    // Turn off torch after capture
-                    toggleTorch(false)
-                    print("DEBUG CameraView Coordinator: Setting isShowingCamera to false, timestamp: \(Date())")
-                    parent.isShowingCamera = false
+                    print("DEBUG CameraView Coordinator: Image captured successfully, size: \(image.size), validating quality, timestamp: \(Date())")
+                    if validateImageQuality(image) {
+                        parent.capturedImage = image
+                        print("DEBUG CameraView Coordinator: capturedImage set, will trigger onChange in parent, timestamp: \(Date())")
+                        // Turn off torch after capture
+                        toggleTorch(false)
+                        print("DEBUG CameraView Coordinator: Setting isShowingCamera to false, timestamp: \(Date())")
+                        parent.isShowingCamera = false
+                    } else {
+                        print("DEBUG Coordinator: Image quality validation failed")
+                        showValidationAlert(message: "Image is too dark or too bright. Please ensure good lighting and try again.")
+                        // Do not set capturedImage or close camera, allow user to try again
+                    }
                 } else {
                     print("DEBUG Coordinator: Failed to create UIImage from imageData")
                 }
@@ -215,22 +256,77 @@ class CameraViewController: UIViewController {
     func setupUI(coordinator: CameraView.Coordinator, previewLayer: AVCaptureVideoPreviewLayer, captureDevice: AVCaptureDevice) {
         self.coordinator = coordinator
         previewLayer.frame = view.layer.bounds
-        
+
         // Create overlay view
         let overlayView = UIView()
         overlayView.translatesAutoresizingMaskIntoConstraints = false
         overlayView.backgroundColor = .clear
         view.addSubview(overlayView)
-        
+
         NSLayoutConstraint.activate([
             overlayView.topAnchor.constraint(equalTo: view.topAnchor),
             overlayView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             overlayView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             overlayView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        
+
         setupTopBar(in: overlayView, hasFlash: captureDevice.hasFlash)
         setupBottomBar(in: overlayView)
+        setupGuidanceOverlays(in: overlayView)
+    }
+
+    private func setupGuidanceOverlays(in containerView: UIView) {
+        // Framing guides - rectangle in center
+        let framingView = UIView()
+        framingView.translatesAutoresizingMaskIntoConstraints = false
+        framingView.backgroundColor = .clear
+        framingView.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
+        framingView.layer.borderWidth = 2
+        framingView.layer.cornerRadius = 8
+        containerView.addSubview(framingView)
+
+        NSLayoutConstraint.activate([
+            framingView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            framingView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            framingView.widthAnchor.constraint(equalTo: containerView.widthAnchor, multiplier: 0.8),
+            framingView.heightAnchor.constraint(equalTo: containerView.heightAnchor, multiplier: 0.4)
+        ])
+
+        // Tips label at the top
+        let tipsLabel = UILabel()
+        tipsLabel.translatesAutoresizingMaskIntoConstraints = false
+        tipsLabel.text = "Position book within frame • Ensure good lighting • Hold steady for focus"
+        tipsLabel.textColor = .white
+        tipsLabel.font = AppleBooksCameraTypography.caption
+        tipsLabel.textAlignment = .center
+        tipsLabel.numberOfLines = 0
+        tipsLabel.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        tipsLabel.layer.cornerRadius = 8
+        tipsLabel.clipsToBounds = true
+        containerView.addSubview(tipsLabel)
+
+        NSLayoutConstraint.activate([
+            tipsLabel.topAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.topAnchor, constant: 80),
+            tipsLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: AppleBooksCameraSpacing.space20),
+            tipsLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -AppleBooksCameraSpacing.space20),
+            tipsLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 40)
+        ])
+
+        // Focus indicator (small circle in center)
+        let focusIndicator = UIView()
+        focusIndicator.translatesAutoresizingMaskIntoConstraints = false
+        focusIndicator.backgroundColor = .clear
+        focusIndicator.layer.borderColor = UIColor.green.withAlphaComponent(0.8).cgColor
+        focusIndicator.layer.borderWidth = 1
+        focusIndicator.layer.cornerRadius = 20
+        containerView.addSubview(focusIndicator)
+
+        NSLayoutConstraint.activate([
+            focusIndicator.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            focusIndicator.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            focusIndicator.widthAnchor.constraint(equalToConstant: 40),
+            focusIndicator.heightAnchor.constraint(equalToConstant: 40)
+        ])
     }
     
     private func setupTopBar(in containerView: UIView, hasFlash: Bool) {

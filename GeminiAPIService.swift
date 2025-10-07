@@ -17,7 +17,7 @@ import UIKit
  * - Higher rate limits (1000 vs 60 requests/minute)
  * - Advanced image understanding and context awareness
  *
- * Enhanced Prompt: Optimized for book recognition with confidence scoring
+ * Enhanced Prompt: Optimized for diverse book scanning scenarios with robust detection
  */
 class GeminiAPIService {
     private var apiKey: String {
@@ -60,46 +60,46 @@ class GeminiAPIService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let enhancedPrompt = """
-        You are an expert librarian with advanced OCR capabilities analyzing a bookshelf photograph.
+        You are an expert librarian with advanced OCR capabilities analyzing an image containing books.
 
-        TASK: Extract and analyze all visible books with maximum accuracy.
+        TASK: Extract and analyze all visible books with maximum accuracy, regardless of their arrangement, orientation, or surroundings.
 
         ANALYSIS REQUIREMENTS:
-        1. OCR Excellence: Read text from book spines, even if curved, angled, or partially obscured
-        2. Detail Extraction: Capture titles, authors, ISBNs, publishers, publication years
+        1. OCR Excellence: Read text from book spines, covers, or any visible surfaces, even if curved, angled, partially obscured, or in various orientations
+        2. Detail Extraction: Capture titles, authors, ISBNs, publishers, publication years from any visible text
         3. Visual Inference: Determine genres from cover designs, colors, and visual cues
-        4. Quality Assessment: Evaluate image quality and suggest improvements if needed
-        5. Book Detection: Identify individual books even in densely packed shelves
-        6. Text Recognition: Handle various fonts, sizes, and orientations
-        7. Sub-Genre Classification: Identify specific sub-genres (e.g., Cozy Mystery, Historical Fiction)
-        8. Reading Time Estimation: Estimate reading time based on page count and genre (e.g., "8-10 hours")
-        9. Page Count Inference: Estimate or extract page count from visual cues or knowledge
-        10. Author Information: Provide brief author biography if known from common knowledge
+        4. Quality Assessment: Evaluate image quality and provide specific guidance for better results if the image is poor (e.g., "Ensure books are well-lit and in focus for better text recognition")
+        5. Book Detection: Identify individual books in any arrangement - single books, stacks, shelves, tables, floors, or mixed with other objects
+        6. Text Recognition: Handle various fonts, sizes, orientations, and languages
+        7. Sub-Genre Classification: Identify specific sub-genres when possible
+        8. Reading Time Estimation: Estimate reading time based on page count and genre
+        9. Page Count Inference: Estimate page count from visual cues or knowledge
+        10. Author Information: Provide brief author biography if known
 
         OUTPUT FORMAT: Return a JSON array of books with this exact structure:
         [
           {
             "title": "Book Title (be precise with OCR)",
-            "author": "Author Name (extract from spine or cover)",
-            "isbn": "ISBN-13 or ISBN-10 (if visible, even small text)",
-            "genre": "Inferred genre (Fiction, Non-Fiction, Mystery, etc.)",
-            "subGenre": "Specific sub-genre (e.g., Cozy Mystery, Historical Fiction)",
-            "publisher": "Publisher name (if visible)",
-            "publicationYear": "Year (if visible on spine)",
+            "author": "Author Name",
+            "isbn": "ISBN if visible",
+            "genre": "Inferred genre",
+            "subGenre": "Specific sub-genre",
+            "publisher": "Publisher name",
+            "publicationYear": "Year",
             "pageCount": 300,
-            "estimatedReadingTime": "Estimated reading time (e.g., 8-10 hours)",
-            "authorBiography": "Brief author biography (if known)",
+            "estimatedReadingTime": "8-10 hours",
+            "authorBiography": "Brief bio",
             "confidence": 0.95,
-            "position": "approximate position on shelf (left, center, right)"
+            "notes": "Any additional notes about detection or quality"
           }
         ]
 
         IMPORTANT:
         - Focus on accuracy over speed
         - Include confidence scores for each extraction
-        - Handle multiple books in the same image
+        - Handle multiple books or single books
         - Extract as much metadata as possible
-        - If image quality is poor, note this in the response
+        - If image quality is poor, include guidance in the 'notes' field for better results
         """
 
         let requestBody: [String: Any] = [

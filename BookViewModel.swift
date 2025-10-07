@@ -15,11 +15,14 @@ class BookViewModel: ObservableObject {
     @Published var books: [Book] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var scanFeedbackMessage: String?
     @Published var totalBooks: Int = 0
     @Published var currentPage = 0
     @Published var hasMoreBooks = true
     @Published var isLoadingMore = false
     private var isScanning = false
+    private var retryCount = 0
+    private let maxRetries = 3
 
     private var authStateCancellable: AnyCancellable?
 
@@ -182,10 +185,12 @@ class BookViewModel: ObservableObject {
         }
         print("DEBUG BookViewModel: isScanning was false, proceeding with scan, timestamp: \(Date())")
         isScanning = true
+        retryCount = 0
 
         // Check usage limits
         if !UsageTracker.shared.canPerformScan() {
             errorMessage = "Scan limit reached. Upgrade to Premium for unlimited scans."
+            scanFeedbackMessage = nil
             // Trigger upgrade prompt
             AnalyticsManager.shared.trackUpgradePromptShown(source: "scan_limit_hit", limitType: "scan")
             NotificationCenter.default.post(
@@ -199,16 +204,23 @@ class BookViewModel: ObservableObject {
 
         isLoading = true
         errorMessage = nil
+        scanFeedbackMessage = "Scanning bookshelf..."
+        performScanWithRetry(image: image)
+    }
+
+    private func performScanWithRetry(image: UIImage) {
         let scanStartTime = Date()
 
-        print("DEBUG BookViewModel: Calling Gemini analyzeImage, timestamp: \(Date())")
+        print("DEBUG BookViewModel: Calling Gemini analyzeImage (attempt \(retryCount + 1)/\(maxRetries + 1)), timestamp: \(Date())")
         apiService.analyzeImage(image) { [weak self] result in
+            guard let self = self else { return }
             let responseTime = Date().timeIntervalSince(scanStartTime)
             DispatchQueue.main.async {
-                self?.isLoading = false
                 switch result {
                 case .success(let responseText):
                     print("DEBUG BookViewModel: Gemini analysis success, response length: \(responseText.count), timestamp: \(Date())")
+                    self.isLoading = false
+                    self.scanFeedbackMessage = nil
                     UsageTracker.shared.incrementScans()
                     // Track API call success
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: true, responseTime: responseTime)
@@ -221,22 +233,50 @@ class BookViewModel: ObservableObject {
                     )
 
                     print("DEBUG BookViewModel: Calling parseAndAddBooks with response length \(responseText.count), timestamp: \(Date())")
-                    self?.parseAndAddBooks(from: responseText)
+                    self.parseAndAddBooks(from: responseText)
+                    self.isScanning = false
                 case .failure(let error):
                     print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription), timestamp: \(Date())")
                     ErrorHandler.shared.handle(error, context: "Image Analysis")
                     // Track API call failure
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
+
+                    // Check if we should retry
+                    if self.shouldRetry(error: error) && self.retryCount < self.maxRetries {
+                        self.retryCount += 1
+                        self.scanFeedbackMessage = "Scan failed. Retrying... (\(self.retryCount)/\(self.maxRetries))"
+                        print("DEBUG BookViewModel: Retrying scan, attempt \(self.retryCount)/\(self.maxRetries)")
+                        // Retry after a delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            self.performScanWithRetry(image: image)
+                        }
+                    } else {
+                        // Max retries reached or non-retryable error
+                        self.isLoading = false
+                        self.scanFeedbackMessage = nil
+                        self.errorMessage = "Scan failed after \(self.retryCount + 1) attempts. Please check your connection and try again."
+                        self.isScanning = false
+                    }
                 }
             }
-            print("DEBUG BookViewModel: Gemini completion finished, setting isScanning to false, timestamp: \(Date())")
-            self?.isScanning = false
         }
+    }
+
+    private func shouldRetry(error: Error) -> Bool {
+        let errorDescription = error.localizedDescription.lowercased()
+        // Retry on network-related errors
+        return errorDescription.contains("network") ||
+               errorDescription.contains("timeout") ||
+               errorDescription.contains("connection") ||
+               errorDescription.contains("unreachable") ||
+               errorDescription.contains("offline")
     }
 
     private func parseAndAddBooks(from responseText: String) {
         print("DEBUG BookViewModel: parseAndAddBooks START, responseText length: \(responseText.count), timestamp: \(Date())")
         print("DEBUG BookViewModel: isScanning during parse: \(isScanning)")
+        errorMessage = nil // Clear any previous errors
+
         // Extract JSON from markdown code block if present
         var jsonString = responseText
         if let jsonStart = responseText.range(of: "```json\n"), let jsonEnd = responseText.range(of: "\n```", options: .backwards) {
@@ -253,6 +293,13 @@ class BookViewModel: ObservableObject {
                 print("DEBUG BookViewModel: Attempting to decode JSON: \(jsonString)")
                 let decodedBooks = try JSONDecoder().decode([Book].self, from: data)
                 print("DEBUG BookViewModel: Successfully decoded \(decodedBooks.count) books, timestamp: \(Date())")
+
+                // Handle empty results
+                if decodedBooks.isEmpty {
+                    print("DEBUG BookViewModel: No books detected in the image")
+                    scanFeedbackMessage = "No books detected. Please ensure the bookshelf is clearly visible and try again."
+                    return
+                }
 
                 // Check for duplicates based on title (case-insensitive) or ISBN
                 let existingTitles = Set(self.books.compactMap { $0.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) })
@@ -272,75 +319,77 @@ class BookViewModel: ObservableObject {
                     print("DEBUG BookViewModel: Processing new book #\(bookIndex)/\(decodedBooks.count): \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
                     let coverFetchStartTime = Date()
                     googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
-                         let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
-                         var updatedBook = book
-                         switch result {
-                         case .success(let url):
-                             AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: true, responseTime: coverResponseTime)
-                             if let urlString = url {
-                                 // Convert HTTP to HTTPS for security and iOS compatibility
-                                 let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
-                                 print("DEBUG BookViewModel: Fetched cover URL: \(secureURLString) for \(book.title ?? "")")
-                                 updatedBook.coverImageURL = secureURLString
-                                 // Try to download the image data for local storage
-                                 if let imageURL = URL(string: urlString) {
-                                     URLSession.shared.dataTask(with: imageURL) { data, response, error in
-                                         DispatchQueue.main.async {
-                                             if let data = data, error == nil {
-                                                 // updatedBook.coverImageData = data // Commented out to reduce memory usage - rely on URL
-                                                 print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "") (not storing in memory)")
-                                             } else {
-                                                 print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
-                                             }
-                                             // Analyze age rating before saving
-                                             self?.analyzeAndSaveBook(updatedBook)
-                                         }
-                                     }.resume()
-                                 } else {
-                                     // Analyze age rating before saving
-                                     self?.analyzeAndSaveBook(updatedBook)
-                                 }
-                             } else {
-                                 print("DEBUG BookViewModel: No cover URL found for \(book.title ?? "")")
-                                 // Analyze age rating before saving
-                                 self?.analyzeAndSaveBook(updatedBook)
-                             }
-                         case .failure(let error):
-                             AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: false, responseTime: coverResponseTime, errorMessage: error.localizedDescription)
-                             print("DEBUG BookViewModel: Failed to fetch cover for \(book.title ?? ""): \(error.localizedDescription)")
-                             // Analyze age rating before saving
-                             self?.analyzeAndSaveBook(updatedBook)
-                         }
-                     }
-                }
-                // Track bookshelf scan completed
-                AnalyticsManager.shared.trackBookshelfScanCompleted(bookCount: decodedBooks.count)
-            } else {
-                print("DEBUG BookViewModel: Failed to convert jsonString to data")
-                errorMessage = "Failed to parse book data. Please try again."
-            }
-        } catch {
-            print("DEBUG BookViewModel: JSON decode error: \(error)")
-            print("DEBUG BookViewModel: Failed JSON string: \(jsonString)")
-            if let decodingError = error as? DecodingError {
-                switch decodingError {
-                case .keyNotFound(let key, let context):
-                    print("DEBUG BookViewModel: Key '\(key.stringValue)' not found: \(context.debugDescription)")
-                case .typeMismatch(let type, let context):
-                    print("DEBUG BookViewModel: Type mismatch for type \(type): \(context.debugDescription)")
-                case .valueNotFound(let type, let context):
-                    print("DEBUG BookViewModel: Value not found for type \(type): \(context.debugDescription)")
-                case .dataCorrupted(let context):
-                    print("DEBUG BookViewModel: Data corrupted: \(context.debugDescription)")
-                @unknown default:
-                    print("DEBUG BookViewModel: Unknown decoding error")
-                }
-            }
-            // Fallback: try to extract basic info with regex or string parsing
-            errorMessage = "Failed to parse book data. Please try again."
-        }
-        print("DEBUG BookViewModel: parseAndAddBooks END, timestamp: \(Date())")
-    }
+                          let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
+                          var updatedBook = book
+                          switch result {
+                          case .success(let url):
+                              AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: true, responseTime: coverResponseTime)
+                              if let urlString = url {
+                                  // Convert HTTP to HTTPS for security and iOS compatibility
+                                  let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
+                                  print("DEBUG BookViewModel: Fetched cover URL: \(secureURLString) for \(book.title ?? "")")
+                                  updatedBook.coverImageURL = secureURLString
+                                  // Try to download the image data for local storage
+                                  if let imageURL = URL(string: urlString) {
+                                      URLSession.shared.dataTask(with: imageURL) { data, response, error in
+                                          DispatchQueue.main.async {
+                                              if let data = data, error == nil {
+                                                  // updatedBook.coverImageData = data // Commented out to reduce memory usage - rely on URL
+                                                  print("DEBUG BookViewModel: Downloaded cover image data for \(book.title ?? "") (not storing in memory)")
+                                              } else {
+                                                  print("DEBUG BookViewModel: Failed to download cover image for \(book.title ?? ""): \(error?.localizedDescription ?? "Unknown error")")
+                                              }
+                                              // Analyze age rating before saving
+                                              self?.analyzeAndSaveBook(updatedBook)
+                                          }
+                                      }.resume()
+                                  } else {
+                                      // Analyze age rating before saving
+                                      self?.analyzeAndSaveBook(updatedBook)
+                                  }
+                              } else {
+                                  print("DEBUG BookViewModel: No cover URL found for \(book.title ?? "")")
+                                  // Analyze age rating before saving
+                                  self?.analyzeAndSaveBook(updatedBook)
+                              }
+                          case .failure(let error):
+                              AnalyticsManager.shared.trackAPICall(service: "GoogleBooks", endpoint: "fetchCoverURL", success: false, responseTime: coverResponseTime, errorMessage: error.localizedDescription)
+                              print("DEBUG BookViewModel: Failed to fetch cover for \(book.title ?? ""): \(error.localizedDescription)")
+                              // Analyze age rating before saving
+                              self?.analyzeAndSaveBook(updatedBook)
+                          }
+                      }
+                 }
+                 // Track bookshelf scan completed
+                 AnalyticsManager.shared.trackBookshelfScanCompleted(bookCount: decodedBooks.count)
+             } else {
+                 print("DEBUG BookViewModel: Failed to convert jsonString to data")
+                 errorMessage = "Failed to parse book data. Please try again."
+                 scanFeedbackMessage = nil
+             }
+         } catch {
+             print("DEBUG BookViewModel: JSON decode error: \(error)")
+             print("DEBUG BookViewModel: Failed JSON string: \(jsonString)")
+             if let decodingError = error as? DecodingError {
+                 switch decodingError {
+                 case .keyNotFound(let key, let context):
+                     print("DEBUG BookViewModel: Key '\(key.stringValue)' not found: \(context.debugDescription)")
+                 case .typeMismatch(let type, let context):
+                     print("DEBUG BookViewModel: Type mismatch for type \(type): \(context.debugDescription)")
+                 case .valueNotFound(let type, let context):
+                     print("DEBUG BookViewModel: Value not found for type \(type): \(context.debugDescription)")
+                 case .dataCorrupted(let context):
+                     print("DEBUG BookViewModel: Data corrupted: \(context.debugDescription)")
+                 @unknown default:
+                     print("DEBUG BookViewModel: Unknown decoding error")
+                 }
+             }
+             // Fallback: try to extract basic info with regex or string parsing
+             errorMessage = "Failed to parse book data. Please try again."
+             scanFeedbackMessage = nil
+         }
+         print("DEBUG BookViewModel: parseAndAddBooks END, timestamp: \(Date())")
+     }
 
     func refreshData() {
         Task { await loadBooksPaginated(page: 0) }
