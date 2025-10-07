@@ -247,21 +247,30 @@ struct EditBookView: View {
             .collection("books")
             .document(book.id.uuidString)
 
-        bookRef.setData(from: updatedBook) { error in
+        do {
+            try bookRef.setData(from: updatedBook) { error in
+                DispatchQueue.main.async {
+                    isLoading = false
+                    if let error = error {
+                        errorMessage = NSError(domain: "SaveError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to save changes: \(error.localizedDescription)"])
+                    } else {
+                        // If status changed, update it separately
+                        if updatedBook.status != selectedStatus {
+                            viewModel.moveBook(updatedBook, to: selectedStatus)
+                        }
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }
+            }
+        } catch {
             DispatchQueue.main.async {
                 isLoading = false
-                if let error = error {
-                    errorMessage = NSError(domain: "SaveError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to save changes: \(error.localizedDescription)"])
-                } else {
-                    // If status changed, update it separately
-                    if updatedBook.status != selectedStatus {
-                        viewModel.moveBook(updatedBook, to: selectedStatus)
-                    }
-                    presentationMode.wrappedValue.dismiss()
-                }
+                errorMessage = NSError(domain: "EncodingError", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to encode book data: \(error.localizedDescription)"])
             }
         }
     }
+}
+
 struct ErrorWrapper: Identifiable {
     let id = UUID()
     let error: Error
