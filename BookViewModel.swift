@@ -295,7 +295,9 @@ class BookViewModel: ObservableObject {
             .replacingOccurrences(of: "( jr\\.| sr\\.| iii| ii| iv)$", with: "", options: .regularExpression)
         // Remove extra whitespace and normalize spaces
         normalized = normalized.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-        return normalized.trimmingCharacters(in: .whitespacesAndNewlines)
+        normalized = normalized.trimmingCharacters(in: .whitespacesAndNewlines)
+        print("DEBUG normalizeAuthorName: '\(author ?? "")' -> '\(normalized)'")
+        return normalized
     }
 
     private func parseAndAddBooks(from responseText: String) {
@@ -328,22 +330,26 @@ class BookViewModel: ObservableObject {
                 }
 
                 // Check for duplicates based on title + author combination (case-insensitive) or ISBN
-                let existingTitleAuthorCombinations = Set(self.books.compactMap { book in
-                    let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                    let normalizedAuthor = normalizeAuthorName(book.author)
-                    return normalizedTitle + "|" + normalizedAuthor
-                })
                 let existingISBNs = Set(self.books.compactMap { $0.isbn })
-                print("DEBUG BookViewModel: Existing title-author combinations count: \(existingTitleAuthorCombinations.count), ISBNs count: \(existingISBNs.count)")
+                print("DEBUG BookViewModel: Existing books count: \(self.books.count), ISBNs count: \(existingISBNs.count)")
 
                 // Filter out duplicates
                 let nonDuplicateBooks = decodedBooks.filter { book in
                     let normalizedTitle = book.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
                     let normalizedAuthor = normalizeAuthorName(book.author)
-                    let titleAuthorKey = normalizedTitle + "|" + normalizedAuthor
-                    let isTitleAuthorDuplicate = existingTitleAuthorCombinations.contains(titleAuthorKey)
+                    let isDuplicate = self.books.contains { existingBook in
+                        let existingNormalizedTitle = existingBook.title?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                        if existingNormalizedTitle == normalizedTitle {
+                            let existingNormalizedAuthor = normalizeAuthorName(existingBook.author)
+                            let isAuthorDuplicate = existingNormalizedAuthor.contains(normalizedAuthor) || normalizedAuthor.contains(existingNormalizedAuthor)
+                            print("DEBUG Duplicate Check: Comparing authors for title '\(normalizedTitle)': existing '\(existingNormalizedAuthor)' vs new '\(normalizedAuthor)' -> \(isAuthorDuplicate)")
+                            return isAuthorDuplicate
+                        }
+                        return false
+                    }
                     let isISBNDuplicate = book.isbn != nil && existingISBNs.contains(book.isbn!)
-                    return !isTitleAuthorDuplicate && !isISBNDuplicate
+                    print("DEBUG Duplicate Check: Checking new book '\(book.title ?? "")' by '\(book.author ?? "")' -> normalizedTitle '\(normalizedTitle)', normalizedAuthor '\(normalizedAuthor)', isDuplicate: \(isDuplicate), isISBNDuplicate: \(isISBNDuplicate)")
+                    return !isDuplicate && !isISBNDuplicate
                 }
                 let duplicateCount = decodedBooks.count - nonDuplicateBooks.count
                 print("DEBUG BookViewModel: Non-duplicate books: \(nonDuplicateBooks.count) out of \(decodedBooks.count), duplicates: \(duplicateCount)")
