@@ -80,7 +80,7 @@ struct DiscoverView: View {
                         Text("No recommendations yet")
                             .font(AppleBooksTypography.headlineMedium)
                             .foregroundColor(AppleBooksColors.text)
-                        Text("Add some books to your library to get personalized recommendations powered by Grok AI!")
+                        Text("Add some books to your library to get personalized recommendations powered by intelligent AI!")
                             .font(AppleBooksTypography.bodyMedium)
                             .foregroundColor(AppleBooksColors.textSecondary)
                             .multilineTextAlignment(.center)
@@ -109,7 +109,7 @@ struct DiscoverView: View {
                                 HStack {
                                     Image(systemName: "sparkles")
                                         .foregroundColor(Color(hex: "FF2D92"))
-                                    Text("Powered by Grok AI")
+                                    Text("Powered by Smart AI")
                                         .font(AppleBooksTypography.captionBold)
                                         .foregroundColor(Color(hex: "FF2D92"))
                                 }

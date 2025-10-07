@@ -22,7 +22,7 @@ struct HomeView: View {
         ("camera.fill", "Scan Your Bookshelf", "Point your camera at your bookshelf and capture a photo"),
         ("sparkles", "AI Recognition", "Our AI instantly identifies books using advanced computer vision"),
         ("books.vertical.fill", "Organize & Track", "Automatically organize your library and track reading progress"),
-        ("star.fill", "Discover New Books", "Get personalized recommendations powered by Grok AI")
+        ("star.fill", "Discover New Books", "Get personalized recommendations powered by smart AI")
     ]
 
 
