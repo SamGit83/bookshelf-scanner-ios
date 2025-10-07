@@ -61,6 +61,8 @@ struct HomeView: View {
                         .foregroundColor(AppleBooksColors.textSecondary)
                         .multilineTextAlignment(.leading)
                         .padding(.horizontal, AppleBooksSpacing.space24)
+                        .lineLimit(nil)
+                        .minimumScaleFactor(0.8)
                     
                     // Animated Hero Words with Icons
                     ZStack {
@@ -324,7 +326,8 @@ struct FeatureRow: View {
                 Text(description)
                     .font(AppleBooksTypography.bodyMedium)
                     .foregroundColor(AppleBooksColors.textSecondary)
-                    .lineLimit(2)
+                    .lineLimit(nil)
+                    .minimumScaleFactor(0.8)
             }
 
             Spacer()
