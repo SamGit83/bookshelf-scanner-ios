@@ -419,8 +419,8 @@ struct SubscriptionButton: View {
             let paddingInner = max(20.0, width * 0.08)
             let minHeight = max(160.0, height * 0.3)
             let cornerRadius = max(16.0, width * 0.05)
-            let shadowRadius = isSelected ? 8 : 5
-            let shadowY = isSelected ? 4 : 2
+            let shadowRadius = isSelected ? 8.0 : 5.0
+            let shadowY = isSelected ? 4.0 : 2.0
             let saveHPad = max(8.0, width * 0.025)
             let saveVPad = max(4.0, height * 0.01)
             let bestHPad = max(8.0, width * 0.025)
@@ -488,7 +488,7 @@ struct SubscriptionButton: View {
                     RoundedRectangle(cornerRadius: cornerRadius)
                         .stroke(isSelected ? AppleBooksColors.accent : Color.clear, lineWidth: isSelected ? 3 : 0)
                 )
-                .shadow(color: isSelected ? AppleBooksColors.accent.opacity(0.3) : Color.black.opacity(0.05), radius: shadowRadius, x: 0, y: shadowY)
+                .shadow(color: isSelected ? AppleBooksColors.accent.opacity(0.3) : Color.black.opacity(0.05), radius: shadowRadius, x: 0.0, y: shadowY)
             }
             .buttonStyle(PlainButtonStyle())
         }
