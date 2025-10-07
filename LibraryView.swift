@@ -33,7 +33,7 @@ struct LibraryView: View {
     @State private var isShowingAddBook = false
     @State private var isShowingSearch = false
     @State private var showingClearConfirmation = false
-    @State private var selectedSort: SortOption = .titleAZ
+    @AppStorage("librarySortPreference") private var selectedSort: SortOption = .titleAZ
     @State private var selectedBook: Book?
     @State private var isShowingDetail = false
 
