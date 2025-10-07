@@ -14,7 +14,7 @@ struct AddBookView: View {
     @State private var searchResults: [BookRecommendation] = []
     @State private var selectedBook: BookRecommendation?
     @State private var showManualEntry = false
-    @State private var errorMessage: String?
+    @State private var errorMessage: Error?
     @State private var showUpgradeModal = false
 
     var body: some View {
@@ -30,7 +30,7 @@ struct AddBookView: View {
                 trailing: addButton
             )
             .alert(item: errorBinding) { errorWrapper in
-                Alert(title: Text("Error"), message: Text(errorWrapper.error), dismissButton: .default(Text("OK")))
+                Alert(title: Text("Error"), message: Text(errorWrapper.error.localizedDescription), dismissButton: .default(Text("OK")))
             }
             .sheet(isPresented: $showUpgradeModal) {
                 UpgradeModalView()
@@ -283,7 +283,7 @@ struct AddBookView: View {
 
     private var errorBinding: Binding<ErrorWrapper?> {
         Binding(
-            get: { errorMessage.map { ErrorWrapper(error: $0) } },
+            get: { errorMessage.map { ErrorWrapper(error: $0, guidance: nil) } },
             set: { _ in errorMessage = nil }
         )
     }
@@ -302,10 +302,10 @@ struct AddBookView: View {
                 case .success(let books):
                     searchResults = books
                     if books.isEmpty {
-                        errorMessage = "No books found with that ISBN. Try entering details manually."
+                        errorMessage = NSError(domain: "SearchError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No books found with that ISBN. Try entering details manually."])
                     }
                 case .failure(let error):
-                    errorMessage = "Search failed: \(error.localizedDescription)"
+                    errorMessage = NSError(domain: "SearchError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Search failed: \(error.localizedDescription)"])
                 }
             }
         }
@@ -326,9 +326,9 @@ struct AddBookView: View {
                     self.presentationMode.wrappedValue.dismiss()
                 case .failure(let error):
                     if let nsError = error as? NSError, nsError.domain == "DuplicateBook" {
-                        self.errorMessage = "This book is already in your library"
+                        self.errorMessage = NSError(domain: "AddBookError", code: 1, userInfo: [NSLocalizedDescriptionKey: "This book is already in your library"])
                     } else {
-                        self.errorMessage = "Failed to add book: \(error.localizedDescription)"
+                        self.errorMessage = NSError(domain: "AddBookError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to add book: \(error.localizedDescription)"])
                     }
                 }
             }
@@ -355,11 +355,6 @@ struct AddBookView: View {
         viewModel.successMessage = "Book added to your library."
         presentationMode.wrappedValue.dismiss()
     }
-}
-
-struct ErrorWrapper: Identifiable {
-    let id = UUID()
-    let error: String
 }
 
 struct BookSearchResultView: View {
