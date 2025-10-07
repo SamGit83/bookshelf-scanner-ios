@@ -131,6 +131,7 @@ struct DiscoverView: View {
                                         selectedBook = book
                                     },
                                     onSeeAllTap: nil,
+                                    onEditTap: nil,
                                     viewModel: viewModel
                                 )
                             }
@@ -146,6 +147,7 @@ struct DiscoverView: View {
                                             selectedBook = book
                                         },
                                         onSeeAllTap: nil,
+                                        onEditTap: nil,
                                         viewModel: viewModel
                                     )
                                 }
