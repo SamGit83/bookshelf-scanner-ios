@@ -60,6 +60,9 @@ struct LoginView: View {
                             Text("Digitize your library with AI")
                                 .font(AppleBooksTypography.bodyLarge)
                                 .foregroundColor(AppleBooksColors.textSecondary)
+                                .lineLimit(nil)
+                                .minimumScaleFactor(0.9)
+                                .multilineTextAlignment(.center)
                         }
                     }
                     .offset(y: animateForm ? 0 : 50)
