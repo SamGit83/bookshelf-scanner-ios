@@ -20,352 +20,356 @@ struct ReadingProgressView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                AppleBooksColors.background
-                    .ignoresSafeArea()
+        ZStack {
+            AppleBooksColors.background
+                .ignoresSafeArea()
 
-                if let book = book {
-                    ScrollView {
-                        VStack(spacing: AppleBooksSpacing.space32) {
-                            // Book Header
+            if let book = book {
+                ScrollView {
+                    VStack(spacing: AppleBooksSpacing.space32) {
+                        // Header
+                        HStack {
+                            Spacer()
+                            Text("Reading Progress")
+                                .font(AppleBooksTypography.headlineLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                            Spacer()
+                            Button(action: {
+                                presentationMode.wrappedValue.dismiss()
+                            }) {
+                                Image(systemName: "xmark")
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .font(.system(size: 16, weight: .medium))
+                            }
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+
+                        // Book Header
+                        AppleBooksCard(
+                            cornerRadius: 16,
+                            padding: AppleBooksSpacing.space24,
+                            shadowStyle: .medium
+                        ) {
+                            HStack(spacing: AppleBooksSpacing.space16) {
+                                // Book Cover
+                                if let coverData = book.coverImageData,
+                                    let uiImage = UIImage(data: coverData) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 80, height: 120)
+                                        .cornerRadius(12)
+                                        .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
+                                } else {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.gray.opacity(0.2))
+                                            .frame(width: 80, height: 120)
+                                        Image(systemName: "book.fill")
+                                            .font(.system(size: 32))
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+
+                                // Book Details
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                    Text(book.title ?? "Unknown Title")
+                                        .font(AppleBooksTypography.displayMedium)
+                                        .foregroundColor(AppleBooksColors.text)
+                                        .lineLimit(2)
+
+                                    Text(book.author ?? "Unknown Author")
+                                        .font(AppleBooksTypography.bodyMedium)
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+
+                                    if let genre = book.genre {
+                                        Text(genre)
+                                            .font(AppleBooksTypography.captionBold)
+                                            .foregroundColor(AppleBooksColors.accent)
+                                            .padding(.horizontal, AppleBooksSpacing.space8)
+                                            .padding(.vertical, AppleBooksSpacing.space4)
+                                            .background(AppleBooksColors.accent.opacity(0.1))
+                                            .cornerRadius(6)
+                                    }
+                                }
+
+                                Spacer()
+                            }
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+
+                        // Progress Overview
+                        VStack(spacing: AppleBooksSpacing.space20) {
+                            Text("Reading Progress")
+                                .font(AppleBooksTypography.headlineLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
                             AppleBooksCard(
                                 cornerRadius: 16,
                                 padding: AppleBooksSpacing.space24,
-                                shadowStyle: .medium
+                                shadowStyle: .subtle
                             ) {
-                                HStack(spacing: AppleBooksSpacing.space16) {
-                                    // Book Cover
-                                    if let coverData = book.coverImageData,
-                                        let uiImage = UIImage(data: coverData) {
-                                        Image(uiImage: uiImage)
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 80, height: 120)
-                                            .cornerRadius(12)
-                                            .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
-                                    } else {
+                                VStack(spacing: AppleBooksSpacing.space16) {
+                                    if let totalPages = book.totalPages {
+                                        // Progress Circle
                                         ZStack {
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(Color.gray.opacity(0.2))
-                                                .frame(width: 80, height: 120)
-                                            Image(systemName: "book.fill")
-                                                .font(.system(size: 32))
-                                                .foregroundColor(.gray)
-                                        }
-                                    }
+                                            Circle()
+                                                .stroke(AppleBooksColors.textTertiary, lineWidth: 8)
+                                                .frame(width: 140, height: 140)
 
-                                    // Book Details
-                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                        Text(book.title ?? "Unknown Title")
-                                            .font(AppleBooksTypography.displayMedium)
-                                            .foregroundColor(AppleBooksColors.text)
-                                            .lineLimit(2)
+                                            Circle()
+                                                .trim(from: 0, to: min(CGFloat(book.currentPage) / CGFloat(totalPages), 1.0))
+                                                .stroke(AppleBooksColors.success, lineWidth: 8)
+                                                .frame(width: 140, height: 140)
+                                                .rotationEffect(.degrees(-90))
 
-                                        Text(book.author ?? "Unknown Author")
-                                            .font(AppleBooksTypography.bodyMedium)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                            VStack(spacing: AppleBooksSpacing.space4) {
+                                                Text("\(book.currentPage)")
+                                                    .font(AppleBooksTypography.displayLarge)
+                                                    .foregroundColor(AppleBooksColors.text)
+                                                    .fontWeight(.bold)
 
-                                        if let genre = book.genre {
-                                            Text(genre)
-                                                .font(AppleBooksTypography.captionBold)
-                                                .foregroundColor(AppleBooksColors.accent)
-                                                .padding(.horizontal, AppleBooksSpacing.space8)
-                                                .padding(.vertical, AppleBooksSpacing.space4)
-                                                .background(AppleBooksColors.accent.opacity(0.1))
-                                                .cornerRadius(6)
-                                        }
-                                    }
-
-                                    Spacer()
-                                }
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-
-                            // Progress Overview
-                            VStack(spacing: AppleBooksSpacing.space20) {
-                                Text("Reading Progress")
-                                    .font(AppleBooksTypography.headlineLarge)
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                                AppleBooksCard(
-                                    cornerRadius: 16,
-                                    padding: AppleBooksSpacing.space24,
-                                    shadowStyle: .subtle
-                                ) {
-                                    VStack(spacing: AppleBooksSpacing.space16) {
-                                        if let totalPages = book.totalPages {
-                                            // Progress Circle
-                                            ZStack {
-                                                Circle()
-                                                    .stroke(AppleBooksColors.textTertiary, lineWidth: 8)
-                                                    .frame(width: 140, height: 140)
-
-                                                Circle()
-                                                    .trim(from: 0, to: min(CGFloat(book.currentPage) / CGFloat(totalPages), 1.0))
-                                                    .stroke(AppleBooksColors.success, lineWidth: 8)
-                                                    .frame(width: 140, height: 140)
-                                                    .rotationEffect(.degrees(-90))
-
-                                                VStack(spacing: AppleBooksSpacing.space4) {
-                                                    Text("\(book.currentPage)")
-                                                        .font(AppleBooksTypography.displayLarge)
-                                                        .foregroundColor(AppleBooksColors.text)
-                                                        .fontWeight(.bold)
-
-                                                    Text("of \(totalPages)")
-                                                        .font(AppleBooksTypography.bodySmall)
-                                                        .foregroundColor(AppleBooksColors.textSecondary)
-                                                }
-                                            }
-
-                                            let progressPercentage = totalPages > 0 ? Int((Double(book.currentPage) / Double(totalPages)) * 100) : 0
-                                            Text("\(progressPercentage)% Complete")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.success)
-                                                .fontWeight(.semibold)
-                                        } else {
-                                            VStack(spacing: AppleBooksSpacing.space12) {
-                                                Image(systemName: "chart.pie")
-                                                    .font(.system(size: 60))
-                                                    .foregroundColor(AppleBooksColors.textTertiary)
-
-                                                Text("No page count set")
-                                                    .font(AppleBooksTypography.bodyLarge)
+                                                Text("of \(totalPages)")
+                                                    .font(AppleBooksTypography.bodySmall)
                                                     .foregroundColor(AppleBooksColors.textSecondary)
                                             }
                                         }
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
 
-                            // Statistics Section
-                            VStack(spacing: AppleBooksSpacing.space20) {
-                                Text("Reading Statistics")
-                                    .font(AppleBooksTypography.headlineLarge)
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                        let progressPercentage = totalPages > 0 ? Int((Double(book.currentPage) / Double(totalPages)) * 100) : 0
+                                        Text("\(progressPercentage)% Complete")
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.success)
+                                            .fontWeight(.semibold)
+                                    } else {
+                                        VStack(spacing: AppleBooksSpacing.space12) {
+                                            Image(systemName: "chart.pie")
+                                                .font(.system(size: 60))
+                                                .foregroundColor(AppleBooksColors.textTertiary)
 
-                                HStack(spacing: AppleBooksSpacing.space16) {
-                                    // Total Pages Read
-                                    AppleBooksCard(
-                                        cornerRadius: 12,
-                                        padding: AppleBooksSpacing.space16,
-                                        shadowStyle: .subtle
-                                    ) {
-                                        VStack(spacing: AppleBooksSpacing.space8) {
-                                            Image(systemName: "book.pages")
-                                                .font(.system(size: 24))
-                                                .foregroundColor(AppleBooksColors.accent)
-
-                                            Text("\(book.currentPage)")
-                                                .font(AppleBooksTypography.headlineMedium)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .fontWeight(.bold)
-
-                                            Text("Pages Read")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-                                    }
-
-                                    // Reading Streak
-                                    AppleBooksCard(
-                                        cornerRadius: 12,
-                                        padding: AppleBooksSpacing.space16,
-                                        shadowStyle: .subtle
-                                    ) {
-                                        VStack(spacing: AppleBooksSpacing.space8) {
-                                            Image(systemName: "flame")
-                                                .font(.system(size: 24))
-                                                .foregroundColor(AppleBooksColors.promotional)
-
-                                            Text("7") // Placeholder for streak
-                                                .font(AppleBooksTypography.headlineMedium)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .fontWeight(.bold)
-
-                                            Text("Day Streak")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-                                    }
-                                }
-
-                                HStack(spacing: AppleBooksSpacing.space16) {
-                                    // Average Session
-                                    AppleBooksCard(
-                                        cornerRadius: 12,
-                                        padding: AppleBooksSpacing.space16,
-                                        shadowStyle: .subtle
-                                    ) {
-                                        VStack(spacing: AppleBooksSpacing.space8) {
-                                            Image(systemName: "clock")
-                                                .font(.system(size: 24))
-                                                .foregroundColor(AppleBooksColors.success)
-
-                                            Text("25m") // Placeholder
-                                                .font(AppleBooksTypography.headlineMedium)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .fontWeight(.bold)
-
-                                            Text("Avg Session")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-                                    }
-
-                                    // Total Time
-                                    AppleBooksCard(
-                                        cornerRadius: 12,
-                                        padding: AppleBooksSpacing.space16,
-                                        shadowStyle: .subtle
-                                    ) {
-                                        VStack(spacing: AppleBooksSpacing.space8) {
-                                            Image(systemName: "timer")
-                                                .font(.system(size: 24))
-                                                .foregroundColor(AppleBooksColors.accent)
-
-                                            Text("3h 45m") // Placeholder
-                                                .font(AppleBooksTypography.headlineMedium)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .fontWeight(.bold)
-
-                                            Text("Total Time")
-                                                .font(AppleBooksTypography.caption)
+                                            Text("No page count set")
+                                                .font(AppleBooksTypography.bodyLarge)
                                                 .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
                                 }
                             }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
-                            // Update Progress Section
-                            VStack(spacing: AppleBooksSpacing.space20) {
-                                Text("Update Progress")
-                                    .font(AppleBooksTypography.headlineLarge)
-                                    .foregroundColor(AppleBooksColors.text)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                        // Statistics Section
+                        VStack(spacing: AppleBooksSpacing.space20) {
+                            Text("Reading Statistics")
+                                .font(AppleBooksTypography.headlineLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
+                            HStack(spacing: AppleBooksSpacing.space16) {
+                                // Total Pages Read
                                 AppleBooksCard(
-                                    cornerRadius: 16,
-                                    padding: AppleBooksSpacing.space24,
+                                    cornerRadius: 12,
+                                    padding: AppleBooksSpacing.space16,
                                     shadowStyle: .subtle
                                 ) {
-                                    VStack(spacing: AppleBooksSpacing.space20) {
-                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                            Text("Current Page")
-                                                .font(AppleBooksTypography.bodyMedium)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "book.pages")
+                                            .font(.system(size: 24))
+                                            .foregroundColor(AppleBooksColors.accent)
 
-                                            TextField("Enter current page", text: $currentPage)
-                                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                                .keyboardType(.numberPad)
-                                                .font(AppleBooksTypography.bodyLarge)
-                                        }
+                                        Text("\(book.currentPage)")
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .fontWeight(.bold)
 
-                                        HStack(spacing: AppleBooksSpacing.space12) {
-                                            Button(action: {
-                                                updateCurrentPage()
-                                            }) {
-                                                Text("Update Page")
-                                                    .frame(maxWidth: .infinity)
-                                                    .padding(AppleBooksSpacing.space16)
-                                                    .background(AppleBooksColors.accent)
-                                                    .foregroundColor(.white)
-                                                    .cornerRadius(12)
-                                                    .font(AppleBooksTypography.buttonLarge)
-                                            }
+                                        Text("Pages Read")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                }
 
-                                            Button(action: {
-                                                markBookComplete()
-                                            }) {
-                                                Text("Mark Complete")
-                                                    .frame(maxWidth: .infinity)
-                                                    .padding(AppleBooksSpacing.space16)
-                                                    .background(AppleBooksColors.card)
-                                                    .foregroundColor(AppleBooksColors.accent)
-                                                    .cornerRadius(12)
-                                                    .font(AppleBooksTypography.buttonLarge)
-                                                    .overlay(
-                                                        RoundedRectangle(cornerRadius: 12)
-                                                            .stroke(AppleBooksColors.accent, lineWidth: 1)
-                                                    )
-                                            }
-                                        }
+                                // Reading Streak
+                                AppleBooksCard(
+                                    cornerRadius: 12,
+                                    padding: AppleBooksSpacing.space16,
+                                    shadowStyle: .subtle
+                                ) {
+                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "flame")
+                                            .font(.system(size: 24))
+                                            .foregroundColor(AppleBooksColors.promotional)
+
+                                        Text("7") // Placeholder for streak
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .fontWeight(.bold)
+
+                                        Text("Day Streak")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
                                     }
                                 }
                             }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
 
-                            Spacer(minLength: AppleBooksSpacing.space40)
+                            HStack(spacing: AppleBooksSpacing.space16) {
+                                // Average Session
+                                AppleBooksCard(
+                                    cornerRadius: 12,
+                                    padding: AppleBooksSpacing.space16,
+                                    shadowStyle: .subtle
+                                ) {
+                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "clock")
+                                            .font(.system(size: 24))
+                                            .foregroundColor(AppleBooksColors.success)
+
+                                        Text("25m") // Placeholder
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .fontWeight(.bold)
+
+                                        Text("Avg Session")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                }
+
+                                // Total Time
+                                AppleBooksCard(
+                                    cornerRadius: 12,
+                                    padding: AppleBooksSpacing.space16,
+                                    shadowStyle: .subtle
+                                ) {
+                                    VStack(spacing: AppleBooksSpacing.space8) {
+                                        Image(systemName: "timer")
+                                            .font(.system(size: 24))
+                                            .foregroundColor(AppleBooksColors.accent)
+
+                                        Text("3h 45m") // Placeholder
+                                            .font(AppleBooksTypography.headlineMedium)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .fontWeight(.bold)
+
+                                        Text("Total Time")
+                                            .font(AppleBooksTypography.caption)
+                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                    }
+                                }
+                            }
                         }
-                        .padding(.vertical, AppleBooksSpacing.space24)
-                    }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
 
-                    // Success Message Overlay
-                    if showSuccessMessage {
-                        VStack {
-                            Spacer()
+                        // Update Progress Section
+                        VStack(spacing: AppleBooksSpacing.space20) {
+                            Text("Update Progress")
+                                .font(AppleBooksTypography.headlineLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
                             AppleBooksCard(
-                                cornerRadius: 12,
-                                padding: AppleBooksSpacing.space16,
+                                cornerRadius: 16,
+                                padding: AppleBooksSpacing.space24,
                                 shadowStyle: .subtle
                             ) {
-                                HStack {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(AppleBooksColors.success)
-                                        .font(.system(size: 20))
-
-                                    Text("Progress updated successfully!")
-                                        .font(AppleBooksTypography.bodyMedium)
-                                        .foregroundColor(AppleBooksColors.text)
-
-                                    Spacer()
-
-                                    Button(action: {
-                                        showSuccessMessage = false
-                                    }) {
-                                        Image(systemName: "xmark")
+                                VStack(spacing: AppleBooksSpacing.space20) {
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        Text("Current Page")
+                                            .font(AppleBooksTypography.bodyMedium)
                                             .foregroundColor(AppleBooksColors.textSecondary)
-                                            .font(.system(size: 16, weight: .medium))
+
+                                        TextField("Enter current page", text: $currentPage)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            .keyboardType(.numberPad)
+                                            .font(AppleBooksTypography.bodyLarge)
+                                    }
+
+                                    HStack(spacing: AppleBooksSpacing.space12) {
+                                        Button(action: {
+                                            updateCurrentPage()
+                                        }) {
+                                            Text("Update Page")
+                                                .frame(maxWidth: .infinity)
+                                                .padding(AppleBooksSpacing.space16)
+                                                .background(AppleBooksColors.accent)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(12)
+                                                .font(AppleBooksTypography.buttonLarge)
+                                        }
+
+                                        Button(action: {
+                                            markBookComplete()
+                                        }) {
+                                            Text("Mark Complete")
+                                                .frame(maxWidth: .infinity)
+                                                .padding(AppleBooksSpacing.space16)
+                                                .background(AppleBooksColors.card)
+                                                .foregroundColor(AppleBooksColors.accent)
+                                                .cornerRadius(12)
+                                                .font(AppleBooksTypography.buttonLarge)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(AppleBooksColors.accent, lineWidth: 1)
+                                                )
+                                        }
                                     }
                                 }
                             }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-                            .padding(.bottom, AppleBooksSpacing.space24)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+
+                        Spacer(minLength: AppleBooksSpacing.space40)
                     }
-                } else {
-                    // Book not found
-                    VStack(spacing: AppleBooksSpacing.space24) {
-                        Text("Book not found")
-                            .font(AppleBooksTypography.headlineLarge)
-                            .foregroundColor(AppleBooksColors.text)
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            Text("Go Back")
-                                .font(AppleBooksTypography.buttonLarge)
-                                .foregroundColor(AppleBooksColors.accent)
+                    .padding(.vertical, AppleBooksSpacing.space24)
+                }
+
+                // Success Message Overlay
+                if showSuccessMessage {
+                    VStack {
+                        Spacer()
+                        AppleBooksCard(
+                            cornerRadius: 12,
+                            padding: AppleBooksSpacing.space16,
+                            shadowStyle: .subtle
+                        ) {
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(AppleBooksColors.success)
+                                    .font(.system(size: 20))
+
+                                Text("Progress updated successfully!")
+                                    .font(AppleBooksTypography.bodyMedium)
+                                    .foregroundColor(AppleBooksColors.text)
+
+                                Spacer()
+
+                                Button(action: {
+                                    showSuccessMessage = false
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .foregroundColor(AppleBooksColors.textSecondary)
+                                        .font(.system(size: 16, weight: .medium))
+                                }
+                            }
                         }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+                        .padding(.bottom, AppleBooksSpacing.space24)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+            } else {
+                // Book not found
+                VStack(spacing: AppleBooksSpacing.space24) {
+                    Text("Book not found")
+                        .font(AppleBooksTypography.headlineLarge)
+                        .foregroundColor(AppleBooksColors.text)
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("Go Back")
+                            .font(AppleBooksTypography.buttonLarge)
+                            .foregroundColor(AppleBooksColors.accent)
                     }
                 }
             }
-            .navigationBarItems(
-                leading: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Image(systemName: "xmark")
-                        .foregroundColor(AppleBooksColors.text)
-                        .font(.system(size: 16, weight: .medium))
-                }
-            )
-            .navigationBarTitle("Reading Progress", displayMode: .inline)
-            .navigationBarTitleDisplayMode(.inline)
         }
     }
 

@@ -386,7 +386,6 @@ struct BookDetailView: View {
                 bookCoverSection
                 bookMetadataSection
                 bookDetailsSection
-                actionButtonsSection
                 bookTeaserSection
                 authorBiographySection
                 readingProgressSection
@@ -396,6 +395,28 @@ struct BookDetailView: View {
             .background(AppleBooksColors.background)
             .navigationTitle("Book Details")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button("Edit Book") {
+                            showEditView = true
+                        }
+                        if currentBook.status == .library {
+                            Button("Start Reading") {
+                                withAnimation(.spring()) {
+                                    viewModel.moveBook(currentBook, to: .reading)
+                                }
+                            }
+                        } else if currentBook.status == .reading || currentBook.status == .currentlyReading {
+                            Button("Update Progress") {
+                                showProgressView = true
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
             .sheet(isPresented: $showProgressView) {
                 ReadingProgressView(book: currentBook, viewModel: viewModel)
             }

@@ -26,14 +26,15 @@ struct EditBookView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                AppleBooksColors.background
-                    .ignoresSafeArea()
+        ZStack {
+            AppleBooksColors.background
+                .ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: AppleBooksSpacing.space32) {
-                        // Header
+            ScrollView {
+                VStack(spacing: AppleBooksSpacing.space32) {
+                    // Header
+                    HStack {
+                        Spacer()
                         VStack(spacing: AppleBooksSpacing.space8) {
                             Text("Edit Book")
                                 .font(AppleBooksTypography.displayMedium)
@@ -43,7 +44,16 @@ struct EditBookView: View {
                                 .font(AppleBooksTypography.bodyMedium)
                                 .foregroundColor(AppleBooksColors.textSecondary)
                         }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
+                        Spacer()
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(AppleBooksColors.text)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
 
                         // Book Cover Preview
                         if let imageData = book.coverImageData, let uiImage = UIImage(data: imageData) {
@@ -198,15 +208,6 @@ struct EditBookView: View {
                     .padding(.vertical, AppleBooksSpacing.space16)
                 }
             }
-            .navigationBarItems(
-                trailing: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Image(systemName: "xmark")
-                        .foregroundColor(AppleBooksColors.text)
-                        .font(.system(size: 16, weight: .medium))
-                }
-            )
             .alert(item: Binding(
                 get: { errorMessage.map { ErrorWrapper(error: $0) } },
                 set: { _ in errorMessage = nil }
