@@ -1050,6 +1050,9 @@ class BookViewModel: ObservableObject {
             if let index = self.books.firstIndex(where: { $0.id == updatedBook.id }) {
                 self.books[index] = updatedBook
                 print("DEBUG BookViewModel: Updated local book with cover image: \(updatedBook.title ?? "")")
+            } else {
+                self.books.append(updatedBook)
+                print("DEBUG BookViewModel: Added new book to local array: \(updatedBook.title ?? "")")
             }
         }
     }
