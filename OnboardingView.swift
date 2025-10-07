@@ -80,7 +80,7 @@ struct OnboardingView: View {
                         ) {
                             VStack(spacing: AppleBooksSpacing.space24) {
                                 // Page Indicator
-                                HStack(spacing: AppleBooksSpacing.small) {
+                                HStack(spacing: AppleBooksSpacing.space8) {
                                     ForEach(0..<pages.count, id: \.self) { index in
                                         Circle()
                                             .fill(index == currentPage ? pages[currentPage].accentColor : AppleBooksColors.textTertiary)
@@ -89,7 +89,7 @@ struct OnboardingView: View {
                                             .animation(.easeInOut(duration: 0.3), value: currentPage)
                                     }
                                 }
-                                .padding(.top, AppleBooksSpacing.small)
+                                .padding(.top, AppleBooksSpacing.space8)
 
                                 if currentPage < pages.count - 1 {
                                     // Icon
@@ -268,7 +268,7 @@ struct SubscriptionSelectionView: View {
                     padding: AppleBooksSpacing.space16,
                     shadowStyle: .subtle
                 ) {
-                    VStack(spacing: AppleBooksSpacing.small) {
+                    VStack(spacing: AppleBooksSpacing.space8) {
                         Text("Premium Coming Soon")
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(AppleBooksColors.textTertiary)
@@ -281,9 +281,9 @@ struct SubscriptionSelectionView: View {
                             "AI-powered recommendations"
                         ]
 
-                        VStack(alignment: .leading, spacing: AppleBooksSpacing.small) {
+                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                             ForEach(premiumFeatures, id: \.self) { feature in
-                                HStack(spacing: AppleBooksSpacing.small) {
+                                HStack(spacing: AppleBooksSpacing.space8) {
                                     Image(systemName: "checkmark.circle.fill")
                                         .foregroundColor(AppleBooksColors.success)
                                         .font(.system(size: 12, weight: .medium))
