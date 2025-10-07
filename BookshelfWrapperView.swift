@@ -8,6 +8,7 @@ struct BookshelfWrapperView: View {
     @State private var isShowingCamera = false
     @State private var selectedTab = 0
     @State private var showUpgradeModal = false
+    @State private var editingBook: Book?
 
     var body: some View {
         Group {
@@ -48,6 +49,9 @@ struct BookshelfWrapperView: View {
                         onSeeAllTap: {
                             // Handle see all
                         },
+                        onEditTap: { book in
+                            editingBook = book
+                        },
                         viewModel: viewModel
                     )
 
@@ -75,6 +79,9 @@ struct BookshelfWrapperView: View {
                         onSeeAllTap: {
                             // Handle see all
                         },
+                        onEditTap: { book in
+                            editingBook = book
+                        },
                         viewModel: viewModel
                     )
 
@@ -89,6 +96,9 @@ struct BookshelfWrapperView: View {
                         onSeeAllTap: {
                             // Handle see all
                         },
+                        onEditTap: { book in
+                            editingBook = book
+                        },
                         viewModel: viewModel
                     )
                 }
@@ -99,6 +109,11 @@ struct BookshelfWrapperView: View {
         }
         .sheet(isPresented: $showUpgradeModal) {
             UpgradeModalView()
+        }
+        .sheet(isPresented: Binding(get: { editingBook != nil }, set: { if !$0 { editingBook = nil } })) {
+            if let book = editingBook {
+                EditBookView(book: book, viewModel: viewModel)
+            }
         }
         .onChange(of: capturedImage) { newImage in
             if let image = newImage {
