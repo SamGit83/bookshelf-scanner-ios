@@ -2,6 +2,7 @@ import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
+import ErrorHandling
 
 struct AddBookView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -29,7 +30,7 @@ struct AddBookView: View {
                 leading: closeButton,
                 trailing: addButton
             )
-            .alert(item: errorBinding) { errorWrapper in
+            .alert(item: errorBinding) { (errorWrapper: ErrorWrapper) in
                 Alert(title: Text("Error"), message: Text(errorWrapper.error.localizedDescription), dismissButton: .default(Text("OK")))
             }
             .sheet(isPresented: $showUpgradeModal) {
