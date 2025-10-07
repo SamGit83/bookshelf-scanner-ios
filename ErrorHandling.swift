@@ -97,6 +97,13 @@ enum ErrorSeverity {
         }
     }
 }
+// MARK: - Error Wrapper for SwiftUI Alerts
+
+struct ErrorWrapper: Identifiable {
+    let id = UUID()
+    let error: Error
+    let guidance: String?
+}
 
 // MARK: - Error Handler
 
@@ -321,11 +328,4 @@ extension BookshelfError {
 
         return .unknownError("An unexpected error occurred")
     }
-// MARK: - Error Wrapper for SwiftUI Alerts
-
-struct ErrorWrapper: Identifiable {
-    let id = UUID()
-    let error: Error
-    let guidance: String?
-}
 }
