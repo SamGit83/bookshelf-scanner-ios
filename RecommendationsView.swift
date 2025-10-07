@@ -108,6 +108,7 @@ struct RecommendationsView: View {
                                     // Handle book tap - perhaps navigate to detail
                                 },
                                 onSeeAllTap: nil,
+                                onEditTap: nil,
                                 viewModel: viewModel
                             )
 
@@ -122,6 +123,7 @@ struct RecommendationsView: View {
                                             // Handle book tap
                                         },
                                         onSeeAllTap: nil,
+                                        onEditTap: nil,
                                         viewModel: viewModel
                                     )
                                 }
