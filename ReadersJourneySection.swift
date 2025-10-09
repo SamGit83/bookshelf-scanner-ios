@@ -12,14 +12,14 @@ struct ReadersJourneySection: View {
             let horizontalPadding = calculateHorizontalPadding(for: screenWidth)
             
             VStack(spacing: spacing.section) {
-                Text("Alex's Reading Journey")
+                Text("Pragya's Reading Journey")
                     .font(TypographySystem.headlineMedium)
                     .foregroundColor(.primary)
                     .padding(.horizontal, horizontalPadding)
                     .padding(.top, spacing.top)
                     .scaleEffect(textScale.title)
 
-                Text("Meet Alex, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
+                Text("Meet Pragya, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
                     .font(TypographySystem.bodyMedium)
                     .foregroundColor(AppleBooksColors.textSecondary)
                     .multilineTextAlignment(.leading)
