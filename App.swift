@@ -8,6 +8,16 @@ struct BookshelfScannerApp: App {
     init() {
         // Configure Firebase using GoogleService-Info.plist
         FirebaseApp.configure()
+
+        // Initialize and fetch Remote Config
+        RemoteConfigManager.shared.fetchAndActivate { result in
+            switch result {
+            case .success:
+                print("RemoteConfig fetched and activated successfully")
+            case .failure(let error):
+                print("Failed to fetch RemoteConfig: \(error.localizedDescription)")
+            }
+        }
     }
 
     var body: some Scene {

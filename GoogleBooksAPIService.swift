@@ -19,6 +19,8 @@ class GoogleBooksAPIService {
         let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "google_books", endpoint: "volumes", method: "GET")
 
         print("DEBUG GoogleBooksAPIService: searchBooks called with query: '\(query)', maxResults: \(maxResults)")
+        print("DEBUG GoogleBooksAPIService: API key configured: \(apiKey.count > 0 ? "YES (\(apiKey.prefix(10))...)" : "NO")")
+        print("DEBUG GoogleBooksAPIService: Using environment: \(SecureConfig.shared.isDevelopment ? "DEBUG" : "PRODUCTION")")
         print("DEBUG GoogleBooksAPIService: Making request without API key (public access)")
 
         guard var urlComponents = URLComponents(string: baseURL) else {
@@ -119,6 +121,11 @@ class GoogleBooksAPIService {
                 completion(.success(recommendations))
             } catch {
                 print("DEBUG GoogleBooksAPIService: JSON decode error: \(error)")
+                print("DEBUG GoogleBooksAPIService: Raw response for debugging: \(String(data: data, encoding: .utf8)?.prefix(500) ?? "Unable to decode")")
+
+                // Check if this is a parsing error (non-retryable)
+                let isParsingError = error is DecodingError
+                print("DEBUG GoogleBooksAPIService: Is parsing error: \(isParsingError)")
 
                 PerformanceMonitoringService.shared.completeAPICall(
                     traceId: traceId,

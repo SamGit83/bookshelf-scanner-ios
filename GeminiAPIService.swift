@@ -20,36 +20,63 @@ import UIKit
  * Enhanced Prompt: Optimized for diverse book scanning scenarios with robust detection
  */
 class GeminiAPIService {
-    private var apiKey: String {
-        // Try environment variable first, fallback to SecureConfig
-        if let envKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !envKey.isEmpty {
-            return envKey
-        }
-        return SecureConfig.shared.geminiAPIKey
-    }
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
     func analyzeImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         let startTime = Date()
         let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "gemini", endpoint: "generateContent", method: "POST")
-    
+
         print("DEBUG GeminiAPIService: analyzeImage START, image size: \(image.size), timestamp: \(Date())")
+        print("DEBUG GeminiAPIService: Using environment: \(SecureConfig.shared.isDevelopment ? "DEBUG" : "PRODUCTION")")
         print("DEBUG GeminiAPIService: isScanning from context (if available): Note - flag not directly accessible here")
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            print("DEBUG GeminiAPIService: jpegData returned nil")
-            let error = NSError(domain: "ImageConversion", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])
 
-            // Track failed API call
-            PerformanceMonitoringService.shared.completeAPICall(
-                traceId: traceId,
-                success: false,
-                responseTime: Date().timeIntervalSince(startTime),
-                error: error
-            )
+        // Fetch fresh API key asynchronously
+        SecureConfig.shared.getGeminiAPIKeyAsync { [weak self] apiKey in
+            guard let self = self else { return }
 
-            completion(.failure(error))
-            return
+            print("DEBUG GeminiAPIService: API key retrieved: \(apiKey.count > 0 ? "YES (\(apiKey.prefix(10))...)" : "NO")")
+
+            // Validate API key
+            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+            if !isValidKey {
+                print("DEBUG GeminiAPIService: Invalid or missing Gemini API key")
+                let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Gemini API key is not configured or invalid"])
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: Date().timeIntervalSince(startTime),
+                    error: keyError
+                )
+
+                completion(.failure(keyError))
+                return
+            }
+
+            guard let imageData = self.imageToJPEGData(image) else {
+                print("DEBUG GeminiAPIService: jpegData returned nil")
+                let error = NSError(domain: "ImageConversion", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: Date().timeIntervalSince(startTime),
+                    error: error
+                )
+
+                completion(.failure(error))
+                return
+            }
+
+            self.performGeminiRequest(with: imageData, apiKey: apiKey, startTime: startTime, traceId: traceId, completion: completion)
         }
+    }
+
+    private func imageToJPEGData(_ image: UIImage) -> Data? {
+        return image.jpegData(compressionQuality: 0.8)
+    }
+
+    private func performGeminiRequest(with imageData: Data, apiKey: String, startTime: Date, traceId: String, completion: @escaping (Result<String, Error>) -> Void) {
         print("DEBUG GeminiAPIService: jpegData successful, size: \(imageData.count) bytes")
 
         let base64Image = imageData.base64EncodedString()
@@ -136,6 +163,13 @@ class GeminiAPIService {
             let responseTime = Date().timeIntervalSince(startTime)
             let dataSize = Int64(data?.count ?? 0)
 
+            // Log HTTP response details
+            if let httpResponse = response as? HTTPURLResponse {
+                print("DEBUG GeminiAPIService: HTTP status code: \(httpResponse.statusCode), headers: \(httpResponse.allHeaderFields)")
+            } else {
+                print("DEBUG GeminiAPIService: No HTTP response or non-HTTP response")
+            }
+
             print("DEBUG GeminiAPIService: Received response from Gemini, error: \(error?.localizedDescription ?? "none"), data count: \(data?.count ?? 0), timestamp: \(Date())")
 
             if let error = error {
@@ -173,7 +207,19 @@ class GeminiAPIService {
             // First, try to decode as error response
             if let errorResponse = try? JSONDecoder().decode(GeminiErrorResponse.self, from: data) {
                 print("DEBUG GeminiAPIService: API error: \(errorResponse.error.message)")
-                let apiError = NSError(domain: "APIError", code: errorResponse.error.code, userInfo: [NSLocalizedDescriptionKey: errorResponse.error.message])
+                print("DEBUG GeminiAPIService: Error code: \(errorResponse.error.code), status: \(errorResponse.error.status)")
+                print("DEBUG GeminiAPIService: Full error response: \(String(describing: errorResponse))")
+
+                // Check for specific non-retryable errors
+                let isAuthError = errorResponse.error.code == 401 || errorResponse.error.message.contains("API_KEY")
+                let isQuotaError = errorResponse.error.code == 429 || errorResponse.error.message.contains("quota") || errorResponse.error.message.contains("limit")
+                print("DEBUG GeminiAPIService: Is auth error: \(isAuthError), Is quota error: \(isQuotaError)")
+
+                let apiError = NSError(domain: "APIError", code: errorResponse.error.code, userInfo: [
+                    NSLocalizedDescriptionKey: errorResponse.error.message,
+                    "isAuthError": isAuthError,
+                    "isQuotaError": isQuotaError
+                ])
 
                 // Track API error
                 PerformanceMonitoringService.shared.completeAPICall(
@@ -203,9 +249,9 @@ class GeminiAPIService {
                         dataSize: dataSize
                     )
 
-                    // Record API cost ($0.0025 per image for Gemini 1.5 Flash)
+                    // Record API cost ($0.0005 per image for Gemini 2.0 Flash)
                     print("DEBUG GeminiAPIService: Recording cost for gemini, timestamp: \(Date())")
-                    CostTracker.shared.recordCost(service: "gemini", cost: 0.0025)
+                    CostTracker.shared.recordCost(service: "gemini", cost: 0.0005)
 
                     print("DEBUG GeminiAPIService: SUCCESS completion called with text length \(text.count), timestamp: \(Date())")
                     completion(.success(text))

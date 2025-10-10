@@ -190,6 +190,14 @@ class BookViewModel: ObservableObject {
         isScanning = true
         retryCount = 0
 
+        // Check for valid API keys
+        if !SecureConfig.shared.hasValidGeminiKey || !SecureConfig.shared.hasValidGoogleBooksKey {
+            errorMessage = "API keys not configured. Please set your Gemini and Google Books API keys in Settings > Account Settings > API Settings."
+            scanFeedbackMessage = nil
+            isScanning = false
+            return
+        }
+
         // Check for approaching scan limit
         if UsageTracker.shared.isApproachingScanLimit() {
             let current = UsageTracker.shared.monthlyScans
@@ -219,6 +227,13 @@ class BookViewModel: ObservableObject {
         scanFeedbackMessage = "Scanning bookshelf..."
         partialSuccessMessage = nil
         successMessage = nil
+
+        // Log image details for debugging
+        print("DEBUG BookViewModel: Image details - size: \(image.size), scale: \(image.scale), orientation: \(image.imageOrientation.rawValue)")
+        if let cgImage = image.cgImage {
+            print("DEBUG BookViewModel: CGImage details - width: \(cgImage.width), height: \(cgImage.height), bitsPerComponent: \(cgImage.bitsPerComponent), bitsPerPixel: \(cgImage.bitsPerPixel)")
+        }
+
         performScanWithRetry(image: image)
     }
 
@@ -251,9 +266,20 @@ class BookViewModel: ObservableObject {
                     self.isScanning = false
                 case .failure(let error):
                     print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription), timestamp: \(Date())")
+                    print("DEBUG BookViewModel: Full error details - domain: \((error as NSError).domain), code: \((error as NSError).code), userInfo: \((error as NSError).userInfo), shouldRetry: \(shouldRetry(error: error)), retryCount: \(retryCount)")
                     ErrorHandler.shared.handle(error, context: "Image Analysis")
                     // Track API call failure
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
+
+                    // Log additional error context for debugging
+                    if let nsError = error as NSError {
+                        print("DEBUG BookViewModel: Error domain: \(nsError.domain), code: \(nsError.code)")
+                        if nsError.domain == "APIError" {
+                            print("DEBUG BookViewModel: This is an API error from Gemini service")
+                        } else if nsError.domain == NSURLErrorDomain {
+                            print("DEBUG BookViewModel: This is a network error - \(nsError.code)")
+                        }
+                    }
 
                     // Check if we should retry
                     if self.shouldRetry(error: error) && self.retryCount < self.maxRetries {
@@ -269,6 +295,7 @@ class BookViewModel: ObservableObject {
                         self.isLoading = false
                         self.scanFeedbackMessage = nil
                         self.errorMessage = "Scan failed after \(self.retryCount + 1) attempts. Please check your connection and try again."
+                        print("DEBUG BookViewModel: Max retries reached or non-retryable error. Final error message set.")
                         self.isScanning = false
                     }
                 }
@@ -278,6 +305,28 @@ class BookViewModel: ObservableObject {
 
     private func shouldRetry(error: Error) -> Bool {
         let errorDescription = error.localizedDescription.lowercased()
+
+        // Check for non-retryable API errors
+        if let nsError = error as NSError {
+            // Gemini API auth/quota errors
+            if nsError.domain == "APIError" {
+                if let isAuthError = nsError.userInfo["isAuthError"] as? Bool, isAuthError {
+                    print("DEBUG BookViewModel: Non-retryable auth error detected")
+                    return false
+                }
+                if let isQuotaError = nsError.userInfo["isQuotaError"] as? Bool, isQuotaError {
+                    print("DEBUG BookViewModel: Non-retryable quota error detected")
+                    return false
+                }
+            }
+
+            // Google Books parsing errors (DecodingError)
+            if error is DecodingError {
+                print("DEBUG BookViewModel: Non-retryable parsing error detected")
+                return false
+            }
+        }
+
         // Retry on network-related errors
         return errorDescription.contains("network") ||
                 errorDescription.contains("timeout") ||

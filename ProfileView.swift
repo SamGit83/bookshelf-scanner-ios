@@ -695,6 +695,12 @@ struct AccountSettingsView: View {
                 }
             }
 
+            Section("API Configuration") {
+                NavigationLink(destination: APISettingsView()) {
+                    Text("API Settings")
+                }
+            }
+
             Section("Support") {
                 NavigationLink(destination: HelpView()) {
                     Text("Help & Support")

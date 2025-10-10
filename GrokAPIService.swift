@@ -7,14 +7,6 @@ import Foundation
  * and reading preferences.
  */
 class GrokAPIService {
-    private var apiKey: String {
-        // Try environment variable first, fallback to SecureConfig
-        if let envKey = ProcessInfo.processInfo.environment["GROK_API_KEY"], !envKey.isEmpty {
-            return envKey
-        }
-        return SecureConfig.shared.grokAPIKey
-    }
-
     private let baseURL = "https://api.x.ai/v1/chat/completions"
 
     func generateRecommendations(userBooks: [Book], currentBook: Book?, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
@@ -23,8 +15,42 @@ class GrokAPIService {
 
         print("DEBUG GrokAPIService: generateRecommendations called with \(userBooks.count) books")
 
-        let prompt = buildRecommendationPrompt(userBooks: userBooks, currentBook: currentBook)
+        // Fetch fresh API key asynchronously
+        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
+            guard let self = self else { return }
 
+            print("DEBUG GrokAPIService: API key retrieved: \(apiKey.count > 0 ? "YES (\(apiKey.prefix(10))...)" : "NO")")
+
+            // Validate API key
+            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+            if !isValidKey {
+                print("DEBUG GrokAPIService: Invalid or missing Grok API key")
+                let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])
+
+                PerformanceMonitoringService.shared.completeAPICall(
+                    traceId: traceId,
+                    success: false,
+                    responseTime: Date().timeIntervalSince(startTime),
+                    error: keyError
+                )
+
+                completion(.failure(keyError))
+                return
+            }
+
+            let prompt = self.buildRecommendationPrompt(userBooks: userBooks, currentBook: currentBook)
+            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 2000, temperature: 0.7) { result in
+                switch result {
+                case .success(let content):
+                    self.parseRecommendations(from: content, completion: completion)
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
+    private func performGrokRequest(prompt: String, apiKey: String, maxTokens: Int, temperature: Double, completion: @escaping (Result<String, Error>) -> Void) {
         let requestBody: [String: Any] = [
             "model": "grok-3-mini",
             "messages": [
@@ -33,8 +59,8 @@ class GrokAPIService {
                     "content": prompt
                 ]
             ],
-            "max_tokens": 2000,
-            "temperature": 0.7
+            "max_tokens": maxTokens,
+            "temperature": temperature
         ]
 
         guard let url = URL(string: baseURL) else {
@@ -54,107 +80,36 @@ class GrokAPIService {
             return
         }
 
-        print("DEBUG GrokAPIService: Sending request to Grok API")
         URLSession.shared.dataTask(with: request) { data, response, error in
-            let responseTime = Date().timeIntervalSince(startTime)
-            let dataSize = Int64(data?.count ?? 0)
-
             if let error = error {
-                print("DEBUG GrokAPIService: Network error: \(error.localizedDescription)")
-
-                PerformanceMonitoringService.shared.completeAPICall(
-                    traceId: traceId,
-                    success: false,
-                    responseTime: responseTime,
-                    dataSize: dataSize,
-                    error: error
-                )
-
                 completion(.failure(error))
                 return
             }
 
             guard let data = data else {
-                let noDataError = NSError(domain: "NoData", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])
-
-                PerformanceMonitoringService.shared.completeAPICall(
-                    traceId: traceId,
-                    success: false,
-                    responseTime: responseTime,
-                    error: noDataError
-                )
-
-                completion(.failure(noDataError))
+                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
                 return
-            }
-
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("DEBUG GrokAPIService: Response string: \(responseString)")
             }
 
             do {
                 let grokResponse = try JSONDecoder().decode(GrokResponse.self, from: data)
 
                 if let error = grokResponse.error {
-                    print("DEBUG GrokAPIService: API error: \(error.message)")
-                    let apiError = NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])
-
-                    PerformanceMonitoringService.shared.completeAPICall(
-                        traceId: traceId,
-                        success: false,
-                        responseTime: responseTime,
-                        dataSize: dataSize,
-                        error: apiError
-                    )
-
-                    completion(.failure(apiError))
+                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
                     return
                 }
 
                 if let choices = grokResponse.choices, let content = choices.first?.message.content {
-                    print("DEBUG GrokAPIService: Extracted content, length: \(content.count)")
-                    print("DEBUG GrokAPIService: Content: \(content)")
-
-                    // Track successful API call and cost ($0.001 per request for Grok)
-                    PerformanceMonitoringService.shared.completeAPICall(
-                        traceId: traceId,
-                        success: true,
-                        responseTime: responseTime,
-                        dataSize: dataSize
-                    )
-
-                    CostTracker.shared.recordCost(service: "grok", cost: 0.001)
-
-                    self.parseRecommendations(from: content, completion: completion)
+                    completion(.success(content))
                 } else {
-                    print("DEBUG GrokAPIService: No content in response")
-                    let parseError = NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
-
-                    PerformanceMonitoringService.shared.completeAPICall(
-                        traceId: traceId,
-                        success: false,
-                        responseTime: responseTime,
-                        dataSize: dataSize,
-                        error: parseError
-                    )
-
-                    completion(.failure(parseError))
+                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
                 }
             } catch {
-                print("DEBUG GrokAPIService: JSON decode error: \(error)")
-
-                PerformanceMonitoringService.shared.completeAPICall(
-                    traceId: traceId,
-                    success: false,
-                    responseTime: responseTime,
-                    dataSize: dataSize,
-                    error: error
-                )
-
                 completion(.failure(error))
             }
         }.resume()
     }
+
 
     private func buildRecommendationPrompt(userBooks: [Book], currentBook: Book?) -> String {
         var prompt = """
@@ -210,216 +165,106 @@ class GrokAPIService {
     }
 
     func fetchAuthorBiography(author: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let prompt = """
-        Provide a concise biography of the author \(author). Include their birth/death dates if applicable, major works, and key achievements. Keep it to 2-3 paragraphs.
-        """
+        // Fetch fresh API key asynchronously
+        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
+            guard let self = self else { return }
 
-        let requestBody: [String: Any] = [
-            "model": "grok-3-mini",
-            "messages": [
-                [
-                    "role": "user",
-                    "content": prompt
-                ]
-            ],
-            "max_tokens": 500,
-            "temperature": 0.3
-        ]
-
-        guard let url = URL(string: baseURL) else {
-            completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-        } catch {
-            completion(.failure(error))
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
+            // Validate API key
+            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+            if !isValidKey {
+                completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
                 return
             }
 
-            guard let data = data else {
-                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
-                return
-            }
+            let prompt = """
+            Provide a concise biography of the author \(author). Include their birth/death dates if applicable, major works, and key achievements. Keep it to 2-3 paragraphs.
+            """
 
-            do {
-                let grokResponse = try JSONDecoder().decode(GrokResponse.self, from: data)
-
-                if let error = grokResponse.error {
-                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
-                    return
-                }
-
-                if let choices = grokResponse.choices, let content = choices.first?.message.content {
+            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 500, temperature: 0.3) { result in
+                switch result {
+                case .success(let content):
                     print("DEBUG GrokAPIService: Fetched bio/teaser content: \(content)")
                     completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
-                } else {
-                    print("DEBUG GrokAPIService: No content in bio/teaser response")
-                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
-            } catch {
-                completion(.failure(error))
             }
-        }.resume()
+        }
     }
 
     func fetchBookSummary(title: String, author: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let prompt = """
-        Provide a short, engaging summary/teaser for the book "\(title)" by \(author). Keep it to 2-3 sentences that capture the essence of the story without spoilers. Make it enticing and informative.
-        """
+        // Fetch fresh API key asynchronously
+        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
+            guard let self = self else { return }
 
-        let requestBody: [String: Any] = [
-            "model": "grok-3-mini",
-            "messages": [
-                [
-                    "role": "user",
-                    "content": prompt
-                ]
-            ],
-            "max_tokens": 300,
-            "temperature": 0.5
-        ]
-
-        guard let url = URL(string: baseURL) else {
-            completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-        } catch {
-            completion(.failure(error))
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
+            // Validate API key
+            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+            if !isValidKey {
+                completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
                 return
             }
 
-            guard let data = data else {
-                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
-                return
-            }
+            let prompt = """
+            Provide a short, engaging summary/teaser for the book "\(title)" by \(author). Keep it to 2-3 sentences that capture the essence of the story without spoilers. Make it enticing and informative.
+            """
 
-            do {
-                let grokResponse = try JSONDecoder().decode(GrokResponse.self, from: data)
-
-                if let error = grokResponse.error {
-                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
-                    return
-                }
-
-                if let choices = grokResponse.choices, let content = choices.first?.message.content {
+            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 300, temperature: 0.5) { result in
+                switch result {
+                case .success(let content):
                     completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
-                } else {
-                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
-            } catch {
-                completion(.failure(error))
             }
-        }.resume()
+        }
     }
 
     func analyzeAgeRating(title: String?, author: String?, description: String?, genre: String?, completion: @escaping (Result<String, Error>) -> Void) {
-        var prompt = """
-        Analyze the following book and determine its appropriate age rating based on content, themes, and target audience. Return only one of these categories: "Children", "Teen", "Adult", "Mature", or "Unknown" if insufficient information.
+        // Fetch fresh API key asynchronously
+        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
+            guard let self = self else { return }
 
-        Book Details:
-        """
-
-        if let title = title {
-            prompt += "\nTitle: \(title)"
-        }
-        if let author = author {
-            prompt += "\nAuthor: \(author)"
-        }
-        if let description = description {
-            prompt += "\nDescription: \(description)"
-        }
-        if let genre = genre {
-            prompt += "\nGenre: \(genre)"
-        }
-
-        prompt += """
-
-        Age Rating Guidelines:
-        - Children: Books suitable for ages 8-12, with simple themes, no mature content
-        - Teen: Books for ages 13-17, may include coming-of-age themes, mild romance, some violence
-        - Adult: Books for ages 18+, with complex themes, mature relationships, moderate violence/language
-        - Mature: Books with explicit content, graphic violence, strong language, or controversial themes
-        - Unknown: Insufficient information to determine rating
-
-        Return only the category name, nothing else.
-        """
-
-        let requestBody: [String: Any] = [
-            "model": "grok-3-mini",
-            "messages": [
-                [
-                    "role": "user",
-                    "content": prompt
-                ]
-            ],
-            "max_tokens": 50,
-            "temperature": 0.3
-        ]
-
-        guard let url = URL(string: baseURL) else {
-            completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-        } catch {
-            completion(.failure(error))
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
+            // Validate API key
+            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+            if !isValidKey {
+                completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
                 return
             }
 
-            guard let data = data else {
-                completion(.failure(NSError(domain: "NoData", code: 0, userInfo: nil)))
-                return
+            var prompt = """
+            Analyze the following book and determine its appropriate age rating based on content, themes, and target audience. Return only one of these categories: "Children", "Teen", "Adult", "Mature", or "Unknown" if insufficient information.
+
+            Book Details:
+            """
+
+            if let title = title {
+                prompt += "\nTitle: \(title)"
+            }
+            if let author = author {
+                prompt += "\nAuthor: \(author)"
+            }
+            if let description = description {
+                prompt += "\nDescription: \(description)"
+            }
+            if let genre = genre {
+                prompt += "\nGenre: \(genre)"
             }
 
-            do {
-                let grokResponse = try JSONDecoder().decode(GrokResponse.self, from: data)
+            prompt += """
 
-                if let error = grokResponse.error {
-                    completion(.failure(NSError(domain: "APIError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.message])))
-                    return
-                }
+            Age Rating Guidelines:
+            - Children: Books suitable for ages 8-12, with simple themes, no mature content
+            - Teen: Books for ages 13-17, may include coming-of-age themes, mild romance, some violence
+            - Adult: Books for ages 18+, with complex themes, mature relationships, moderate violence/language
+            - Mature: Books with explicit content, graphic violence, strong language, or controversial themes
+            - Unknown: Insufficient information to determine rating
 
-                if let choices = grokResponse.choices, let content = choices.first?.message.content {
+            Return only the category name, nothing else.
+            """
+
+            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 50, temperature: 0.3) { result in
+                switch result {
+                case .success(let content):
                     let rating = content.trimmingCharacters(in: .whitespacesAndNewlines)
                     // Validate the response is one of the expected categories
                     let validRatings = ["Children", "Teen", "Adult", "Mature", "Unknown"]
@@ -428,13 +273,11 @@ class GrokAPIService {
                     } else {
                         completion(.success("Unknown"))
                     }
-                } else {
-                    completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
-            } catch {
-                completion(.failure(error))
             }
-        }.resume()
+        }
     }
 
     private func parseRecommendations(from content: String, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {

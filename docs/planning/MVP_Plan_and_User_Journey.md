@@ -260,7 +260,76 @@ Add to Info.plist:
 ### 💰 Freemium Monetization Model
 For detailed tier specifications, pricing, and revenue projections, see the [Freemium Tier Specifications](Freemium_Tier_Specifications.md).
 
-### **📈 Advanced Analytics & Insights**
+### **🔐 Enhanced Security & Configuration Management**
+
+#### **Firebase Remote Config for Secure API Key Management**
+**Phase**: Phase 3 (Post-MVP Core Features) - Advanced Configuration Management
+
+**Overview**: Implement Firebase Remote Config to dynamically manage API keys and configuration parameters, enhancing security by removing hardcoded secrets and enabling real-time configuration updates without app store releases.
+
+**Business Value**:
+- **Security Enhancement**: Eliminates hardcoded API keys from the codebase
+- **Operational Flexibility**: Update API keys and configurations remotely without app updates
+- **Compliance**: Supports security audits and key rotation requirements
+- **Scalability**: Enables A/B testing of different API providers or configurations
+
+**Dependencies**:
+- Firebase SDK (already integrated)
+- Existing SecureConfig.swift infrastructure
+- Firebase project with Remote Config enabled
+
+**Acceptance Criteria**:
+- All API keys retrieved from Firebase Remote Config instead of local storage
+- Graceful fallback to local configuration if Remote Config is unavailable
+- No hardcoded API keys in codebase or version control
+- Configuration updates applied without app restart
+- Comprehensive error handling for Remote Config failures
+- Unit and integration tests covering all scenarios
+
+**Detailed Implementation Task List**:
+
+1. **Firebase Remote Config Setup**
+   - Enable Remote Config in Firebase Console
+   - Configure Remote Config parameters for API keys (Gemini, Grok, Google Books)
+   - Set up development vs production environments
+   - Configure fetch intervals and caching policies
+
+2. **Remote Config Integration**
+   - Add Firebase Remote Config SDK to project dependencies
+   - Initialize Remote Config in AppDelegate or main app entry point
+   - Implement Remote Config fetch and activation logic
+   - Update SecureConfig.swift to use Remote Config as primary source
+
+3. **API Key Storage and Retrieval**
+   - Migrate existing API keys to Firebase Remote Config console
+   - Implement secure key retrieval from Remote Config
+   - Add encryption/decryption for sensitive keys if required
+   - Update all API service classes (GeminiAPIService, GrokAPIService, GoogleBooksAPIService) to use new key retrieval
+
+4. **Fallback Mechanisms**
+   - Implement local fallback configuration for offline/network failure scenarios
+   - Add configuration validation to ensure retrieved keys are valid
+   - Implement retry logic for Remote Config fetch failures
+   - Create emergency local override mechanism for critical updates
+
+5. **Testing and Validation**
+   - Unit tests for Remote Config integration and key retrieval
+   - Integration tests for API services with Remote Config keys
+   - Network failure simulation tests for fallback mechanisms
+   - A/B testing setup for configuration variations
+   - Security testing to ensure keys are not exposed in logs or crashes
+
+**Timeline**: 2-3 weeks post-MVP launch
+**Priority**: High (Security Enhancement)
+**Risk Level**: Medium (Well-established Firebase service)
+
+**Success Metrics**:
+- 100% API keys migrated to Remote Config
+- Zero security incidents related to exposed keys
+- <5% Remote Config fetch failures in production
+- Successful key rotation without app updates
+
+### **� Advanced Analytics & Insights**
 - **Reading Streaks**: Daily/weekly reading streak tracking with gamification
 - **Reading Speed Analysis**: Calculate pages per hour and reading velocity trends
 - **Genre Preferences**: Visual analytics showing reading patterns by genre

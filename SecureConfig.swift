@@ -4,21 +4,37 @@ import Foundation
 class SecureConfig {
     static let shared = SecureConfig()
 
-    private init() {}
+    private let remoteConfigManager: RemoteConfigManagerProtocol
+
+    private init() {
+        self.remoteConfigManager = RemoteConfigManager.shared
+    }
+
+    // For testing
+    init(remoteConfigManager: RemoteConfigManagerProtocol = RemoteConfigManager.shared) {
+        self.remoteConfigManager = remoteConfigManager
+    }
 
     // MARK: - API Keys
 
     var geminiAPIKey: String {
-        // Try environment variable first (for development/testing)
-        if let envKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !envKey.isEmpty {
-            print("DEBUG SecureConfig: Using Gemini API key from environment variable")
-            return envKey
+        // Try Remote Config first
+        let remoteKey = remoteConfigManager.getString(forKey: "gemini_api_key")
+        if !remoteKey.isEmpty {
+            print("DEBUG SecureConfig: Using Gemini API key from Remote Config")
+            return remoteKey
         }
 
-        // Try UserDefaults (for production, should be encrypted)
+        // Try UserDefaults
         if let storedKey = UserDefaults.standard.string(forKey: "gemini_api_key"), !storedKey.isEmpty {
             print("DEBUG SecureConfig: Using Gemini API key from UserDefaults")
             return storedKey
+        }
+
+        // Try environment variable
+        if let envKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using Gemini API key from environment variable")
+            return envKey
         }
 
         // Fallback to placeholder (should never be used in production)
@@ -27,10 +43,11 @@ class SecureConfig {
     }
 
     var googleBooksAPIKey: String {
-        // Try environment variable first
-        if let envKey = ProcessInfo.processInfo.environment["GOOGLE_BOOKS_API_KEY"], !envKey.isEmpty {
-            print("DEBUG SecureConfig: Using Google Books API key from environment variable")
-            return envKey
+        // Try Remote Config first
+        let remoteKey = remoteConfigManager.getString(forKey: "google_books_api_key")
+        if !remoteKey.isEmpty {
+            print("DEBUG SecureConfig: Using Google Books API key from Remote Config")
+            return remoteKey
         }
 
         // Try UserDefaults
@@ -39,16 +56,23 @@ class SecureConfig {
             return storedKey
         }
 
+        // Try environment variable
+        if let envKey = ProcessInfo.processInfo.environment["GOOGLE_BOOKS_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using Google Books API key from environment variable")
+            return envKey
+        }
+
         // Fallback to placeholder
         print("DEBUG SecureConfig: Using placeholder Google Books API key - this will cause API failures")
         return "YOUR_GOOGLE_BOOKS_API_KEY_HERE"
     }
 
     var grokAPIKey: String {
-        // Try environment variable first
-        if let envKey = ProcessInfo.processInfo.environment["GROK_API_KEY"], !envKey.isEmpty {
-            print("DEBUG SecureConfig: Using Grok API key from environment variable")
-            return envKey
+        // Try Remote Config first
+        let remoteKey = remoteConfigManager.getString(forKey: "grok_api_key")
+        if !remoteKey.isEmpty {
+            print("DEBUG SecureConfig: Using Grok API key from Remote Config")
+            return remoteKey
         }
 
         // Try UserDefaults
@@ -57,16 +81,23 @@ class SecureConfig {
             return storedKey
         }
 
+        // Try environment variable
+        if let envKey = ProcessInfo.processInfo.environment["GROK_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using Grok API key from environment variable")
+            return envKey
+        }
+
         // Fallback to placeholder
         print("DEBUG SecureConfig: Using placeholder Grok API key - this will cause API failures")
         return "YOUR_GROK_API_KEY_HERE"
     }
 
     var revenueCatAPIKey: String? {
-        // Try environment variable first
-        if let envKey = ProcessInfo.processInfo.environment["REVENUECAT_API_KEY"], !envKey.isEmpty {
-            print("DEBUG SecureConfig: Using RevenueCat API key from environment variable")
-            return envKey
+        // Try Remote Config first
+        let remoteKey = remoteConfigManager.getString(forKey: "revenuecat_api_key")
+        if !remoteKey.isEmpty {
+            print("DEBUG SecureConfig: Using RevenueCat API key from Remote Config")
+            return remoteKey
         }
 
         // Try UserDefaults
@@ -75,9 +106,49 @@ class SecureConfig {
             return storedKey
         }
 
+        // Try environment variable
+        if let envKey = ProcessInfo.processInfo.environment["REVENUECAT_API_KEY"], !envKey.isEmpty {
+            print("DEBUG SecureConfig: Using RevenueCat API key from environment variable")
+            return envKey
+        }
+
         // No fallback - return nil if not configured
         print("DEBUG SecureConfig: RevenueCat API key not configured")
         return nil
+    }
+
+    // MARK: - Async API Key Retrieval
+
+    func getGeminiAPIKeyAsync(completion: @escaping (String) -> Void) {
+        // Ensure Remote Config is fresh
+        remoteConfigManager.fetchAndActivate { [weak self] result in
+            guard let self = self else { return }
+            completion(self.geminiAPIKey)
+        }
+    }
+
+    func getGoogleBooksAPIKeyAsync(completion: @escaping (String) -> Void) {
+        // Ensure Remote Config is fresh
+        remoteConfigManager.fetchAndActivate { [weak self] result in
+            guard let self = self else { return }
+            completion(self.googleBooksAPIKey)
+        }
+    }
+
+    func getGrokAPIKeyAsync(completion: @escaping (String) -> Void) {
+        // Ensure Remote Config is fresh
+        remoteConfigManager.fetchAndActivate { [weak self] result in
+            guard let self = self else { return }
+            completion(self.grokAPIKey)
+        }
+    }
+
+    func getRevenueCatAPIKeyAsync(completion: @escaping (String?) -> Void) {
+        // Ensure Remote Config is fresh
+        remoteConfigManager.fetchAndActivate { [weak self] result in
+            guard let self = self else { return }
+            completion(self.revenueCatAPIKey)
+        }
     }
 
     // MARK: - Configuration Management
