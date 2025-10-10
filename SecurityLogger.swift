@@ -29,6 +29,12 @@ enum SecurityEventType: String, Codable {
     case decryptionFailure = "decryption_failure"
     case networkSecurityViolation = "network_security_violation"
     case configurationError = "configuration_error"
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        self = SecurityEventType(rawValue: rawValue) ?? .suspiciousActivity
+    }
 }
 
 /// Security event data structure
