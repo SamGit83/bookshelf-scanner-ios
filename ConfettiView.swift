@@ -7,33 +7,39 @@ struct ConfettiView: UIViewRepresentable {
         view.backgroundColor = .clear
 
         let emitterLayer = CAEmitterLayer()
-        emitterLayer.emitterPosition = CGPoint(x: view.bounds.midX, y: -10)
-        emitterLayer.emitterSize = CGSize(width: view.bounds.width, height: 1)
+        emitterLayer.emitterPosition = CGPoint(x: view.bounds.width / 2, y: 0)
+        emitterLayer.emitterSize = CGSize(width: view.bounds.width, height: 0)
         emitterLayer.emitterShape = .line
-        emitterLayer.birthRate = 10
+        emitterLayer.birthRate = 20
 
         let colors: [UIColor] = [
-            UIColor.systemRed.withAlphaComponent(0.8),
-            UIColor.systemBlue.withAlphaComponent(0.8),
-            UIColor.systemGreen.withAlphaComponent(0.8),
-            UIColor.systemYellow.withAlphaComponent(0.8),
-            UIColor.systemPurple.withAlphaComponent(0.8),
-            UIColor.systemOrange.withAlphaComponent(0.8)
+            UIColor.systemRed.withAlphaComponent(0.9),
+            UIColor.systemBlue.withAlphaComponent(0.9),
+            UIColor.systemGreen.withAlphaComponent(0.9),
+            UIColor.systemYellow.withAlphaComponent(0.9),
+            UIColor.systemPurple.withAlphaComponent(0.9),
+            UIColor.systemOrange.withAlphaComponent(0.9),
+            UIColor.systemPink.withAlphaComponent(0.9),
+            UIColor.systemTeal.withAlphaComponent(0.9),
+            UIColor.systemIndigo.withAlphaComponent(0.9),
+            UIColor(red: 1.0, green: 0.4, blue: 0.8, alpha: 0.9), // Hot pink
+            UIColor(red: 0.0, green: 0.8, blue: 0.8, alpha: 0.9), // Cyan
+            UIColor(red: 1.0, green: 0.8, blue: 0.0, alpha: 0.9)  // Gold
         ]
 
         var cells: [CAEmitterCell] = []
         for color in colors {
             let cell = CAEmitterCell()
-            cell.birthRate = 1
-            cell.lifetime = 10
-            cell.velocity = 100
-            cell.velocityRange = 50
+            cell.birthRate = 3
+            cell.lifetime = 12
+            cell.velocity = 150
+            cell.velocityRange = 100
             cell.emissionLongitude = .pi
-            cell.emissionRange = .pi / 4
-            cell.spin = 2
-            cell.spinRange = 3
-            cell.scale = 0.1
-            cell.scaleRange = 0.05
+            cell.emissionRange = .pi / 2
+            cell.spin = 4
+            cell.spinRange = 6
+            cell.scale = 0.15
+            cell.scaleRange = 0.1
             cell.contents = createConfettiImage(color: color).cgImage
             cells.append(cell)
         }
@@ -47,8 +53,8 @@ struct ConfettiView: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         // Update emitter position if needed
         if let emitterLayer = uiView.layer.sublayers?.first as? CAEmitterLayer {
-            emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.midX, y: -10)
-            emitterLayer.emitterSize = CGSize(width: uiView.bounds.width, height: 1)
+            emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: 0)
+            emitterLayer.emitterSize = CGSize(width: uiView.bounds.width, height: 0)
         }
     }
 

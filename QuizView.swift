@@ -84,9 +84,39 @@ struct QuizView: View {
 
     var body: some View {
         if showSummary {
-            QuizSummaryView(questions: questions, responses: responses, dismiss: {
-                presentationMode.wrappedValue.dismiss()
-            })
+            ZStack {
+                AppleBooksColors.background
+                    .ignoresSafeArea()
+
+                VStack(spacing: AppleBooksSpacing.space24) {
+                    Text("Thank you for completing the quiz!")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(AppleBooksColors.text)
+                        .multilineTextAlignment(.center)
+
+                    Text("Your responses will help us personalize recommendations and improve your experience.")
+                        .font(.system(size: 18))
+                        .foregroundColor(AppleBooksColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+
+                    Spacer()
+
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("Done")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, AppleBooksSpacing.space16)
+                            .background(AppleBooksColors.success)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .padding(.bottom, AppleBooksSpacing.space32)
+                }
+            }
         } else {
             ZStack {
                 AppleBooksColors.background
@@ -287,67 +317,6 @@ struct OptionButton: View {
     }
 }
 
-struct QuizSummaryView: View {
-    let questions: [QuizQuestion]
-    let responses: [Int: Set<String>]
-    let dismiss: () -> Void
-
-    var answeredQuestions: [QuizQuestion] {
-        questions.filter { responses[$0.id] != nil }
-    }
-
-    var body: some View {
-        ZStack {
-            AppleBooksColors.background
-                .ignoresSafeArea()
-
-            VStack(spacing: AppleBooksSpacing.space24) {
-                Text("Quiz Completed!")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(AppleBooksColors.text)
-                    .multilineTextAlignment(.center)
-
-                ScrollView {
-                    VStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(Array(answeredQuestions.enumerated()), id: \.0) { index, question in
-                            if let response = responses[question.id] {
-                                AppleBooksCard(
-                                    cornerRadius: 12,
-                                    padding: AppleBooksSpacing.space16,
-                                    shadowStyle: .subtle
-                                ) {
-                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                        Text(question.question)
-                                            .font(.system(size: 18, weight: .semibold))
-                                            .foregroundColor(AppleBooksColors.text)
-                                        Text(response.sorted().joined(separator: ", "))
-                                            .font(.system(size: 16))
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                }
-
-                Spacer()
-
-                Button(action: dismiss) {
-                    Text("Done")
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, AppleBooksSpacing.space16)
-                        .background(AppleBooksColors.success)
-                        .cornerRadius(12)
-                }
-                .padding(.horizontal, AppleBooksSpacing.space24)
-                .padding(.bottom, AppleBooksSpacing.space32)
-            }
-        }
-    }
-}
 
 // Preview
 struct QuizView_Previews: PreviewProvider {
