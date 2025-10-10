@@ -6,6 +6,7 @@ struct ConfettiView: UIViewRepresentable {
         print("DEBUG ConfettiView: makeUIView called")
         let view = UIView()
         view.backgroundColor = .clear
+        view.isUserInteractionEnabled = false
 
         let emitterLayer = CAEmitterLayer()
         // Will be set properly in updateUIView when bounds are available
