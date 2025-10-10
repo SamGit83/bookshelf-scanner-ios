@@ -305,7 +305,8 @@ struct QuizSummaryView: View {
 
                 ScrollView {
                     VStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(questions, id: \.id) { question in
+                        ForEach(questions.indices, id: \.self) { index in
+                            let question = questions[index]
                             if let response = responses[question.id] {
                                 AppleBooksCard(
                                     cornerRadius: 12,
