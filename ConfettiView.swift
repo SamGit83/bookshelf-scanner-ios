@@ -32,7 +32,7 @@ struct ConfettiView: UIViewRepresentable {
         var cells: [CAEmitterCell] = []
         for color in colors {
             let cell = CAEmitterCell()
-            cell.birthRate = 4
+            cell.birthRate = 8
             cell.lifetime = 14.0
             cell.lifetimeRange = 0
             cell.velocity = 350
@@ -41,8 +41,8 @@ struct ConfettiView: UIViewRepresentable {
             cell.emissionRange = .pi / 4
             cell.spin = 3.5
             cell.spinRange = 4
-            cell.scaleRange = 0.25
-            cell.scale = 0.1
+            cell.scaleRange = 0.5
+            cell.scale = 0.25
             cell.contents = createConfettiImage(color: color).cgImage
             cells.append(cell)
         }
