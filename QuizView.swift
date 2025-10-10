@@ -314,7 +314,7 @@ struct QuizSummaryView: View {
                                 AppleBooksCard(
                                     cornerRadius: 12,
                                     padding: AppleBooksSpacing.space16,
-                                    shadowStyle: .light
+                                    shadowStyle: .subtle
                                 ) {
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                         Text(question.question)
