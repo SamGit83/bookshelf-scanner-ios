@@ -166,12 +166,7 @@ struct DiscoverView: View {
                     Image(systemName: "arrow.clockwise")
                         .foregroundColor(AppleBooksColors.accent)
                 }
-                .disabled(isLoading)
-            }
-        }
-        .onAppear {
-            if showRecommendations && (recommendations.isEmpty || shouldRefreshRecommendations()) {
-                loadRecommendations()
+                .disabled(isLoading || !showRecommendations)
             }
         }
         .sheet(item: $selectedBook) { book in
@@ -207,7 +202,9 @@ struct DiscoverView: View {
 
     private func loadRecommendations() {
         guard !isLoading else { return }
-        
+
+        guard showRecommendations else { return }
+
         // Don't load recommendations if user has no books
         guard !viewModel.books.isEmpty else {
             errorMessage = nil
