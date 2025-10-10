@@ -15,37 +15,35 @@ class GrokAPIService {
 
         print("DEBUG GrokAPIService: generateRecommendations called with \(userBooks.count) books")
 
-        // Fetch fresh API key asynchronously
-        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
-            guard let self = self else { return }
+        // Get API key synchronously
+        let apiKey = SecureConfig.shared.grokAPIKey
 
-            print("DEBUG GrokAPIService: API key retrieved: \(apiKey.count > 0 ? "YES (\(apiKey.prefix(10))...)" : "NO")")
+        print("DEBUG GrokAPIService: API key retrieved: \(apiKey.count > 0 ? "YES (\(apiKey.prefix(10))...)" : "NO")")
 
-            // Validate API key
-            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
-            if !isValidKey {
-                print("DEBUG GrokAPIService: Invalid or missing Grok API key")
-                let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])
+        // Validate API key
+        let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+        if !isValidKey {
+            print("DEBUG GrokAPIService: Invalid or missing Grok API key")
+            let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])
 
-                PerformanceMonitoringService.shared.completeAPICall(
-                    traceId: traceId,
-                    success: false,
-                    responseTime: Date().timeIntervalSince(startTime),
-                    error: keyError
-                )
+            PerformanceMonitoringService.shared.completeAPICall(
+                traceId: traceId,
+                success: false,
+                responseTime: Date().timeIntervalSince(startTime),
+                error: keyError
+            )
 
-                completion(.failure(keyError))
-                return
-            }
+            completion(.failure(keyError))
+            return
+        }
 
-            let prompt = self.buildRecommendationPrompt(userBooks: userBooks, currentBook: currentBook)
-            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 2000, temperature: 0.7) { result in
-                switch result {
-                case .success(let content):
-                    self.parseRecommendations(from: content, completion: completion)
-                case .failure(let error):
-                    completion(.failure(error))
-                }
+        let prompt = self.buildRecommendationPrompt(userBooks: userBooks, currentBook: currentBook)
+        self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 2000, temperature: 0.7) { result in
+            switch result {
+            case .success(let content):
+                self.parseRecommendations(from: content, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }
@@ -187,123 +185,117 @@ class GrokAPIService {
 
     func fetchAuthorBiography(author: String, completion: @escaping (Result<String, Error>) -> Void) {
         print("DEBUG GrokAPIService: fetchAuthorBiography called for author: '\(author)' at \(Date())")
-        // Fetch fresh API key asynchronously
-        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
-            guard let self = self else { return }
+        // Get API key synchronously
+        let apiKey = SecureConfig.shared.grokAPIKey
 
-            // Validate API key
-            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
-            if !isValidKey {
-                completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
-                return
-            }
+        // Validate API key
+        let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+        if !isValidKey {
+            completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
+            return
+        }
 
-            let prompt = """
-            Provide a concise biography of the author \(author). Include their birth/death dates if applicable, major works, and key achievements. Keep it to 2-3 paragraphs.
-            """
-            print("DEBUG GrokAPIService: Initiating Grok request for author biography")
+        let prompt = """
+        Provide a concise biography of the author \(author). Include their birth/death dates if applicable, major works, and key achievements. Keep it to 2-3 paragraphs.
+        """
+        print("DEBUG GrokAPIService: Initiating Grok request for author biography")
 
-            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 500, temperature: 0.3) { result in
-                switch result {
-                case .success(let content):
-                    print("DEBUG GrokAPIService: Fetched bio/teaser content: \(content)")
-                    completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
-                case .failure(let error):
-                    print("DEBUG GrokAPIService: fetchAuthorBiography failed with error: \(error)")
-                    completion(.failure(error))
-                }
+        self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 500, temperature: 0.3) { result in
+            switch result {
+            case .success(let content):
+                print("DEBUG GrokAPIService: Fetched bio/teaser content: \(content)")
+                completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
+            case .failure(let error):
+                print("DEBUG GrokAPIService: fetchAuthorBiography failed with error: \(error)")
+                completion(.failure(error))
             }
         }
     }
 
     func fetchBookSummary(title: String, author: String, completion: @escaping (Result<String, Error>) -> Void) {
         print("DEBUG GrokAPIService: fetchBookSummary called for title: '\(title)', author: '\(author)' at \(Date())")
-        // Fetch fresh API key asynchronously
-        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
-            guard let self = self else { return }
+        // Get API key synchronously
+        let apiKey = SecureConfig.shared.grokAPIKey
 
-            // Validate API key
-            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
-            if !isValidKey {
-                completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
-                return
-            }
+        // Validate API key
+        let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+        if !isValidKey {
+            completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
+            return
+        }
 
-            let prompt = """
-            Provide a short, engaging summary/teaser for the book "\(title)" by \(author). Keep it to 2-3 sentences that capture the essence of the story without spoilers. Make it enticing and informative.
-            """
+        let prompt = """
+        Provide a short, engaging summary/teaser for the book "\(title)" by \(author). Keep it to 2-3 sentences that capture the essence of the story without spoilers. Make it enticing and informative.
+        """
 
-            print("DEBUG GrokAPIService: Initiating Grok request for book summary")
-            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 300, temperature: 0.5) { result in
-                switch result {
-                case .success(let content):
-                    print("DEBUG GrokAPIService: fetchBookSummary succeeded, content length: \(content.count)")
-                    completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
-                case .failure(let error):
-                    print("DEBUG GrokAPIService: fetchBookSummary failed with error: \(error)")
-                    completion(.failure(error))
-                }
+        print("DEBUG GrokAPIService: Initiating Grok request for book summary")
+        self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 300, temperature: 0.5) { result in
+            switch result {
+            case .success(let content):
+                print("DEBUG GrokAPIService: fetchBookSummary succeeded, content length: \(content.count)")
+                completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
+            case .failure(let error):
+                print("DEBUG GrokAPIService: fetchBookSummary failed with error: \(error)")
+                completion(.failure(error))
             }
         }
     }
 
     func analyzeAgeRating(title: String?, author: String?, description: String?, genre: String?, completion: @escaping (Result<String, Error>) -> Void) {
-        // Fetch fresh API key asynchronously
-        SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
-            guard let self = self else { return }
+        // Get API key synchronously
+        let apiKey = SecureConfig.shared.grokAPIKey
 
-            // Validate API key
-            let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
-            if !isValidKey {
-                completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
-                return
-            }
+        // Validate API key
+        let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
+        if !isValidKey {
+            completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
+            return
+        }
 
-            var prompt = """
-            Analyze the following book and determine its appropriate age rating based on content, themes, and target audience. Return only one of these categories: "Children", "Teen", "Adult", "Mature", or "Unknown" if insufficient information.
+        var prompt = """
+        Analyze the following book and determine its appropriate age rating based on content, themes, and target audience. Return only one of these categories: "Children", "Teen", "Adult", "Mature", or "Unknown" if insufficient information.
 
-            Book Details:
-            """
+        Book Details:
+        """
 
-            if let title = title {
-                prompt += "\nTitle: \(title)"
-            }
-            if let author = author {
-                prompt += "\nAuthor: \(author)"
-            }
-            if let description = description {
-                prompt += "\nDescription: \(description)"
-            }
-            if let genre = genre {
-                prompt += "\nGenre: \(genre)"
-            }
+        if let title = title {
+            prompt += "\nTitle: \(title)"
+        }
+        if let author = author {
+            prompt += "\nAuthor: \(author)"
+        }
+        if let description = description {
+            prompt += "\nDescription: \(description)"
+        }
+        if let genre = genre {
+            prompt += "\nGenre: \(genre)"
+        }
 
-            prompt += """
+        prompt += """
 
-            Age Rating Guidelines:
-            - Children: Books suitable for ages 8-12, with simple themes, no mature content
-            - Teen: Books for ages 13-17, may include coming-of-age themes, mild romance, some violence
-            - Adult: Books for ages 18+, with complex themes, mature relationships, moderate violence/language
-            - Mature: Books with explicit content, graphic violence, strong language, or controversial themes
-            - Unknown: Insufficient information to determine rating
+        Age Rating Guidelines:
+        - Children: Books suitable for ages 8-12, with simple themes, no mature content
+        - Teen: Books for ages 13-17, may include coming-of-age themes, mild romance, some violence
+        - Adult: Books for ages 18+, with complex themes, mature relationships, moderate violence/language
+        - Mature: Books with explicit content, graphic violence, strong language, or controversial themes
+        - Unknown: Insufficient information to determine rating
 
-            Return only the category name, nothing else.
-            """
+        Return only the category name, nothing else.
+        """
 
-            self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 50, temperature: 0.3) { result in
-                switch result {
-                case .success(let content):
-                    let rating = content.trimmingCharacters(in: .whitespacesAndNewlines)
-                    // Validate the response is one of the expected categories
-                    let validRatings = ["Children", "Teen", "Adult", "Mature", "Unknown"]
-                    if validRatings.contains(rating) {
-                        completion(.success(rating))
-                    } else {
-                        completion(.success("Unknown"))
-                    }
-                case .failure(let error):
-                    completion(.failure(error))
+        self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 50, temperature: 0.3) { result in
+            switch result {
+            case .success(let content):
+                let rating = content.trimmingCharacters(in: .whitespacesAndNewlines)
+                // Validate the response is one of the expected categories
+                let validRatings = ["Children", "Teen", "Adult", "Mature", "Unknown"]
+                if validRatings.contains(rating) {
+                    completion(.success(rating))
+                } else {
+                    completion(.success("Unknown"))
                 }
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }
