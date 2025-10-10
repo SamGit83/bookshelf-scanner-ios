@@ -106,7 +106,8 @@ struct QuizView: View {
     }
 
     var body: some View {
-        ZStack {
+        print("DEBUG QuizView: body called, showConfetti: \(showConfetti), showSummary: \(showSummary)")
+        return ZStack {
             if showSummary {
                 AppleBooksColors.background
                     .ignoresSafeArea()
@@ -305,6 +306,7 @@ struct QuizView: View {
 
             if showConfetti {
                 ConfettiView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea()
             }
         }
