@@ -11,6 +11,9 @@ import UIKit
 import FirebaseAnalytics
 #endif
 
+// Rate limiting
+import RateLimiter
+
 class BookViewModel: ObservableObject {
     @Published var books: [Book] = []
     @Published var isLoading = false
@@ -33,6 +36,7 @@ class BookViewModel: ObservableObject {
     private let grokService = GrokAPIService()
     private let googleBooksService = GoogleBooksAPIService()
     private let db = FirebaseConfig.shared.db
+    private let rateLimiter = RateLimiter()
     private var listener: ListenerRegistration?
 
     init() {
@@ -222,6 +226,14 @@ class BookViewModel: ObservableObject {
             return
         }
 
+        // Check device-based rate limits
+        if !rateLimiter.canMakeCall() {
+            errorMessage = "API rate limit exceeded. Please try again later."
+            scanFeedbackMessage = nil
+            isScanning = false
+            return
+        }
+
         isLoading = true
         errorMessage = nil
         scanFeedbackMessage = "Scanning bookshelf..."
@@ -239,6 +251,9 @@ class BookViewModel: ObservableObject {
 
     private func performScanWithRetry(image: UIImage) {
         let scanStartTime = Date()
+
+        // Record API call for rate limiting
+        rateLimiter.recordCall()
 
         print("DEBUG BookViewModel: Calling Gemini analyzeImage (attempt \(retryCount + 1)/\(maxRetries + 1)), timestamp: \(Date())")
         apiService.analyzeImage(image) { [weak self] result in
@@ -449,7 +464,10 @@ class BookViewModel: ObservableObject {
                 for (index, book) in booksToProcess.enumerated() {
                     print("DEBUG BookViewModel: Processing new book #\(index + 1)/\(booksToProcess.count): \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
                     let coverFetchStartTime = Date()
-                    googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
+                    // Check rate limit before cover fetch
+                    if self.rateLimiter.canMakeCall() {
+                        self.rateLimiter.recordCall()
+                        googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
                           let coverResponseTime = Date().timeIntervalSince(coverFetchStartTime)
                           var updatedBook = book
                           switch result {
@@ -490,6 +508,11 @@ class BookViewModel: ObservableObject {
                               self?.analyzeAndSaveBook(updatedBook)
                           }
                       }
+                    } else {
+                        // Rate limit exceeded, skip cover fetch and proceed to analyze
+                        print("DEBUG BookViewModel: Rate limit exceeded, skipping cover fetch for \(book.title ?? "")")
+                        self.analyzeAndSaveBook(book)
+                    }
                  }
                  // Track bookshelf scan completed
                  AnalyticsManager.shared.trackBookshelfScanCompleted(bookCount: booksToProcess.count)
@@ -605,7 +628,10 @@ class BookViewModel: ObservableObject {
         let book = booksToProcess[index]
         print("DEBUG BookViewModel: Fetching cover for existing book (\(index + 1)/\(booksToProcess.count)): \(book.title ?? "") by \(book.author ?? "")")
 
-        googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
+        // Check rate limit before cover fetch
+        if rateLimiter.canMakeCall() {
+            rateLimiter.recordCall()
+            googleBooksService.fetchCoverURL(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
             var updatedBook = book
             switch result {
             case .success(let url):
@@ -658,6 +684,14 @@ class BookViewModel: ObservableObject {
                 }
             }
         }
+        } else {
+            // Rate limit exceeded, skip cover fetch
+            print("DEBUG BookViewModel: Rate limit exceeded, skipping cover fetch for existing book: \(book.title ?? "")")
+            // Process next book
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.processBooksForCovers(booksToProcess, index: index + 1)
+            }
+        }
     }
 
     private func processBooksForAgeRatings(_ booksToProcess: [Book], index: Int) {
@@ -669,7 +703,10 @@ class BookViewModel: ObservableObject {
         let book = booksToProcess[index]
         print("DEBUG BookViewModel: Analyzing age rating for existing book (\(index + 1)/\(booksToProcess.count)): \(book.title ?? "") by \(book.author ?? "")")
 
-        grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
+        // Check rate limit before age rating analysis
+        if self.rateLimiter.canMakeCall() {
+            self.rateLimiter.recordCall()
+            grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
             var updatedBook = book
             switch result {
             case .success(let ageRating):
@@ -686,6 +723,18 @@ class BookViewModel: ObservableObject {
             // Process next book after a delay to rate limit API calls
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // 1 second delay for rate limiting
                 self?.processBooksForAgeRatings(booksToProcess, index: index + 1)
+            }
+        }
+        } else {
+            // Rate limit exceeded, save with unknown age rating
+            print("DEBUG BookViewModel: Rate limit exceeded, saving existing book without age rating analysis: \(book.title ?? "")")
+            var updatedBook = book
+            updatedBook.ageRating = "Unknown"
+            saveBookToFirestore(updatedBook)
+            updateLocalBook(updatedBook)
+            // Process next book
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.processBooksForAgeRatings(booksToProcess, index: index + 1)
             }
         }
     }
@@ -1112,7 +1161,10 @@ class BookViewModel: ObservableObject {
     private func analyzeAndSaveBook(_ book: Book) {
         print("DEBUG BookViewModel: analyzeAndSaveBook START for book: \(book.title ?? "") by \(book.author ?? ""), timestamp: \(Date())")
         print("DEBUG BookViewModel: isScanning during analyzeAndSaveBook: \(isScanning)")
-        grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
+        // Check rate limit before age rating analysis
+        if rateLimiter.canMakeCall() {
+            rateLimiter.recordCall()
+            grokService.analyzeAgeRating(title: book.title, author: book.author, description: book.teaser, genre: book.genre) { [weak self] result in
             var updatedBook = book
             switch result {
             case .success(let ageRating):
@@ -1127,6 +1179,14 @@ class BookViewModel: ObservableObject {
             self?.saveBookToFirestore(updatedBook)
             self?.updateLocalBook(updatedBook)
             print("DEBUG BookViewModel: analyzeAndSaveBook END for book: \(book.title ?? ""), timestamp: \(Date())")
+        }
+        } else {
+            // Rate limit exceeded, save with unknown age rating
+            print("DEBUG BookViewModel: Rate limit exceeded, saving book without age rating analysis: \(book.title ?? "")")
+            var updatedBook = book
+            updatedBook.ageRating = "Unknown"
+            saveBookToFirestore(updatedBook)
+            updateLocalBook(updatedBook)
         }
     }
 
@@ -1184,6 +1244,13 @@ class BookViewModel: ObservableObject {
         }
 
         let recommendationStartTime = Date()
+        // Check rate limit before generating recommendations
+        if !rateLimiter.canMakeCall() {
+            let error = NSError(domain: "BookshelfScanner", code: 2, userInfo: [NSLocalizedDescriptionKey: "API rate limit exceeded. Please try again later."])
+            completion(.failure(error))
+            return
+        }
+        rateLimiter.recordCall()
         // Use Grok AI to generate personalized recommendations based on user's entire library
         grokService.generateRecommendations(userBooks: books, currentBook: currentBook) { result in
             let responseTime = Date().timeIntervalSince(recommendationStartTime)
@@ -1278,8 +1345,11 @@ class BookViewModel: ObservableObject {
             status: .library
         )
 
-        // Analyze age rating
-        grokService.analyzeAgeRating(title: recommendation.title, author: recommendation.author, description: recommendation.description, genre: recommendation.genre) { [weak self] result in
+        // Check rate limit before age rating analysis
+        if rateLimiter.canMakeCall() {
+            rateLimiter.recordCall()
+            // Analyze age rating
+            grokService.analyzeAgeRating(title: recommendation.title, author: recommendation.author, description: recommendation.description, genre: recommendation.genre) { [weak self] result in
             var bookToSave = newBook
             switch result {
             case .success(let ageRating):
@@ -1293,6 +1363,16 @@ class BookViewModel: ObservableObject {
             self?.saveBookToFirestore(bookToSave)
             self?.updateLocalBook(bookToSave)
             self?.successMessage = "Book added to your library."
+            completion(.success(()))
+        }
+        } else {
+            // Rate limit exceeded, save with unknown age rating
+            print("DEBUG BookViewModel: Rate limit exceeded, saving recommended book without age rating analysis: \(recommendation.title)")
+            var bookToSave = newBook
+            bookToSave.ageRating = "Unknown"
+            saveBookToFirestore(bookToSave)
+            updateLocalBook(bookToSave)
+            successMessage = "Book added to your library."
             completion(.success(()))
         }
     }

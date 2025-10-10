@@ -79,12 +79,17 @@ class GeminiAPIService {
     private func performGeminiRequest(with imageData: Data, apiKey: String, startTime: Date, traceId: String, completion: @escaping (Result<String, Error>) -> Void) {
         print("DEBUG GeminiAPIService: jpegData successful, size: \(imageData.count) bytes")
 
+        // Generate timestamp for replay attack prevention
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let timeWindow = SecureConfig.shared.requestTimeWindowSeconds
+
         let base64Image = imageData.base64EncodedString()
 
         let url = URL(string: "\(baseURL)?key=\(apiKey)")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(timestamp, forHTTPHeaderField: "X-Timestamp")
 
         let enhancedPrompt = """
         You are an expert librarian with advanced OCR capabilities analyzing an image containing books.
@@ -171,8 +176,26 @@ class GeminiAPIService {
             }
 
             print("DEBUG GeminiAPIService: Received response from Gemini, error: \(error?.localizedDescription ?? "none"), data count: \(data?.count ?? 0), timestamp: \(Date())")
-
-            if let error = error {
+    
+                // Validate response timestamp for replay attack prevention
+                let responseTime = Date().timeIntervalSince(startTime)
+                if responseTime > timeWindow {
+                    print("DEBUG GeminiAPIService: Response received after time window (\(responseTime)s > \(timeWindow)s), rejecting for replay attack prevention")
+                    let timestampError = NSError(domain: "TimestampValidation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Response received outside acceptable time window"])
+    
+                    PerformanceMonitoringService.shared.completeAPICall(
+                        traceId: traceId,
+                        success: false,
+                        responseTime: responseTime,
+                        dataSize: dataSize,
+                        error: timestampError
+                    )
+    
+                    completion(.failure(timestampError))
+                    return
+                }
+    
+                if let error = error {
                 // Track failed API call
                 PerformanceMonitoringService.shared.completeAPICall(
                     traceId: traceId,

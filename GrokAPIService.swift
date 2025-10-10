@@ -51,6 +51,11 @@ class GrokAPIService {
     }
 
     private func performGrokRequest(prompt: String, apiKey: String, maxTokens: Int, temperature: Double, completion: @escaping (Result<String, Error>) -> Void) {
+        // Generate timestamp for replay attack prevention
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let timeWindow = SecureConfig.shared.requestTimeWindowSeconds
+        let requestStartTime = Date()
+
         let requestBody: [String: Any] = [
             "model": "grok-3-mini",
             "messages": [
@@ -72,6 +77,7 @@ class GrokAPIService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue(timestamp, forHTTPHeaderField: "X-Timestamp")
 
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
@@ -81,6 +87,15 @@ class GrokAPIService {
         }
 
         URLSession.shared.dataTask(with: request) { data, response, error in
+            // Validate response timestamp for replay attack prevention
+            let responseTime = Date().timeIntervalSince(requestStartTime)
+            if responseTime > timeWindow {
+                print("DEBUG GrokAPIService: Response received after time window (\(responseTime)s > \(timeWindow)s), rejecting for replay attack prevention")
+                let timestampError = NSError(domain: "TimestampValidation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Response received outside acceptable time window"])
+                completion(.failure(timestampError))
+                return
+            }
+
             if let error = error {
                 completion(.failure(error))
                 return
