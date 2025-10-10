@@ -12,6 +12,19 @@ struct ProfileView: View {
     @State private var showUpgradeModal = false
     @State private var showSubscriptionView = false
     @State private var expandedUsageDetails = false
+    @State private var showingReAuthSheet = false
+    @State private var reAuthEmail = ""
+    @State private var reAuthPassword = ""
+    @State private var reAuthError: String? = nil
+    @State private var showDeleteConfirmationAlert = false
+
+    private var secondaryTextColor: Color {
+        colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary
+    }
+
+    private var tertiaryTextColor: Color {
+        colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary
+    }
 
     var body: some View {
             ZStack {
@@ -22,276 +35,13 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(spacing: AppleBooksSpacing.space32) {
                         // User Info Section
-                        VStack(spacing: AppleBooksSpacing.space20) {
-                            // Profile picture
-                            HStack {
-                                Spacer()
-                                ProfilePictureView(authService: authService)
-                                    .background(
-                                        Circle()
-                                            .fill(AppleBooksColors.card)
-                                            .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
-                                    )
-                                Spacer()
-                            }
-                            .padding(.bottom, AppleBooksSpacing.space16)
-
-                            if let user = authService.currentUser {
-                                VStack(spacing: AppleBooksSpacing.space8) {
-                                    HStack(spacing: AppleBooksSpacing.space8) {
-                                        Image(systemName: "person.circle")
-                                            .font(AppleBooksTypography.headlineMedium)
-                                            .foregroundColor(AppleBooksColors.accent)
-                                        Text(user.displayName ?? user.email ?? "User")
-                                            .font(AppleBooksTypography.headlineLarge)
-                                            .foregroundColor(AppleBooksColors.text)
-                                            .multilineTextAlignment(.center)
-                                    }
-
-                                    HStack(spacing: AppleBooksSpacing.space8) {
-                                        Image(systemName: "envelope")
-                                            .font(AppleBooksTypography.bodyMedium)
-                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
-                                        Text(user.email ?? "")
-                                            .font(AppleBooksTypography.bodyMedium)
-                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary)
-                                    }
-
-                                    HStack(spacing: AppleBooksSpacing.space8) {
-                                        Image(systemName: "calendar")
-                                            .font(AppleBooksTypography.caption)
-                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
-                                        Text("Member since \(formattedDate(user.creationDate))")
-                                            .font(AppleBooksTypography.caption)
-                                            .foregroundColor(colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                        .padding(.top, AppleBooksSpacing.space32)
+                        UserInfoSection(authService: authService)
 
                         // Usage Stats Section with Progressive Disclosure
-                        if let user = authService.currentUser {
-                            VStack(spacing: AppleBooksSpacing.space16) {
-                                AppleBooksSectionHeader(
-                                    title: "Usage This Month",
-                                    subtitle: user.tier == .free ? "Free tier limits" : "Premium - Unlimited",
-                                    showSeeAll: user.tier == .free,
-                                    seeAllAction: user.tier == .free ? { expandedUsageDetails.toggle() } : nil
-                                )
-
-                                AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                    VStack(spacing: AppleBooksSpacing.space16) {
-                                        // Scans
-                                        EnhancedUsageRow(
-                                            icon: "camera.fill",
-                                            title: "AI Scans",
-                                            current: usageTracker.monthlyScans,
-                                            limit: usageTracker.scanLimit,
-                                            color: AppleBooksColors.accent,
-                                            showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
-                                            onUpgradeTap: {
-                                                showUpgradeModal = true
-                                            }
-                                        )
-
-                                        // Books
-                                        EnhancedUsageRow(
-                                            icon: "book.fill",
-                                            title: "Books in Library",
-                                            current: usageTracker.totalBooks,
-                                            limit: usageTracker.bookLimit,
-                                            color: AppleBooksColors.success,
-                                            showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
-                                            onUpgradeTap: {
-                                                showUpgradeModal = true
-                                            }
-                                        )
-
-                                        // Recommendations
-                                        EnhancedUsageRow(
-                                            icon: "sparkles",
-                                            title: "AI Recommendations",
-                                            current: usageTracker.monthlyRecommendations,
-                                            limit: usageTracker.recommendationLimit,
-                                            color: AppleBooksColors.promotional,
-                                            showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
-                                            onUpgradeTap: {
-                                                showUpgradeModal = true
-                                            }
-                                        )
-
-                                        // Progressive disclosure for detailed usage
-                                        if user.tier == .free {
-                                            Divider()
-                                                .background(AppleBooksColors.textTertiary.opacity(0.3))
-
-                                            VStack(spacing: AppleBooksSpacing.space16) {
-                                                Text("Premium Features Coming Soon")
-                                                    .font(AppleBooksTypography.captionBold)
-                                                    .foregroundColor(AppleBooksColors.accent)
-
-                                                Text("Unlock unlimited access to advanced analytics, unlimited scans, and more – stay tuned!")
-                                                    .font(AppleBooksTypography.caption)
-                                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                                    .multilineTextAlignment(.center)
-
-                                                Button(action: {
-                                                    // Premium coming soon - no action
-                                                    print("DEBUG ProfileView: Premium coming soon - view plans button tap ignored")
-                                                }) {
-                                                    Text("Coming Soon")
-                                                        .font(.caption.bold())
-                                                        .foregroundColor(.white)
-                                                        .padding(.horizontal, 12)
-                                                        .padding(.vertical, 6)
-                                                        .background(accentColorManager.currentAccentColor.color.opacity(0.7))
-                                                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                                                }
-                                                .disabled(true)
-                                                .glassBackground()
-                                                .opacity(0.6)
-                                                .accessibilityLabel("Premium Coming Soon")
-                                            }
-                                            .padding(.top, AppleBooksSpacing.space8)
-                                        }
-                                    }
-                                }
-                                .frame(maxWidth: 350)
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-                        }
+                        UsageStatsSection(authService: authService, usageTracker: usageTracker, showUpgradeModal: $showUpgradeModal)
 
                         // Settings Options Section
-                        VStack(spacing: AppleBooksSpacing.space16) {
-                            AppleBooksSectionHeader(
-                                title: "Manage your account and preferences",
-                                subtitle: nil,
-                                showSeeAll: false,
-                                seeAllAction: nil
-                            )
-
-                            VStack(spacing: AppleBooksSpacing.space16) {
-                                NavigationLink(destination: AccountSettingsView(authService: authService)) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                        HStack(spacing: AppleBooksSpacing.space12) {
-                                            Image(systemName: "gear")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.accent)
-                                                .frame(width: 24, height: 24)
-                                            Text("Account Settings")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.text)
-                                            Spacer()
-                                            Image(systemName: "chevron.right")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-                                    }
-                                    .frame(maxWidth: 350)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-
-                                NavigationLink(destination: ReadingStatsView()) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                        HStack(spacing: AppleBooksSpacing.space12) {
-                                            Image(systemName: "chart.bar.fill")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.success)
-                                                .frame(width: 24, height: 24)
-                                            Text("Detailed Statistics")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.text)
-                                            Spacer()
-                                            Image(systemName: "chevron.right")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-                                    }
-                                    .frame(maxWidth: 350)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-
-                                // Theme Section
-                                AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                    VStack(spacing: AppleBooksSpacing.space12) {
-                                        HStack {
-                                            Text("Appearance")
-                                                .font(AppleBooksTypography.headlineSmall)
-                                                .foregroundColor(AppleBooksColors.text)
-                                            Spacer()
-                                        }
-
-                                        GlassSegmentedPicker(
-                                            title: "",
-                                            selection: $themeManager.currentPreference,
-                                            options: ColorSchemePreference.allCases,
-                                            displayText: { $0.rawValue.capitalized },
-                                            isMandatory: false
-                                        )
-                                    }
-                                }
-                                .frame(maxWidth: 350)
-
-                                // Accent Color Section
-                                AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                    VStack(spacing: AppleBooksSpacing.space12) {
-                                        HStack {
-                                            Text("Accent Color")
-                                                .font(AppleBooksTypography.headlineSmall)
-                                                .foregroundColor(AppleBooksColors.text)
-                                            Spacer()
-                                        }
-
-                                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: AppleBooksSpacing.space12) {
-                                            ForEach(AccentColorScheme.allCases) { colorScheme in
-                                                AccentColorOption(
-                                                    colorScheme: colorScheme,
-                                                    isSelected: accentColorManager.currentAccentColor == colorScheme
-                                                )
-                                                .onTapGesture {
-                                                    accentColorManager.currentAccentColor = colorScheme
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                .frame(maxWidth: 350)
-
-                                // Sign Out
-                                Button(action: {
-                                    print("DEBUG ProfileView: Sign out button tapped")
-                                    print("DEBUG ProfileView: Current modal states - showWaitlistModal: \(showWaitlistModal), showUpgradeModal: \(showUpgradeModal)")
-                                    if showWaitlistModal || showUpgradeModal {
-                                        print("DEBUG ProfileView: Cannot present sign out alert because a sheet is already presented")
-                                        return
-                                    }
-                                    print("DEBUG ProfileView: Setting showSignOutAlert to true, alert should appear")
-                                    showSignOutAlert = true
-                                }) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                        HStack(spacing: AppleBooksSpacing.space12) {
-                                            Image(systemName: "arrow.right.square")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.promotional)
-                                                .frame(width: 24, height: 24)
-                                            Text("Sign Out")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.promotional)
-                                            Spacer()
-                                            Image(systemName: "chevron.right")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-                                    }
-                                    .frame(maxWidth: 350)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-
-                            }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
-                        }
+                        SettingsOptionsSection(authService: authService, themeManager: themeManager, accentColorManager: accentColorManager, showSignOutAlert: $showSignOutAlert)
 
 
                         Spacer(minLength: AppleBooksSpacing.space64)
@@ -310,6 +60,40 @@ struct ProfileView: View {
                 }
             } message: {
                 Text("Are you sure you want to sign out?")
+            }
+            .alert(isPresented: $showDeleteConfirmationAlert) {
+                return Alert(
+                    title: Text("Confirm Account Deletion"),
+                    message: Text("This action will permanently delete all your books, reading progress, and your account. This cannot be undone."),
+                    primaryButton: .destructive(Text("Delete Account")) {
+                        authService.deleteAccount { deleteResult in
+                            switch deleteResult {
+                            case .success:
+                                showingReAuthSheet = false
+                                showDeleteConfirmationAlert = false
+                                // Clear user-specific data
+                                let profileImagePath = UserDefaults.standard.string(forKey: "profileImagePath")
+                                UserDefaults.standard.removeObject(forKey: "profileImagePath")
+                                UserDefaults.standard.removeObject(forKey: "lastCoverRefreshTime")
+                                UserDefaults.standard.removeObject(forKey: "alertConfigurations")
+                                UserDefaults.standard.removeObject(forKey: "alertHistory")
+                                // Remove profile image file
+                                if let path = profileImagePath {
+                                    try? FileManager.default.removeItem(atPath: path)
+                                }
+                                // Reset usage tracker
+                                UsageTracker.shared.resetAllUsage()
+                                // Reset alert manager history
+                                AlertManager.shared.clearAlertHistory()
+                            case .failure(let error):
+                                reAuthError = "Deletion failed: \(error.localizedDescription)"
+                                showingReAuthSheet = true
+                                showDeleteConfirmationAlert = false
+                            }
+                        }
+                    },
+                    secondaryButton: .cancel()
+                )
             }
             .onChange(of: showSignOutAlert) { newValue in
                 print("DEBUG ProfileView: showSignOutAlert changed to \(newValue)")
@@ -332,57 +116,379 @@ struct ProfileView: View {
             }
             .animation(.easeInOut(duration: 0.3), value: showUpgradeModal)
             .sheet(isPresented: $showingReAuthSheet) {
-                NavigationView {
-                    Form {
-                        Section(header: Text("Re-authenticate to delete your account")) {
-                            TextField("Email", text: $reAuthEmail)
-                                .textContentType(.emailAddress)
-                                .autocapitalization(.none)
-                            if reAuthEmail.isEmpty {
-                                Text("Email is required")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                            }
-                            SecureField("Password", text: $reAuthPassword)
-                                .textContentType(.password)
-                            if reAuthPassword.isEmpty {
-                                Text("Password is required")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                            }
-                            if let error = reAuthError {
-                                Text(error)
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                            }
-                        }
-                        Section {
-                            Button(action: {
-                                authService.reAuthenticate(email: reAuthEmail, password: reAuthPassword) { result in
-                                    switch result {
-                                    case .success:
-                                        showingReAuthSheet = false
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            self.showDeleteConfirmationAlert = true
-                                        }
-                                    case .failure(let error):
-                                        reAuthError = error.localizedDescription
-                                    }
-                                }
-                            }) {
-                                Text("Delete Account")
-                                    .foregroundColor(.red)
-                            }
-                            .disabled(reAuthEmail.isEmpty || reAuthPassword.isEmpty)
-                        }
-                    }
-                    .navigationTitle("Confirm Deletion")
-                    .navigationBarItems(leading: Button("Cancel") {
-                        showingReAuthSheet = false
-                    })
-                }
+                ReAuthSheet(
+                    authService: authService,
+                    showingReAuthSheet: $showingReAuthSheet,
+                    reAuthEmail: $reAuthEmail,
+                    reAuthPassword: $reAuthPassword,
+                    reAuthError: $reAuthError,
+                    showDeleteConfirmationAlert: $showDeleteConfirmationAlert
+                )
             }
             .animation(.easeInOut(duration: 0.3), value: showingReAuthSheet)
+    }
+
+    private func formattedDate(_ date: Date?) -> String {
+        guard let date = date else { return "Unknown" }
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+}
+
+struct SettingsOptionsSection: View {
+    @ObservedObject var authService: AuthService
+    @ObservedObject var themeManager: ThemeManager
+    @ObservedObject var accentColorManager: AccentColorManager
+    @Binding var showSignOutAlert: Bool
+
+    var body: some View {
+        VStack(spacing: AppleBooksSpacing.space16) {
+            AppleBooksSectionHeader(
+                title: "Manage your account and preferences",
+                subtitle: nil,
+                showSeeAll: false,
+                seeAllAction: nil
+            )
+
+            VStack(spacing: AppleBooksSpacing.space16) {
+                NavigationLink(destination: AccountSettingsView(authService: authService)) {
+                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                        HStack(spacing: AppleBooksSpacing.space12) {
+                            Image(systemName: "gear")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.accent)
+                                .frame(width: 24, height: 24)
+                            Text("Account Settings")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                        }
+                    }
+                    .frame(maxWidth: 350)
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                NavigationLink(destination: ReadingStatsView()) {
+                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                        HStack(spacing: AppleBooksSpacing.space12) {
+                            Image(systemName: "chart.bar.fill")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.success)
+                                .frame(width: 24, height: 24)
+                            Text("Detailed Statistics")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                        }
+                    }
+                    .frame(maxWidth: 350)
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                // Theme Section
+                AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                    VStack(spacing: AppleBooksSpacing.space12) {
+                        HStack {
+                            Text("Appearance")
+                                .font(AppleBooksTypography.headlineSmall)
+                                .foregroundColor(AppleBooksColors.text)
+                            Spacer()
+                        }
+
+                        GlassSegmentedPicker(
+                            title: "",
+                            selection: $themeManager.currentPreference,
+                            options: ColorSchemePreference.allCases,
+                            displayText: { $0.rawValue.capitalized },
+                            isMandatory: false
+                        )
+                    }
+                }
+                .frame(maxWidth: 350)
+
+                // Accent Color Section
+                AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                    VStack(spacing: AppleBooksSpacing.space12) {
+                        HStack {
+                            Text("Accent Color")
+                                .font(AppleBooksTypography.headlineSmall)
+                                .foregroundColor(AppleBooksColors.text)
+                            Spacer()
+                        }
+
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: AppleBooksSpacing.space12) {
+                            ForEach(AccentColorScheme.allCases) { colorScheme in
+                                AccentColorOption(
+                                    colorScheme: colorScheme,
+                                    isSelected: accentColorManager.currentAccentColor == colorScheme
+                                )
+                                .onTapGesture {
+                                    accentColorManager.currentAccentColor = colorScheme
+                                }
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: 350)
+
+                // Sign Out
+                Button(action: {
+                    print("DEBUG ProfileView: Sign out button tapped")
+                    showSignOutAlert = true
+                }) {
+                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                        HStack(spacing: AppleBooksSpacing.space12) {
+                            Image(systemName: "arrow.right.square")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.promotional)
+                                .frame(width: 24, height: 24)
+                            Text("Sign Out")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.promotional)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                        }
+                    }
+                    .frame(maxWidth: 350)
+                }
+                .buttonStyle(PlainButtonStyle())
+
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        }
+    }
+}
+
+struct ReAuthSheet: View {
+    @ObservedObject var authService: AuthService
+    @Binding var showingReAuthSheet: Bool
+    @Binding var reAuthEmail: String
+    @Binding var reAuthPassword: String
+    @Binding var reAuthError: String?
+    @Binding var showDeleteConfirmationAlert: Bool
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Re-authenticate to delete your account")) {
+                    TextField("Email", text: $reAuthEmail)
+                        .textContentType(.emailAddress)
+                        .autocapitalization(.none)
+                    if reAuthEmail.isEmpty {
+                        Text("Email is required")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                    SecureField("Password", text: $reAuthPassword)
+                        .textContentType(.password)
+                    if reAuthPassword.isEmpty {
+                        Text("Password is required")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                    if let error = reAuthError {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                }
+                Section {
+                    Button(action: {
+                        authService.reAuthenticate(email: reAuthEmail, password: reAuthPassword) { result in
+                            switch result {
+                            case .success:
+                                showingReAuthSheet = false
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    self.showDeleteConfirmationAlert = true
+                                }
+                            case .failure(let error):
+                                reAuthError = error.localizedDescription
+                            }
+                        }
+                    }) {
+                        Text("Delete Account")
+                            .foregroundColor(.red)
+                    }
+                    .disabled(reAuthEmail.isEmpty || reAuthPassword.isEmpty)
+                }
+            }
+            .navigationTitle("Confirm Deletion")
+            .navigationBarItems(leading: Button("Cancel") {
+                showingReAuthSheet = false
+            })
+        }
+    }
+}
+
+struct UsageStatsSection: View {
+    @ObservedObject var authService: AuthService
+    @ObservedObject var usageTracker: UsageTracker
+    @Binding var showUpgradeModal: Bool
+
+    var body: some View {
+        if let user = authService.currentUser {
+            VStack(spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "Usage This Month",
+                    subtitle: user.tier == .free ? "Free tier limits" : "Premium - Unlimited",
+                    showSeeAll: user.tier == .free,
+                    seeAllAction: user.tier == .free ? { } : nil
+                )
+
+                AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                    VStack(spacing: AppleBooksSpacing.space16) {
+                        // Scans
+                        EnhancedUsageRow(
+                            icon: "camera.fill",
+                            title: "AI Scans",
+                            current: usageTracker.monthlyScans,
+                            limit: usageTracker.scanLimit,
+                            color: AppleBooksColors.accent,
+                            showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
+                            onUpgradeTap: {
+                                showUpgradeModal = true
+                            }
+                        )
+
+                        // Books
+                        EnhancedUsageRow(
+                            icon: "book.fill",
+                            title: "Books in Library",
+                            current: usageTracker.totalBooks,
+                            limit: usageTracker.bookLimit,
+                            color: AppleBooksColors.success,
+                            showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
+                            onUpgradeTap: {
+                                showUpgradeModal = true
+                            }
+                        )
+
+                        // Recommendations
+                        EnhancedUsageRow(
+                            icon: "sparkles",
+                            title: "AI Recommendations",
+                            current: usageTracker.monthlyRecommendations,
+                            limit: usageTracker.recommendationLimit,
+                            color: AppleBooksColors.promotional,
+                            showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
+                            onUpgradeTap: {
+                                showUpgradeModal = true
+                            }
+                        )
+
+                        // Progressive disclosure for detailed usage
+                        if user.tier == .free {
+                            Divider()
+                                .background(AppleBooksColors.textTertiary.opacity(0.3))
+
+                            VStack(spacing: AppleBooksSpacing.space16) {
+                                Text("Premium Features Coming Soon")
+                                    .font(AppleBooksTypography.captionBold)
+                                    .foregroundColor(AppleBooksColors.accent)
+
+                                Text("Unlock unlimited access to advanced analytics, unlimited scans, and more – stay tuned!")
+                                    .font(AppleBooksTypography.caption)
+                                    .foregroundColor(AppleBooksColors.textSecondary)
+                                    .multilineTextAlignment(.center)
+
+                                Button(action: {
+                                    // Premium coming soon - no action
+                                    print("DEBUG ProfileView: Premium coming soon - view plans button tap ignored")
+                                }) {
+                                    Text("Coming Soon")
+                                        .font(.caption.bold())
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.blue.opacity(0.7))
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                }
+                                .disabled(true)
+                                .glassBackground()
+                                .opacity(0.6)
+                                .accessibilityLabel("Premium Coming Soon")
+                            }
+                            .padding(.top, AppleBooksSpacing.space8)
+                        }
+                    }
+                }
+                .frame(maxWidth: 350)
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        }
+    }
+}
+
+struct UserInfoSection: View {
+    @ObservedObject var authService: AuthService
+    @Environment(\.colorScheme) var colorScheme
+
+    private var secondaryTextColor: Color {
+        colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary
+    }
+
+    private var tertiaryTextColor: Color {
+        colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary
+    }
+
+    var body: some View {
+        VStack(spacing: AppleBooksSpacing.space20) {
+            // Profile picture
+            HStack {
+                Spacer()
+                ProfilePictureView(authService: authService)
+                    .background(
+                        Circle()
+                            .fill(AppleBooksColors.card)
+                            .shadow(color: AppleBooksShadow.subtle.color, radius: AppleBooksShadow.subtle.radius, x: AppleBooksShadow.subtle.x, y: AppleBooksShadow.subtle.y)
+                    )
+                Spacer()
+            }
+            .padding(.bottom, AppleBooksSpacing.space16)
+
+            if let user = authService.currentUser {
+                VStack(spacing: AppleBooksSpacing.space8) {
+                    HStack(spacing: AppleBooksSpacing.space8) {
+                        Image(systemName: "person.circle")
+                            .font(AppleBooksTypography.headlineMedium)
+                            .foregroundColor(AppleBooksColors.accent)
+                        Text(user.displayName ?? user.email ?? "User")
+                            .font(AppleBooksTypography.headlineLarge)
+                            .foregroundColor(AppleBooksColors.text)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    HStack(spacing: AppleBooksSpacing.space8) {
+                        Image(systemName: "envelope")
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(secondaryTextColor)
+                        Text(user.email ?? "")
+                            .font(AppleBooksTypography.bodyMedium)
+                            .foregroundColor(secondaryTextColor)
+                    }
+
+                    HStack(spacing: AppleBooksSpacing.space8) {
+                        Image(systemName: "calendar")
+                            .font(AppleBooksTypography.caption)
+                            .foregroundColor(tertiaryTextColor)
+                        Text("Member since \(formattedDate(user.creationDate))")
+                            .font(AppleBooksTypography.caption)
+                            .foregroundColor(tertiaryTextColor)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, AppleBooksSpacing.space24)
+        .padding(.top, AppleBooksSpacing.space32)
     }
 
     private func formattedDate(_ date: Date?) -> String {
