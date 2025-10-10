@@ -175,8 +175,8 @@ struct LoginView: View {
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                         HStack {
                                             Text("Last Name")
-                                            .font(AppleBooksTypography.headlineSmall)
-                                            .foregroundColor(AppleBooksColors.text)
+                                                .font(AppleBooksTypography.headlineSmall)
+                                                .foregroundColor(AppleBooksColors.text)
                                             Text("*")
                                                 .foregroundColor(AppleBooksColors.promotional)
                                                 .font(AppleBooksTypography.headlineSmall)
@@ -194,6 +194,36 @@ struct LoginView: View {
                                             )
                                             .textContentType(.familyName)
                                     }
+                                }
+
+                                // Country Field (required for signup)
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                    HStack {
+                                        Text("Country")
+                                            .font(AppleBooksTypography.headlineSmall)
+                                            .foregroundColor(AppleBooksColors.text)
+                                        Text("*")
+                                            .foregroundColor(AppleBooksColors.promotional)
+                                            .font(AppleBooksTypography.headlineSmall)
+                                    }
+
+                                    Picker("Select country", selection: $country) {
+                                        Text("Select country").tag("")
+                                        ForEach(Locale.isoRegionCodes.compactMap { Locale.current.localizedString(forRegionCode: $0) }.sorted(), id: \.self) { countryName in
+                                            Text(countryName).tag(countryName)
+                                        }
+                                    }
+                                    .pickerStyle(.menu)
+                                    .font(AppleBooksTypography.bodyLarge)
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .padding(AppleBooksSpacing.space12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(AppleBooksColors.background)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
                                 }
                             }
 
@@ -287,43 +317,23 @@ struct LoginView: View {
                                             .textContentType(.telephoneNumber)
                                     }
 
-                                    // Country & City
-                                    HStack(spacing: AppleBooksSpacing.space12) {
-                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                            Text("Country")
-                                                .font(AppleBooksTypography.headlineSmall)
-                                                .foregroundColor(AppleBooksColors.text)
+                                    // City
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
+                                        Text("City")
+                                            .font(AppleBooksTypography.headlineSmall)
+                                            .foregroundColor(AppleBooksColors.text)
 
-                                            TextField("Enter country", text: $country)
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .padding(AppleBooksSpacing.space12)
-                                                .background(AppleBooksColors.background)
-                                                .cornerRadius(8)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        TextField("Enter city", text: $city)
+                                            .font(AppleBooksTypography.bodyLarge)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .padding(AppleBooksSpacing.space12)
+                                            .background(AppleBooksColors.background)
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                             )
-                                            .textContentType(.countryName)
-                                        }
-
-                                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                            Text("City")
-                                                .font(AppleBooksTypography.headlineSmall)
-                                                .foregroundColor(AppleBooksColors.text)
-
-                                            TextField("Enter city", text: $city)
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(AppleBooksColors.text)
-                                                .padding(AppleBooksSpacing.space12)
-                                                .background(AppleBooksColors.background)
-                                                .cornerRadius(8)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                                )
                                             .textContentType(.addressCity)
-                                        }
                                     }
 
                                     // Favorite Book Genre
@@ -499,6 +509,10 @@ struct LoginView: View {
             authService.errorMessage = "Last name is required"
             return
         }
+        guard !country.isEmpty else {
+            authService.errorMessage = "Country is required"
+            return
+        }
 
         guard let tier = selectedTier else {
             authService.errorMessage = "Please select a tier"
@@ -514,7 +528,7 @@ struct LoginView: View {
             dateOfBirth: showMoreFields ? dateOfBirth : nil,
             gender: gender.isEmpty ? nil : gender,
             phone: phone.isEmpty ? nil : phone,
-            country: country.isEmpty ? nil : country,
+            country: country,
             city: city.isEmpty ? nil : city,
             favoriteBookGenre: favoriteBookGenre.isEmpty ? nil : favoriteBookGenre,
             tier: tier
