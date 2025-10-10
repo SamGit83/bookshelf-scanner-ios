@@ -275,9 +275,9 @@ struct SubscriptionSelectionView: View {
                     Text("Premium Coming Soon")
                         .font(.system(size: 17, weight: .medium))
                         .foregroundColor(AppleBooksColors.textTertiary)
-                        .frame(maxWidth: isIPad ? 500 : .infinity)
                         .padding(.vertical, AppleBooksSpacing.space16)
                 }
+                .frame(maxWidth: isIPad ? 500 : .infinity)
                 .frame(maxWidth: .infinity)
                 .background(AppleBooksColors.card)
                 .cornerRadius(12)
@@ -322,6 +322,8 @@ struct SubscriptionSelectionView: View {
                         }
                     }
                 }
+                .frame(maxWidth: isIPad ? 600 : .infinity)
+                .frame(maxWidth: .infinity)
                 .padding(.top, AppleBooksSpacing.space16)
 
 
@@ -373,6 +375,8 @@ struct SubscriptionSelectionView: View {
                         }
                     }
                 }
+                .frame(maxWidth: isIPad ? 600 : .infinity)
+                .frame(maxWidth: .infinity)
                 .padding(.top, AppleBooksSpacing.space16)
                 
                 if showSuccess {
@@ -387,8 +391,8 @@ struct SubscriptionSelectionView: View {
                         Text("Skip for Free Tier")
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(AppleBooksColors.textSecondary)
-                            .frame(maxWidth: isIPad ? 500 : .infinity)
                     }
+                    .frame(maxWidth: isIPad ? 500 : .infinity)
                     .frame(maxWidth: .infinity)
                 }
             }
