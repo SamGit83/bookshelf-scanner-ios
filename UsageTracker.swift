@@ -80,6 +80,10 @@ class UsageTracker: ObservableObject {
     }
 
     func incrementScans() {
+        // Prevent incrementing if already at or over the limit (for non-premium users)
+        if monthlyScans >= scanLimit && scanLimit != Int.max {
+            return
+        }
         monthlyScans += 1
         saveUsageData()
         // Update analytics user properties
@@ -111,6 +115,10 @@ class UsageTracker: ObservableObject {
     }
 
     func incrementBooks() {
+        // Prevent incrementing if already at or over the limit (for non-premium users)
+        if totalBooks >= bookLimit && bookLimit != Int.max {
+            return
+        }
         totalBooks += 1
         saveUsageData()
         // Update analytics user properties
@@ -121,6 +129,7 @@ class UsageTracker: ObservableObject {
         #if canImport(FirebaseAnalytics)
         if totalBooks == bookLimit {
             AnalyticsManager.shared.trackLimitHit(limitType: "book", currentValue: totalBooks, limitValue: bookLimit)
+            ABTestingService.shared.trackLimitHit(limitType: "book", currentValue: totalBooks, limitValue: bookLimit)
             ABTestingService.shared.trackExperimentEvent(
                 experimentId: "usage_limits_experiment",
                 variantId: "current_variant",
@@ -141,6 +150,10 @@ class UsageTracker: ObservableObject {
     }
 
     func incrementRecommendations() {
+        // Prevent incrementing if already at or over the limit (for non-premium users)
+        if monthlyRecommendations >= recommendationLimit && recommendationLimit != Int.max {
+            return
+        }
         monthlyRecommendations += 1
         saveUsageData()
         // Update analytics user properties

@@ -350,7 +350,7 @@ struct UsageStatsSection: View {
                         EnhancedUsageRow(
                             icon: "camera.fill",
                             title: "AI Scans",
-                            current: usageTracker.monthlyScans,
+                            current: min(usageTracker.monthlyScans, usageTracker.scanLimit),
                             limit: usageTracker.scanLimit,
                             color: AppleBooksColors.accent,
                             showTeaser: user.tier == .free && usageTracker.monthlyScans >= usageTracker.scanLimit * 3 / 4,
@@ -363,7 +363,7 @@ struct UsageStatsSection: View {
                         EnhancedUsageRow(
                             icon: "book.fill",
                             title: "Books in Library",
-                            current: usageTracker.totalBooks,
+                            current: min(usageTracker.totalBooks, usageTracker.bookLimit),
                             limit: usageTracker.bookLimit,
                             color: AppleBooksColors.success,
                             showTeaser: user.tier == .free && usageTracker.totalBooks >= usageTracker.bookLimit * 3 / 4,
@@ -376,7 +376,7 @@ struct UsageStatsSection: View {
                         EnhancedUsageRow(
                             icon: "sparkles",
                             title: "AI Recommendations",
-                            current: usageTracker.monthlyRecommendations,
+                            current: min(usageTracker.monthlyRecommendations, usageTracker.recommendationLimit),
                             limit: usageTracker.recommendationLimit,
                             color: AppleBooksColors.promotional,
                             showTeaser: user.tier == .free && usageTracker.monthlyRecommendations >= usageTracker.recommendationLimit * 3 / 4,
@@ -804,6 +804,16 @@ struct AccountSettingsView: View {
                     }
                 },
                 secondaryButton: .cancel()
+            )
+        }
+        .sheet(isPresented: $showingReAuthSheet) {
+            ReAuthSheet(
+                authService: authService,
+                showingReAuthSheet: $showingReAuthSheet,
+                reAuthEmail: $reAuthEmail,
+                reAuthPassword: $reAuthPassword,
+                reAuthError: $reAuthError,
+                showDeleteConfirmationAlert: $showDeleteConfirmationAlert
             )
         }
     }
