@@ -3,6 +3,7 @@ import UIKit
 
 struct ConfettiView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
+        print("DEBUG ConfettiView: makeUIView called")
         let view = UIView()
         view.backgroundColor = .clear
 
@@ -52,11 +53,13 @@ struct ConfettiView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
+        print("DEBUG ConfettiView: updateUIView called, bounds: \(uiView.bounds)")
         // Update emitter position to center top of screen
         if let emitterLayer = uiView.layer.sublayers?.first as? CAEmitterLayer {
             emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: 0)
             // Set emitter size to a small width so confetti emits from center point
             emitterLayer.emitterSize = CGSize(width: 50, height: 0)
+            print("DEBUG ConfettiView: emitter position set to \(emitterLayer.emitterPosition), size \(emitterLayer.emitterSize)")
         }
     }
 

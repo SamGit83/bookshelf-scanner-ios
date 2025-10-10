@@ -147,8 +147,10 @@ struct QuizView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .onAppear {
+                    print("DEBUG QuizView: onAppear triggered for summary, setting showConfetti = true")
                     showConfetti = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        print("DEBUG QuizView: Setting showConfetti = false after 5 seconds")
                         showConfetti = false
                     }
                 }
