@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct QuizPromptView: View {
-    @State private var showQuiz = false
-    @State private var showMainApp = false
+    let onTakeQuiz: () -> Void
+    let onDoItLater: () -> Void
 
     var body: some View {
         ZStack {
@@ -58,11 +58,9 @@ struct QuizPromptView: View {
                 // Action Buttons
                 VStack(spacing: AppleBooksSpacing.space16) {
                     Button(action: {
-                        withAnimation(.easeInOut(duration: 0.5)) {
-                            showQuiz = true
-                        }
+                        onTakeQuiz()
                     }) {
-                        Text("Take Quiz")
+                        Text("Take Quiz Now")
                             .font(.system(size: 17, weight: .medium))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -72,11 +70,9 @@ struct QuizPromptView: View {
                     }
 
                     Button(action: {
-                        withAnimation(.easeInOut(duration: 0.5)) {
-                            showMainApp = true
-                        }
+                        onDoItLater()
                     }) {
-                        Text("Skip for Now")
+                        Text("Do It Later")
                             .font(.system(size: 17, weight: .medium))
                             .foregroundColor(AppleBooksColors.textSecondary)
                     }
@@ -85,18 +81,12 @@ struct QuizPromptView: View {
                 .padding(.bottom, AppleBooksSpacing.space32)
             }
         }
-        .fullScreenCover(isPresented: $showQuiz) {
-            QuizView()
-        }
-        .fullScreenCover(isPresented: $showMainApp) {
-            ContentView()
-        }
     }
 }
 
 // Preview
 struct QuizPromptView_Previews: PreviewProvider {
     static var previews: some View {
-        QuizPromptView()
+        QuizPromptView(onTakeQuiz: {}, onDoItLater: {})
     }
 }

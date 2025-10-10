@@ -5,15 +5,27 @@ import UIKit
 
 
 struct ContentView: View {
-     @ObservedObject private var authService = AuthService.shared
-     @ObservedObject private var themeManager = ThemeManager.shared
-     @ObservedObject private var accentColorManager = AccentColorManager.shared
-     @StateObject private var viewModel = BookViewModel()
-     @State private var capturedImage: UIImage?
-     @State private var isShowingCamera = false
-     @State private var selectedTab = 0
+      @ObservedObject private var authService = AuthService.shared
+      @ObservedObject private var themeManager = ThemeManager.shared
+      @ObservedObject private var accentColorManager = AccentColorManager.shared
+      @StateObject private var viewModel = BookViewModel()
+      @State private var capturedImage: UIImage?
+      @State private var isShowingCamera = false
+      @State private var selectedTab = 0
+      @State private var showQuiz = false
 
-     private var userInitials: String {
+      private var hasSeenQuizPrompt: Bool {
+          get {
+              guard let userId = authService.currentUser?.id else { return false }
+              return UserDefaults.standard.bool(forKey: "hasSeenQuizPrompt_\(userId)")
+          }
+          set {
+              guard let userId = authService.currentUser?.id else { return }
+              UserDefaults.standard.set(newValue, forKey: "hasSeenQuizPrompt_\(userId)")
+          }
+      }
+
+      private var userInitials: String {
          let displayName = authService.currentUser?.displayName
          let email = authService.currentUser?.email
          let name = displayName ?? email ?? "?"
@@ -36,10 +48,13 @@ struct ContentView: View {
                  // For authenticated users, assume they have completed onboarding
                  // unless explicitly marked as not completed
                  if authService.hasCompletedOnboarding || authService.isLoadingOnboardingStatus {
-                     if authService.currentUser?.hasTakenQuiz == true {
+                     if authService.currentUser?.hasTakenQuiz == true || hasSeenQuizPrompt {
                          authenticatedView
                      } else {
-                         QuizView()
+                         QuizPromptView(
+                             onTakeQuiz: { showQuiz = true },
+                             onDoItLater: { hasSeenQuizPrompt = true }
+                         )
                      }
                  } else {
                      OnboardingView()
@@ -99,6 +114,9 @@ struct ContentView: View {
         .navigationViewStyle(StackNavigationViewStyle())
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
+        }
+        .fullScreenCover(isPresented: $showQuiz) {
+            QuizView()
         }
         .onChange(of: isShowingCamera) { newValue in
         }

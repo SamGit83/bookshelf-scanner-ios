@@ -106,8 +106,8 @@ struct QuizView: View {
     }
 
     var body: some View {
-        if showSummary {
-            ZStack {
+        ZStack {
+            if showSummary {
                 AppleBooksColors.background
                     .ignoresSafeArea()
 
@@ -126,7 +126,9 @@ struct QuizView: View {
                     Spacer()
 
                     Button(action: {
-                        // Quiz completed, view will transition automatically
+                        // Quiz completed, dismiss the view
+                        showConfetti = false
+                        presentationMode.wrappedValue.dismiss()
                     }) {
                         Text("Done")
                             .font(.system(size: 17, weight: .medium))
@@ -139,9 +141,7 @@ struct QuizView: View {
                     .padding(.horizontal, AppleBooksSpacing.space24)
                     .padding(.bottom, AppleBooksSpacing.space32)
                 }
-            }
-        } else {
-            ZStack {
+            } else {
                 AppleBooksColors.background
                     .ignoresSafeArea()
 
@@ -276,7 +276,6 @@ struct QuizView: View {
                             }
                             showConfetti = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                showConfetti = false
                                 showSummary = true
                             }
                         }) {
