@@ -305,15 +305,15 @@ struct QuizSummaryView: View {
 
                 ScrollView {
                     VStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(questions.indices, id: \.self) { index in
-                            if let response = responses[index] {
+                        ForEach(questions, id: \.id) { question in
+                            if let response = responses[question.id] {
                                 AppleBooksCard(
                                     cornerRadius: 12,
                                     padding: AppleBooksSpacing.space16,
                                     shadowStyle: .light
                                 ) {
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
-                                        Text(questions[index].question)
+                                        Text(question.question)
                                             .font(.system(size: 18, weight: .semibold))
                                             .foregroundColor(AppleBooksColors.text)
                                         Text(response.sorted().joined(separator: ", "))
