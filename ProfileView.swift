@@ -447,7 +447,7 @@ struct QuizSection: View {
                 NavigationLink(destination: QuizView()) {
                     AppleBooksCard(padding: AppleBooksSpacing.space12) {
                         HStack(spacing: AppleBooksSpacing.space12) {
-                            Image(systemName: "questionmark.circle")
+                            Image(systemName: "list.bullet.clipboard")
                                 .font(AppleBooksTypography.bodyLarge)
                                 .foregroundColor(AppleBooksColors.accent)
                                 .frame(width: 24, height: 24)

@@ -7,8 +7,9 @@ struct ConfettiView: UIViewRepresentable {
         view.backgroundColor = .clear
 
         let emitterLayer = CAEmitterLayer()
-        emitterLayer.emitterPosition = CGPoint(x: view.bounds.width / 2, y: 0)
-        emitterLayer.emitterSize = CGSize(width: view.bounds.width, height: 0)
+        // Will be set properly in updateUIView when bounds are available
+        emitterLayer.emitterPosition = CGPoint(x: 0, y: 0)
+        emitterLayer.emitterSize = CGSize(width: 0, height: 0)
         emitterLayer.emitterShape = .line
         emitterLayer.birthRate = 6
 
