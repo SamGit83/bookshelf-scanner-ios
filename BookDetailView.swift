@@ -6,6 +6,7 @@ import UIKit
 struct BookDetailView: View {
     let book: Book
     @ObservedObject var viewModel: BookViewModel
+    private let rateLimiter = RateLimiter()
 
     private var currentBook: Book {
         viewModel.books.first(where: { $0.id == book.id }) ?? book
@@ -438,6 +439,7 @@ struct BookDetailView: View {
                 switch result {
                 case .success(let details):
                     self.bookDetails = details
+                    print("DEBUG BookDetailView: Book details loaded successfully, initiating teaser and bio fetches")
                     // Always fetch fresh AI-generated book teaser
                     if let title = self.currentBook.title, let author = self.currentBook.author {
                         self.loadBookTeaser(title: title, author: author)
@@ -467,32 +469,48 @@ struct BookDetailView: View {
             return
         }
         isLoadingBio = true
+        guard rateLimiter.canMakeCall() else {
+            print("DEBUG BookDetailView: Rate limit exceeded for author bio fetch - cannot make API call")
+            isLoadingBio = false
+            return
+        }
+        print("DEBUG BookDetailView: Initiating author bio fetch for author: \(author)")
         let grokService = GrokAPIService()
         grokService.fetchAuthorBiography(author: author) { result in
             DispatchQueue.main.async {
                 self.isLoadingBio = false
                 switch result {
                 case .success(let bio):
+                    print("DEBUG BookDetailView: Successfully loaded author bio for \(author)")
                     self.viewModel.updateBookAuthorBio(self.currentBook, authorBio: bio)
                 case .failure(let error):
-                    print("Failed to load author biography: \(error.localizedDescription)")
+                    print("DEBUG BookDetailView: Failed to load author biography for \(author): \(error.localizedDescription)")
                 }
+                self.rateLimiter.recordCall()
             }
         }
     }
 
     private func loadBookTeaser(title: String, author: String) {
         isLoadingTeaser = true
+        guard rateLimiter.canMakeCall() else {
+            print("DEBUG BookDetailView: Rate limit exceeded for book teaser fetch - cannot make API call")
+            isLoadingTeaser = false
+            return
+        }
+        print("DEBUG BookDetailView: Initiating book teaser fetch for title: \(title), author: \(author)")
         let grokService = GrokAPIService()
         grokService.fetchBookSummary(title: title, author: author) { result in
             DispatchQueue.main.async {
                 self.isLoadingTeaser = false
                 switch result {
                 case .success(let teaser):
+                    print("DEBUG BookDetailView: Successfully loaded book teaser for \(title)")
                     self.viewModel.updateBookTeaser(self.currentBook, teaser: teaser)
                 case .failure(let error):
-                    print("Failed to load book teaser: \(error.localizedDescription)")
+                    print("DEBUG BookDetailView: Failed to load book teaser for \(title): \(error.localizedDescription)")
                 }
+                self.rateLimiter.recordCall()
             }
         }
     }
