@@ -10,7 +10,7 @@ struct ConfettiView: UIViewRepresentable {
         // Will be set properly in updateUIView when bounds are available
         emitterLayer.emitterPosition = CGPoint(x: 0, y: 0)
         emitterLayer.emitterSize = CGSize(width: 0, height: 0)
-        emitterLayer.emitterShape = .point
+        emitterLayer.emitterShape = .line
         emitterLayer.birthRate = 6
 
         let colors: [UIColor] = [
@@ -54,8 +54,8 @@ struct ConfettiView: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         // Update emitter position if needed
         if let emitterLayer = uiView.layer.sublayers?.first as? CAEmitterLayer {
-            emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: uiView.bounds.height / 2)
-            emitterLayer.emitterSize = CGSize(width: 0, height: 0)
+            emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: 0)
+            emitterLayer.emitterSize = CGSize(width: uiView.bounds.width, height: 0)
         }
     }
 
