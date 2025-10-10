@@ -10,7 +10,7 @@ struct ConfettiView: UIViewRepresentable {
         emitterLayer.emitterPosition = CGPoint(x: view.bounds.width / 2, y: 0)
         emitterLayer.emitterSize = CGSize(width: view.bounds.width, height: 0)
         emitterLayer.emitterShape = .line
-        emitterLayer.birthRate = 20
+        emitterLayer.birthRate = 6
 
         let colors: [UIColor] = [
             UIColor.systemRed.withAlphaComponent(0.9),
@@ -30,7 +30,7 @@ struct ConfettiView: UIViewRepresentable {
         var cells: [CAEmitterCell] = []
         for color in colors {
             let cell = CAEmitterCell()
-            cell.birthRate = 3
+            cell.birthRate = 1
             cell.lifetime = 12
             cell.velocity = 150
             cell.velocityRange = 100

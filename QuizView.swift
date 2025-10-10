@@ -5,12 +5,15 @@ struct QuizQuestion: Identifiable {
     let question: String
     let options: [String]
     let multipleSelection: Bool
+    let isTextField: Bool
+    let textPlaceholder: String?
 }
 
 struct QuizView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var currentQuestionIndex = 0
-    @State private var responses: [Int: Set<String>] = [:]
+    @State private var responses: [Int: Any] = [:]
+    @State private var currentText: String = ""
     @State private var showConfetti = false
     @State private var showSummary = false
     @State private var quizSaveError: String?
@@ -20,61 +23,81 @@ struct QuizView: View {
             id: 0,
             question: "What is your age group?",
             options: ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"],
-            multipleSelection: false
+            multipleSelection: false,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 1,
             question: "What is your gender?",
             options: ["Male", "Female", "Non-binary", "Prefer not to say"],
-            multipleSelection: false
+            multipleSelection: false,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 2,
             question: "How often do you read?",
             options: ["Daily", "A few times a week", "Once a week", "A few times a month", "Rarely"],
-            multipleSelection: false
+            multipleSelection: false,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 3,
             question: "What are your favorite genres?",
             options: ["Fiction", "Non-fiction", "Mystery/Thriller", "Romance", "Science Fiction", "Fantasy", "Biography/Memoir", "History", "Self-help/Personal Development", "Poetry", "Other"],
-            multipleSelection: true
+            multipleSelection: true,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 4,
             question: "What type of books do you prefer?",
             options: ["Physical books", "E-books", "Audiobooks", "All equally"],
-            multipleSelection: false
+            multipleSelection: false,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 5,
             question: "How many books do you typically read per year?",
             options: ["0-5", "6-10", "11-20", "21-50", "50+"],
-            multipleSelection: false
+            multipleSelection: false,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 6,
             question: "What motivates you to read?",
             options: ["Relaxation", "Learning new things", "Entertainment", "Social recommendations", "Professional development", "Other"],
-            multipleSelection: true
+            multipleSelection: true,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 7,
             question: "Do you track your reading progress?",
             options: ["Yes, regularly", "Sometimes", "No"],
-            multipleSelection: false
+            multipleSelection: false,
+            isTextField: false,
+            textPlaceholder: nil
         ),
         QuizQuestion(
             id: 8,
             question: "Who are some of your favorite authors?",
-            options: ["J.K. Rowling", "Stephen King", "Jane Austen", "George Orwell", "Agatha Christie", "Other"],
-            multipleSelection: true
+            options: [],
+            multipleSelection: false,
+            isTextField: true,
+            textPlaceholder: "Enter authors separated by commas"
         ),
         QuizQuestion(
             id: 9,
             question: "What is your preferred book format?",
             options: ["Paperback", "Hardcover", "Digital (e-book)", "Audio", "Any"],
-            multipleSelection: false
+            multipleSelection: false,
+            isTextField: false,
+            textPlaceholder: nil
         )
     ]
 
@@ -155,17 +178,27 @@ struct QuizView: View {
                                     .minimumScaleFactor(0.8)
                                     .padding(.horizontal, AppleBooksSpacing.space16)
 
-                                // Options
+                                // Options or Text Field
                                 VStack(spacing: AppleBooksSpacing.space12) {
-                                    ForEach(currentQuestion.options, id: \.self) { option in
-                                        OptionButton(
-                                            option: option,
-                                            isSelected: isSelected(option),
-                                            multipleSelection: currentQuestion.multipleSelection,
-                                            action: {
-                                                toggleSelection(option)
-                                            }
-                                        )
+                                    if currentQuestion.isTextField {
+                                        TextField(currentQuestion.textPlaceholder ?? "", text: $currentText)
+                                            .padding(.vertical, AppleBooksSpacing.space12)
+                                            .padding(.horizontal, AppleBooksSpacing.space16)
+                                            .background(AppleBooksColors.card)
+                                            .cornerRadius(12)
+                                            .foregroundColor(AppleBooksColors.text)
+                                            .font(.system(size: 16))
+                                    } else {
+                                        ForEach(currentQuestion.options, id: \.self) { option in
+                                            OptionButton(
+                                                option: option,
+                                                isSelected: isSelected(option),
+                                                multipleSelection: currentQuestion.multipleSelection,
+                                                action: {
+                                                    toggleSelection(option)
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -183,6 +216,9 @@ struct QuizView: View {
                         Button(action: {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 currentQuestionIndex -= 1
+                                if questions[currentQuestionIndex].isTextField {
+                                    currentText = responses[questions[currentQuestionIndex].id] as? String ?? ""
+                                }
                             }
                         }) {
                             Text("Previous")
@@ -199,8 +235,14 @@ struct QuizView: View {
 
                     if currentQuestionIndex < questions.count - 1 {
                         Button(action: {
+                            if currentQuestion.isTextField {
+                                responses[currentQuestion.id] = currentText
+                            }
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 currentQuestionIndex += 1
+                                if questions[currentQuestionIndex].isTextField {
+                                    currentText = responses[questions[currentQuestionIndex].id] as? String ?? ""
+                                }
                             }
                         }) {
                             Text("Next")
@@ -213,9 +255,16 @@ struct QuizView: View {
                         }
                     } else {
                         Button(action: {
+                            if currentQuestion.isTextField {
+                                responses[currentQuestion.id] = currentText
+                            }
                             // Quiz completed - save responses and show confetti then summary
                             let quizResponses: [String: [String]] = responses.reduce(into: [:]) { dict, pair in
-                                dict["\(pair.key)"] = Array(pair.value)
+                                if let setValue = pair.value as? Set<String> {
+                                    dict["\(pair.key)"] = Array(setValue)
+                                } else if let stringValue = pair.value as? String {
+                                    dict["\(pair.key)"] = [stringValue]
+                                }
                             }
                             AuthService.shared.completeQuiz(with: quizResponses) { result in
                                 switch result {
