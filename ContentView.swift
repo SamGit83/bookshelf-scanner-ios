@@ -13,17 +13,7 @@ struct ContentView: View {
       @State private var isShowingCamera = false
       @State private var selectedTab = 0
       @State private var showQuiz = false
-
-      private var hasSeenQuizPrompt: Bool {
-          get {
-              guard let userId = authService.currentUser?.id else { return false }
-              return UserDefaults.standard.bool(forKey: "hasSeenQuizPrompt_\(userId)")
-          }
-          set {
-              guard let userId = authService.currentUser?.id else { return }
-              UserDefaults.standard.set(newValue, forKey: "hasSeenQuizPrompt_\(userId)")
-          }
-      }
+      @State private var hasSeenQuizPrompt: Bool = false
 
       private var userInitials: String {
          let displayName = authService.currentUser?.displayName
@@ -53,8 +43,15 @@ struct ContentView: View {
                      } else {
                          let userId = authService.currentUser?.id
                          QuizPromptView(
-                             onTakeQuiz: { showQuiz = true },
+                             onTakeQuiz: {
+                                 showQuiz = true
+                                 hasSeenQuizPrompt = true
+                                 if let uid = userId {
+                                     UserDefaults.standard.set(true, forKey: "hasSeenQuizPrompt_\(uid)")
+                                 }
+                             },
                              onDoItLater: {
+                                 hasSeenQuizPrompt = true
                                  if let uid = userId {
                                      UserDefaults.standard.set(true, forKey: "hasSeenQuizPrompt_\(uid)")
                                  }
@@ -71,6 +68,9 @@ struct ContentView: View {
          .preferredColorScheme(themeManager.currentPreference.colorScheme)
          .onAppear {
              // Firebase is initialized in AppDelegate
+             if let userId = authService.currentUser?.id {
+                 hasSeenQuizPrompt = UserDefaults.standard.bool(forKey: "hasSeenQuizPrompt_\(userId)")
+             }
          }
          .onChange(of: authService.isAuthenticated) { isAuthenticated in
              if isAuthenticated {

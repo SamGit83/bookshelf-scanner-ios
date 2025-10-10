@@ -24,7 +24,7 @@ struct QuizPromptView: View {
                         ) {
                             VStack(spacing: AppleBooksSpacing.space24) {
                                 // Icon
-                                Image(systemName: "questionmark.circle.fill")
+                                Image(systemName: "list.bullet.clipboard")
                                     .font(.system(size: 80, weight: .light))
                                     .foregroundColor(AppleBooksColors.accent)
                                     .frame(height: 120)
