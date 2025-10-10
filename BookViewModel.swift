@@ -267,9 +267,9 @@ class BookViewModel: ObservableObject {
                 case .failure(let error):
                     print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription), timestamp: \(Date())")
                     if let nsError = error as? NSError {
-                        print("DEBUG BookViewModel: Full error details - domain: \(nsError.domain), code: \(nsError.code), userInfo: \(nsError.userInfo), shouldRetry: \(shouldRetry(error: error)), retryCount: \(retryCount)")
+                        print("DEBUG BookViewModel: Full error details - domain: \(nsError.domain), code: \(nsError.code), userInfo: \(nsError.userInfo), shouldRetry: \(self.shouldRetry(error: error)), retryCount: \(self.retryCount)")
                     } else {
-                        print("DEBUG BookViewModel: Error is not NSError, shouldRetry: \(shouldRetry(error: error)), retryCount: \(retryCount)")
+                        print("DEBUG BookViewModel: Error is not NSError, shouldRetry: \(self.shouldRetry(error: error)), retryCount: \(self.retryCount)")
                     }
                     ErrorHandler.shared.handle(error, context: "Image Analysis")
                     // Track API call failure
