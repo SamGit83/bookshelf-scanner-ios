@@ -13,7 +13,9 @@ struct BookshelfScannerApp: App {
         RemoteConfigManager.shared.fetchAndActivate { result in
             switch result {
             case .success:
+                break
             case .failure(let error):
+                break
             }
         }
     }
