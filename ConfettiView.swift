@@ -9,7 +9,7 @@ struct ConfettiView: UIViewRepresentable {
         view.isUserInteractionEnabled = false
 
         let emitterLayer = CAEmitterLayer()
-        emitterLayer.emitterPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: -10)
+        emitterLayer.emitterPosition = CGPoint(x: 0, y: -10)
         emitterLayer.emitterSize = CGSize(width: UIScreen.main.bounds.width, height: 1)
         emitterLayer.emitterShape = .line
         emitterLayer.renderMode = .additive
@@ -57,7 +57,7 @@ struct ConfettiView: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         print("DEBUG ConfettiView: updateUIView called, bounds: \(uiView.bounds)")
         if let emitterLayer = uiView.layer.sublayers?.first as? CAEmitterLayer {
-            emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: -10)
+            emitterLayer.emitterPosition = CGPoint(x: 0, y: -10)
             emitterLayer.emitterSize = CGSize(width: uiView.bounds.width, height: 1)
             print("DEBUG ConfettiView: Updated emitter - position: \(emitterLayer.emitterPosition), size: \(emitterLayer.emitterSize), birthRate: \(emitterLayer.birthRate ?? 0)")
         }
