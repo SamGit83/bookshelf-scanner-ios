@@ -304,11 +304,10 @@ struct QuizView: View {
                 .padding(.bottom, AppleBooksSpacing.space32)
             }
 
-            if showConfetti {
-                ConfettiView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .ignoresSafeArea()
-            }
+            // Temporarily always show for testing
+            ConfettiView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
         }
         }
     }
