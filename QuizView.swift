@@ -280,7 +280,7 @@ struct QuizView: View {
                                 }
                             }
                             showConfetti = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
                                 showSummary = true
                             }
                         }) {
