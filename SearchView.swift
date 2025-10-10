@@ -494,13 +494,13 @@ struct GoogleBooksSearchResultRow: View {
         isAddingToLibrary = true
 
         // Add to library using the proper method that fetches complete metadata
-        viewModel.addBookFromRecommendation(recommendation) { [weak self] result in
+        viewModel.addBookFromRecommendation(recommendation) { result in
             DispatchQueue.main.async {
-                self?.isAddingToLibrary = false
+                self.isAddingToLibrary = false
                 switch result {
                 case .success:
                     // Book added successfully
-                    self?.isAdded = true
+                    self.isAdded = true
                 case .failure(let error):
                     print("Failed to add book from search: \(error.localizedDescription)")
                     // Could show an error message here if needed
