@@ -304,12 +304,22 @@ struct QuizView: View {
     }
 
     private func isSelected(_ option: String) -> Bool {
-        responses[currentQuestion.id]?.contains(option) ?? false
+        if let selections = responses[currentQuestion.id] as? [String] {
+            return selections.contains(option)
+        } else if let selections = responses[currentQuestion.id] as? Set<String> {
+            return selections.contains(option)
+        }
+        return false
     }
 
     private func toggleSelection(_ option: String) {
         if currentQuestion.multipleSelection {
-            var currentSelections = responses[currentQuestion.id] ?? Set<String>()
+            var currentSelections: Set<String>
+            if let existing = responses[currentQuestion.id] as? Set<String> {
+                currentSelections = existing
+            } else {
+                currentSelections = Set<String>()
+            }
             if currentSelections.contains(option) {
                 currentSelections.remove(option)
             } else {
