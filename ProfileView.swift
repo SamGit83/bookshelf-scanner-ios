@@ -8,16 +8,10 @@ struct ProfileView: View {
     @ObservedObject var accentColorManager = AccentColorManager.shared
     @ObservedObject var usageTracker = UsageTracker.shared
     @State private var showSignOutAlert = false
-    @State private var showDeleteAccountAlert = false
-    @State private var showDeleteConfirmationAlert = false
     @State private var showWaitlistModal = false
     @State private var showUpgradeModal = false
     @State private var showSubscriptionView = false
     @State private var expandedUsageDetails = false
-    @State private var showingReAuthSheet = false
-    @State private var reAuthEmail = ""
-    @State private var reAuthPassword = ""
-    @State private var reAuthError: String? = nil
 
     var body: some View {
             ZStack {
@@ -179,7 +173,7 @@ struct ProfileView: View {
                             )
 
                             VStack(spacing: AppleBooksSpacing.space16) {
-                                NavigationLink(destination: AccountSettingsView()) {
+                                NavigationLink(destination: AccountSettingsView(authService: authService)) {
                                     AppleBooksCard(padding: AppleBooksSpacing.space12) {
                                         HStack(spacing: AppleBooksSpacing.space12) {
                                             Image(systemName: "gear")
@@ -268,8 +262,8 @@ struct ProfileView: View {
                                 // Sign Out
                                 Button(action: {
                                     print("DEBUG ProfileView: Sign out button tapped")
-                                    print("DEBUG ProfileView: Current modal states - showWaitlistModal: \(showWaitlistModal), showUpgradeModal: \(showUpgradeModal), showingReAuthSheet: \(showingReAuthSheet), showDeleteConfirmationAlert: \(showDeleteConfirmationAlert)")
-                                    if showingReAuthSheet || showWaitlistModal || showUpgradeModal {
+                                    print("DEBUG ProfileView: Current modal states - showWaitlistModal: \(showWaitlistModal), showUpgradeModal: \(showUpgradeModal)")
+                                    if showWaitlistModal || showUpgradeModal {
                                         print("DEBUG ProfileView: Cannot present sign out alert because a sheet is already presented")
                                         return
                                     }
@@ -295,33 +289,6 @@ struct ProfileView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
 
-                                // Delete Account
-                                Button(action: {
-                                    print("DEBUG ProfileView: Delete account button tapped")
-                                    reAuthEmail = authService.currentUser?.email ?? ""
-                                    reAuthPassword = ""
-                                    reAuthError = nil
-                                    showingReAuthSheet = true
-                                    print("DEBUG ProfileView: Setting showingReAuthSheet to true, re-auth sheet should appear")
-                                }) {
-                                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                                        HStack(spacing: AppleBooksSpacing.space12) {
-                                            Image(systemName: "trash")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(.red)
-                                                .frame(width: 24, height: 24)
-                                            Text("Delete Account")
-                                                .font(AppleBooksTypography.bodyLarge)
-                                                .foregroundColor(.red)
-                                            Spacer()
-                                            Image(systemName: "chevron.right")
-                                                .font(AppleBooksTypography.caption)
-                                                .foregroundColor(AppleBooksColors.textSecondary)
-                                        }
-                                    }
-                                    .frame(maxWidth: 350)
-                                }
-                                .buttonStyle(PlainButtonStyle())
                             }
                             .padding(.horizontal, AppleBooksSpacing.space24)
                         }
@@ -416,40 +383,6 @@ struct ProfileView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.3), value: showingReAuthSheet)
-            .alert(isPresented: $showDeleteConfirmationAlert) {
-                return Alert(
-                    title: Text("Confirm Account Deletion"),
-                    message: Text("This action will permanently delete all your books, reading progress, and your account. This cannot be undone."),
-                    primaryButton: .destructive(Text("Delete Account")) {
-                        authService.deleteAccount { deleteResult in
-                            switch deleteResult {
-                            case .success:
-                                showingReAuthSheet = false
-                                showDeleteConfirmationAlert = false
-                                // Clear user-specific data
-                                let profileImagePath = UserDefaults.standard.string(forKey: "profileImagePath")
-                                UserDefaults.standard.removeObject(forKey: "profileImagePath")
-                                UserDefaults.standard.removeObject(forKey: "lastCoverRefreshTime")
-                                UserDefaults.standard.removeObject(forKey: "alertConfigurations")
-                                UserDefaults.standard.removeObject(forKey: "alertHistory")
-                                // Remove profile image file
-                                if let path = profileImagePath {
-                                    try? FileManager.default.removeItem(atPath: path)
-                                }
-                                // Reset usage tracker
-                                UsageTracker.shared.resetAllUsage()
-                                // Reset alert manager history
-                                AlertManager.shared.clearAlertHistory()
-                            case .failure(let error):
-                                reAuthError = "Deletion failed: \(error.localizedDescription)"
-                                showingReAuthSheet = true
-                                showDeleteConfirmationAlert = false
-                            }
-                        }
-                    },
-                    secondaryButton: .cancel()
-                )
-            }
     }
 
     private func formattedDate(_ date: Date?) -> String {
@@ -682,8 +615,14 @@ struct ProfilePictureView: View {
 }
 
 struct AccountSettingsView: View {
+    @ObservedObject var authService: AuthService
     @State private var showPasswordReset = false
     @State private var message = ""
+    @State private var showingReAuthSheet = false
+    @State private var reAuthEmail = ""
+    @State private var reAuthPassword = ""
+    @State private var reAuthError: String? = nil
+    @State private var showDeleteConfirmationAlert = false
 
     var body: some View {
         List {
@@ -692,6 +631,18 @@ struct AccountSettingsView: View {
                     showPasswordReset = true
                 }) {
                     Text("Change Password")
+                }
+
+                Button(action: {
+                    print("DEBUG AccountSettingsView: Delete account button tapped")
+                    reAuthEmail = authService.currentUser?.email ?? ""
+                    reAuthPassword = ""
+                    reAuthError = nil
+                    showingReAuthSheet = true
+                    print("DEBUG AccountSettingsView: Setting showingReAuthSheet to true, re-auth sheet should appear")
+                }) {
+                    Text("Delete Account")
+                        .foregroundColor(.red)
                 }
             }
 
@@ -714,6 +665,40 @@ struct AccountSettingsView: View {
         .navigationTitle("Settings")
         .sheet(isPresented: $showPasswordReset) {
             PasswordResetView()
+        }
+        .alert(isPresented: $showDeleteConfirmationAlert) {
+            return Alert(
+                title: Text("Confirm Account Deletion"),
+                message: Text("This action will permanently delete all your books, reading progress, and your account. This cannot be undone."),
+                primaryButton: .destructive(Text("Delete Account")) {
+                    authService.deleteAccount { deleteResult in
+                        switch deleteResult {
+                        case .success:
+                            showingReAuthSheet = false
+                            showDeleteConfirmationAlert = false
+                            // Clear user-specific data
+                            let profileImagePath = UserDefaults.standard.string(forKey: "profileImagePath")
+                            UserDefaults.standard.removeObject(forKey: "profileImagePath")
+                            UserDefaults.standard.removeObject(forKey: "lastCoverRefreshTime")
+                            UserDefaults.standard.removeObject(forKey: "alertConfigurations")
+                            UserDefaults.standard.removeObject(forKey: "alertHistory")
+                            // Remove profile image file
+                            if let path = profileImagePath {
+                                try? FileManager.default.removeItem(atPath: path)
+                            }
+                            // Reset usage tracker
+                            UsageTracker.shared.resetAllUsage()
+                            // Reset alert manager history
+                            AlertManager.shared.clearAlertHistory()
+                        case .failure(let error):
+                            reAuthError = "Deletion failed: \(error.localizedDescription)"
+                            showingReAuthSheet = true
+                            showDeleteConfirmationAlert = false
+                        }
+                    }
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
 }

@@ -518,7 +518,7 @@ struct BookRecommendation: Identifiable, Codable {
     let author: String
     let genre: String
     let description: String?
-    let thumbnailURL: String?
+    var thumbnailURL: String?
     let publishedDate: String?
     let pageCount: Int?
     let ageRating: String?
