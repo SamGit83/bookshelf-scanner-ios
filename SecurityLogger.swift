@@ -2,7 +2,7 @@ import Foundation
 import FirebaseAnalytics
 
 /// Security logging levels for controlling verbosity
-enum SecurityLogLevel: Int, Comparable, Decodable {
+enum SecurityLogLevel: Int, Comparable, Codable {
     case debug = 0
     case info = 1
     case warning = 2
