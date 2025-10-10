@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct QuizQuestion {
+struct QuizQuestion: Identifiable {
     let id: Int
     let question: String
     let options: [String]
