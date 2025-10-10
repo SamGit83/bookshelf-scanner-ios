@@ -157,7 +157,9 @@ class SecureConfig {
         // Ensure Remote Config is fresh
         remoteConfigManager.fetchAndActivate { [weak self] result in
             guard let self = self else { return }
-            completion(self.grokAPIKey)
+            let key = self.grokAPIKey
+            print("DEBUG SecureConfig: getGrokAPIKeyAsync completed, key length: \(key.count), starts with YOUR_: \(key.contains("YOUR_"))")
+            completion(key)
         }
     }
 

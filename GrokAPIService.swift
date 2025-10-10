@@ -51,6 +51,8 @@ class GrokAPIService {
     }
 
     private func performGrokRequest(prompt: String, apiKey: String, maxTokens: Int, temperature: Double, completion: @escaping (Result<String, Error>) -> Void) {
+        print("DEBUG GrokAPIService: performGrokRequest called with prompt length: \(prompt.count), apiKey length: \(apiKey.count)")
+
         // Generate timestamp for replay attack prevention
         let timestamp = ISO8601DateFormatter().string(from: Date())
         let timeWindow = SecureConfig.shared.requestTimeWindowSeconds
@@ -86,7 +88,7 @@ class GrokAPIService {
             return
         }
 
-        print("DEBUG GrokAPIService: Sending HTTP POST request to \(baseURL)")
+        print("DEBUG GrokAPIService: About to send HTTP POST request to \(baseURL) with body length: \(request.httpBody?.count ?? 0)")
         URLSession.shared.dataTask(with: request) { data, response, error in
             print("DEBUG GrokAPIService: Received HTTP response, status code: \((response as? HTTPURLResponse)?.statusCode ?? -1), data length: \(data?.count ?? 0)")
             // Validate response timestamp for replay attack prevention
