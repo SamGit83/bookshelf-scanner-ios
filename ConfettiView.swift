@@ -52,10 +52,11 @@ struct ConfettiView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        // Update emitter position if needed
+        // Update emitter position to center top of screen
         if let emitterLayer = uiView.layer.sublayers?.first as? CAEmitterLayer {
             emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: 0)
-            emitterLayer.emitterSize = CGSize(width: uiView.bounds.width, height: 0)
+            // Set emitter size to a small width so confetti emits from center point
+            emitterLayer.emitterSize = CGSize(width: 50, height: 0)
         }
     }
 
