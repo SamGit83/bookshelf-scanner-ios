@@ -39,7 +39,7 @@ class RemoteConfigManager {
     init(remoteConfig: RemoteConfigProtocol = RemoteConfig.remoteConfig()) {
         self.remoteConfig = remoteConfig
         let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 0 // For development; set to 3600 for production
+        settings.minimumFetchInterval = 86400 // For production
         remoteConfig.configSettings = settings
 
         // Set default values
