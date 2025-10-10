@@ -51,9 +51,14 @@ struct ContentView: View {
                      if authService.currentUser?.hasTakenQuiz == true || hasSeenQuizPrompt {
                          authenticatedView
                      } else {
+                         let userId = authService.currentUser?.id
                          QuizPromptView(
                              onTakeQuiz: { showQuiz = true },
-                             onDoItLater: { hasSeenQuizPrompt = true }
+                             onDoItLater: {
+                                 if let uid = userId {
+                                     UserDefaults.standard.set(true, forKey: "hasSeenQuizPrompt_\(uid)")
+                                 }
+                             }
                          )
                      }
                  } else {
