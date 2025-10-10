@@ -129,7 +129,6 @@ class UsageTracker: ObservableObject {
         #if canImport(FirebaseAnalytics)
         if totalBooks == bookLimit {
             AnalyticsManager.shared.trackLimitHit(limitType: "book", currentValue: totalBooks, limitValue: bookLimit)
-            ABTestingService.shared.trackLimitHit(limitType: "book", currentValue: totalBooks, limitValue: bookLimit)
             ABTestingService.shared.trackExperimentEvent(
                 experimentId: "usage_limits_experiment",
                 variantId: "current_variant",
