@@ -1250,8 +1250,12 @@ class BookViewModel: ObservableObject {
             return
         }
         rateLimiter.recordCall()
-        // Use Grok AI to generate personalized recommendations based on user's entire library
-        grokService.generateRecommendations(userBooks: books, currentBook: currentBook) { result in
+
+        // Get user's quiz responses for personalization
+        let quizResponses = AuthService.shared.currentUser?.quizResponses
+
+        // Use Grok AI to generate personalized recommendations based on user's entire library and quiz preferences
+        grokService.generateRecommendations(userBooks: books, currentBook: currentBook, quizResponses: quizResponses) { result in
             let responseTime = Date().timeIntervalSince(recommendationStartTime)
             DispatchQueue.main.async {
                 switch result {

@@ -399,6 +399,24 @@ For detailed tier specifications, pricing, and revenue projections, see the [Fre
 
 ---
 
+## 🎯 **User Profile Quiz Feature**
+
+The User Profile Quiz is an engaging feature that appears after user sign-up and onboarding completion. It offers users the opportunity to participate in a curated set of questions designed to understand their reading preferences, habits, and interests. Users can choose to participate or skip the quiz. The quiz is always accessible from the Profile page, regardless of whether the user has taken it. If the user has already taken the quiz, the option will say "Retake Quiz".
+
+The UX/UI design follows the onboarding styles, featuring liquid glass effects, smooth animations, and an intuitive flow. Upon completion, a delightful confetti animation celebrates the user's engagement.
+
+The quiz responses are stored in the database to build a comprehensive user profile, which is then leveraged by the recommendations engine in the Discover screen to provide personalized book suggestions tailored to the user's tastes.
+
+### **Implementation Tasks**
+- **Create quiz views**: Develop interactive quiz screens with curated questions covering reading preferences, genres, habits, and interests
+- **Integrate with onboarding flow**: Add quiz presentation after sign-up and onboarding completion with participate/skip options
+- **Add to profile page**: Include quiz access option in Profile tab, always available; if the user has taken the quiz, label it as "Retake Quiz"
+- **Implement confetti animation**: Add celebratory confetti effect upon quiz completion using SwiftUI animations
+- **Database storage**: Set up Firebase/Firestore storage for quiz responses and user profile data
+- **Update recommendations logic**: Modify Discover screen recommendations to incorporate quiz profile data for personalized suggestions
+
+---
+
 ## 👥 **User Journey Analysis**
 
 ### **Primary User Personas**

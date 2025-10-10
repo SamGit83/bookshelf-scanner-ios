@@ -174,7 +174,7 @@ struct OnboardingView: View {
             }
         }
         .fullScreenCover(isPresented: $showMainApp) {
-            ContentView()
+            QuizPromptView()
         }
         .sheet(isPresented: $showWaitlistModal) {
             WaitlistModal(

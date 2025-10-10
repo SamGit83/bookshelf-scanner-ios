@@ -9,11 +9,11 @@ import Foundation
 class GrokAPIService {
     private let baseURL = "https://api.x.ai/v1/chat/completions"
 
-    func generateRecommendations(userBooks: [Book], currentBook: Book?, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
+    func generateRecommendations(userBooks: [Book], currentBook: Book?, quizResponses: [String: Any]?, completion: @escaping (Result<[BookRecommendation], Error>) -> Void) {
         let startTime = Date()
         let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "grok", endpoint: "chat/completions", method: "POST")
 
-        print("DEBUG GrokAPIService: generateRecommendations called with \(userBooks.count) books")
+        print("DEBUG GrokAPIService: generateRecommendations called with \(userBooks.count) books, quiz responses: \(quizResponses != nil ? "present" : "none")")
 
         // Get API key synchronously
         let apiKey = SecureConfig.shared.grokAPIKey
@@ -37,7 +37,7 @@ class GrokAPIService {
             return
         }
 
-        let prompt = self.buildRecommendationPrompt(userBooks: userBooks, currentBook: currentBook)
+        let prompt = self.buildRecommendationPrompt(userBooks: userBooks, currentBook: currentBook, quizResponses: quizResponses)
         self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 2000, temperature: 0.7) { result in
             switch result {
             case .success(let content):
@@ -130,9 +130,9 @@ class GrokAPIService {
     }
 
 
-    private func buildRecommendationPrompt(userBooks: [Book], currentBook: Book?) -> String {
+    private func buildRecommendationPrompt(userBooks: [Book], currentBook: Book?, quizResponses: [String: Any]?) -> String {
         var prompt = """
-        You are an expert librarian and book recommender. Based on a user's book library, provide personalized book recommendations.
+        You are an expert librarian and book recommender. Based on a user's book library and reading preferences, provide personalized book recommendations.
 
         USER'S LIBRARY:
         """
@@ -142,6 +142,45 @@ class GrokAPIService {
             if let title = book.title, let author = book.author {
                 let genre = book.genre ?? "Unknown"
                 prompt += "\n- \"\(title)\" by \(author) (Genre: \(genre))"
+            }
+        }
+
+        // Add quiz preferences if available
+        if let quizResponses = quizResponses, !quizResponses.isEmpty {
+            prompt += """
+
+            USER'S READING PREFERENCES (from quiz):
+            """
+            // Parse quiz responses and add relevant preferences
+            if let ageGroup = quizResponses["0"] as? [String], let age = ageGroup.first {
+                prompt += "\n- Age group: \(age)"
+            }
+            if let gender = quizResponses["1"] as? [String], let genderValue = gender.first {
+                prompt += "\n- Gender: \(genderValue)"
+            }
+            if let readingFrequency = quizResponses["2"] as? [String], let frequency = readingFrequency.first {
+                prompt += "\n- Reading frequency: \(frequency)"
+            }
+            if let favoriteGenres = quizResponses["3"] as? [String], !favoriteGenres.isEmpty {
+                prompt += "\n- Favorite genres: \(favoriteGenres.joined(separator: ", "))"
+            }
+            if let bookType = quizResponses["4"] as? [String], let type = bookType.first {
+                prompt += "\n- Preferred book format: \(type)"
+            }
+            if let booksPerYear = quizResponses["5"] as? [String], let count = booksPerYear.first {
+                prompt += "\n- Books read per year: \(count)"
+            }
+            if let motivations = quizResponses["6"] as? [String], !motivations.isEmpty {
+                prompt += "\n- Reading motivations: \(motivations.joined(separator: ", "))"
+            }
+            if let tracking = quizResponses["7"] as? [String], let track = tracking.first {
+                prompt += "\n- Progress tracking: \(track)"
+            }
+            if let favoriteAuthors = quizResponses["8"] as? [String], !favoriteAuthors.isEmpty {
+                prompt += "\n- Favorite authors: \(favoriteAuthors.joined(separator: ", "))"
+            }
+            if let preferredFormat = quizResponses["9"] as? [String], let format = preferredFormat.first {
+                prompt += "\n- Preferred format: \(format)"
             }
         }
 
@@ -156,13 +195,15 @@ class GrokAPIService {
 
         prompt += """
 
-        TASK: Recommend 10-15 books that this user would likely enjoy based on their reading patterns, favorite genres, and authors. Focus on:
-        1. Books by similar authors they already enjoy
-        2. Books in their favorite genres
-        3. Books with similar themes or styles to their current reading
-        4. Popular and well-regarded books in their preferred categories
+        TASK: Recommend 10-15 books that this user would likely enjoy based on their reading patterns, favorite genres, authors, and stated preferences. Focus on:
+        1. Books by their favorite authors or similar authors they already enjoy
+        2. Books in their favorite genres from the quiz
+        3. Books with themes/styles that match their reading motivations and preferences
+        4. Books appropriate for their age group and reading level
+        5. Books in their preferred format when possible
+        6. Popular and well-regarded books that align with their stated interests
 
-        IMPORTANT: Only recommend real, existing books. Do not invent books or authors.
+        IMPORTANT: Only recommend real, existing books. Do not invent books or authors. Prioritize recommendations that strongly match their quiz preferences.
 
         OUTPUT FORMAT: Return a JSON array of book recommendations with this exact structure:
         [
@@ -177,7 +218,7 @@ class GrokAPIService {
           }
         ]
 
-        Make sure the JSON is valid and properly formatted. Focus on quality recommendations that match the user's tastes.
+        Make sure the JSON is valid and properly formatted. Focus on quality recommendations that match the user's tastes and preferences.
         """
 
         return prompt

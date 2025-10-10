@@ -40,6 +40,9 @@ struct ProfileView: View {
                         // Usage Stats Section with Progressive Disclosure
                         UsageStatsSection(authService: authService, usageTracker: usageTracker, showUpgradeModal: $showUpgradeModal)
 
+                        // Quiz Section
+                        QuizSection(authService: authService)
+
                         // Settings Options Section
                         SettingsOptionsSection(authService: authService, themeManager: themeManager, accentColorManager: accentColorManager, showSignOutAlert: $showSignOutAlert)
 
@@ -420,6 +423,44 @@ struct UsageStatsSection: View {
                             .padding(.top, AppleBooksSpacing.space8)
                         }
                     }
+                }
+                .frame(maxWidth: 350)
+            }
+            .padding(.horizontal, AppleBooksSpacing.space24)
+        }
+    }
+}
+
+struct QuizSection: View {
+    @ObservedObject var authService: AuthService
+
+    var body: some View {
+        if let user = authService.currentUser {
+            VStack(spacing: AppleBooksSpacing.space16) {
+                AppleBooksSectionHeader(
+                    title: "Reading Preferences",
+                    subtitle: nil,
+                    showSeeAll: false,
+                    seeAllAction: nil
+                )
+
+                AppleBooksCard(padding: AppleBooksSpacing.space12) {
+                    NavigationLink(destination: QuizView()) {
+                        HStack(spacing: AppleBooksSpacing.space12) {
+                            Image(systemName: "questionmark.circle.fill")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.accent)
+                                .frame(width: 24, height: 24)
+                            Text(user.hasTakenQuiz ? "Retake Quiz" : "Take Quiz")
+                                .font(AppleBooksTypography.bodyLarge)
+                                .foregroundColor(AppleBooksColors.text)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
                 .frame(maxWidth: 350)
             }

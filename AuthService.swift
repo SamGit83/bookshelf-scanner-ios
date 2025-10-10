@@ -336,6 +336,36 @@ class AuthService: ObservableObject {
         }
     }
 
+    func completeQuiz(with responses: [String: Any], completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let userId = currentUser?.id else {
+            completion(.failure(NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in"])))
+            return
+        }
+        let db = Firestore.firestore()
+        let userDoc = db.collection("users").document(userId)
+        let data: [String: Any] = [
+            "quizResponses": responses,
+            "hasTakenQuiz": true
+        ]
+        userDoc.updateData(data) { [weak self] error in
+            if let error = error {
+                print("Error saving quiz responses: \(error.localizedDescription)")
+                completion(.failure(error))
+            } else {
+                print("Quiz responses saved successfully")
+                // Update currentUser
+                if var updatedUser = self?.currentUser {
+                    updatedUser.quizResponses = responses
+                    updatedUser.hasTakenQuiz = true
+                    self?.currentUser = updatedUser
+                }
+                // Track quiz completion
+                AnalyticsManager.shared.trackFeatureUsage(feature: "quiz_completed")
+                completion(.success(()))
+            }
+        }
+    }
+
     func joinWaitlist(firstName: String, lastName: String, email: String, plan: String, userId: String? = nil) async throws {
         let db = Firestore.firestore()
         // Check for duplicates
