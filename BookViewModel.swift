@@ -266,13 +266,17 @@ class BookViewModel: ObservableObject {
                     self.isScanning = false
                 case .failure(let error):
                     print("DEBUG BookViewModel: Gemini analysis failed: \(error.localizedDescription), timestamp: \(Date())")
-                    print("DEBUG BookViewModel: Full error details - domain: \((error as NSError).domain), code: \((error as NSError).code), userInfo: \((error as NSError).userInfo), shouldRetry: \(shouldRetry(error: error)), retryCount: \(retryCount)")
+                    if let nsError = error as? NSError {
+                        print("DEBUG BookViewModel: Full error details - domain: \(nsError.domain), code: \(nsError.code), userInfo: \(nsError.userInfo), shouldRetry: \(shouldRetry(error: error)), retryCount: \(retryCount)")
+                    } else {
+                        print("DEBUG BookViewModel: Error is not NSError, shouldRetry: \(shouldRetry(error: error)), retryCount: \(retryCount)")
+                    }
                     ErrorHandler.shared.handle(error, context: "Image Analysis")
                     // Track API call failure
                     AnalyticsManager.shared.trackAPICall(service: "Gemini", endpoint: "analyzeImage", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
 
                     // Log additional error context for debugging
-                    if let nsError = error as NSError {
+                    if let nsError = error as? NSError {
                         print("DEBUG BookViewModel: Error domain: \(nsError.domain), code: \(nsError.code)")
                         if nsError.domain == "APIError" {
                             print("DEBUG BookViewModel: This is an API error from Gemini service")
@@ -307,7 +311,7 @@ class BookViewModel: ObservableObject {
         let errorDescription = error.localizedDescription.lowercased()
 
         // Check for non-retryable API errors
-        if let nsError = error as NSError {
+        if let nsError = error as? NSError {
             // Gemini API auth/quota errors
             if nsError.domain == "APIError" {
                 if let isAuthError = nsError.userInfo["isAuthError"] as? Bool, isAuthError {
