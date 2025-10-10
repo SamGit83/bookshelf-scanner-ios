@@ -86,7 +86,9 @@ class GrokAPIService {
             return
         }
 
+        print("DEBUG GrokAPIService: Sending HTTP POST request to \(baseURL)")
         URLSession.shared.dataTask(with: request) { data, response, error in
+            print("DEBUG GrokAPIService: Received HTTP response, status code: \((response as? HTTPURLResponse)?.statusCode ?? -1), data length: \(data?.count ?? 0)")
             // Validate response timestamp for replay attack prevention
             let responseTime = Date().timeIntervalSince(requestStartTime)
             if responseTime > timeWindow {
@@ -97,6 +99,7 @@ class GrokAPIService {
             }
 
             if let error = error {
+                print("DEBUG GrokAPIService: HTTP request failed with network error: \(error)")
                 completion(.failure(error))
                 return
             }
@@ -120,6 +123,7 @@ class GrokAPIService {
                     completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
                 }
             } catch {
+                print("DEBUG GrokAPIService: Failed to decode JSON response: \(error)")
                 completion(.failure(error))
             }
         }.resume()
@@ -180,6 +184,7 @@ class GrokAPIService {
     }
 
     func fetchAuthorBiography(author: String, completion: @escaping (Result<String, Error>) -> Void) {
+        print("DEBUG GrokAPIService: fetchAuthorBiography called for author: '\(author)' at \(Date())")
         // Fetch fresh API key asynchronously
         SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
             guard let self = self else { return }
@@ -194,6 +199,7 @@ class GrokAPIService {
             let prompt = """
             Provide a concise biography of the author \(author). Include their birth/death dates if applicable, major works, and key achievements. Keep it to 2-3 paragraphs.
             """
+            print("DEBUG GrokAPIService: Initiating Grok request for author biography")
 
             self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 500, temperature: 0.3) { result in
                 switch result {
@@ -201,6 +207,7 @@ class GrokAPIService {
                     print("DEBUG GrokAPIService: Fetched bio/teaser content: \(content)")
                     completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
                 case .failure(let error):
+                    print("DEBUG GrokAPIService: fetchAuthorBiography failed with error: \(error)")
                     completion(.failure(error))
                 }
             }
@@ -208,6 +215,7 @@ class GrokAPIService {
     }
 
     func fetchBookSummary(title: String, author: String, completion: @escaping (Result<String, Error>) -> Void) {
+        print("DEBUG GrokAPIService: fetchBookSummary called for title: '\(title)', author: '\(author)' at \(Date())")
         // Fetch fresh API key asynchronously
         SecureConfig.shared.getGrokAPIKeyAsync { [weak self] apiKey in
             guard let self = self else { return }
@@ -223,11 +231,14 @@ class GrokAPIService {
             Provide a short, engaging summary/teaser for the book "\(title)" by \(author). Keep it to 2-3 sentences that capture the essence of the story without spoilers. Make it enticing and informative.
             """
 
+            print("DEBUG GrokAPIService: Initiating Grok request for book summary")
             self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 300, temperature: 0.5) { result in
                 switch result {
                 case .success(let content):
+                    print("DEBUG GrokAPIService: fetchBookSummary succeeded, content length: \(content.count)")
                     completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
                 case .failure(let error):
+                    print("DEBUG GrokAPIService: fetchBookSummary failed with error: \(error)")
                     completion(.failure(error))
                 }
             }
