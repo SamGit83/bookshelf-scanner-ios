@@ -184,7 +184,7 @@ struct QuizView: View {
                     } else {
                         Button(action: {
                             // Quiz completed - save responses and show confetti then summary
-                            let quizResponses: [String: Any] = responses.reduce(into: [:]) { dict, pair in
+                            let quizResponses: [String: [String]] = responses.reduce(into: [:]) { dict, pair in
                                 dict["\(pair.key)"] = Array(pair.value)
                             }
                             AuthService.shared.completeQuiz(with: quizResponses) { result in

@@ -22,7 +22,7 @@ struct UserProfile: Codable, Identifiable {
     var subscriptionId: String?
     var hasCompletedOnboarding: Bool
     var hasTakenQuiz: Bool
-    var quizResponses: [String: Any]?
+    var quizResponses: [String: [String]]?
     var creationDate: Date?
 
     init(from firebaseUser: FirebaseAuth.User, firestoreData: [String: Any]) {
@@ -42,7 +42,7 @@ struct UserProfile: Codable, Identifiable {
         self.subscriptionId = firestoreData["subscriptionId"] as? String
         self.hasCompletedOnboarding = firestoreData["hasCompletedOnboarding"] as? Bool ?? false
         self.hasTakenQuiz = firestoreData["hasTakenQuiz"] as? Bool ?? false
-        self.quizResponses = firestoreData["quizResponses"] as? [String: Any]
+        self.quizResponses = firestoreData["quizResponses"] as? [String: [String]]
         self.creationDate = firebaseUser.metadata.creationDate
     }
 

@@ -336,7 +336,7 @@ class AuthService: ObservableObject {
         }
     }
 
-    func completeQuiz(with responses: [String: Any], completion: @escaping (Result<Void, Error>) -> Void) {
+    func completeQuiz(with responses: [String: [String]], completion: @escaping (Result<Void, Error>) -> Void) {
         guard let userId = currentUser?.id else {
             completion(.failure(NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in"])))
             return
