@@ -303,6 +303,7 @@ struct QuizView: View {
                 .padding(.horizontal, AppleBooksSpacing.space24)
                 .padding(.bottom, AppleBooksSpacing.space32)
             }
+            }
 
             if showConfetti {
                 ConfettiView()
@@ -310,7 +311,6 @@ struct QuizView: View {
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }
-        }
         }
     }
 
