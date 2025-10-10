@@ -176,9 +176,8 @@ class GeminiAPIService {
             }
 
             print("DEBUG GeminiAPIService: Received response from Gemini, error: \(error?.localizedDescription ?? "none"), data count: \(data?.count ?? 0), timestamp: \(Date())")
-    
+
                 // Validate response timestamp for replay attack prevention
-                let responseTime = Date().timeIntervalSince(startTime)
                 if responseTime > timeWindow {
                     print("DEBUG GeminiAPIService: Response received after time window (\(responseTime)s > \(timeWindow)s), rejecting for replay attack prevention")
                     let timestampError = NSError(domain: "TimestampValidation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Response received outside acceptable time window"])

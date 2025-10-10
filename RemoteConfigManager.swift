@@ -1,12 +1,6 @@
 import Foundation
 import FirebaseRemoteConfig
 
-protocol RemoteConfigManagerProtocol {
-    func getString(forKey key: String) -> String
-    func fetchAndActivate(completion: @escaping (Result<Void, RemoteConfigError>) -> Void)
-}
-
-extension RemoteConfigManager: RemoteConfigManagerProtocol {}
 
 enum RemoteConfigError: Error {
     case fetchFailed(status: RemoteConfigFetchStatus, underlyingError: Error?)

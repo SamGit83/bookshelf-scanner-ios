@@ -4,17 +4,10 @@ import Foundation
 class SecureConfig {
     static let shared = SecureConfig()
 
-    private let remoteConfigManager: RemoteConfigManagerProtocol
+    private let remoteConfigManager = RemoteConfigManager.shared
     private let encryptionManager = EncryptionManager.shared
 
-    private init() {
-        self.remoteConfigManager = RemoteConfigManager.shared
-    }
-
-    // For testing
-    init(remoteConfigManager: RemoteConfigManagerProtocol = RemoteConfigManager.shared) {
-        self.remoteConfigManager = remoteConfigManager
-    }
+    private init() {}
 
     // MARK: - API Keys
 
