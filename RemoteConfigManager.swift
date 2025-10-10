@@ -1,19 +1,6 @@
 import Foundation
 import FirebaseRemoteConfig
 
-protocol RemoteConfigProtocol {
-    var lastFetchStatus: RemoteConfigFetchStatus { get }
-    var lastFetchTime: Date? { get }
-    var configSettings: RemoteConfigSettings { get set }
-
-    func setDefaults(_ defaults: [String: NSObject])
-    func fetch(completionHandler: @escaping (RemoteConfigFetchStatus, Error?) -> Void)
-    func activate(completion: ((Bool, Error?) -> Void)?)
-    func configValue(forKey key: String) -> RemoteConfigValue
-}
-
-extension RemoteConfig: RemoteConfigProtocol {}
-
 protocol RemoteConfigManagerProtocol {
     func getString(forKey key: String) -> String
     func fetchAndActivate(completion: @escaping (Result<Void, RemoteConfigError>) -> Void)
@@ -32,13 +19,13 @@ enum RemoteConfigError: Error {
 class RemoteConfigManager {
     static let shared = RemoteConfigManager()
 
-    private let remoteConfig: RemoteConfigProtocol
+    private let remoteConfig: RemoteConfig
     private var isInitialized = false
 
     // For testing
-    init(remoteConfig: RemoteConfigProtocol = RemoteConfig.remoteConfig()) {
+    init(remoteConfig: RemoteConfig = RemoteConfig.remoteConfig()) {
         self.remoteConfig = remoteConfig
-        let settings = RemoteConfigSettings()
+        var settings = RemoteConfigSettings()
         settings.minimumFetchInterval = 86400 // For production
         remoteConfig.configSettings = settings
 
