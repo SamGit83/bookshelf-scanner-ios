@@ -9,6 +9,8 @@ struct ContentView: View {
       @ObservedObject private var themeManager = ThemeManager.shared
       @ObservedObject private var accentColorManager = AccentColorManager.shared
       @StateObject private var viewModel = BookViewModel()
+    @State private var hasShownQuizPrompt = false
+    @State private var shouldDisplayQuiz = false
       @State private var capturedImage: UIImage?
       @State private var isShowingCamera = false
       @State private var selectedTab = 0
@@ -39,7 +41,17 @@ struct ContentView: View {
                      if let hasTaken = authService.currentUser?.hasTakenQuiz, hasTaken {
                          authenticatedView
                      } else {
-                         QuizView()
+                         if shouldDisplayQuiz {
+                             QuizView()
+                         } else if !hasShownQuizPrompt {
+                             QuizPromptView(onTakeQuiz: {
+                                 shouldDisplayQuiz = true
+                             }, onDoItLater: {
+                                 hasShownQuizPrompt = true
+                             })
+                         } else {
+                             authenticatedView
+                         }
                      }
                  } else {
                      OnboardingView()
