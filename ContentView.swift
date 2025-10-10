@@ -41,9 +41,7 @@ struct ContentView: View {
                      if let hasTaken = authService.currentUser?.hasTakenQuiz, hasTaken {
                          authenticatedView
                      } else {
-                         if shouldDisplayQuiz {
-                             QuizView()
-                         } else if !hasShownQuizPrompt {
+                         if !hasShownQuizPrompt {
                              QuizPromptView(onTakeQuiz: {
                                  shouldDisplayQuiz = true
                              }, onDoItLater: {
@@ -59,6 +57,9 @@ struct ContentView: View {
              } else {
                  HomeView()
              }
+         }
+         .sheet(isPresented: $shouldDisplayQuiz) {
+             QuizView()
          }
          .preferredColorScheme(themeManager.currentPreference.colorScheme)
          .onChange(of: authService.isAuthenticated) { isAuthenticated in

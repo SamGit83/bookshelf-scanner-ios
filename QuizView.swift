@@ -131,6 +131,7 @@ struct QuizView: View {
 
                     Button(action: {
                         // Quiz completed, dismiss the view
+                        print("DEBUG QuizView: Done button tapped, setting showConfetti to false and dismissing view")
                         showConfetti = false
                         presentationMode.wrappedValue.dismiss()
                     }) {
@@ -264,6 +265,7 @@ struct QuizView: View {
                                 responses[currentQuestion.id] = currentText
                             }
                             // Quiz completed - save responses and show confetti then summary
+                            print("DEBUG QuizView: Complete Quiz button tapped")
                             let quizResponses: [String: [String]] = responses.reduce(into: [:]) { dict, pair in
                                 if let setValue = pair.value as? Set<String> {
                                     dict["\(pair.key)"] = Array(setValue)
@@ -274,13 +276,17 @@ struct QuizView: View {
                             AuthService.shared.completeQuiz(with: quizResponses) { result in
                                 switch result {
                                 case .success:
-                                    break
+                                    print("DEBUG QuizView: Quiz save successful")
                                 case .failure(let error):
+                                    print("DEBUG QuizView: Quiz save failed: \(error.localizedDescription)")
                                     quizSaveError = error.localizedDescription
                                 }
                             }
+                            print("DEBUG QuizView: Setting showConfetti to true")
                             showConfetti = true
+                            print("DEBUG QuizView: Scheduling 12-second delay for showSummary")
                             DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
+                                print("DEBUG QuizView: 12-second delay completed, setting showSummary to true")
                                 showSummary = true
                             }
                         }) {
