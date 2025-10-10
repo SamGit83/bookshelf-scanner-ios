@@ -29,13 +29,19 @@ struct LoginView: View {
         horizontalSizeClass == .regular
     }
     
-    private var horizontalPadding: CGFloat {
-        isIPad ? 48 : 24
-    }
+    private var modalMaxWidth: CGFloat { isIPad ? 650 : 400 }
     
-    private var maxFormWidth: CGFloat {
-        isIPad ? 600 : .infinity
-    }
+    private var adaptivePadding: CGFloat { isIPad ? 32 : 16 }
+    
+    private var formPadding: CGFloat { isIPad ? 32 : 24 }
+    
+    private var formSpacing: CGFloat { isIPad ? 24 : 20 }
+    
+    private var fieldPadding: CGFloat { isIPad ? 16 : 12 }
+    
+    private var buttonVerticalPadding: CGFloat { isIPad ? 20 : 16 }
+    
+    private var nameHStackSpacing: CGFloat { isIPad ? 24 : 12 }
     
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
@@ -84,9 +90,9 @@ struct LoginView: View {
 
                     if isSignUp {
                         ExpandableTierSelection(selectedTier: $selectedTier, selectedPeriod: $selectedPeriod, showWaitlistModal: $showWaitlistModal)
-                            .frame(maxWidth: maxFormWidth)
+                            .frame(maxWidth: modalMaxWidth)
                             .frame(maxWidth: .infinity)
-                            .padding(.horizontal, horizontalPadding)
+                            .padding(.horizontal, adaptivePadding)
                             .padding(.bottom, AppleBooksSpacing.space16)
                     }
 
@@ -94,10 +100,10 @@ struct LoginView: View {
                         // Clean Login/Signup Form
                         AppleBooksCard(
                             cornerRadius: 16,
-                            padding: AppleBooksSpacing.space24,
+                            padding: formPadding,
                             shadowStyle: .subtle
                         ) {
-                            VStack(spacing: AppleBooksSpacing.space20) {
+                            VStack(spacing: formSpacing) {
                                 // Form Header
                                 VStack(spacing: AppleBooksSpacing.space8) {
                                     Text(isSignUp ? "Create Account" : "Welcome Back")
@@ -163,7 +169,7 @@ struct LoginView: View {
 
                             // Required Name Fields (only for signup and free tier)
                             if isSignUp && selectedTier == .free {
-                                HStack(spacing: AppleBooksSpacing.space12) {
+                                HStack(spacing: nameHStackSpacing) {
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
                                         HStack {
                                             Text("First Name")
@@ -264,7 +270,7 @@ struct LoginView: View {
 
                             // Additional Fields (shown when expanded and free tier)
                             if isSignUp && showMoreFields && selectedTier == .free {
-                                VStack(spacing: AppleBooksSpacing.space16) {
+                                VStack(spacing: formSpacing) {
 
                                     // Date of Birth
                                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space8) {
@@ -404,7 +410,8 @@ struct LoginView: View {
                                             .font(AppleBooksTypography.buttonLarge)
                                             .foregroundColor(AppleBooksColors.card)
                                             .frame(maxWidth: .infinity)
-                                            .padding(AppleBooksSpacing.space16)
+                                            .padding(.vertical, buttonVerticalPadding)
+                                            .padding(.horizontal, AppleBooksSpacing.space16)
                                             .background(AppleBooksColors.accent)
                                             .cornerRadius(12)
                                     }
@@ -435,13 +442,13 @@ struct LoginView: View {
                             }
                         }
                     }
-                    .frame(maxWidth: maxFormWidth)
+                    .frame(maxWidth: modalMaxWidth)
                     .frame(maxWidth: .infinity)
-                    .padding(.horizontal, horizontalPadding)
+                    .padding(.horizontal, adaptivePadding)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.4), value: animateForm)
-                    }
+                }
 
                     // Error message
                     if let error = authService.errorMessage {
@@ -463,9 +470,9 @@ struct LoginView: View {
                                     .lineLimit(nil)
                             }
                         }
-                        .frame(maxWidth: maxFormWidth)
+                        .frame(maxWidth: modalMaxWidth)
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, horizontalPadding)
+                        .padding(.horizontal, adaptivePadding)
                         .transition(.scale.combined(with: .opacity))
                         .animation(AnimationTiming.feedback, value: authService.errorMessage)
                     }

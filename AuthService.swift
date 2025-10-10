@@ -99,7 +99,8 @@ class AuthService: ObservableObject {
                         let userDoc = db.collection("users").document(user.uid)
                         var data: [String: Any] = [
                             "tier": tier.rawValue,
-                            "hasCompletedOnboarding": false
+                            "hasCompletedOnboarding": false,
+                            "hasTakenQuiz": false
                         ]
                         if let firstName = firstName { data["firstName"] = firstName }
                         if let lastName = lastName { data["lastName"] = lastName }
@@ -275,7 +276,8 @@ class AuthService: ObservableObject {
                 // Create default profile if not exists
                 let defaultData: [String: Any] = [
                     "tier": UserTier.free.rawValue,
-                    "hasCompletedOnboarding": false
+                    "hasCompletedOnboarding": false,
+                    "hasTakenQuiz": false
                 ]
                 let userProfile = UserProfile(from: user, firestoreData: defaultData)
                 completion(.success(userProfile))

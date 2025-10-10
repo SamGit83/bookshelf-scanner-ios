@@ -12,8 +12,6 @@ struct ContentView: View {
       @State private var capturedImage: UIImage?
       @State private var isShowingCamera = false
       @State private var selectedTab = 0
-      @State private var showQuiz = false
-      @State private var hasSeenQuizPrompt: Bool = false
 
       private var userInitials: String {
          let displayName = authService.currentUser?.displayName
@@ -38,25 +36,10 @@ struct ContentView: View {
                  // For authenticated users, assume they have completed onboarding
                  // unless explicitly marked as not completed
                  if authService.hasCompletedOnboarding || authService.isLoadingOnboardingStatus {
-                     if authService.currentUser?.hasTakenQuiz == true || hasSeenQuizPrompt {
+                     if let hasTaken = authService.currentUser?.hasTakenQuiz, hasTaken {
                          authenticatedView
                      } else {
-                         let userId = authService.currentUser?.id
-                         QuizPromptView(
-                             onTakeQuiz: {
-                                 showQuiz = true
-                                 hasSeenQuizPrompt = true
-                                 if let uid = userId {
-                                     UserDefaults.standard.set(true, forKey: "hasSeenQuizPrompt_\(uid)")
-                                 }
-                             },
-                             onDoItLater: {
-                                 hasSeenQuizPrompt = true
-                                 if let uid = userId {
-                                     UserDefaults.standard.set(true, forKey: "hasSeenQuizPrompt_\(uid)")
-                                 }
-                             }
-                         )
+                         QuizView()
                      }
                  } else {
                      OnboardingView()
@@ -66,12 +49,6 @@ struct ContentView: View {
              }
          }
          .preferredColorScheme(themeManager.currentPreference.colorScheme)
-         .onAppear {
-             // Firebase is initialized in AppDelegate
-             if let userId = authService.currentUser?.id {
-                 hasSeenQuizPrompt = UserDefaults.standard.bool(forKey: "hasSeenQuizPrompt_\(userId)")
-             }
-         }
          .onChange(of: authService.isAuthenticated) { isAuthenticated in
              if isAuthenticated {
                  // User signed in, refresh data
@@ -119,11 +96,6 @@ struct ContentView: View {
         .navigationViewStyle(StackNavigationViewStyle())
         .sheet(isPresented: $isShowingCamera) {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
-        }
-        .fullScreenCover(isPresented: $showQuiz) {
-            QuizView()
-        }
-        .onChange(of: isShowingCamera) { newValue in
         }
         .onChange(of: capturedImage) { newImage in
             if let image = newImage {
