@@ -112,16 +112,20 @@ struct QuizView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: AppleBooksSpacing.space24) {
-                    Text("Thank you for completing the quiz!")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(AppleBooksColors.text)
-                        .multilineTextAlignment(.center)
+                    Spacer()
 
-                    Text("Your responses will help us personalize recommendations and improve your experience.")
-                        .font(.system(size: 18))
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, AppleBooksSpacing.space24)
+                    VStack(spacing: AppleBooksSpacing.space24) {
+                        Text("Thank you for completing the quiz!")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(AppleBooksColors.text)
+                            .multilineTextAlignment(.center)
+
+                        Text("Your responses will help us personalize recommendations and improve your experience.")
+                            .font(.system(size: 18))
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+                    }
 
                     Spacer()
 
@@ -141,6 +145,7 @@ struct QuizView: View {
                     .padding(.horizontal, AppleBooksSpacing.space24)
                     .padding(.bottom, AppleBooksSpacing.space32)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 AppleBooksColors.background
                     .ignoresSafeArea()

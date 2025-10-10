@@ -130,10 +130,32 @@ struct CurrentlyReadingBookCard: View {
 }
 
 struct CurrentlyReadingView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var viewModel: BookViewModel
     @Binding var isShowingCamera: Bool
     @State private var selectedBook: Book?
     @State private var progressBook: Book?
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var cardWidth: CGFloat {
+        isIPad ? 350 : 280
+    }
+    
+    private var adaptivePadding: CGFloat {
+        isIPad ? 48 : 24
+    }
+    
+    private var adaptiveSpacing: CGFloat {
+        isIPad ? 24 : 16
+    }
+    
+    private var gridColumns: [GridItem] {
+        let count = isIPad ? 2 : 1
+        return Array(repeating: GridItem(.flexible(), spacing: adaptiveSpacing), count: count)
+    }
 
     // Dummy data for favorites and trending
     private var favoriteBooks: [Book] {
@@ -161,18 +183,33 @@ struct CurrentlyReadingView: View {
                 showSeeAll: false,
                 seeAllAction: nil
             )
+            .padding(.horizontal, adaptivePadding)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: AppleBooksSpacing.space16) {
+            if isIPad {
+                LazyVGrid(columns: gridColumns, spacing: adaptiveSpacing) {
                     ForEach(viewModel.currentlyReadingBooks) { book in
                         CurrentlyReadingBookCard(book: book, onTap: {
                             selectedBook = book
                         }, onProgressTap: { progressBook in
                             self.progressBook = progressBook
                         })
+                        .frame(maxWidth: 500)
                     }
                 }
-                .padding(.horizontal, AppleBooksSpacing.space24)
+                .padding(.horizontal, adaptivePadding)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: AppleBooksSpacing.space16) {
+                        ForEach(viewModel.currentlyReadingBooks) { book in
+                            CurrentlyReadingBookCard(book: book, onTap: {
+                                selectedBook = book
+                            }, onProgressTap: { progressBook in
+                                self.progressBook = progressBook
+                            })
+                        }
+                    }
+                    .padding(.horizontal, AppleBooksSpacing.space24)
+                }
             }
         }
     }
@@ -189,6 +226,9 @@ struct CurrentlyReadingView: View {
         ) {
             // Handle promo tap - could open store
         }
+        .frame(maxWidth: isIPad ? 800 : .infinity)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, adaptivePadding)
     }
 
     @ViewBuilder
@@ -202,16 +242,18 @@ struct CurrentlyReadingView: View {
                     // Handle see all
                 }
             )
+            .padding(.horizontal, adaptivePadding)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: AppleBooksSpacing.space16) {
+                HStack(spacing: adaptiveSpacing) {
                     ForEach(favoriteBooks) { book in
                         BookCard(book: book, viewModel: viewModel, onProgressTap: { progressBook in
                             self.progressBook = progressBook
                         })
+                        .frame(width: cardWidth)
                     }
                 }
-                .padding(.horizontal, AppleBooksSpacing.space24)
+                .padding(.horizontal, adaptivePadding)
             }
         }
     }
@@ -227,16 +269,18 @@ struct CurrentlyReadingView: View {
                     // Handle see all
                 }
             )
+            .padding(.horizontal, adaptivePadding)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: AppleBooksSpacing.space16) {
+                HStack(spacing: adaptiveSpacing) {
                     ForEach(trendingBooks) { book in
                         BookCard(book: book, viewModel: viewModel, onProgressTap: { progressBook in
                             self.progressBook = progressBook
                         })
+                        .frame(width: cardWidth)
                     }
                 }
-                .padding(.horizontal, AppleBooksSpacing.space24)
+                .padding(.horizontal, adaptivePadding)
             }
         }
     }
@@ -265,21 +309,25 @@ struct CurrentlyReadingView: View {
                     .foregroundColor(AppleBooksColors.textSecondary)
                     .multilineTextAlignment(.center)
             }
-            .padding(.horizontal, AppleBooksSpacing.space32)
+            .frame(maxWidth: 600)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, adaptivePadding)
             .padding(.vertical, AppleBooksSpacing.space64)
         }
     }
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 0) {
+            VStack(spacing: AppleBooksSpacing.space32) {
                 readingGoalsSection
+                    .padding(.horizontal, adaptivePadding)
                 currentlyReadingSection
                 promoBannerSection
                 favoritesSection
                 trendingSection
                 emptyStateSection
             }
+            .padding(.vertical, AppleBooksSpacing.space24)
         }
         .background(AppleBooksColors.background)
         .overlay(

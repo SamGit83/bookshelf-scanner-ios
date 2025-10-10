@@ -4,9 +4,31 @@ import UIKit
 #endif
 
 struct BookDetailView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let book: Book
     @ObservedObject var viewModel: BookViewModel
     private let rateLimiter = RateLimiter()
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var adaptivePadding: CGFloat {
+        isIPad ? 64 : 24
+    }
+    
+    private var maxContentWidth: CGFloat {
+        isIPad ? 800 : .infinity
+    }
+    
+    private var sectionMaxWidth: CGFloat {
+        isIPad ? 700 : .infinity
+    }
+    
+    private var gridColumns: [GridItem] {
+        let count = isIPad ? 3 : 2
+        return Array(repeating: GridItem(.flexible(), spacing: 16), count: count)
+    }
 
     private var currentBook: Book {
         viewModel.books.first(where: { $0.id == book.id }) ?? book
@@ -59,7 +81,9 @@ struct BookDetailView: View {
                 }
             }
         }
-        .padding(.horizontal, AppleBooksSpacing.space24)
+        .frame(maxWidth: sectionMaxWidth)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, adaptivePadding)
         .padding(.top, AppleBooksSpacing.space32)
     }
 
@@ -104,7 +128,9 @@ struct BookDetailView: View {
                 }
             }
         }
-        .padding(.horizontal, AppleBooksSpacing.space24)
+        .frame(maxWidth: sectionMaxWidth)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, adaptivePadding)
     }
 
     // Removed descriptionSection to avoid duplication with AI-generated teaser
@@ -159,7 +185,9 @@ struct BookDetailView: View {
                     }
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24))
+            .frame(maxWidth: sectionMaxWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, adaptivePadding))
         } else {
             AnyView(EmptyView())
         }
@@ -182,7 +210,9 @@ struct BookDetailView: View {
                         .lineSpacing(6)
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24))
+            .frame(maxWidth: sectionMaxWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, adaptivePadding))
         } else if isLoadingTeaser {
             AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
@@ -196,7 +226,9 @@ struct BookDetailView: View {
                     ProgressView()
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24))
+            .frame(maxWidth: sectionMaxWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, adaptivePadding))
         } else {
             AnyView(EmptyView())
         }
@@ -219,7 +251,9 @@ struct BookDetailView: View {
                         .lineSpacing(6)
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24))
+            .frame(maxWidth: sectionMaxWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, adaptivePadding))
         } else if isLoadingBio {
             AnyView(VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
                 AppleBooksSectionHeader(
@@ -233,7 +267,9 @@ struct BookDetailView: View {
                     ProgressView()
                 }
             }
-            .padding(.horizontal, AppleBooksSpacing.space24))
+            .frame(maxWidth: sectionMaxWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, adaptivePadding))
         } else {
             AnyView(EmptyView())
         }
@@ -285,7 +321,9 @@ struct BookDetailView: View {
                 }
             }
         }
-        .padding(.horizontal, AppleBooksSpacing.space24)
+        .frame(maxWidth: sectionMaxWidth)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, adaptivePadding)
     }
 
     private var actionButtonsSection: some View {
@@ -298,7 +336,7 @@ struct BookDetailView: View {
             )
 
             AppleBooksCard {
-                VStack(spacing: AppleBooksSpacing.space12) {
+                HStack(spacing: AppleBooksSpacing.space12) {
                     if currentBook.status == .library {
                         Button(action: {
                             withAnimation(.spring()) {
@@ -308,7 +346,7 @@ struct BookDetailView: View {
                             Text("Start Reading")
                                 .font(AppleBooksTypography.buttonLarge)
                                 .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: isIPad ? 300 : .infinity)
                                 .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(AppleBooksColors.accent)
                                 .cornerRadius(12)
@@ -320,7 +358,7 @@ struct BookDetailView: View {
                             Text("Update Progress")
                                 .font(AppleBooksTypography.buttonLarge)
                                 .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: isIPad ? 300 : .infinity)
                                 .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(AppleBooksColors.success)
                                 .cornerRadius(12)
@@ -333,7 +371,7 @@ struct BookDetailView: View {
                         Text("Edit Book")
                             .font(AppleBooksTypography.buttonLarge)
                             .foregroundColor(AppleBooksColors.text)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: isIPad ? 300 : .infinity)
                             .padding(.vertical, AppleBooksSpacing.space16)
                             .background(AppleBooksColors.card.opacity(0.5))
                             .cornerRadius(12)
@@ -341,7 +379,9 @@ struct BookDetailView: View {
                 }
             }
         }
-        .padding(.horizontal, AppleBooksSpacing.space24)
+        .frame(maxWidth: sectionMaxWidth)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, adaptivePadding)
     }
 
     private var recommendationsSection: AnyView {
@@ -353,10 +393,11 @@ struct BookDetailView: View {
                     showSeeAll: false,
                     seeAllAction: {}
                 )
+                .padding(.horizontal, adaptivePadding)
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(recommendations.prefix(5)) { recommendation in
+                if isIPad {
+                    LazyVGrid(columns: gridColumns, spacing: 16) {
+                        ForEach(recommendations.prefix(6)) { recommendation in
                             AppleBooksBookCard(
                                 book: Book(
                                     title: recommendation.title,
@@ -373,7 +414,29 @@ struct BookDetailView: View {
                             )
                         }
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .padding(.horizontal, adaptivePadding)
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: AppleBooksSpacing.space16) {
+                            ForEach(recommendations.prefix(5)) { recommendation in
+                                AppleBooksBookCard(
+                                    book: Book(
+                                        title: recommendation.title,
+                                        author: recommendation.author,
+                                        genre: nil as String?,
+                                        status: .library,
+                                        coverImageURL: recommendation.thumbnailURL
+                                    ),
+                                    onTap: {},
+                                    showAddButton: false,
+                                    onAddTap: {},
+                                    onEditTap: nil,
+                                    viewModel: viewModel
+                                )
+                            }
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+                    }
                 }
             })
         } else {
@@ -384,13 +447,38 @@ struct BookDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: AppleBooksSpacing.space32) {
-                bookCoverSection
-                bookMetadataSection
-                bookDetailsSection
-                bookTeaserSection
-                authorBiographySection
-                readingProgressSection
-                recommendationsSection
+                if isIPad {
+                    HStack(alignment: .top, spacing: AppleBooksSpacing.space32) {
+                        VStack(spacing: AppleBooksSpacing.space20) {
+                            bookCoverSection
+                        }
+                        .frame(maxWidth: 300)
+                        
+                        VStack(alignment: .leading, spacing: AppleBooksSpacing.space24) {
+                            bookMetadataSection
+                            bookDetailsSection
+                            readingProgressSection
+                            actionButtonsSection
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .frame(maxWidth: maxContentWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, adaptivePadding)
+                    
+                    bookTeaserSection
+                    authorBiographySection
+                    recommendationsSection
+                } else {
+                    bookCoverSection
+                    bookMetadataSection
+                    bookDetailsSection
+                    bookTeaserSection
+                    authorBiographySection
+                    readingProgressSection
+                    actionButtonsSection
+                    recommendationsSection
+                }
                 Spacer(minLength: AppleBooksSpacing.space64)
             }
             .background(AppleBooksColors.background)

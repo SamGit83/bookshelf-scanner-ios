@@ -23,6 +23,19 @@ struct LoginView: View {
     @State private var showWaitlistModal = false
     @State private var selectedTier: UserTier? = nil
     @State private var selectedPeriod: SubscriptionPeriod = SubscriptionPeriod(unit: .month)
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var horizontalPadding: CGFloat {
+        isIPad ? 48 : 24
+    }
+    
+    private var maxFormWidth: CGFloat {
+        isIPad ? 600 : .infinity
+    }
     
     init(isSignUp: Bool = false) {
         _isSignUp = State(initialValue: isSignUp)
@@ -71,8 +84,10 @@ struct LoginView: View {
 
                     if isSignUp {
                         ExpandableTierSelection(selectedTier: $selectedTier, selectedPeriod: $selectedPeriod, showWaitlistModal: $showWaitlistModal)
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                        .padding(.bottom, AppleBooksSpacing.space16)
+                            .frame(maxWidth: maxFormWidth)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.bottom, AppleBooksSpacing.space16)
                     }
 
                     if !isSignUp || (isSignUp && selectedTier == .free) {
@@ -420,7 +435,9 @@ struct LoginView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .frame(maxWidth: maxFormWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, horizontalPadding)
                     .offset(y: animateForm ? 0 : 50)
                     .opacity(animateForm ? 1 : 0)
                     .animation(AnimationTiming.transition.delay(0.4), value: animateForm)
@@ -446,7 +463,9 @@ struct LoginView: View {
                                     .lineLimit(nil)
                             }
                         }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
+                        .frame(maxWidth: maxFormWidth)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, horizontalPadding)
                         .transition(.scale.combined(with: .opacity))
                         .animation(AnimationTiming.feedback, value: authService.errorMessage)
                     }
@@ -726,6 +745,12 @@ struct ExpandableTierSelection: View {
     @Binding var selectedPeriod: SubscriptionPeriod
     @Binding var showWaitlistModal: Bool
     @State private var expandedTier: UserTier? = nil
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
     private let premiumFeatures = [
         "Unlimited scans",
         "Unlimited books",
@@ -791,6 +816,11 @@ struct ExpandableTierButton: View {
     @Binding var expandedTier: UserTier?
     @Binding var selectedPeriod: SubscriptionPeriod
     @Binding var showWaitlistModal: Bool
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
+    private var isIPadButton: Bool {
+        horizontalSizeClass == .regular
+    }
 
     // Initialize with optional pricing subtext and period
     init(tier: UserTier, icon: String, title: String, badge: String, badgeColor: Color, pricing: String? = nil, pricingSubtext: String? = nil, features: [String], selectedTier: Binding<UserTier?>, expandedTier: Binding<UserTier?>, selectedPeriod: Binding<SubscriptionPeriod> = .constant(SubscriptionPeriod(unit: .month)), showWaitlistModal: Binding<Bool>) {
@@ -920,11 +950,12 @@ struct ExpandableTierButton: View {
                             Text("Join Waitlist")
                                 .font(AppleBooksTypography.buttonLarge)
                                 .foregroundColor(AppleBooksColors.card)
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: isIPadButton ? 400 : .infinity)
                                 .padding(AppleBooksSpacing.space16)
                                 .background(AppleBooksColors.accent)
                                 .cornerRadius(12)
                         }
+                        .frame(maxWidth: .infinity)
                     }
 
                     // Pricing Subtext for Premium

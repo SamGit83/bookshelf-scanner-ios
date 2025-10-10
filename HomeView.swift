@@ -17,6 +17,23 @@ struct HomeView: View {
     @State private var nextOpacity: Double = 0
     @State private var nextIndex: Int = 1
     @State private var currentPage: Int = 0
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var horizontalPadding: CGFloat {
+        isIPad ? 64 : 24
+    }
+    
+    private var heroMaxWidth: CGFloat {
+        isIPad ? 800 : .infinity
+    }
+    
+    private var featureMaxWidth: CGFloat {
+        isIPad ? 700 : .infinity
+    }
 
     private let features = [
         ("camera.fill", "Scan Your Bookshelf", "Point your camera at your bookshelf and capture a photo"),
@@ -37,32 +54,36 @@ struct HomeView: View {
                 VStack(spacing: AppleBooksSpacing.space32) {
                     Spacer(minLength: AppleBooksSpacing.space80)
 
-                    // App Icon
-                    Image(systemName: "books.vertical.fill")
-                        .font(.system(size: 80, weight: .light))
-                        .foregroundColor(AppleBooksColors.accent)
-                        .padding(AppleBooksSpacing.space24)
-                        .background(
-                            Circle()
-                                .fill(AppleBooksColors.accent.opacity(0.1))
-                        )
-                        .offset(y: floatingOffset)
-                        .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
+                    VStack(spacing: AppleBooksSpacing.space32) {
+                        // App Icon
+                        Image(systemName: "books.vertical.fill")
+                            .font(.system(size: 80, weight: .light))
+                            .foregroundColor(AppleBooksColors.accent)
+                            .padding(AppleBooksSpacing.space24)
+                            .background(
+                                Circle()
+                                    .fill(AppleBooksColors.accent.opacity(0.1))
+                            )
+                            .offset(y: floatingOffset)
+                            .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
 
-                    // Title
-                    Text("Book Shelfie")
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundColor(AppleBooksColors.text)
-                        .multilineTextAlignment(.center)
+                        // Title
+                        Text("Book Shelfie")
+                            .font(.largeTitle.weight(.bold))
+                            .foregroundColor(AppleBooksColors.text)
+                            .multilineTextAlignment(.center)
 
-                    // Subtitle
-                    Text("Transform your physical bookshelf into a smart digital library with AI-powered book recognition.")
-                        .font(AppleBooksTypography.bodyLarge)
-                        .foregroundColor(AppleBooksColors.textSecondary)
-                        .multilineTextAlignment(.leading)
-                        .padding(.horizontal, AppleBooksSpacing.space24)
-                        .lineLimit(nil)
-                        .minimumScaleFactor(0.8)
+                        // Subtitle
+                        Text("Transform your physical bookshelf into a smart digital library with AI-powered book recognition.")
+                            .font(AppleBooksTypography.bodyLarge)
+                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+                            .lineLimit(nil)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .frame(maxWidth: heroMaxWidth)
+                    .frame(maxWidth: .infinity)
                     
                     // Animated Hero Words with Icons
                     ZStack {
@@ -141,6 +162,8 @@ struct HomeView: View {
                             )
                         }
                         .frame(height: 80)
+                        .frame(maxWidth: heroMaxWidth)
+                        .frame(maxWidth: .infinity)
                     
                     // CTA Buttons
                     VStack(spacing: AppleBooksSpacing.space16) {
@@ -150,7 +173,7 @@ struct HomeView: View {
                             Text("Get Started")
                                 .font(AppleBooksTypography.buttonLarge)
                                 .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: isIPad ? 400 : .infinity)
                                 .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(AppleBooksColors.accent)
                                 .cornerRadius(12)
@@ -162,7 +185,7 @@ struct HomeView: View {
                             Text("Sign In")
                                 .font(AppleBooksTypography.buttonLarge)
                                 .foregroundColor(AppleBooksColors.accent)
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: isIPad ? 400 : .infinity)
                                 .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(AppleBooksColors.card)
                                 .cornerRadius(12)
@@ -172,7 +195,9 @@ struct HomeView: View {
                                 )
                         }
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .frame(maxWidth: heroMaxWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, horizontalPadding)
 
                     Spacer(minLength: AppleBooksSpacing.space40)
                 }
@@ -221,49 +246,53 @@ struct HomeView: View {
 
                 // Page 3: How It Works Section
                 VStack(spacing: AppleBooksSpacing.space24) {
-                    Text("How it works")
-                        .font(AppleBooksTypography.headlineLarge)
-                        .foregroundColor(AppleBooksColors.text)
-                        .padding(.bottom, AppleBooksSpacing.space40)
-
                     VStack(spacing: AppleBooksSpacing.space24) {
-                        ForEach(features.indices, id: \.self) { index in
-                            let feature = features[index]
-                            GeometryReader { geometry in
-                                let minY = geometry.frame(in: .global).minY
-                                let maxY = geometry.frame(in: .global).maxY
-                                let screenHeight = UIScreen.main.bounds.height
+                        Text("How it works")
+                            .font(AppleBooksTypography.headlineLarge)
+                            .foregroundColor(AppleBooksColors.text)
+                            .padding(.bottom, AppleBooksSpacing.space40)
 
-                                // Calculate visibility: item is visible when it's in viewport
-                                // Fade in starts when bottom of item enters screen (maxY < screenHeight)
-                                // Full opacity when item is well within viewport
-                                // Stay visible even when scrolling up past top
-                                let fadeInThreshold: CGFloat = screenHeight * 0.95
-                                let fadeInComplete: CGFloat = screenHeight * 0.90
+                        VStack(spacing: AppleBooksSpacing.space24) {
+                            ForEach(features.indices, id: \.self) { index in
+                                let feature = features[index]
+                                GeometryReader { geometry in
+                                    let minY = geometry.frame(in: .global).minY
+                                    let maxY = geometry.frame(in: .global).maxY
+                                    let screenHeight = UIScreen.main.bounds.height
 
-                                let visibility: Double = {
-                                    if maxY < fadeInComplete {
-                                        // Item is well within viewport - fully visible
-                                        return 1.0
-                                    } else if maxY < fadeInThreshold {
-                                        // Item is entering viewport - fade in
-                                        let progress = (fadeInThreshold - maxY) / (fadeInThreshold - fadeInComplete)
-                                        return Double(min(max(progress, 0), 1))
-                                    } else {
-                                        // Item is below viewport - hidden
-                                        return 0.0
-                                    }
-                                }()
+                                    // Calculate visibility: item is visible when it's in viewport
+                                    // Fade in starts when bottom of item enters screen (maxY < screenHeight)
+                                    // Full opacity when item is well within viewport
+                                    // Stay visible even when scrolling up past top
+                                    let fadeInThreshold: CGFloat = screenHeight * 0.95
+                                    let fadeInComplete: CGFloat = screenHeight * 0.90
 
-                                FeatureRow(icon: feature.0, title: feature.1, description: feature.2)
-                                    .opacity(visibility)
-                                    .offset(y: (1 - visibility) * 30)
-                                    .onChange(of: visibility) { _ in }
+                                    let visibility: Double = {
+                                        if maxY < fadeInComplete {
+                                            // Item is well within viewport - fully visible
+                                            return 1.0
+                                        } else if maxY < fadeInThreshold {
+                                            // Item is entering viewport - fade in
+                                            let progress = (fadeInThreshold - maxY) / (fadeInThreshold - fadeInComplete)
+                                            return Double(min(max(progress, 0), 1))
+                                        } else {
+                                            // Item is below viewport - hidden
+                                            return 0.0
+                                        }
+                                    }()
+
+                                    FeatureRow(icon: feature.0, title: feature.1, description: feature.2)
+                                        .opacity(visibility)
+                                        .offset(y: (1 - visibility) * 30)
+                                        .onChange(of: visibility) { _ in }
+                                }
+                                .frame(height: 80)
                             }
-                            .frame(height: 80)
                         }
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .frame(maxWidth: featureMaxWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, horizontalPadding)
 
                     Spacer()
 
@@ -273,16 +302,17 @@ struct HomeView: View {
                         Text("Sign Up")
                             .font(AppleBooksTypography.buttonLarge)
                             .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: isIPad ? 400 : .infinity)
                             .padding(.vertical, AppleBooksSpacing.space16)
                             .background(AppleBooksColors.accent)
                             .cornerRadius(12)
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .frame(maxWidth: featureMaxWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, horizontalPadding)
                     .padding(.bottom, AppleBooksSpacing.space80)
                 }
                 .padding(.top, AppleBooksSpacing.space48)
-                .padding(.horizontal, AppleBooksSpacing.space24)
                 .tag(2)
             }
             .tabViewStyle(PageTabViewStyle())

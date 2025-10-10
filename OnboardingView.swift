@@ -15,6 +15,19 @@ struct OnboardingView: View {
     @State private var selectedOption: SubscriptionOption? = nil
     @State private var showSuccess = false
     @State private var showWaitlistModal = false
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var horizontalPadding: CGFloat {
+        isIPad ? 48 : 24
+    }
+    
+    private var maxContentWidth: CGFloat {
+        isIPad ? 700 : .infinity
+    }
 
     let subscriptionOptions: [SubscriptionOption] = [
         SubscriptionOption(name: "Monthly Premium", price: "$9.99", period: "month"),
@@ -126,7 +139,9 @@ struct OnboardingView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, AppleBooksSpacing.space24)
+                        .frame(maxWidth: maxContentWidth)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, horizontalPadding)
 
                         Color.clear
                             .frame(height: AppleBooksSpacing.space32)
@@ -144,7 +159,7 @@ struct OnboardingView: View {
                             Text("Previous")
                                 .font(.system(size: 17, weight: .medium))
                                 .foregroundColor(AppleBooksColors.textSecondary)
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: isIPad ? 300 : .infinity)
                                 .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(AppleBooksColors.card)
                                 .cornerRadius(12)
@@ -162,14 +177,16 @@ struct OnboardingView: View {
                             Text("Next")
                                 .font(.system(size: 17, weight: .medium))
                                 .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: isIPad ? 300 : .infinity)
                                 .padding(.vertical, AppleBooksSpacing.space16)
                                 .background(pages[currentPage].accentColor)
                                 .cornerRadius(12)
                         }
                     }
                 }
-                .padding(.horizontal, AppleBooksSpacing.space24)
+                .frame(maxWidth: maxContentWidth)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, horizontalPadding)
                 .padding(.bottom, AppleBooksSpacing.space32)
             }
         }
@@ -194,6 +211,11 @@ struct SubscriptionSelectionView: View {
     @Binding var showWaitlistModal: Bool
     let subscriptionOptions: [SubscriptionOption]
     let completeOnboarding: () -> Void
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
 
     var body: some View {
         VStack(spacing: AppleBooksSpacing.space24) {
@@ -221,9 +243,12 @@ struct SubscriptionSelectionView: View {
 
             HStack(spacing: AppleBooksSpacing.space16) {
                 SubscriptionButton(option: subscriptionOptions[0], selectedOption: $selectedOption)
+                    .frame(maxWidth: isIPad ? 300 : .infinity)
                 SubscriptionButton(option: subscriptionOptions[1], selectedOption: $selectedOption)
+                    .frame(maxWidth: isIPad ? 300 : .infinity)
             }
             .frame(height: 200)
+            .frame(maxWidth: isIPad ? 650 : .infinity)
 
             VStack(spacing: AppleBooksSpacing.space16) {
                 Text("Free Tier Selected")
@@ -250,9 +275,10 @@ struct SubscriptionSelectionView: View {
                     Text("Premium Coming Soon")
                         .font(.system(size: 17, weight: .medium))
                         .foregroundColor(AppleBooksColors.textTertiary)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: isIPad ? 500 : .infinity)
                         .padding(.vertical, AppleBooksSpacing.space16)
                 }
+                .frame(maxWidth: .infinity)
                 .background(AppleBooksColors.card)
                 .cornerRadius(12)
                 .disabled(true)
@@ -361,7 +387,9 @@ struct SubscriptionSelectionView: View {
                         Text("Skip for Free Tier")
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(AppleBooksColors.textSecondary)
+                            .frame(maxWidth: isIPad ? 500 : .infinity)
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
         }

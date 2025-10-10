@@ -27,6 +27,7 @@ enum SortOption: String, CaseIterable {
 }
 
 struct LibraryView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var viewModel: BookViewModel
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @Binding var isShowingCamera: Bool
@@ -38,6 +39,27 @@ struct LibraryView: View {
     @State private var isShowingDetail = false
     @State private var selectedBookForEdit: Book?
     @State private var isShowingEditBook = false
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var gridColumns: [GridItem] {
+        let count = isIPad ? 3 : 1
+        return Array(repeating: GridItem(.flexible(), spacing: AppleBooksSpacing.space16), count: count)
+    }
+    
+    private var adaptivePadding: CGFloat {
+        isIPad ? 48 : 24
+    }
+    
+    private var cardMaxWidth: CGFloat {
+        isIPad ? 450 : .infinity
+    }
+    
+    private var bannerMaxWidth: CGFloat {
+        isIPad ? 800 : .infinity
+    }
 
     private var emptyStateView: some View {
         VStack(spacing: AppleBooksSpacing.space20) {
@@ -57,7 +79,9 @@ struct LibraryView: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .padding(.horizontal, AppleBooksSpacing.space24)
+        .frame(maxWidth: 600)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, adaptivePadding)
     }
 
     private var libraryContentView: some View {
@@ -75,7 +99,7 @@ struct LibraryView: View {
                         seeAllAction: nil
                     )
 
-                    LazyVStack(spacing: AppleBooksSpacing.space16) {
+                    LazyVGrid(columns: gridColumns, spacing: AppleBooksSpacing.space16) {
                         ForEach(readingBooks) { book in
                             AppleBooksBookCard(
                                 book: book,
@@ -85,9 +109,10 @@ struct LibraryView: View {
                                 onEditTap: { selectedBookForEdit = book; isShowingEditBook = true },
                                 viewModel: viewModel
                             )
+                            .frame(maxWidth: cardMaxWidth)
                         }
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .padding(.horizontal, adaptivePadding)
                 }
 
                 // To Read Section (New books + Legacy Library)
@@ -102,7 +127,7 @@ struct LibraryView: View {
                         seeAllAction: nil
                     )
 
-                    LazyVStack(spacing: AppleBooksSpacing.space16) {
+                    LazyVGrid(columns: gridColumns, spacing: AppleBooksSpacing.space16) {
                         ForEach(toReadBooks) { book in
                             AppleBooksBookCard(
                                 book: book,
@@ -112,9 +137,10 @@ struct LibraryView: View {
                                 onEditTap: { selectedBookForEdit = book; isShowingEditBook = true },
                                 viewModel: viewModel
                             )
+                            .frame(maxWidth: cardMaxWidth)
                         }
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .padding(.horizontal, adaptivePadding)
                 }
 
                 // Read Section (Completed books)
@@ -127,7 +153,7 @@ struct LibraryView: View {
                         seeAllAction: nil
                     )
 
-                    LazyVStack(spacing: AppleBooksSpacing.space16) {
+                    LazyVGrid(columns: gridColumns, spacing: AppleBooksSpacing.space16) {
                         ForEach(readBooks) { book in
                             AppleBooksBookCard(
                                 book: book,
@@ -137,9 +163,10 @@ struct LibraryView: View {
                                 onEditTap: { selectedBookForEdit = book; isShowingEditBook = true },
                                 viewModel: viewModel
                             )
+                            .frame(maxWidth: cardMaxWidth)
                         }
                     }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
+                    .padding(.horizontal, adaptivePadding)
                 }
             }
             .padding(.vertical, AppleBooksSpacing.space24)
@@ -160,7 +187,7 @@ struct LibraryView: View {
                             .font(AppleBooksTypography.buttonLarge)
                     }
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: isIPad ? 300 : .infinity)
                     .padding(.vertical, AppleBooksSpacing.space16)
                     .background(AppleBooksColors.accent)
                     .cornerRadius(12)
@@ -176,7 +203,7 @@ struct LibraryView: View {
                             .font(AppleBooksTypography.buttonLarge)
                     }
                     .foregroundColor(AppleBooksColors.accent)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: isIPad ? 300 : .infinity)
                     .padding(.vertical, AppleBooksSpacing.space16)
                     .background(AppleBooksColors.card)
                     .cornerRadius(12)
@@ -186,8 +213,10 @@ struct LibraryView: View {
                     )
                 }
             }
+            .frame(maxWidth: isIPad ? 650 : .infinity)
+            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, AppleBooksSpacing.space24)
+        .padding(.horizontal, adaptivePadding)
         .padding(.top, AppleBooksSpacing.space24)
         .padding(.bottom, AppleBooksSpacing.space32)
         .padding(.bottom, 70)
@@ -249,7 +278,9 @@ struct LibraryView: View {
                     .padding(.vertical, AppleBooksSpacing.space12)
                     .background(SemanticColors.warningSecondary.opacity(0.1))
                     .cornerRadius(8)
-                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .frame(maxWidth: bannerMaxWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, adaptivePadding)
                     .padding(.top, AppleBooksSpacing.space16)
                 }
 
@@ -274,7 +305,9 @@ struct LibraryView: View {
                     .padding(.vertical, AppleBooksSpacing.space12)
                     .background(SemanticColors.errorSecondary.opacity(0.1))
                     .cornerRadius(8)
-                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .frame(maxWidth: bannerMaxWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, adaptivePadding)
                     .padding(.top, AppleBooksSpacing.space16)
                 }
 
@@ -299,7 +332,9 @@ struct LibraryView: View {
                     .padding(.vertical, AppleBooksSpacing.space12)
                     .background(SemanticColors.successSecondary.opacity(0.1))
                     .cornerRadius(8)
-                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .frame(maxWidth: bannerMaxWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, adaptivePadding)
                     .padding(.top, AppleBooksSpacing.space16)
                 }
 
@@ -324,7 +359,9 @@ struct LibraryView: View {
                     .padding(.vertical, AppleBooksSpacing.space12)
                     .background(SemanticColors.successSecondary.opacity(0.1))
                     .cornerRadius(8)
-                    .padding(.horizontal, AppleBooksSpacing.space16)
+                    .frame(maxWidth: bannerMaxWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, adaptivePadding)
                     .padding(.top, AppleBooksSpacing.space16)
                 }
 

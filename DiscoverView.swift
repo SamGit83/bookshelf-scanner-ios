@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DiscoverView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var viewModel: BookViewModel
     @ObservedObject private var accentColorManager = AccentColorManager.shared
     @State private var recommendations: [BookRecommendation] = []
@@ -11,6 +12,23 @@ struct DiscoverView: View {
     @State private var showUpgradeModal = false
     @State private var hasFetchedRecommendations = false
 @AppStorage("showRecommendations") private var showRecommendations = false
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var adaptivePadding: CGFloat {
+        isIPad ? 48 : 24
+    }
+    
+    private var headerMaxWidth: CGFloat {
+        isIPad ? 800 : .infinity
+    }
+    
+    private var gridColumns: [GridItem] {
+        let count = isIPad ? 3 : 2
+        return Array(repeating: GridItem(.flexible(), spacing: 16), count: count)
+    }
 
     // Group recommendations by genre for categories
     private var recommendationsByGenre: [String: [BookRecommendation]] {
@@ -27,7 +45,9 @@ struct DiscoverView: View {
                     .foregroundColor(AppleBooksColors.text)
             }
             .toggleStyle(.switch)
-            .padding(.horizontal, AppleBooksSpacing.space24)
+            .frame(maxWidth: headerMaxWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, adaptivePadding)
             .padding(.vertical, AppleBooksSpacing.space16)
             .onChange(of: showRecommendations) { oldValue, newValue in
                 if newValue {
@@ -47,6 +67,8 @@ struct DiscoverView: View {
                             .font(AppleBooksTypography.bodyMedium)
                             .foregroundColor(AppleBooksColors.textSecondary)
                     }
+                    .frame(maxWidth: 600)
+                    .frame(maxWidth: .infinity)
                     .padding()
                 } else if let error = errorMessage {
                     VStack(spacing: AppleBooksSpacing.space20) {
@@ -70,7 +92,9 @@ struct DiscoverView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(12)
                         }
-                        .padding(.horizontal)
+                        .frame(maxWidth: 400)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, adaptivePadding)
                     }
                     .padding()
                 } else if showRecommendations && recommendations.isEmpty {
@@ -85,7 +109,7 @@ struct DiscoverView: View {
                             .font(AppleBooksTypography.bodyMedium)
                             .foregroundColor(AppleBooksColors.textSecondary)
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+                            .padding(.horizontal, adaptivePadding)
                         
                         Button(action: loadRecommendations) {
                             HStack {
@@ -99,7 +123,9 @@ struct DiscoverView: View {
                             .foregroundColor(.white)
                             .cornerRadius(12)
                         }
-                        .padding(.horizontal)
+                        .frame(maxWidth: 400)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, adaptivePadding)
                     }
                     .padding()
                 } else if showRecommendations && !recommendations.isEmpty {
@@ -119,38 +145,92 @@ struct DiscoverView: View {
                                     .foregroundColor(AppleBooksColors.textSecondary)
                                     .multilineTextAlignment(.center)
                             }
-                            .padding(.horizontal, AppleBooksSpacing.space24)
+                            .frame(maxWidth: headerMaxWidth)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, adaptivePadding)
                             .padding(.top, AppleBooksSpacing.space16)
 
                             // All Recommendations Section
                             if !recommendations.isEmpty {
-                                AppleBooksCollection(
-                                    books: recommendations.map { convertToBook($0) },
-                                    title: "Recommended for You",
-                                    subtitle: "\(recommendations.count) personalized picks",
-                                    onBookTap: { book in
-                                        selectedBook = book
-                                    },
-                                    onSeeAllTap: nil,
-                                    onEditTap: nil,
-                                    viewModel: viewModel
-                                )
+                                VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                                    AppleBooksSectionHeader(
+                                        title: "Recommended for You",
+                                        subtitle: "\(recommendations.count) personalized picks",
+                                        showSeeAll: false,
+                                        seeAllAction: nil
+                                    )
+                                    .padding(.horizontal, adaptivePadding)
+                                    
+                                    if isIPad {
+                                        LazyVGrid(columns: gridColumns, spacing: 16) {
+                                            ForEach(recommendations.map { convertToBook($0) }) { book in
+                                                AppleBooksBookCard(
+                                                    book: book,
+                                                    onTap: { selectedBook = book },
+                                                    showAddButton: false,
+                                                    onAddTap: nil,
+                                                    onEditTap: nil,
+                                                    viewModel: viewModel
+                                                )
+                                            }
+                                        }
+                                        .padding(.horizontal, adaptivePadding)
+                                    } else {
+                                        AppleBooksCollection(
+                                            books: recommendations.map { convertToBook($0) },
+                                            title: "",
+                                            subtitle: "",
+                                            onBookTap: { book in
+                                                selectedBook = book
+                                            },
+                                            onSeeAllTap: nil,
+                                            onEditTap: nil,
+                                            viewModel: viewModel
+                                        )
+                                    }
+                                }
                             }
 
                             // Categories Sections
                             ForEach(recommendationsByGenre.keys.sorted(), id: \.self) { genre in
                                 if let genreRecommendations = recommendationsByGenre[genre], !genreRecommendations.isEmpty {
-                                    AppleBooksCollection(
-                                        books: genreRecommendations.map { convertToBook($0) },
-                                        title: genre,
-                                        subtitle: "\(genreRecommendations.count) books",
-                                        onBookTap: { book in
-                                            selectedBook = book
-                                        },
-                                        onSeeAllTap: nil,
-                                        onEditTap: nil,
-                                        viewModel: viewModel
-                                    )
+                                    VStack(alignment: .leading, spacing: AppleBooksSpacing.space16) {
+                                        AppleBooksSectionHeader(
+                                            title: genre,
+                                            subtitle: "\(genreRecommendations.count) books",
+                                            showSeeAll: false,
+                                            seeAllAction: nil
+                                        )
+                                        .padding(.horizontal, adaptivePadding)
+                                        
+                                        if isIPad {
+                                            LazyVGrid(columns: gridColumns, spacing: 16) {
+                                                ForEach(genreRecommendations.map { convertToBook($0) }) { book in
+                                                    AppleBooksBookCard(
+                                                        book: book,
+                                                        onTap: { selectedBook = book },
+                                                        showAddButton: false,
+                                                        onAddTap: nil,
+                                                        onEditTap: nil,
+                                                        viewModel: viewModel
+                                                    )
+                                                }
+                                            }
+                                            .padding(.horizontal, adaptivePadding)
+                                        } else {
+                                            AppleBooksCollection(
+                                                books: genreRecommendations.map { convertToBook($0) },
+                                                title: "",
+                                                subtitle: "",
+                                                onBookTap: { book in
+                                                    selectedBook = book
+                                                },
+                                                onSeeAllTap: nil,
+                                                onEditTap: nil,
+                                                viewModel: viewModel
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -3,6 +3,7 @@ import PhotosUI
 
 struct ProfileView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var authService: AuthService
     @ObservedObject var themeManager = ThemeManager.shared
     @ObservedObject var accentColorManager = AccentColorManager.shared
@@ -25,6 +26,18 @@ struct ProfileView: View {
     private var tertiaryTextColor: Color {
         colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textTertiary
     }
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var adaptivePadding: CGFloat {
+        isIPad ? 64 : 24
+    }
+    
+    private var maxContentWidth: CGFloat {
+        isIPad ? 700 : .infinity
+    }
 
     var body: some View {
             ZStack {
@@ -36,19 +49,28 @@ struct ProfileView: View {
                     VStack(spacing: AppleBooksSpacing.space32) {
                         // User Info Section
                         UserInfoSection(authService: authService)
+                            .frame(maxWidth: maxContentWidth)
+                            .frame(maxWidth: .infinity)
 
                         // Usage Stats Section with Progressive Disclosure
                         UsageStatsSection(authService: authService, usageTracker: usageTracker, showUpgradeModal: $showUpgradeModal)
+                            .frame(maxWidth: maxContentWidth)
+                            .frame(maxWidth: .infinity)
 
                         // Quiz Section
                         QuizSection(authService: authService)
+                            .frame(maxWidth: maxContentWidth)
+                            .frame(maxWidth: .infinity)
 
                         // Settings Options Section
                         SettingsOptionsSection(authService: authService, themeManager: themeManager, accentColorManager: accentColorManager, showSignOutAlert: $showSignOutAlert)
+                            .frame(maxWidth: maxContentWidth)
+                            .frame(maxWidth: .infinity)
 
 
                         Spacer(minLength: AppleBooksSpacing.space64)
                     }
+                    .padding(.horizontal, adaptivePadding)
                 }
             }
             .navigationTitle("Profile")
@@ -140,10 +162,24 @@ struct ProfileView: View {
 }
 
 struct SettingsOptionsSection: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var authService: AuthService
     @ObservedObject var themeManager: ThemeManager
     @ObservedObject var accentColorManager: AccentColorManager
     @Binding var showSignOutAlert: Bool
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var gridColumns: [GridItem] {
+        let count = isIPad ? 2 : 1
+        return Array(repeating: GridItem(.flexible(), spacing: AppleBooksSpacing.space16), count: count)
+    }
+    
+    private var cardMaxWidth: CGFloat {
+        isIPad ? 350 : .infinity
+    }
 
     var body: some View {
         VStack(spacing: AppleBooksSpacing.space16) {
@@ -154,7 +190,7 @@ struct SettingsOptionsSection: View {
                 seeAllAction: nil
             )
 
-            VStack(spacing: AppleBooksSpacing.space16) {
+            LazyVGrid(columns: gridColumns, spacing: AppleBooksSpacing.space16) {
                 NavigationLink(destination: AccountSettingsView(authService: authService)) {
                     AppleBooksCard(padding: AppleBooksSpacing.space12) {
                         HStack(spacing: AppleBooksSpacing.space12) {
@@ -171,7 +207,6 @@ struct SettingsOptionsSection: View {
                                 .foregroundColor(AppleBooksColors.textSecondary)
                         }
                     }
-                    .frame(maxWidth: 350)
                 }
                 .buttonStyle(PlainButtonStyle())
 
@@ -191,7 +226,6 @@ struct SettingsOptionsSection: View {
                                 .foregroundColor(AppleBooksColors.textSecondary)
                         }
                     }
-                    .frame(maxWidth: 350)
                 }
                 .buttonStyle(PlainButtonStyle())
 
@@ -214,7 +248,6 @@ struct SettingsOptionsSection: View {
                         )
                     }
                 }
-                .frame(maxWidth: 350)
 
                 // Accent Color Section
                 AppleBooksCard(padding: AppleBooksSpacing.space12) {
@@ -239,7 +272,6 @@ struct SettingsOptionsSection: View {
                         }
                     }
                 }
-                .frame(maxWidth: 350)
 
                 // Sign Out
                 Button(action: {
@@ -261,12 +293,10 @@ struct SettingsOptionsSection: View {
                                 .foregroundColor(AppleBooksColors.textSecondary)
                         }
                     }
-                    .frame(maxWidth: 350)
                 }
                 .buttonStyle(PlainButtonStyle())
 
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
         }
     }
 }
@@ -333,9 +363,18 @@ struct ReAuthSheet: View {
 }
 
 struct UsageStatsSection: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var authService: AuthService
     @ObservedObject var usageTracker: UsageTracker
     @Binding var showUpgradeModal: Bool
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var cardMaxWidth: CGFloat {
+        isIPad ? 600 : .infinity
+    }
 
     var body: some View {
         if let user = authService.currentUser {
@@ -424,15 +463,24 @@ struct UsageStatsSection: View {
                         }
                     }
                 }
-                .frame(maxWidth: 350)
+                .frame(maxWidth: cardMaxWidth)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
         }
     }
 }
 
 struct QuizSection: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var authService: AuthService
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
+    private var cardMaxWidth: CGFloat {
+        isIPad ? 600 : .infinity
+    }
 
     var body: some View {
         if let user = authService.currentUser {
@@ -460,18 +508,23 @@ struct QuizSection: View {
                                 .foregroundColor(AppleBooksColors.textSecondary)
                         }
                     }
-                    .frame(maxWidth: 350)
+                    .frame(maxWidth: cardMaxWidth)
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, AppleBooksSpacing.space24)
         }
     }
 }
 
 struct UserInfoSection: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @ObservedObject var authService: AuthService
     @Environment(\.colorScheme) var colorScheme
+    
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
 
     private var secondaryTextColor: Color {
         colorScheme == .dark ? AppleBooksColors.accent : AppleBooksColors.textSecondary
@@ -528,7 +581,6 @@ struct UserInfoSection: View {
                 }
             }
         }
-        .padding(.horizontal, AppleBooksSpacing.space24)
         .padding(.top, AppleBooksSpacing.space32)
     }
 
