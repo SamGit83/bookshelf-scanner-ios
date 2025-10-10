@@ -1261,20 +1261,23 @@ class BookViewModel: ObservableObject {
                     let uniqueRecommendations = self.removeDuplicates(from: recommendations)
                     let limitedRecommendations = Array(uniqueRecommendations.prefix(20))
 
-                    // Cache recommendations for offline use
-                    OfflineCache.shared.cacheRecommendations(limitedRecommendations)
+                    // Fetch covers for recommendations
+                    self.fetchCoversForRecommendations(limitedRecommendations) { enrichedRecommendations in
+                        // Cache recommendations for offline use
+                        OfflineCache.shared.cacheRecommendations(enrichedRecommendations)
 
-                    // Track usage
-                    UsageTracker.shared.incrementRecommendations()
+                        // Track usage
+                        UsageTracker.shared.incrementRecommendations()
 
-                    // Trigger feature usage for surveys
-                    NotificationCenter.default.post(
-                        name: Notification.Name("FeatureUsed"),
-                        object: nil,
-                        userInfo: ["feature": "recommendations", "context": "successful_generation"]
-                    )
+                        // Trigger feature usage for surveys
+                        NotificationCenter.default.post(
+                            name: Notification.Name("FeatureUsed"),
+                            object: nil,
+                            userInfo: ["feature": "recommendations", "context": "successful_generation"]
+                        )
 
-                    completion(.success(limitedRecommendations))
+                        completion(.success(enrichedRecommendations))
+                    }
                 case .failure(let error):
                     AnalyticsManager.shared.trackAPICall(service: "Grok", endpoint: "generateRecommendations", success: false, responseTime: responseTime, errorMessage: error.localizedDescription)
                     print("DEBUG BookViewModel: Grok recommendation failed: \(error.localizedDescription)")
@@ -1287,6 +1290,46 @@ class BookViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    private func fetchCoversForRecommendations(_ recommendations: [BookRecommendation], completion: @escaping ([BookRecommendation]) -> Void) {
+        var enrichedRecommendations = recommendations
+        var index = 0
+
+        func fetchNext() {
+            guard index < enrichedRecommendations.count else {
+                completion(enrichedRecommendations)
+                return
+            }
+
+            let recommendation = enrichedRecommendations[index]
+
+            // Check rate limit before fetching cover
+            if rateLimiter.canMakeCall() {
+                rateLimiter.recordCall()
+                googleBooksService.fetchCoverURL(isbn: nil, title: recommendation.title, author: recommendation.author) { [weak self] result in
+                    switch result {
+                    case .success(let url):
+                        if let url = url {
+                            enrichedRecommendations[index].thumbnailURL = url
+                        }
+                    case .failure(let error):
+                        print("DEBUG BookViewModel: Failed to fetch cover for recommendation \(recommendation.title): \(error.localizedDescription)")
+                    }
+                    index += 1
+                    // Add a small delay to avoid overwhelming the API
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        fetchNext()
+                    }
+                }
+            } else {
+                print("DEBUG BookViewModel: Rate limit exceeded, skipping cover fetch for recommendation: \(recommendation.title)")
+                index += 1
+                fetchNext()
+            }
+        }
+
+        fetchNext()
     }
 
     private func getFavoriteAuthors() -> [String] {

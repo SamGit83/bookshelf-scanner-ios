@@ -9,6 +9,7 @@ struct DiscoverView: View {
     @State private var lastRefreshDate: Date?
     @State private var selectedBook: Book?
     @State private var showUpgradeModal = false
+    @State private var hasFetchedRecommendations = false
 @AppStorage("showRecommendations") private var showRecommendations = false
 
     // Group recommendations by genre for categories
@@ -158,6 +159,11 @@ struct DiscoverView: View {
                 }
             }
         }
+        .onAppear {
+            if showRecommendations && !hasFetchedRecommendations {
+                loadRecommendations()
+            }
+        }
         .navigationTitle("Discover")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -183,20 +189,21 @@ struct DiscoverView: View {
             title: recommendation.title,
             author: recommendation.author,
             genre: recommendation.genre,
-            status: .toRead
+            status: .toRead,
+            coverImageURL: recommendation.thumbnailURL
         )
-        
+
         // Add additional metadata if available
         if let pageCount = recommendation.pageCount {
             book.pageCount = pageCount
         }
-        
+
         if let publishedDate = recommendation.publishedDate {
             book.publicationYear = publishedDate
         }
-        
+
         book.teaser = recommendation.description
-        
+
         return book
     }
 
@@ -227,6 +234,7 @@ struct DiscoverView: View {
                     recommendations = newRecommendations
                     lastRefreshDate = Date()
                     errorMessage = nil
+                    hasFetchedRecommendations = true
                 case .failure(let error):
                     // Check if it's a limit error
                     if error.localizedDescription.contains("Recommendation limit reached") {
