@@ -444,8 +444,8 @@ struct QuizSection: View {
                     seeAllAction: nil
                 )
 
-                AppleBooksCard(padding: AppleBooksSpacing.space12) {
-                    NavigationLink(destination: QuizView()) {
+                NavigationLink(destination: QuizView()) {
+                    AppleBooksCard(padding: AppleBooksSpacing.space12) {
                         HStack(spacing: AppleBooksSpacing.space12) {
                             Image(systemName: "questionmark.circle")
                                 .font(AppleBooksTypography.bodyLarge)
@@ -460,9 +460,9 @@ struct QuizSection: View {
                                 .foregroundColor(AppleBooksColors.textSecondary)
                         }
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .frame(maxWidth: 350)
                 }
-                .frame(maxWidth: 350)
+                .buttonStyle(PlainButtonStyle())
             }
             .padding(.horizontal, AppleBooksSpacing.space24)
         }
