@@ -29,7 +29,7 @@ struct LoginView: View {
         horizontalSizeClass == .regular
     }
     
-    private var modalMaxWidth: CGFloat { isIPad ? 650 : 400 }
+    private var modalMaxWidth: CGFloat { isIPad ? UIScreen.main.bounds.width * 0.75 : 400 }
     
     private var adaptivePadding: CGFloat { isIPad ? 32 : 16 }
     
