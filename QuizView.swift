@@ -146,14 +146,6 @@ struct QuizView: View {
                     .padding(.bottom, AppleBooksSpacing.space32)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .onAppear {
-                    print("DEBUG QuizView: onAppear triggered for summary, setting showConfetti = true")
-                    showConfetti = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        print("DEBUG QuizView: Setting showConfetti = false after 5 seconds")
-                        showConfetti = false
-                    }
-                }
             } else {
                 AppleBooksColors.background
                     .ignoresSafeArea()
@@ -289,8 +281,13 @@ struct QuizView: View {
                                     quizSaveError = error.localizedDescription
                                 }
                             }
-                            print("DEBUG QuizView: Setting showSummary to true")
+                            print("DEBUG QuizView: Setting showSummary to true and showConfetti to true")
                             showSummary = true
+                            showConfetti = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                print("DEBUG QuizView: Setting showConfetti = false after 5 seconds")
+                                showConfetti = false
+                            }
                         }) {
                             Text("Complete Quiz")
                                 .font(.system(size: 17, weight: .medium))
