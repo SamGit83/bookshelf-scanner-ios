@@ -292,6 +292,10 @@ struct QuizSummaryView: View {
     let responses: [Int: Set<String>]
     let dismiss: () -> Void
 
+    var answeredQuestions: [QuizQuestion] {
+        questions.filter { responses[$0.id] != nil }
+    }
+
     var body: some View {
         ZStack {
             AppleBooksColors.background
@@ -305,8 +309,7 @@ struct QuizSummaryView: View {
 
                 ScrollView {
                     VStack(spacing: AppleBooksSpacing.space16) {
-                        ForEach(questions.indices, id: \.self) { index in
-                            let question = questions[index]
+                        ForEach(answeredQuestions, id: \.id) { question in
                             if let response = responses[question.id] {
                                 AppleBooksCard(
                                     cornerRadius: 12,
