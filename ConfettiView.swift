@@ -32,7 +32,7 @@ struct ConfettiView: UIViewRepresentable {
         for color in colors {
             let cell = CAEmitterCell()
             cell.birthRate = 1
-            cell.lifetime = 12
+            cell.lifetime = 5
             cell.velocity = 150
             cell.velocityRange = 100
             cell.emissionLongitude = .pi

@@ -131,8 +131,7 @@ struct QuizView: View {
 
                     Button(action: {
                         // Quiz completed, dismiss the view
-                        print("DEBUG QuizView: Done button tapped, setting showConfetti to false and dismissing view")
-                        showConfetti = false
+                        print("DEBUG QuizView: Done button tapped, dismissing view")
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Text("Done")
@@ -147,6 +146,12 @@ struct QuizView: View {
                     .padding(.bottom, AppleBooksSpacing.space32)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onAppear {
+                    showConfetti = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        showConfetti = false
+                    }
+                }
             } else {
                 AppleBooksColors.background
                     .ignoresSafeArea()
@@ -264,7 +269,7 @@ struct QuizView: View {
                             if currentQuestion.isTextField {
                                 responses[currentQuestion.id] = currentText
                             }
-                            // Quiz completed - save responses and show confetti then summary
+                            // Quiz completed - save responses and show summary
                             print("DEBUG QuizView: Complete Quiz button tapped")
                             let quizResponses: [String: [String]] = responses.reduce(into: [:]) { dict, pair in
                                 if let setValue = pair.value as? Set<String> {
@@ -282,13 +287,8 @@ struct QuizView: View {
                                     quizSaveError = error.localizedDescription
                                 }
                             }
-                            print("DEBUG QuizView: Setting showConfetti to true")
-                            showConfetti = true
-                            print("DEBUG QuizView: Scheduling 12-second delay for showSummary")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
-                                print("DEBUG QuizView: 12-second delay completed, setting showSummary to true")
-                                showSummary = true
-                            }
+                            print("DEBUG QuizView: Setting showSummary to true")
+                            showSummary = true
                         }) {
                             Text("Complete Quiz")
                                 .font(.system(size: 17, weight: .medium))
