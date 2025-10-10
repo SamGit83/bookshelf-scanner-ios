@@ -390,6 +390,7 @@ struct GoogleBooksSearchResultRow: View {
     let recommendation: BookRecommendation
     @ObservedObject var viewModel: BookViewModel
     @State private var isAddingToLibrary = false
+    @State private var isAdded = false
 
     var body: some View {
         AppleBooksCard(
@@ -471,7 +472,11 @@ struct GoogleBooksSearchResultRow: View {
 
                 // Add to Library Button
                 Button(action: addToLibrary) {
-                    if isAddingToLibrary {
+                    if isAdded {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.green)
+                    } else if isAddingToLibrary {
                         ProgressView()
                             .frame(width: AppleBooksSpacing.space20, height: AppleBooksSpacing.space20)
                     } else {
@@ -480,7 +485,7 @@ struct GoogleBooksSearchResultRow: View {
                             .foregroundColor(AppleBooksColors.accent)
                     }
                 }
-                .disabled(isAddingToLibrary)
+                .disabled(isAddingToLibrary || isAdded)
             }
         }
     }
@@ -488,20 +493,19 @@ struct GoogleBooksSearchResultRow: View {
     private func addToLibrary() {
         isAddingToLibrary = true
 
-        // Convert BookRecommendation to Book
-        let book = Book(
-            title: recommendation.title,
-            author: recommendation.author,
-            genre: recommendation.genre,
-            coverImageURL: recommendation.thumbnailURL
-        )
-
-        // Add to library
-        viewModel.saveBookToFirestore(book)
-
-        // Show feedback and reset state
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            isAddingToLibrary = false
+        // Add to library using the proper method that fetches complete metadata
+        viewModel.addBookFromRecommendation(recommendation) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isAddingToLibrary = false
+                switch result {
+                case .success:
+                    // Book added successfully
+                    self?.isAdded = true
+                case .failure(let error):
+                    print("Failed to add book from search: \(error.localizedDescription)")
+                    // Could show an error message here if needed
+                }
+            }
         }
     }
 }

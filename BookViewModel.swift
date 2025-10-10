@@ -1336,13 +1336,20 @@ class BookViewModel: ObservableObject {
             return
         }
 
-        let newBook = Book(
+        var newBook = Book(
             title: recommendation.title,
             author: recommendation.author,
             isbn: recommendation.id, // Using Google Books ID as ISBN fallback
             genre: recommendation.genre,
-            status: .library
+            status: .library,
+            ageRating: recommendation.ageRating
         )
+
+        // Map additional metadata from recommendation
+        newBook.pageCount = recommendation.pageCount
+        newBook.publicationYear = recommendation.publishedDate
+        newBook.teaser = recommendation.description
+        newBook.coverImageURL = recommendation.thumbnailURL
 
         // Check rate limit before age rating analysis
         if rateLimiter.canMakeCall() {

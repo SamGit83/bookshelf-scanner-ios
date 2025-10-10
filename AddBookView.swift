@@ -343,6 +343,57 @@ struct AddBookView: View {
             return
         }
 
+        // Always try to fetch metadata from Google Books API using title and author search
+        isLoading = true
+        errorMessage = nil
+
+        let booksService = GoogleBooksAPIService()
+        booksService.fetchBookDetails(isbn: isbn.isEmpty ? nil : isbn, title: title, author: author) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.isLoading = false
+
+                switch result {
+                case .success(let recommendation):
+                    if let recommendation = recommendation {
+                        // Create book with fetched metadata
+                        var newBook = Book(
+                            title: self.title,
+                            author: self.author,
+                            isbn: self.isbn.isEmpty ? nil : self.isbn,
+                            genre: recommendation.genre != "Unknown" ? recommendation.genre : (self.genre.isEmpty ? nil : self.genre),
+                            status: .library,
+                            ageRating: recommendation.ageRating
+                        )
+
+                        // Map additional metadata
+                        newBook.pageCount = recommendation.pageCount
+                        newBook.publicationYear = recommendation.publishedDate
+                        newBook.teaser = recommendation.description
+                        newBook.coverImageURL = recommendation.thumbnailURL
+
+                        // Calculate estimated reading time if page count is available
+                        if let pages = recommendation.pageCount {
+                            newBook.estimatedReadingTime = self.calculateEstimatedReadingTime(pages: pages)
+                        }
+
+                        self.viewModel.saveBookToFirestore(newBook)
+                        self.viewModel.successMessage = "Book added to your library."
+                        self.presentationMode.wrappedValue.dismiss()
+                    } else {
+                        // No metadata found, create with manual data
+                        self.createBookWithManualData()
+                    }
+                case .failure(let error):
+                    print("DEBUG AddBookView: Failed to fetch book details: \(error.localizedDescription)")
+                    // Fall back to manual data
+                    self.createBookWithManualData()
+                }
+            }
+        }
+    }
+
+    private func createBookWithManualData() {
         let newBook = Book(
             title: title,
             author: author,
@@ -354,6 +405,26 @@ struct AddBookView: View {
         viewModel.saveBookToFirestore(newBook)
         viewModel.successMessage = "Book added to your library."
         presentationMode.wrappedValue.dismiss()
+    }
+
+    private func calculateEstimatedReadingTime(pages: Int) -> String {
+        // Average reading speed: 200 words per minute
+        // Average words per page: 250
+        // Pages per minute: 200/250 = 0.8
+        // Minutes per page: 1/0.8 ≈ 1.25
+        let minutesPerPage = 1.25
+        let totalMinutes = Double(pages) * minutesPerPage
+
+        if totalMinutes < 60 {
+            let roundedMinutes = Int(ceil(totalMinutes))
+            return "\(roundedMinutes) minute\(roundedMinutes != 1 ? "s" : "")"
+        } else {
+            let hours = Int(totalMinutes / 60)
+            let remainingMinutes = Int(ceil(totalMinutes.truncatingRemainder(dividingBy: 60)))
+            let hourString = "\(hours) hour\(hours != 1 ? "s" : "")"
+            let minuteString = remainingMinutes > 0 ? " \(remainingMinutes) minute\(remainingMinutes != 1 ? "s" : "")" : ""
+            return hourString + minuteString
+        }
     }
 }
 
