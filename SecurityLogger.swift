@@ -2,7 +2,7 @@ import Foundation
 import FirebaseAnalytics
 
 /// Security logging levels for controlling verbosity
-enum SecurityLogLevel: Int, Comparable {
+enum SecurityLogLevel: Int, Comparable, Decodable {
     case debug = 0
     case info = 1
     case warning = 2
@@ -38,7 +38,7 @@ enum SecurityEventType: String, Codable {
 }
 
 /// Security event data structure
-struct SecurityEvent: Codable {
+struct SecurityEvent: Encodable {
     let id: String
     let type: SecurityEventType
     let level: SecurityLogLevel
@@ -58,13 +58,13 @@ struct SecurityEvent: Codable {
     }
 
     init(type: SecurityEventType,
-          level: SecurityLogLevel,
-          userId: String? = nil,
-          service: String? = nil,
-          endpoint: String? = nil,
-          details: [String: Any]? = nil,
-          errorMessage: String? = nil,
-          stackTrace: String? = nil) {
+           level: SecurityLogLevel,
+           userId: String? = nil,
+           service: String? = nil,
+           endpoint: String? = nil,
+           details: [String: Any]? = nil,
+           errorMessage: String? = nil,
+           stackTrace: String? = nil) {
 
         self.id = UUID().uuidString
         self.type = type
@@ -81,21 +81,21 @@ struct SecurityEvent: Codable {
         self.stackTrace = stackTrace
     }
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
-        type = try container.decode(SecurityEventType.self, forKey: .type)
-        level = try container.decode(SecurityLogLevel.self, forKey: .level)
-        timestamp = try container.decode(Date.self, forKey: .timestamp)
-        userId = try container.decodeIfPresent(String.self, forKey: .userId)
-        deviceId = try container.decodeIfPresent(String.self, forKey: .deviceId)
-        service = try container.decodeIfPresent(String.self, forKey: .service)
-        endpoint = try container.decodeIfPresent(String.self, forKey: .endpoint)
-        details = try container.decodeIfPresent([String: AnyCodable].self, forKey: .details)
-        ipAddress = try container.decodeIfPresent(String.self, forKey: .ipAddress)
-        userAgent = try container.decodeIfPresent(String.self, forKey: .userAgent)
-        errorMessage = try container.decodeIfPresent(String.self, forKey: .errorMessage)
-        stackTrace = try container.decodeIfPresent(String.self, forKey: .stackTrace)
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(type, forKey: .type)
+        try container.encode(level.rawValue, forKey: .level)
+        try container.encode(timestamp, forKey: .timestamp)
+        try container.encode(userId, forKey: .userId)
+        try container.encode(deviceId, forKey: .deviceId)
+        try container.encode(service, forKey: .service)
+        try container.encode(endpoint, forKey: .endpoint)
+        try container.encode(details, forKey: .details)
+        try container.encode(ipAddress, forKey: .ipAddress)
+        try container.encode(userAgent, forKey: .userAgent)
+        try container.encode(errorMessage, forKey: .errorMessage)
+        try container.encode(stackTrace, forKey: .stackTrace)
     }
 }
 
