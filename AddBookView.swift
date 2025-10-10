@@ -348,20 +348,19 @@ struct AddBookView: View {
         errorMessage = nil
 
         let booksService = GoogleBooksAPIService()
-        booksService.fetchBookDetails(isbn: isbn.isEmpty ? nil : isbn, title: title, author: author) { [weak self] result in
+        booksService.fetchBookDetails(isbn: isbn.isEmpty ? nil : isbn, title: title, author: author) { result in
             DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.isLoading = false
+                isLoading = false
 
                 switch result {
                 case .success(let recommendation):
                     if let recommendation = recommendation {
                         // Create book with fetched metadata
                         var newBook = Book(
-                            title: self.title,
-                            author: self.author,
-                            isbn: self.isbn.isEmpty ? nil : self.isbn,
-                            genre: recommendation.genre != "Unknown" ? recommendation.genre : (self.genre.isEmpty ? nil : self.genre),
+                            title: title,
+                            author: author,
+                            isbn: isbn.isEmpty ? nil : isbn,
+                            genre: recommendation.genre != "Unknown" ? recommendation.genre : (genre.isEmpty ? nil : genre),
                             status: .library,
                             ageRating: recommendation.ageRating
                         )
@@ -374,20 +373,20 @@ struct AddBookView: View {
 
                         // Calculate estimated reading time if page count is available
                         if let pages = recommendation.pageCount {
-                            newBook.estimatedReadingTime = self.calculateEstimatedReadingTime(pages: pages)
+                            newBook.estimatedReadingTime = calculateEstimatedReadingTime(pages: pages)
                         }
 
-                        self.viewModel.saveBookToFirestore(newBook)
-                        self.viewModel.successMessage = "Book added to your library."
-                        self.presentationMode.wrappedValue.dismiss()
+                        viewModel.saveBookToFirestore(newBook)
+                        viewModel.successMessage = "Book added to your library."
+                        presentationMode.wrappedValue.dismiss()
                     } else {
                         // No metadata found, create with manual data
-                        self.createBookWithManualData()
+                        createBookWithManualData()
                     }
                 case .failure(let error):
                     print("DEBUG AddBookView: Failed to fetch book details: \(error.localizedDescription)")
                     // Fall back to manual data
-                    self.createBookWithManualData()
+                    createBookWithManualData()
                 }
             }
         }
