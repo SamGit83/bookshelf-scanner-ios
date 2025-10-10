@@ -9,11 +9,10 @@ struct ConfettiView: UIViewRepresentable {
         view.isUserInteractionEnabled = false
 
         let emitterLayer = CAEmitterLayer()
-        // Will be set properly in updateUIView when bounds are available
-        emitterLayer.emitterPosition = CGPoint(x: 0, y: 0)
-        emitterLayer.emitterSize = CGSize(width: 0, height: 0)
-        emitterLayer.emitterShape = .point
-        emitterLayer.birthRate = 6
+        emitterLayer.emitterPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: -10)
+        emitterLayer.emitterSize = CGSize(width: UIScreen.main.bounds.width, height: 1)
+        emitterLayer.emitterShape = .line
+        emitterLayer.renderMode = .additive
 
         let colors: [UIColor] = [
             UIColor.systemRed.withAlphaComponent(0.9),
@@ -33,34 +32,34 @@ struct ConfettiView: UIViewRepresentable {
         var cells: [CAEmitterCell] = []
         for color in colors {
             let cell = CAEmitterCell()
-            cell.birthRate = 1
-            cell.lifetime = 5
-            cell.velocity = 150
-            cell.velocityRange = 100
+            cell.birthRate = 4
+            cell.lifetime = 14.0
+            cell.lifetimeRange = 0
+            cell.velocity = 350
+            cell.velocityRange = 80
             cell.emissionLongitude = .pi
-            cell.emissionRange = .pi / 2
-            cell.spin = 4
-            cell.spinRange = 6
-            cell.scale = 0.15
-            cell.scaleRange = 0.1
+            cell.emissionRange = .pi / 4
+            cell.spin = 3.5
+            cell.spinRange = 4
+            cell.scaleRange = 0.25
+            cell.scale = 0.1
             cell.contents = createConfettiImage(color: color).cgImage
             cells.append(cell)
         }
 
         emitterLayer.emitterCells = cells
         view.layer.addSublayer(emitterLayer)
-
+        
+        print("DEBUG ConfettiView: Added emitter layer with \(cells.count) cells")
         return view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
         print("DEBUG ConfettiView: updateUIView called, bounds: \(uiView.bounds)")
-        // Update emitter position to center top of screen
         if let emitterLayer = uiView.layer.sublayers?.first as? CAEmitterLayer {
-            emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: 0)
-            // Set emitter size for point shape
-            emitterLayer.emitterSize = CGSize(width: 1, height: 1)
-            print("DEBUG ConfettiView: emitter position set to \(emitterLayer.emitterPosition), size \(emitterLayer.emitterSize)")
+            emitterLayer.emitterPosition = CGPoint(x: uiView.bounds.width / 2, y: -10)
+            emitterLayer.emitterSize = CGSize(width: uiView.bounds.width, height: 1)
+            print("DEBUG ConfettiView: Updated emitter - position: \(emitterLayer.emitterPosition), size: \(emitterLayer.emitterSize), birthRate: \(emitterLayer.birthRate ?? 0)")
         }
     }
 
