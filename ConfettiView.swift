@@ -4,16 +4,39 @@ import UIKit
 struct ConfettiView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         print("DEBUG ConfettiView: makeUIView called")
-        let view = UIView()
-        view.backgroundColor = .clear
-        view.isUserInteractionEnabled = false
+        let view = ConfettiContainerView()
+        return view
+    }
 
-        let emitterLayer = CAEmitterLayer()
-        emitterLayer.emitterPosition = CGPoint(x: 0, y: -10)
-        emitterLayer.emitterSize = CGSize(width: UIScreen.main.bounds.width, height: 1)
+    func updateUIView(_ uiView: UIView, context: Context) {
+        print("DEBUG ConfettiView: updateUIView called, bounds: \(uiView.bounds)")
+        // No-op: ConfettiContainerView updates its emitter geometry in layoutSubviews
+    }
+}
+
+final class ConfettiContainerView: UIView {
+    private let emitterLayer = CAEmitterLayer()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        backgroundColor = .clear
+        isUserInteractionEnabled = false
+
+        // Configure emitter static properties
         emitterLayer.emitterShape = .line
+        emitterLayer.emitterMode = .outline // switched from .surface to .outline for uniform line emission
         emitterLayer.renderMode = .additive
 
+        // Build cells (unchanged tuning)
         let colors: [UIColor] = [
             UIColor.systemRed.withAlphaComponent(0.9),
             UIColor.systemBlue.withAlphaComponent(0.9),
@@ -48,19 +71,20 @@ struct ConfettiView: UIViewRepresentable {
         }
 
         emitterLayer.emitterCells = cells
-        view.layer.addSublayer(emitterLayer)
-        
+        layer.addSublayer(emitterLayer)
+
         print("DEBUG ConfettiView: Added emitter layer with \(cells.count) cells")
-        return view
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {
-        print("DEBUG ConfettiView: updateUIView called, bounds: \(uiView.bounds)")
-        if let emitterLayer = uiView.layer.sublayers?.first as? CAEmitterLayer {
-            emitterLayer.emitterPosition = CGPoint(x: 0, y: -10)
-            emitterLayer.emitterSize = CGSize(width: uiView.bounds.width, height: 1)
-            print("DEBUG ConfettiView: Updated emitter - position: \(emitterLayer.emitterPosition), size: \(emitterLayer.emitterSize), birthRate: \(emitterLayer.birthRate ?? 0)")
-        }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Ensure geometry matches laid-out size
+        emitterLayer.frame = bounds
+        emitterLayer.emitterPosition = CGPoint(x: bounds.midX, y: 0)
+        emitterLayer.emitterSize = CGSize(width: bounds.width, height: 1)
+        emitterLayer.contentsScale = window?.screen.scale ?? UIScreen.main.scale
+
+        print("DEBUG ConfettiView: layoutSubviews updated emitter - position: \(emitterLayer.emitterPosition), size: \(emitterLayer.emitterSize)")
     }
 
     private func createConfettiImage(color: UIColor) -> UIImage {

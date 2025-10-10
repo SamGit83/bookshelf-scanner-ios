@@ -109,44 +109,56 @@ struct QuizView: View {
         print("DEBUG QuizView: body called, showConfetti: \(showConfetti), showSummary: \(showSummary)")
         return ZStack {
             if showSummary {
-                AppleBooksColors.background
-                    .ignoresSafeArea()
-
-                VStack(spacing: AppleBooksSpacing.space24) {
-                    Spacer()
+                ZStack {
+                    AppleBooksColors.background
+                        .ignoresSafeArea()
 
                     VStack(spacing: AppleBooksSpacing.space24) {
-                        Text("Thank you for completing the quiz!")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(AppleBooksColors.text)
-                            .multilineTextAlignment(.center)
+                        Spacer()
 
-                        Text("Your responses will help us personalize recommendations and improve your experience.")
-                            .font(.system(size: 18))
-                            .foregroundColor(AppleBooksColors.textSecondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, AppleBooksSpacing.space24)
+                        VStack(spacing: AppleBooksSpacing.space24) {
+                            Text("Thank you for completing the quiz!")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(AppleBooksColors.text)
+                                .multilineTextAlignment(.center)
+
+                            Text("Your responses will help us personalize recommendations and improve your experience.")
+                                .font(.system(size: 18))
+                                .foregroundColor(AppleBooksColors.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, AppleBooksSpacing.space24)
+                        }
+
+                        Spacer()
+
+                        Button(action: {
+                            // Quiz completed, dismiss the view
+                            print("DEBUG QuizView: Done button tapped, dismissing view")
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            Text("Done")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, AppleBooksSpacing.space16)
+                                .background(AppleBooksColors.success)
+                                .cornerRadius(12)
+                        }
+                        .padding(.horizontal, AppleBooksSpacing.space24)
+                        .padding(.bottom, AppleBooksSpacing.space32)
                     }
-
-                    Spacer()
-
-                    Button(action: {
-                        // Quiz completed, dismiss the view
-                        print("DEBUG QuizView: Done button tapped, dismissing view")
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Text("Done")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, AppleBooksSpacing.space16)
-                            .background(AppleBooksColors.success)
-                            .cornerRadius(12)
-                    }
-                    .padding(.horizontal, AppleBooksSpacing.space24)
-                    .padding(.bottom, AppleBooksSpacing.space32)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+                .overlay(alignment: .top) {
+                    if showConfetti {
+                        ConfettiView()
+                            .allowsHitTesting(false)
+                            .ignoresSafeArea()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                            .zIndex(999)
+                    }
+                }
             } else {
                 AppleBooksColors.background
                     .ignoresSafeArea()
@@ -305,12 +317,6 @@ struct QuizView: View {
             }
             }
 
-            if showConfetti {
-                ConfettiView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-            }
         }
     }
 
