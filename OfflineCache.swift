@@ -32,50 +32,37 @@ class OfflineCache {
     // MARK: - Books Caching
 
     func cacheBooks(_ books: [Book]) {
-        print("DEBUG OfflineCache: Caching \(books.count) books to \(booksCacheFile.lastPathComponent)")
         do {
             let data = try JSONEncoder().encode(books)
             try data.write(to: booksCacheFile, options: .atomic)
-            print("DEBUG OfflineCache: Successfully cached books")
-            print("DEBUG OfflineCache: Saved \(books.count) books")
         } catch {
-            print("DEBUG OfflineCache: Failed to cache books: \(error)")
         }
     }
 
     func loadCachedBooks() -> [Book]? {
-        print("DEBUG OfflineCache: Attempting to load cached books from \(booksCacheFile.lastPathComponent)")
         do {
             let data = try Data(contentsOf: booksCacheFile)
             let books = try JSONDecoder().decode([Book].self, from: data)
-            print("DEBUG OfflineCache: Successfully loaded \(books.count) cached books")
             return books
         } catch {
-            print("DEBUG OfflineCache: Failed to load cached books: \(error)")
             return nil
         }
     }
 
     /// Paginated load from cache - loads full array and slices for efficiency in small caches
     func loadBooks(page: Int, limit: Int) -> [Book]? {
-        print("DEBUG OfflineCache: loadBooks called with page=\(page), limit=\(limit)")
         guard let allBooks = loadCachedBooks() else {
-            print("DEBUG OfflineCache: loadCachedBooks returned nil")
             return nil
         }
-        print("DEBUG OfflineCache: allBooks count=\(allBooks.count)")
         guard page >= 0 else {
-            print("DEBUG OfflineCache: page=0, returning [] due to guard")
             return []
         }
         let startIndex = page * limit
         guard startIndex >= 0 && startIndex < allBooks.count else {
-            print("DEBUG OfflineCache: invalid startIndex=\(startIndex), returning []")
             return []
         }
         let endIndex = min(startIndex + limit, allBooks.count)
         let result = Array(allBooks[startIndex..<endIndex])
-        print("DEBUG OfflineCache: returning \(result.count) books for page=\(page)")
         return result
     }
 
@@ -95,7 +82,6 @@ class OfflineCache {
             let data = try JSONEncoder().encode(recommendations)
             try data.write(to: recommendationsCacheFile, options: .atomic)
         } catch {
-            print("Failed to cache recommendations: \(error)")
         }
     }
 
@@ -105,7 +91,6 @@ class OfflineCache {
             let recommendations = try JSONDecoder().decode([BookRecommendation].self, from: data)
             return recommendations
         } catch {
-            print("Failed to load cached recommendations: \(error)")
             return nil
         }
     }
@@ -121,7 +106,6 @@ class OfflineCache {
             let jsonData = try JSONSerialization.data(withJSONObject: data, options: .prettyPrinted)
             try jsonData.write(to: userDataCacheFile, options: .atomic)
         } catch {
-            print("Failed to cache user data: \(error)")
         }
     }
 
@@ -131,7 +115,6 @@ class OfflineCache {
             let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
             return jsonObject as? [String: Any]
         } catch {
-            print("Failed to load cached user data: \(error)")
             return nil
         }
     }

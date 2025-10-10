@@ -64,12 +64,8 @@ struct Book: Identifiable, Codable, Hashable {
         // Generate UUID if 'id' is missing
         self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
 
-        print("DEBUG Book decoder: Attempting to decode title")
         self.title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
-        print("DEBUG Book decoder: Successfully decoded title: \(self.title)")
-        print("DEBUG Book decoder: Attempting to decode author")
         self.author = try container.decodeIfPresent(String.self, forKey: .author) ?? ""
-        print("DEBUG Book decoder: Successfully decoded author: \(self.author)")
         self.isbn = try container.decodeIfPresent(String.self, forKey: .isbn)
         self.genre = try container.decodeIfPresent(String.self, forKey: .genre)
         if let rawSubGenre = try container.decodeIfPresent(String.self, forKey: .subGenre) {
@@ -81,12 +77,10 @@ struct Book: Identifiable, Codable, Hashable {
         } else {
             self.subGenre = nil
         }
-        print("DEBUG Book decoder: subGenre: \(String(describing: self.subGenre))")
         self.publisher = try container.decodeIfPresent(String.self, forKey: .publisher)
         self.publicationYear = try container.decodeIfPresent(String.self, forKey: .publicationYear)
         self.pageCount = try container.decodeIfPresent(Int.self, forKey: .pageCount)
         self.estimatedReadingTime = try container.decodeIfPresent(String.self, forKey: .estimatedReadingTime)
-        print("DEBUG Book decoder: estimatedReadingTime: \(String(describing: self.estimatedReadingTime))")
         self.authorBiography = try container.decodeIfPresent(String.self, forKey: .authorBiography)
         self.teaser = try container.decodeIfPresent(String.self, forKey: .teaser)
         self.authorBio = try container.decodeIfPresent(String.self, forKey: .authorBio)

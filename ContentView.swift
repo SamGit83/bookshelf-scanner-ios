@@ -17,20 +17,16 @@ struct ContentView: View {
          let displayName = authService.currentUser?.displayName
          let email = authService.currentUser?.email
          let name = displayName ?? email ?? "?"
-         print("DEBUG ContentView userInitials: currentUser exists: \(authService.currentUser != nil), displayName: \(displayName ?? "nil"), email: \(email ?? "nil"), name: \(name)")
          if name == "?" { return "?" }
          let components = name.split(separator: " ")
          if components.count >= 2 {
              let firstInitial = components.first?.first?.uppercased() ?? ""
              let lastInitial = components.last?.first?.uppercased() ?? ""
              let initials = firstInitial + lastInitial
-             print("DEBUG ContentView userInitials: two components, initials: \(initials)")
              return initials
          } else if let first = components.first?.first?.uppercased() {
-             print("DEBUG ContentView userInitials: one component, initials: \(first)")
              return first
          }
-         print("DEBUG ContentView userInitials: fallback to ?")
          return "?"
      }
 
@@ -51,10 +47,8 @@ struct ContentView: View {
          .preferredColorScheme(themeManager.currentPreference.colorScheme)
          .onAppear {
              // Firebase is initialized in AppDelegate
-             print("ContentView: onAppear - isAuthenticated: \(authService.isAuthenticated), hasCompletedOnboarding: \(authService.hasCompletedOnboarding)")
          }
          .onChange(of: authService.isAuthenticated) { isAuthenticated in
-             print("ContentView: Auth state changed to \(isAuthenticated), hasCompletedOnboarding: \(authService.hasCompletedOnboarding), user: \(authService.currentUser?.email ?? "none")")
              if isAuthenticated {
                  // User signed in, refresh data
                  viewModel.refreshData()
@@ -103,15 +97,11 @@ struct ContentView: View {
             CameraView(capturedImage: $capturedImage, isShowingCamera: $isShowingCamera)
         }
         .onChange(of: isShowingCamera) { newValue in
-            print("DEBUG: isShowingCamera changed to \(newValue)")
         }
         .onChange(of: capturedImage) { newImage in
-            print("DEBUG ContentView: onChange capturedImage triggered, newImage is nil: \(newImage == nil)")
             if let image = newImage {
-                print("DEBUG ContentView: Captured image received, calling scanBookshelf")
                 viewModel.scanBookshelf(image: image)
                 capturedImage = nil
-                print("DEBUG ContentView: Set capturedImage to nil after scanBookshelf")
             }
         }
     }

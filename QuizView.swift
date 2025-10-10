@@ -269,9 +269,7 @@ struct QuizView: View {
                             AuthService.shared.completeQuiz(with: quizResponses) { result in
                                 switch result {
                                 case .success:
-                                    print("Quiz responses saved successfully")
                                 case .failure(let error):
-                                    print("Error saving quiz responses: \(error.localizedDescription)")
                                     quizSaveError = error.localizedDescription
                                 }
                             }

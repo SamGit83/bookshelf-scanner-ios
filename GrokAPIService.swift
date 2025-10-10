@@ -13,18 +13,13 @@ class GrokAPIService {
         let startTime = Date()
         let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "grok", endpoint: "chat/completions", method: "POST")
 
-        print("DEBUG GrokAPIService: generateRecommendations called with \(userBooks.count) books, quiz responses: \(quizResponses != nil ? "present" : "none")")
-
         // Get API key synchronously
         let apiKey = SecureConfig.shared.grokAPIKey
-
-        print("DEBUG GrokAPIService: API key retrieved: \(apiKey.count > 0 ? "YES (\(apiKey.prefix(10))...)" : "NO")")
 
         // Validate API key
         let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
         if !isValidKey {
-            print("DEBUG GrokAPIService: Invalid or missing Grok API key")
-            let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])
+            let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "AI-based features are temporarily unavailable due to high free API usage. You can still manually add books to your library, and other non-AI functionality remains available. AI features will be restored after a period of time."])
 
             PerformanceMonitoringService.shared.completeAPICall(
                 traceId: traceId,
@@ -49,8 +44,6 @@ class GrokAPIService {
     }
 
     private func performGrokRequest(prompt: String, apiKey: String, maxTokens: Int, temperature: Double, completion: @escaping (Result<String, Error>) -> Void) {
-        print("DEBUG GrokAPIService: performGrokRequest called with prompt length: \(prompt.count), apiKey length: \(apiKey.count)")
-
         // Generate timestamp for replay attack prevention
         let timestamp = ISO8601DateFormatter().string(from: Date())
         let timeWindow = SecureConfig.shared.requestTimeWindowSeconds
@@ -86,20 +79,16 @@ class GrokAPIService {
             return
         }
 
-        print("DEBUG GrokAPIService: About to send HTTP POST request to \(baseURL) with body length: \(request.httpBody?.count ?? 0)")
         URLSession.shared.dataTask(with: request) { data, response, error in
-            print("DEBUG GrokAPIService: Received HTTP response, status code: \((response as? HTTPURLResponse)?.statusCode ?? -1), data length: \(data?.count ?? 0)")
             // Validate response timestamp for replay attack prevention
             let responseTime = Date().timeIntervalSince(requestStartTime)
             if responseTime > timeWindow {
-                print("DEBUG GrokAPIService: Response received after time window (\(responseTime)s > \(timeWindow)s), rejecting for replay attack prevention")
                 let timestampError = NSError(domain: "TimestampValidation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Response received outside acceptable time window"])
                 completion(.failure(timestampError))
                 return
             }
 
             if let error = error {
-                print("DEBUG GrokAPIService: HTTP request failed with network error: \(error)")
                 completion(.failure(error))
                 return
             }
@@ -123,7 +112,6 @@ class GrokAPIService {
                     completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No content in response"])))
                 }
             } catch {
-                print("DEBUG GrokAPIService: Failed to decode JSON response: \(error)")
                 completion(.failure(error))
             }
         }.resume()
@@ -225,36 +213,31 @@ class GrokAPIService {
     }
 
     func fetchAuthorBiography(author: String, completion: @escaping (Result<String, Error>) -> Void) {
-        print("DEBUG GrokAPIService: fetchAuthorBiography called for author: '\(author)' at \(Date())")
         // Get API key synchronously
         let apiKey = SecureConfig.shared.grokAPIKey
 
         // Validate API key
         let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
         if !isValidKey {
-            completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
+            completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "AI-based features are temporarily unavailable due to high free API usage. You can still manually add books to your library, and other non-AI functionality remains available. AI features will be restored after a period of time."])))
             return
         }
 
         let prompt = """
         Provide a concise biography of the author \(author). Include their birth/death dates if applicable, major works, and key achievements. Keep it to 2-3 paragraphs.
         """
-        print("DEBUG GrokAPIService: Initiating Grok request for author biography")
 
         self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 500, temperature: 0.3) { result in
             switch result {
             case .success(let content):
-                print("DEBUG GrokAPIService: Fetched bio/teaser content: \(content)")
                 completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
             case .failure(let error):
-                print("DEBUG GrokAPIService: fetchAuthorBiography failed with error: \(error)")
                 completion(.failure(error))
             }
         }
     }
 
     func fetchBookSummary(title: String, author: String, completion: @escaping (Result<String, Error>) -> Void) {
-        print("DEBUG GrokAPIService: fetchBookSummary called for title: '\(title)', author: '\(author)' at \(Date())")
         // Get API key synchronously
         let apiKey = SecureConfig.shared.grokAPIKey
 
@@ -269,14 +252,11 @@ class GrokAPIService {
         Provide a short, engaging summary/teaser for the book "\(title)" by \(author). Keep it to 2-3 sentences that capture the essence of the story without spoilers. Make it enticing and informative.
         """
 
-        print("DEBUG GrokAPIService: Initiating Grok request for book summary")
         self.performGrokRequest(prompt: prompt, apiKey: apiKey, maxTokens: 300, temperature: 0.5) { result in
             switch result {
             case .success(let content):
-                print("DEBUG GrokAPIService: fetchBookSummary succeeded, content length: \(content.count)")
                 completion(.success(content.trimmingCharacters(in: .whitespacesAndNewlines)))
             case .failure(let error):
-                print("DEBUG GrokAPIService: fetchBookSummary failed with error: \(error)")
                 completion(.failure(error))
             }
         }
@@ -289,7 +269,7 @@ class GrokAPIService {
         // Validate API key
         let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
         if !isValidKey {
-            completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Grok API key is not configured or invalid"])))
+            completion(.failure(NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "AI-based features are temporarily unavailable due to high free API usage. You can still manually add books to your library, and other non-AI functionality remains available. AI features will be restored after a period of time."])))
             return
         }
 
@@ -355,18 +335,14 @@ class GrokAPIService {
             }
         }
 
-        print("DEBUG GrokAPIService: Extracted JSON string: \(jsonString)")
-
         do {
             if let data = jsonString.data(using: .utf8) {
                 let recommendations = try JSONDecoder().decode([BookRecommendation].self, from: data)
-                print("DEBUG GrokAPIService: Successfully parsed \(recommendations.count) recommendations")
                 completion(.success(recommendations))
             } else {
                 completion(.failure(NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert string to data"])))
             }
         } catch {
-            print("DEBUG GrokAPIService: JSON decode error: \(error)")
             completion(.failure(error))
         }
     }

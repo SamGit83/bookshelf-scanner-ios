@@ -13,9 +13,7 @@ struct BookshelfScannerApp: App {
         RemoteConfigManager.shared.fetchAndActivate { result in
             switch result {
             case .success:
-                print("RemoteConfig fetched and activated successfully")
             case .failure(let error):
-                print("Failed to fetch RemoteConfig: \(error.localizedDescription)")
             }
         }
     }

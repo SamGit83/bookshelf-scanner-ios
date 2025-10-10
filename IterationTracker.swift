@@ -39,7 +39,6 @@ class IterationTracker: ObservableObject {
             AnalyticsManager.shared.trackFeatureUsage(feature: "iteration_task_created", context: task.type.rawValue)
 
         } catch {
-            print("Failed to add task: \(error)")
         }
     }
 
@@ -58,7 +57,6 @@ class IterationTracker: ObservableObject {
             AnalyticsManager.shared.trackFeatureUsage(feature: "iteration_task_updated", context: task.status.rawValue)
 
         } catch {
-            print("Failed to update task: \(error)")
         }
     }
 
@@ -72,7 +70,6 @@ class IterationTracker: ObservableObject {
             }
 
         } catch {
-            print("Failed to delete task: \(error)")
         }
     }
 
@@ -223,7 +220,6 @@ class IterationTracker: ObservableObject {
         db.collection("iterationTasks")
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self, let documents = snapshot?.documents else {
-                    print("Error fetching tasks: \(error?.localizedDescription ?? "Unknown error")")
                     return
                 }
 
@@ -263,7 +259,6 @@ class IterationTracker: ObservableObject {
                     self.updateFilteredTasks()
                 }
             } catch {
-                print("Failed to load tasks: \(error)")
             }
         }
     }
@@ -323,7 +318,6 @@ class IterationTracker: ObservableObject {
                     self.updateFilteredTasks()
                 }
             } catch {
-                print("Failed to archive task \(task.id): \(error)")
             }
         }
     }

@@ -6,11 +6,9 @@ class GoogleBooksAPIService {
     private var apiKey: String {
         // Try environment variable first, fallback to SecureConfig
         if let envKey = ProcessInfo.processInfo.environment["GOOGLE_BOOKS_API_KEY"], !envKey.isEmpty {
-            print("DEBUG GoogleBooksAPIService: Using Google Books API key from environment variable")
             return envKey
         }
         let configKey = SecureConfig.shared.googleBooksAPIKey
-        print("DEBUG GoogleBooksAPIService: Using Google Books API key from SecureConfig: '\(configKey.prefix(10))...' (length: \(configKey.count))")
         return configKey
     }
 
@@ -18,13 +16,7 @@ class GoogleBooksAPIService {
         let startTime = Date()
         let traceId = PerformanceMonitoringService.shared.trackAPICall(service: "google_books", endpoint: "volumes", method: "GET")
 
-        print("DEBUG GoogleBooksAPIService: searchBooks called with query: '\(query)', maxResults: \(maxResults)")
-        print("DEBUG GoogleBooksAPIService: API key configured: \(apiKey.count > 0 ? "YES (\(apiKey.prefix(10))...)" : "NO")")
-        print("DEBUG GoogleBooksAPIService: Using environment: \(SecureConfig.shared.isDevelopment ? "DEBUG" : "PRODUCTION")")
-        print("DEBUG GoogleBooksAPIService: Making request without API key (public access)")
-
         guard var urlComponents = URLComponents(string: baseURL) else {
-            print("DEBUG GoogleBooksAPIService: Invalid base URL")
             let urlError = NSError(domain: "InvalidURL", code: 0, userInfo: nil)
 
             PerformanceMonitoringService.shared.completeAPICall(
@@ -44,26 +36,15 @@ class GoogleBooksAPIService {
         ]
 
         guard let url = urlComponents.url else {
-            print("DEBUG GoogleBooksAPIService: Failed to construct URL")
             completion(.failure(NSError(domain: "InvalidURL", code: 0, userInfo: nil)))
             return
         }
-
-        print("DEBUG GoogleBooksAPIService: Making request to: \(url.absoluteString)")
 
         URLSession.shared.dataTask(with: url) { data, response, error in
             let responseTime = Date().timeIntervalSince(startTime)
             let dataSize = Int64(data?.count ?? 0)
 
-            print("DEBUG GoogleBooksAPIService: Received response, error: \(error?.localizedDescription ?? "none")")
-
-            if let httpResponse = response as? HTTPURLResponse {
-                print("DEBUG GoogleBooksAPIService: HTTP status code: \(httpResponse.statusCode)")
-            }
-
             if let error = error {
-                print("DEBUG GoogleBooksAPIService: Network error: \(error.localizedDescription)")
-
                 PerformanceMonitoringService.shared.completeAPICall(
                     traceId: traceId,
                     success: false,
@@ -77,7 +58,6 @@ class GoogleBooksAPIService {
             }
 
             guard let data = data else {
-                print("DEBUG GoogleBooksAPIService: No data received")
                 let noDataError = NSError(domain: "NoData", code: 0, userInfo: nil)
 
                 PerformanceMonitoringService.shared.completeAPICall(
@@ -91,24 +71,9 @@ class GoogleBooksAPIService {
                 return
             }
 
-            print("DEBUG GoogleBooksAPIService: Received \(data.count) bytes of data")
-
-            // Print raw response for debugging
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("DEBUG GoogleBooksAPIService: Raw response (first 1000 chars): \(responseString.prefix(1000))")
-                // Also print if it contains imageLinks
-                if responseString.contains("imageLinks") {
-                    print("DEBUG GoogleBooksAPIService: Response contains 'imageLinks'")
-                } else {
-                    print("DEBUG GoogleBooksAPIService: Response does NOT contain 'imageLinks'")
-                }
-            }
-
             do {
                 let googleBooksResponse = try JSONDecoder().decode(GoogleBooksResponse.self, from: data)
-                print("DEBUG GoogleBooksAPIService: Successfully decoded response, items count: \(googleBooksResponse.items?.count ?? 0)")
                 let recommendations = googleBooksResponse.items?.compactMap { self.convertToBookRecommendation($0) } ?? []
-                print("DEBUG GoogleBooksAPIService: Converted to \(recommendations.count) recommendations")
 
                 // Track successful API call (Google Books is free, so no cost tracking)
                 PerformanceMonitoringService.shared.completeAPICall(
@@ -120,13 +85,6 @@ class GoogleBooksAPIService {
 
                 completion(.success(recommendations))
             } catch {
-                print("DEBUG GoogleBooksAPIService: JSON decode error: \(error)")
-                print("DEBUG GoogleBooksAPIService: Raw response for debugging: \(String(data: data, encoding: .utf8)?.prefix(500) ?? "Unable to decode")")
-
-                // Check if this is a parsing error (non-retryable)
-                let isParsingError = error is DecodingError
-                print("DEBUG GoogleBooksAPIService: Is parsing error: \(isParsingError)")
-
                 PerformanceMonitoringService.shared.completeAPICall(
                     traceId: traceId,
                     success: false,
@@ -141,27 +99,17 @@ class GoogleBooksAPIService {
     }
 
     private func convertToBookRecommendation(_ volume: GoogleBookVolume) -> BookRecommendation? {
-        print("DEBUG GoogleBooksAPIService: Converting volume with ID: \(volume.id)")
-        print("DEBUG GoogleBooksAPIService: Volume info - title: '\(volume.volumeInfo.title ?? "nil")', authors: \(volume.volumeInfo.authors ?? [])")
-
         guard let title = volume.volumeInfo.title,
               let authors = volume.volumeInfo.authors else {
-            print("DEBUG GoogleBooksAPIService: Missing title or authors, skipping")
             return nil
         }
 
         var thumbnailURL = volume.volumeInfo.imageLinks?.thumbnail
-        print("DEBUG GoogleBooksAPIService: Original thumbnail URL: '\(thumbnailURL ?? "nil")'")
-        print("DEBUG GoogleBooksAPIService: ImageLinks object exists: \(volume.volumeInfo.imageLinks != nil)")
-        print("DEBUG GoogleBooksAPIService: Full imageLinks: \(String(describing: volume.volumeInfo.imageLinks))")
 
         // Convert HTTP URLs to HTTPS for better security and iOS compatibility
         if let originalURL = thumbnailURL, originalURL.hasPrefix("http://") {
             thumbnailURL = originalURL.replacingOccurrences(of: "http://", with: "https://")
-            print("DEBUG GoogleBooksAPIService: Converted to HTTPS: '\(thumbnailURL ?? "nil")'")
         }
-
-        print("DEBUG GoogleBooksAPIService: Final thumbnail URL: '\(thumbnailURL ?? "nil")'")
 
         let recommendation = BookRecommendation(
             id: volume.id,
@@ -175,7 +123,6 @@ class GoogleBooksAPIService {
             ageRating: mapMaturityRating(volume.volumeInfo.maturityRating)
         )
 
-        print("DEBUG GoogleBooksAPIService: Created recommendation: \(recommendation.title) by \(recommendation.author), thumbnail: \(recommendation.thumbnailURL ?? "nil")")
         return recommendation
     }
 
@@ -209,14 +156,10 @@ class GoogleBooksAPIService {
     }
 
     func fetchBookDetails(isbn: String?, title: String?, author: String?, completion: @escaping (Result<BookRecommendation?, Error>) -> Void) {
-        print("DEBUG GoogleBooksAPIService: fetchBookDetails called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
-
         // Clean and prepare search parameters
         let cleanTitle = title?.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: " ")
         let cleanAuthor = author?.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: " ")
         let cleanISBN = isbn?.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        print("DEBUG GoogleBooksAPIService: Cleaned params - title: '\(cleanTitle ?? "nil")', author: '\(cleanAuthor ?? "nil")', isbn: '\(cleanISBN ?? "nil")'")
 
         // Try different search strategies in order of preference
         let searchStrategies = createSearchStrategies(isbn: cleanISBN, title: cleanTitle, author: cleanAuthor)
@@ -264,28 +207,23 @@ class GoogleBooksAPIService {
 
     private func trySearchStrategies(_ strategies: [(query: String, description: String)], completion: @escaping (Result<BookRecommendation?, Error>) -> Void) {
         guard !strategies.isEmpty else {
-            print("DEBUG GoogleBooksAPIService: No search strategies available")
             completion(.success(nil))
             return
         }
 
         let strategy = strategies.first!
-        print("DEBUG GoogleBooksAPIService: Trying strategy: \(strategy.description) - query: '\(strategy.query)'")
 
         searchBooks(query: strategy.query, maxResults: 1) { [weak self] result in
             switch result {
             case .success(let recommendations):
                 if let book = recommendations.first {
-                    print("DEBUG GoogleBooksAPIService: ✅ Strategy '\(strategy.description)' found: \(book.title) by \(book.author)")
                     completion(.success(book))
                 } else {
-                    print("DEBUG GoogleBooksAPIService: ❌ Strategy '\(strategy.description)' found no results, trying next strategy")
                     // Try next strategy
                     let remainingStrategies = Array(strategies.dropFirst())
                     self?.trySearchStrategies(remainingStrategies, completion: completion)
                 }
             case .failure(let error):
-                print("DEBUG GoogleBooksAPIService: ❌ Strategy '\(strategy.description)' failed: \(error.localizedDescription), trying next strategy")
                 // Try next strategy
                 let remainingStrategies = Array(strategies.dropFirst())
                 self?.trySearchStrategies(remainingStrategies, completion: completion)
@@ -294,22 +232,17 @@ class GoogleBooksAPIService {
     }
 
     func fetchCoverURL(isbn: String?, title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
-        print("DEBUG GoogleBooksAPIService: fetchCoverURL called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
-
         // Try Google Books first
         fetchBookDetails(isbn: isbn, title: title, author: author) { [weak self] result in
             switch result {
             case .success(let book):
                 if let googleURL = book?.thumbnailURL {
-                    print("DEBUG GoogleBooksAPIService: fetchCoverURL success from Google Books: '\(googleURL)'")
                     completion(.success(googleURL))
                     return
                 }
                 // Fall back to Open Library
-                print("DEBUG GoogleBooksAPIService: No cover from Google Books, trying Open Library")
                 self?.fetchOpenLibraryCover(isbn: isbn, title: title, author: author, completion: completion)
             case .failure(let error):
-                print("DEBUG GoogleBooksAPIService: Google Books failed: \(error.localizedDescription), trying Open Library")
                 // Fall back to Open Library
                 self?.fetchOpenLibraryCover(isbn: isbn, title: title, author: author, completion: completion)
             }
@@ -317,8 +250,6 @@ class GoogleBooksAPIService {
     }
 
     private func fetchOpenLibraryCover(isbn: String?, title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
-        print("DEBUG GoogleBooksAPIService: fetchOpenLibraryCover called with isbn: '\(isbn ?? "nil")', title: '\(title ?? "nil")', author: '\(author ?? "nil")'")
-
         // Open Library API: https://openlibrary.org/dev/docs/api/covers
         // Format: https://covers.openlibrary.org/b/isbn/{ISBN}-L.jpg
         // Or: https://covers.openlibrary.org/b/olid/{OLID}-L.jpg
@@ -327,15 +258,12 @@ class GoogleBooksAPIService {
         if let isbn = isbn, !isbn.isEmpty {
             // Try ISBN first - most reliable
             let coverURL = "https://covers.openlibrary.org/b/isbn/\(isbn)-L.jpg"
-            print("DEBUG GoogleBooksAPIService: Trying Open Library ISBN cover: \(coverURL)")
 
             // Test if the URL actually works by making a HEAD request
             testImageURL(coverURL) { exists in
                 if exists {
-                    print("DEBUG GoogleBooksAPIService: Open Library ISBN cover exists: \(coverURL)")
                     completion(.success(coverURL))
                 } else {
-                    print("DEBUG GoogleBooksAPIService: Open Library ISBN cover not found, trying title search")
                     self.searchOpenLibraryByTitle(title: title, author: author, completion: completion)
                 }
             }
@@ -348,7 +276,6 @@ class GoogleBooksAPIService {
 
     private func searchOpenLibraryByTitle(title: String?, author: String?, completion: @escaping (Result<String?, Error>) -> Void) {
         guard let title = title, !title.isEmpty else {
-            print("DEBUG GoogleBooksAPIService: No title provided for Open Library search")
             completion(.success(nil))
             return
         }
@@ -386,7 +313,6 @@ class GoogleBooksAPIService {
 
     private func tryOpenLibraryStrategies(_ strategies: [(query: String, description: String)], completion: @escaping (Result<String?, Error>) -> Void) {
         guard !strategies.isEmpty else {
-            print("DEBUG GoogleBooksAPIService: No Open Library search strategies available")
             completion(.success(nil))
             return
         }
@@ -394,24 +320,19 @@ class GoogleBooksAPIService {
         let strategy = strategies.first!
         guard let encodedQuery = strategy.query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://openlibrary.org/search.json?\(encodedQuery)&limit=5") else {
-            print("DEBUG GoogleBooksAPIService: Failed to create Open Library search URL for strategy: \(strategy.description)")
             let remainingStrategies = Array(strategies.dropFirst())
             tryOpenLibraryStrategies(remainingStrategies, completion: completion)
             return
         }
 
-        print("DEBUG GoogleBooksAPIService: Trying Open Library strategy: \(strategy.description) - URL: \(url.absoluteString)")
-
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             if let error = error {
-                print("DEBUG GoogleBooksAPIService: Open Library strategy '\(strategy.description)' failed: \(error.localizedDescription)")
                 let remainingStrategies = Array(strategies.dropFirst())
                 self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
                 return
             }
 
             guard let data = data else {
-                print("DEBUG GoogleBooksAPIService: No data from Open Library strategy: \(strategy.description)")
                 let remainingStrategies = Array(strategies.dropFirst())
                 self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
                 return
@@ -419,9 +340,7 @@ class GoogleBooksAPIService {
 
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let docs = json["docs"] as? [[String: Any]] {
-
-                    print("DEBUG GoogleBooksAPIService: Open Library strategy '\(strategy.description)' found \(docs.count) results")
+                    let docs = json["docs"] as? [[String: Any]] {
 
                     // Try each result to find one with a cover
                     for (index, doc) in docs.enumerated() {
@@ -429,16 +348,12 @@ class GoogleBooksAPIService {
                             let cleanOLID = olid.replacingOccurrences(of: "/works/", with: "").replacingOccurrences(of: "/books/", with: "")
                             let coverURL = "https://covers.openlibrary.org/b/olid/\(cleanOLID)-L.jpg"
 
-                            print("DEBUG GoogleBooksAPIService: Testing cover for result \(index + 1): \(coverURL)")
-
                             // Test if this cover exists
                             self?.testImageURL(coverURL) { exists in
                                 if exists {
-                                    print("DEBUG GoogleBooksAPIService: ✅ Found working cover: \(coverURL)")
                                     completion(.success(coverURL))
                                 } else if index == docs.count - 1 {
                                     // Last result, try next strategy
-                                    print("DEBUG GoogleBooksAPIService: ❌ No covers found for strategy '\(strategy.description)', trying next")
                                     let remainingStrategies = Array(strategies.dropFirst())
                                     self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
                                 }
@@ -448,17 +363,14 @@ class GoogleBooksAPIService {
                     }
 
                     // No OLID found in any result
-                    print("DEBUG GoogleBooksAPIService: No OLID found in Open Library results for strategy: \(strategy.description)")
                     let remainingStrategies = Array(strategies.dropFirst())
                     self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
 
                 } else {
-                    print("DEBUG GoogleBooksAPIService: Invalid Open Library response for strategy: \(strategy.description)")
                     let remainingStrategies = Array(strategies.dropFirst())
                     self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
                 }
             } catch {
-                print("DEBUG GoogleBooksAPIService: Failed to parse Open Library response for strategy '\(strategy.description)': \(error.localizedDescription)")
                 let remainingStrategies = Array(strategies.dropFirst())
                 self?.tryOpenLibraryStrategies(remainingStrategies, completion: completion)
             }

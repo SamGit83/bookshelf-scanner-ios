@@ -11,9 +11,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         #if canImport(RevenueCat)
         if let apiKey = SecureConfig.shared.revenueCatAPIKey {
             Purchases.configure(withAPIKey: apiKey)
-            print("RevenueCat initialized with API key")
         } else {
-            print("RevenueCat API key not configured - purchases will be simulated")
         }
         #endif
 

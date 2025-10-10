@@ -270,11 +270,6 @@ class AlertManager {
     // MARK: - Notification System
     private func setupNotificationPermissions() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                print("AlertManager: Notification permissions granted")
-            } else if let error = error {
-                print("AlertManager: Notification permissions denied: \(error.localizedDescription)")
-            }
         }
     }
 
@@ -316,9 +311,6 @@ class AlertManager {
         )
 
         UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("AlertManager: Failed to send push notification: \(error.localizedDescription)")
-            }
         }
     }
 
@@ -332,13 +324,11 @@ class AlertManager {
     private func sendEmailAlert(for alert: PerformanceAlert) {
         // Implementation would integrate with email service
         // For now, just log
-        print("AlertManager: Email alert - \(alert.message)")
     }
 
     private func sendSlackAlert(for alert: PerformanceAlert) {
         // Implementation would integrate with Slack webhook
         // For now, just log
-        print("AlertManager: Slack alert - \(alert.message)")
     }
 
     // MARK: - Escalation Policy

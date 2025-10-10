@@ -229,28 +229,20 @@ class UsageTracker: ObservableObject {
 
     func refreshVariantLimits() async {
         guard let userId = AuthService.shared.currentUser?.id else {
-            print("DEBUG UsageTracker: No userId available for refreshing variant limits")
             return
         }
-
-        print("DEBUG UsageTracker: Refreshing variant limits for userId: \(userId)")
 
         do {
             let scanLimit = try await ABTestingService.shared.getScanLimit(for: userId)
             let bookLimit = try await ABTestingService.shared.getBookLimit(for: userId)
             let recommendationLimit = try await ABTestingService.shared.getRecommendationLimit(for: userId)
 
-            print("DEBUG UsageTracker: Retrieved limits - scan: \(scanLimit), book: \(bookLimit), recommendation: \(recommendationLimit)")
-
             await MainActor.run {
                 self.variantScanLimit = scanLimit
                 self.variantBookLimit = bookLimit
                 self.variantRecommendationLimit = recommendationLimit
-                print("DEBUG UsageTracker: Updated variant limits successfully")
             }
         } catch {
-            print("DEBUG UsageTracker: Failed to refresh variant limits: \(error)")
-            print("DEBUG UsageTracker: Error details - domain: \((error as NSError).domain), code: \((error as NSError).code)")
             // Keep default values
         }
     }

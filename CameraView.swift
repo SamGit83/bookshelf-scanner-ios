@@ -34,14 +34,10 @@ struct CameraView: UIViewControllerRepresentable {
     @Binding var isShowingCamera: Bool
 
     func makeUIViewController(context: Context) -> UIViewController {
-        print("DEBUG CameraView: makeUIViewController called")
         let status = AVCaptureDevice.authorizationStatus(for: .video)
-        print("DEBUG CameraView: Camera authorization status: \(status.rawValue)")
         if status == .notDetermined {
-            print("DEBUG CameraView: Requesting camera access")
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 DispatchQueue.main.async {
-                    print("DEBUG CameraView: Camera access \(granted ? "granted" : "denied")")
                 }
             }
         }
@@ -50,10 +46,8 @@ struct CameraView: UIViewControllerRepresentable {
         let captureSession = AVCaptureSession()
 
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
-            print("DEBUG CameraView: No video capture device available")
             return viewController
         }
-        print("DEBUG CameraView: Video capture device found")
         let videoInput: AVCaptureDeviceInput
 
         do {
@@ -64,9 +58,7 @@ struct CameraView: UIViewControllerRepresentable {
 
         if captureSession.canAddInput(videoInput) {
             captureSession.addInput(videoInput)
-            print("DEBUG CameraView: Added video input to session")
         } else {
-            print("DEBUG CameraView: Cannot add video input to session")
             return viewController
         }
 
@@ -75,9 +67,7 @@ struct CameraView: UIViewControllerRepresentable {
         if captureSession.canAddOutput(photoOutput) {
             captureSession.addOutput(photoOutput)
             context.coordinator.photoOutput = photoOutput
-            print("DEBUG CameraView: Added photo output to session")
         } else {
-            print("DEBUG CameraView: Cannot add photo output to session")
         }
 
         let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
@@ -85,7 +75,6 @@ struct CameraView: UIViewControllerRepresentable {
         viewController.view.layer.addSublayer(previewLayer)
 
         captureSession.startRunning()
-        print("DEBUG CameraView: Capture session started")
 
         // Setup the camera view controller
         viewController.setupUI(coordinator: context.coordinator, previewLayer: previewLayer, captureDevice: videoCaptureDevice)
@@ -121,11 +110,9 @@ struct CameraView: UIViewControllerRepresentable {
         init(_ parent: CameraView) {
             self.parent = parent
             super.init()
-            print("DEBUG Coordinator: Initialized")
         }
 
         @objc func capturePhoto() {
-            print("DEBUG CameraView Coordinator: capturePhoto called, timestamp: \(Date())")
             let settings = AVCapturePhotoSettings()
             
             // Set flash mode based on current state
@@ -137,7 +124,6 @@ struct CameraView: UIViewControllerRepresentable {
         }
 
         @objc func cancelCapture() {
-            print("DEBUG Coordinator: cancelCapture called")
             // Turn off torch if it's on
             toggleTorch(false)
             parent.isShowingCamera = false
@@ -159,7 +145,6 @@ struct CameraView: UIViewControllerRepresentable {
                 device.torchMode = on ? .on : .off
                 device.unlockForConfiguration()
             } catch {
-                print("DEBUG Coordinator: Failed to toggle torch: \(error)")
             }
         }
 
@@ -189,20 +174,14 @@ struct CameraView: UIViewControllerRepresentable {
         }
 
         func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-            print("DEBUG CameraView Coordinator: photoOutput didFinishProcessingPhoto, error: \(error?.localizedDescription ?? "none"), timestamp: \(Date())")
             if let imageData = photo.fileDataRepresentation() {
-                print("DEBUG CameraView Coordinator: imageData count: \(imageData.count)")
                 if let image = UIImage(data: imageData) {
-                    print("DEBUG CameraView Coordinator: Image captured successfully, size: \(image.size), validating quality, timestamp: \(Date())")
                     if validateImageQuality(image) {
                         parent.capturedImage = image
-                        print("DEBUG CameraView Coordinator: capturedImage set, will trigger onChange in parent, timestamp: \(Date())")
                         // Turn off torch after capture
                         toggleTorch(false)
-                        print("DEBUG CameraView Coordinator: Setting isShowingCamera to false, timestamp: \(Date())")
                         parent.isShowingCamera = false
                     } else {
-                        print("DEBUG Coordinator: Image quality validation failed")
                         guard let vc = viewController else { return }
                         let alert = UIAlertController(title: "Image Quality Issue", message: "The image may be too dark/bright. Ensure good lighting and try adjusting your distance from the bookshelf.\n\nTry moving closer or farther to fit the bookshelf in the frame", preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "Try Again", style: .default, handler: nil))
@@ -215,10 +194,8 @@ struct CameraView: UIViewControllerRepresentable {
                         // Do not set capturedImage or close camera by default, allow user to try again or proceed
                     }
                 } else {
-                    print("DEBUG Coordinator: Failed to create UIImage from imageData")
                 }
             } else {
-                print("DEBUG Coordinator: fileDataRepresentation returned nil")
             }
         }
     }

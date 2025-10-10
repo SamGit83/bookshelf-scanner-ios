@@ -124,10 +124,6 @@ class ErrorHandler: ObservableObject {
         }
 
         // Log error for debugging
-        print("📱 Bookshelf Error: \(bookshelfError.localizedDescription)")
-        if let suggestion = bookshelfError.recoverySuggestion {
-            print("💡 Suggestion: \(suggestion)")
-        }
     }
 
     func dismissError() {

@@ -102,19 +102,19 @@ class PrivacyManager {
             // Implement crash reporting consent (e.g., disable Crashlytics)
             if status == .denied {
                 // Disable crash reporting
-                print("Crash reporting disabled due to user consent")
+                
             }
         case .personalization:
             // Handle personalization consent
             if status == .denied {
                 // Disable personalized features
-                print("Personalization disabled due to user consent")
+                
             }
         case .marketing:
             // Handle marketing consent
             if status == .denied {
                 // Disable marketing communications
-                print("Marketing communications disabled due to user consent")
+                
             }
         }
     }

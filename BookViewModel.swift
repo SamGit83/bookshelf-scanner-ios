@@ -195,7 +195,7 @@ class BookViewModel: ObservableObject {
 
         // Check for valid API keys
         if !SecureConfig.shared.hasValidGeminiKey || !SecureConfig.shared.hasValidGoogleBooksKey {
-            errorMessage = "API keys not configured. Please set your Gemini and Google Books API keys in Settings > Account Settings > API Settings."
+            errorMessage = "AI-based features are temporarily unavailable due to high free API usage. You can still manually add books to your library, and other non-AI functionality remains available. AI features will be restored after a period of time."
             scanFeedbackMessage = nil
             isScanning = false
             return

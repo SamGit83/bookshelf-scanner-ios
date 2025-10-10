@@ -45,59 +45,46 @@ class CostTracker: ObservableObject {
     func recordCost(service: String, cost: Double? = nil, usage: Int = 1) {
         let actualCost = cost ?? (self.costRates[service] ?? 0.0) * Double(usage)
         let callStack = Thread.callStackSymbols.joined(separator: "\n")
-        print("DEBUG: recordCost called for \(service) with cost \(actualCost) on thread \(Thread.current.name ?? "unknown")\nCall stack:\n\(callStack)")
-        
+
         if actualCost <= 0 {
-            print("DEBUG: Skipping recordCost for \(service) - zero or negative cost")
             return
         }
         
         costUpdateQueue.async { [weak self] in
             guard let self = self else {
-                print("DEBUG: self is nil in recordCost async for \(service)")
                 return
             }
             let selfPtr = String(describing: self)
-            print("DEBUG: Entering recordCost for \(service), usage: \(usage), self: \(selfPtr) on queue thread \(Thread.current.name ?? "unknown")")
-            
+
             guard self.currentCosts != nil else {
-                print("DEBUG: currentCosts is nil for \(service)")
                 return
             }
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self, self.currentCosts != nil else {
-                    print("DEBUG: self or currentCosts nil in main update for \(service)")
                     return
                 }
                 // Prevent recursive calls
                 if self.isUpdating {
                     let callStackSkip = Thread.callStackSymbols.joined(separator: "\n")
-                    print("DEBUG: Skipping recursive update for \(service)\nCall stack:\n\(callStackSkip)")
                     return
                 }
                 self.isUpdating = true
                 let selfPtrMain = String(describing: self)
-                print("DEBUG: Entered main update for \(service), self: \(selfPtrMain). Before: totalCost = \(self.currentCosts.totalCost)")
-                
+
                 self.currentCosts.totalCost += actualCost
                 self.currentCosts.apiUsage[service] = (self.currentCosts.apiUsage[service] ?? 0) + usage
-                print("DEBUG: Updated totalCost and apiUsage for \(service). After: totalCost = \(self.currentCosts.totalCost)")
- 
+
                // Track daily costs
-               let today = self.getCurrentDateString()
-               if self.currentCosts.dailyCosts[today] == nil {
-                   self.currentCosts.dailyCosts[today] = 0.0
-               }
-               self.currentCosts.dailyCosts[today]! += actualCost
-                
-                print("DEBUG: After all dailyCosts update: totalCost = \(self.currentCosts.totalCost)")
-                
-                self.updateProfitability()
-                print("DEBUG: Called updateProfitability and objectWillChange for \(service)")
-                self.objectWillChange.send()
-                print("DEBUG: Exited main update for \(service)")
-                self.isUpdating = false
+                let today = self.getCurrentDateString()
+                if self.currentCosts.dailyCosts[today] == nil {
+                    self.currentCosts.dailyCosts[today] = 0.0
+                }
+                self.currentCosts.dailyCosts[today]! += actualCost
+
+                 self.updateProfitability()
+                 self.objectWillChange.send()
+                 self.isUpdating = false
             }
            
            // Track in performance monitoring (now inside queue for serialization)
@@ -114,7 +101,6 @@ class CostTracker: ObservableObject {
                )
            }
            
-           print("DEBUG: Exited queue for \(service)")
         }
     }
 
@@ -146,14 +132,11 @@ class CostTracker: ObservableObject {
     func recordRevenue(tier: UserTier, amount: Double, subscriptionType: SubscriptionType = .monthly) {
         costUpdateQueue.async { [weak self] in
             guard let self = self else {
-                print("DEBUG: self is nil in recordRevenue async")
                 return
             }
             let selfPtr = String(describing: self)
-            print("DEBUG: Entering recordRevenue for tier \(tier), amount \(amount), self: \(selfPtr) on queue thread \(Thread.current.name ?? "unknown")")
-            
+
             guard self.revenueMetrics != nil else {
-                print("DEBUG: revenueMetrics is nil")
                 return
             }
             
@@ -173,15 +156,12 @@ class CostTracker: ObservableObject {
 
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
-                    print("DEBUG: self nil in main for recordRevenue")
                     return
                 }
                 self.updateProfitability()
                 self.objectWillChange.send()
-                print("DEBUG: Exited main update for recordRevenue")
             }
-            
-            print("DEBUG: Exited queue for recordRevenue")
+
         }
 
         // Track in analytics (synchronous, assuming AnalyticsManager is thread-safe)
@@ -201,11 +181,9 @@ class CostTracker: ObservableObject {
     // MARK: - Profitability Analysis
     private func updateProfitability() {
         guard currentCosts != nil, revenueMetrics != nil, profitabilityAnalysis != nil else {
-            print("DEBUG: Nil properties in updateProfitability")
             return
         }
         let selfPtr = String(describing: self)
-        print("DEBUG: updateProfitability called, self: \(selfPtr) on thread \(Thread.current.name ?? "unknown")")
         
         let oldNetProfit = profitabilityAnalysis.netProfit
         profitabilityAnalysis.netProfit = revenueMetrics.totalRevenue - currentCosts.totalCost

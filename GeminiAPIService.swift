@@ -40,7 +40,7 @@ class GeminiAPIService {
             let isValidKey = !apiKey.isEmpty && !apiKey.contains("YOUR_") && apiKey.count > 20
             if !isValidKey {
                 print("DEBUG GeminiAPIService: Invalid or missing Gemini API key")
-                let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Gemini API key is not configured or invalid"])
+                let keyError = NSError(domain: "APIKeyError", code: 0, userInfo: [NSLocalizedDescriptionKey: "AI-based features are temporarily unavailable due to high free API usage. You can still manually add books to your library, and other non-AI functionality remains available. AI features will be restored after a period of time."])
 
                 PerformanceMonitoringService.shared.completeAPICall(
                     traceId: traceId,
