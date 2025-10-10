@@ -126,7 +126,7 @@ struct QuizView: View {
                     Spacer()
 
                     Button(action: {
-                        presentationMode.wrappedValue.dismiss()
+                        // Quiz completed, view will transition automatically
                     }) {
                         Text("Done")
                             .font(.system(size: 17, weight: .medium))

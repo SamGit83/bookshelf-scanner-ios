@@ -36,7 +36,11 @@ struct ContentView: View {
                  // For authenticated users, assume they have completed onboarding
                  // unless explicitly marked as not completed
                  if authService.hasCompletedOnboarding || authService.isLoadingOnboardingStatus {
-                     authenticatedView
+                     if authService.currentUser?.hasTakenQuiz == true {
+                         authenticatedView
+                     } else {
+                         QuizView()
+                     }
                  } else {
                      OnboardingView()
                  }

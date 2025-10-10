@@ -173,9 +173,6 @@ struct OnboardingView: View {
                 .padding(.bottom, AppleBooksSpacing.space32)
             }
         }
-        .fullScreenCover(isPresented: $showMainApp) {
-            QuizPromptView()
-        }
         .sheet(isPresented: $showWaitlistModal) {
             WaitlistModal(
                 initialFirstName: "",
@@ -188,9 +185,6 @@ struct OnboardingView: View {
 
     private func completeOnboarding() {
         authService.completeOnboarding()
-        withAnimation(.easeInOut(duration: 0.5)) {
-            showMainApp = true
-        }
     }
 }
 
