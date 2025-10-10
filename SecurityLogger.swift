@@ -38,7 +38,7 @@ enum SecurityEventType: String, Codable {
 }
 
 /// Security event data structure
-struct SecurityEvent: Encodable {
+struct SecurityEvent: Codable {
     let id: String
     let type: SecurityEventType
     let level: SecurityLogLevel
@@ -58,13 +58,13 @@ struct SecurityEvent: Encodable {
     }
 
     init(type: SecurityEventType,
-           level: SecurityLogLevel,
-           userId: String? = nil,
-           service: String? = nil,
-           endpoint: String? = nil,
-           details: [String: Any]? = nil,
-           errorMessage: String? = nil,
-           stackTrace: String? = nil) {
+            level: SecurityLogLevel,
+            userId: String? = nil,
+            service: String? = nil,
+            endpoint: String? = nil,
+            details: [String: Any]? = nil,
+            errorMessage: String? = nil,
+            stackTrace: String? = nil) {
 
         self.id = UUID().uuidString
         self.type = type
@@ -79,23 +79,6 @@ struct SecurityEvent: Encodable {
         self.userAgent = "BookshelfScanner/\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")"
         self.errorMessage = errorMessage
         self.stackTrace = stackTrace
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(type, forKey: .type)
-        try container.encode(level.rawValue, forKey: .level)
-        try container.encode(timestamp, forKey: .timestamp)
-        try container.encode(userId, forKey: .userId)
-        try container.encode(deviceId, forKey: .deviceId)
-        try container.encode(service, forKey: .service)
-        try container.encode(endpoint, forKey: .endpoint)
-        try container.encode(details, forKey: .details)
-        try container.encode(ipAddress, forKey: .ipAddress)
-        try container.encode(userAgent, forKey: .userAgent)
-        try container.encode(errorMessage, forKey: .errorMessage)
-        try container.encode(stackTrace, forKey: .stackTrace)
     }
 }
 
