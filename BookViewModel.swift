@@ -12,7 +12,6 @@ import FirebaseAnalytics
 #endif
 
 // Rate limiting
-import RateLimiter
 
 class BookViewModel: ObservableObject {
     @Published var books: [Book] = []

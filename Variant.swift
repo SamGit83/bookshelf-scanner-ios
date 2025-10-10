@@ -6,11 +6,31 @@ struct Variant: Codable, Identifiable {
     let config: [String: AnyCodable]
     let weight: Double // For weighted random assignment (0.0 to 1.0)
 
+    enum CodingKeys: String, CodingKey {
+        case id, name, config, weight
+    }
+
     init(id: String, name: String, config: [String: AnyCodable], weight: Double = 1.0) {
         self.id = id
         self.name = name
         self.config = config
         self.weight = weight
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        config = try container.decode([String: AnyCodable].self, forKey: .config)
+        weight = try container.decode(Double.self, forKey: .weight)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(config, forKey: .config)
+        try container.encode(weight, forKey: .weight)
     }
 
     // Convenience accessors for common config keys
