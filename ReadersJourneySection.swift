@@ -33,6 +33,7 @@ struct ReadersJourneySection: View {
                 TransformationProgressIndicator(screenWidth: screenWidth)
                     .padding(.horizontal, horizontalPadding)
                     .padding(.vertical, spacing.vertical)
+                    .padding(.top, spacing.text)
 
                 CardStack(cardWidth: cardDimensions.width, cardHeight: cardDimensions.height, textScale: textScale)
                     .padding(.horizontal, horizontalPadding)
@@ -45,11 +46,11 @@ struct ReadersJourneySection: View {
     private func calculateCardDimensions(for width: CGFloat) -> (width: CGFloat, height: CGFloat) {
         switch width {
         case ..<375: // iPhone SE, small devices
-            return (320, 380)
+            return (300, 340)
         case 375..<430: // iPhone 13/14/15 standard
-            return (360, 420)
+            return (340, 380)
         default: // iPhone Pro Max, iPad, larger devices
-            return (min(440, width - 40), 500)
+            return (min(400, width - 40), 450)
         }
     }
     
@@ -57,11 +58,11 @@ struct ReadersJourneySection: View {
     private func calculateTextScale(for width: CGFloat) -> (title: CGFloat, body: CGFloat) {
         switch width {
         case ..<375: // Small devices
-            return (1.0, 1.0)
+            return (0.9, 0.9)
         case 375..<430: // Standard devices
-            return (1.1, 1.1)
+            return (1.0, 1.0)
         default: // Large devices
-            return (1.2, 1.15)
+            return (1.1, 1.05)
         }
     }
     
@@ -69,11 +70,11 @@ struct ReadersJourneySection: View {
     private func calculateSpacing(for width: CGFloat) -> (section: CGFloat, text: CGFloat, vertical: CGFloat, top: CGFloat) {
         switch width {
         case ..<375: // Small devices
-            return (12, 8, 4, 20)
+            return (16, 12, 8, 30)
         case 375..<430: // Standard devices
-            return (16, 12, 6, 30)
+            return (24, 20, 12, 50)
         default: // Large devices
-            return (20, 16, 8, 40)
+            return (32, 24, 16, 60)
         }
     }
     
