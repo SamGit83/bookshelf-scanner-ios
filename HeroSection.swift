@@ -5,62 +5,81 @@ struct HeroSection: View {
     @Binding var showSignup: Bool
     @State private var animateContent = false
     @State private var floatingOffset: CGFloat = 0
+    @State private var textOffsets: [CGFloat] = Array(repeating: 30, count: 4)
     @State private var iconOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
-    @State private var textOffsets: [CGFloat] = Array(repeating: 30.0, count: 4)
-    @State private var isAnimatingSequence = false
-    @State private var currentIndex = 0
-
-    private let items = [
-        ("camera.fill", "Scan"),
-        ("books.vertical.fill", "catalog"),
-        ("list.bullet", "organize"),
-        ("magnifyingglass", "discover")
-    ]
+    @State private var textOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
     
     private func startSequenceCycle() {
+        textOffsets = Array(repeating: 30, count: 4)
         iconOpacities = Array(repeating: 0.0, count: 4)
-        textOffsets = Array(repeating: 30.0, count: 4)
-        currentIndex = 0
+        textOpacities = Array(repeating: 0.0, count: 4)
 
-        func animateNext() {
-            if currentIndex < items.count {
+        // First item: icon fade-in, then text slide-up
+        withAnimation(.easeInOut(duration: 0.5)) {
+            iconOpacities[0] = 1.0
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeInOut(duration: 0.5)) {
+                textOffsets[0] = 0
+                textOpacities[0] = 1.0
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // Second item
+            withAnimation(.easeInOut(duration: 0.5)) {
+                iconOpacities[1] = 1.0
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation(.easeInOut(duration: 0.5)) {
-                    iconOpacities[currentIndex] = 1.0
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        textOffsets[currentIndex] = 0
-                    }
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        withAnimation(.easeInOut(duration: 0.5)) {
-                            iconOpacities[currentIndex] = 0.0
-                        }
-
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            currentIndex += 1
-                            animateNext()
-                        }
-                    }
-                }
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeInOut(duration: 0.8)) {
-                        isAnimatingSequence = true
-                        iconOpacities = Array(repeating: 0.0, count: 4)
-                        textOffsets = Array(repeating: 30.0, count: 4)
-                    }
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                        isAnimatingSequence = false
-                        startSequenceCycle()
-                    }
+                    textOffsets[1] = 0
+                    textOpacities[1] = 1.0
                 }
             }
         }
 
-        animateNext()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            // Third item
+            withAnimation(.easeInOut(duration: 0.5)) {
+                iconOpacities[2] = 1.0
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    textOffsets[2] = 0
+                    textOpacities[2] = 1.0
+                }
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            // Fourth item
+            withAnimation(.easeInOut(duration: 0.5)) {
+                iconOpacities[3] = 1.0
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    textOffsets[3] = 0
+                    textOpacities[3] = 1.0
+                }
+            }
+        }
+
+        // Fade out all icons after 5 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            withAnimation(.easeInOut(duration: 0.8)) {
+                iconOpacities = Array(repeating: 0.0, count: 4)
+                textOffsets = Array(repeating: 30, count: 4)
+                textOpacities = Array(repeating: 0.0, count: 4)
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                startSequenceCycle()
+            }
+        }
     }
 
     var body: some View {
@@ -104,19 +123,23 @@ struct HeroSection: View {
                 .animation(.spring().delay(0.2), value: animateContent)
             
             // Animated Sequence
-            VStack(spacing: 16) {
-                HStack(spacing: 24) {
+            VStack {
+                let words = ["Scan", "catalog", "organize", "discover"]
+                let icons = ["camera.fill", "list.bullet", "arrow.up.arrow.down", "magnifyingglass"]
+                HStack(spacing: 20) {
                     ForEach(0..<4, id: \.self) { index in
                         VStack(spacing: 8) {
-                            Image(systemName: items[index].0)
+                            Image(systemName: icons[index])
                                 .font(.system(size: 24))
                                 .foregroundColor(.white)
                                 .opacity(iconOpacities[index])
                                 .animation(.easeInOut(duration: 0.5), value: iconOpacities[index])
 
-                            Text(items[index].1)
+                            Text(words[index])
                                 .font(.subheadline.weight(.medium))
                                 .foregroundColor(.white)
+                                .shadow(color: .blue.opacity(0.4), radius: 10 * textOpacities[index])
+                                .opacity(textOpacities[index])
                                 .offset(y: textOffsets[index])
                                 .animation(.easeInOut(duration: 0.5), value: textOffsets[index])
                         }
@@ -124,8 +147,6 @@ struct HeroSection: View {
                 }
                 .padding(.horizontal, 32)
                 .multilineTextAlignment(.center)
-                .rotationEffect(.degrees(Double(isAnimatingSequence ? 360 : 0)))
-                .animation(.easeInOut(duration: 0.8), value: isAnimatingSequence)
             }
 
             // CTA Button
