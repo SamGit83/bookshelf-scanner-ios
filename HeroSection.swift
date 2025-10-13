@@ -18,26 +18,30 @@ struct HeroSection: View {
     ]
     
     private func startSequenceCycle() {
+        print("DEBUG: Starting sequence cycle")
         iconOpacities = Array(repeating: 0.0, count: 4)
         textOffsets = Array(repeating: 30.0, count: 4)
         currentIndex = 0
-
+    
         func animateNext() {
             if currentIndex < items.count {
+                print("DEBUG: Animating index \(currentIndex)")
                 withAnimation(.easeInOut(duration: 0.5)) {
                     iconOpacities[currentIndex] = 1.0
                 }
-
+    
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    print("DEBUG: Sliding text for index \(currentIndex)")
                     withAnimation(.easeInOut(duration: 0.5)) {
                         textOffsets[currentIndex] = 0
                     }
-
+    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        print("DEBUG: Fading out icon for index \(currentIndex)")
                         withAnimation(.easeInOut(duration: 0.5)) {
                             iconOpacities[currentIndex] = 0.0
                         }
-
+    
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             currentIndex += 1
                             animateNext()
@@ -45,13 +49,14 @@ struct HeroSection: View {
                     }
                 }
             } else {
+                print("DEBUG: Resetting sequence")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation(.easeInOut(duration: 0.8)) {
                         isAnimatingSequence = true
                         iconOpacities = Array(repeating: 0.0, count: 4)
                         textOffsets = Array(repeating: 30.0, count: 4)
                     }
-
+    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                         isAnimatingSequence = false
                         startSequenceCycle()
@@ -59,7 +64,7 @@ struct HeroSection: View {
                 }
             }
         }
-
+    
         animateNext()
     }
 
@@ -151,6 +156,7 @@ struct HeroSection: View {
         }
         .frame(maxWidth: .infinity, minHeight: UIScreen.main.bounds.height * 0.7)
         .onAppear {
+            print("DEBUG: HeroSection onAppear triggered")
             withAnimation(.spring().delay(0.1)) {
                 animateContent = true
             }
