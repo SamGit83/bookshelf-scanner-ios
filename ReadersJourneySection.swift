@@ -286,9 +286,12 @@ struct CardStack: View {
 
     var body: some View {
         ZStack {
-            // Background card (partially visible)
+            // Render all cards with proper stacking
             ForEach(0..<cards.count, id: \.self) { index in
                 let card = cards[index]
+                let isCurrent = index == currentCardIndex
+                let stackPosition = index - currentCardIndex
+
                 EnhancedJourneyCard(
                     icon: card.icon,
                     title: card.title,
@@ -297,9 +300,10 @@ struct CardStack: View {
                     textScale: textScale
                 )
                 .frame(width: cardWidth, height: cardHeight)
-                .offset(y: CGFloat(index - currentCardIndex) * 20) // Stack offset
-                .opacity(index == currentCardIndex ? 1.0 : 0.3) // Dim background cards
-                .zIndex(Double(cards.count - index)) // Ensure proper layering
+                .offset(y: isCurrent ? 0 : 20) // Only background cards have offset
+                .opacity(isCurrent ? 1.0 : 0.3) // Only background cards are dimmed
+                .zIndex(isCurrent ? 2 : 1) // Current card always on top
+                .scaleEffect(isCurrent ? 1.0 : 0.95) // Slight scale for depth
             }
         }
         .frame(width: cardWidth, height: cardHeight + 20) // Account for stack offset
