@@ -96,7 +96,7 @@ struct HomeView: View {
                             // Current word with icon
                             HStack(spacing: 20) {
                                 Image(systemName: icons[currentIndex])
-                                    .font(.system(size: 28, weight: .bold))
+                                    .font(.system(size: 35, weight: .bold))
                                     .foregroundStyle(
                                         LinearGradient(
                                             colors: [colors[currentIndex], colors[currentIndex].opacity(0.7)],
@@ -127,7 +127,7 @@ struct HomeView: View {
                             // Next word with icon
                             HStack(spacing: 20) {
                                 Image(systemName: icons[nextIndex])
-                                    .font(.system(size: 28, weight: .bold))
+                                    .font(.system(size: 35, weight: .bold))
                                     .foregroundStyle(
                                         LinearGradient(
                                             colors: [colors[nextIndex], colors[nextIndex].opacity(0.7)],
