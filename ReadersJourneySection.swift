@@ -11,71 +11,32 @@ struct ReadersJourneySection: View {
             let spacing = calculateSpacing(for: screenWidth)
             let horizontalPadding = calculateHorizontalPadding(for: screenWidth)
             
-            Group {
-                if screenWidth >= 768 {
-                    // iPad-optimized layout: two columns to better use horizontal space
-                    let leftColumnWidth = min(screenWidth * 0.48, 520)
-                    let rightCardWidth = min(screenWidth * 0.44, 560)
-                    let rightCardHeight = min(640, max(520, rightCardWidth * 1.1))
+            VStack(spacing: spacing.section) {
+                Text("Pragya's Reading Journey")
+                    .font(TypographySystem.headlineMedium)
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.top, spacing.top)
+                    .scaleEffect(textScale.title)
 
-                    HStack(alignment: .top, spacing: 32) {
-                        // Left column: text + progress
-                        VStack(alignment: .leading, spacing: spacing.section) {
-                            Text("Pragya's Reading Journey")
-                                .font(TypographySystem.headlineMedium)
-                                .foregroundColor(.primary)
-                                .scaleEffect(textScale.title)
+                Text("Meet Pragya, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
+                    .font(TypographySystem.bodyMedium)
+                    .foregroundColor(AppleBooksColors.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.top, spacing.text)
+                    .scaleEffect(textScale.body)
 
-                            Text("Meet Pragya, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
-                                .font(TypographySystem.bodyMedium)
-                                .foregroundColor(AppleBooksColors.textSecondary)
-                                .multilineTextAlignment(.leading)
-                                .lineLimit(nil)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .scaleEffect(textScale.body)
+                // Progress indicator showing transformation
+                TransformationProgressIndicator(screenWidth: screenWidth)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.vertical, spacing.vertical)
+                    .padding(.top, spacing.text)
 
-                            TransformationProgressIndicator(screenWidth: screenWidth)
-                                .padding(.top, spacing.text)
-                        }
-                        .frame(width: leftColumnWidth, alignment: .leading)
-
-                        // Right column: larger card stack
-                        CardStack(cardWidth: rightCardWidth, cardHeight: rightCardHeight, textScale: textScale)
-                            .frame(width: rightCardWidth, height: rightCardHeight)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.horizontal, 48)
-                    .padding(.top, 16)
-                } else {
-                    // iPhone layout (original vertical stack)
-                    VStack(spacing: spacing.section) {
-                        Text("Pragya's Reading Journey")
-                            .font(TypographySystem.headlineMedium)
-                            .foregroundColor(.primary)
-                            .padding(.horizontal, horizontalPadding)
-                            .padding(.top, spacing.top)
-                            .scaleEffect(textScale.title)
-
-                        Text("Meet Pragya, a college student overwhelmed by her growing physical bookshelf. Discover how traditional reading struggles led her to Book Shelfie, and how our app transformed her entire reading experience.")
-                            .font(TypographySystem.bodyMedium)
-                            .foregroundColor(AppleBooksColors.textSecondary)
-                            .multilineTextAlignment(.leading)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.horizontal, horizontalPadding)
-                            .padding(.top, spacing.text)
-                            .scaleEffect(textScale.body)
-
-                        // Progress indicator showing transformation
-                        TransformationProgressIndicator(screenWidth: screenWidth)
-                            .padding(.horizontal, horizontalPadding)
-                            .padding(.vertical, spacing.vertical)
-                            .padding(.top, spacing.text)
-
-                        CardStack(cardWidth: cardDimensions.width, cardHeight: cardDimensions.height, textScale: textScale)
-                            .padding(.horizontal, horizontalPadding)
-                    }
-                }
+                CardStack(cardWidth: cardDimensions.width, cardHeight: cardDimensions.height, textScale: textScale)
+                    .padding(.horizontal, horizontalPadding)
             }
         }
     }
