@@ -8,13 +8,16 @@ struct HomeView: View {
     @State private var showSignup = false
     @State private var floatingOffset: CGFloat = -20
     @State private var flipAngle: Double = 0
+    @State private var currentIndex: Int = 0
+    @State private var timer: Timer? = nil
     @State private var flipTimer: Timer? = nil
+    @State private var currentOffset: CGFloat = 0
+    @State private var nextOffset: CGFloat = 50
+    @State private var currentOpacity: Double = 1
+    @State private var nextOpacity: Double = 0
+    @State private var nextIndex: Int = 1
     @State private var currentPage: Int = 0
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @State private var iconOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
-    @State private var textOffsets: [CGFloat] = Array(repeating: 30.0, count: 4)
-    @State private var isAnimatingSequence = false
-    @State private var animationCurrentIndex = 0
     
     private var isIPad: Bool {
         horizontalSizeClass == .regular
@@ -40,52 +43,6 @@ struct HomeView: View {
     ]
 
 
-    private func startSequenceCycle() {
-        iconOpacities = Array(repeating: 0.0, count: 4)
-        textOffsets = Array(repeating: 30.0, count: 4)
-        animationCurrentIndex = 0
-    
-        func animateNext() {
-            if animationCurrentIndex < 4 {
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    iconOpacities[animationCurrentIndex] = 1.0
-                }
-    
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        textOffsets[animationCurrentIndex] = 0
-                    }
-    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                        withAnimation(.easeInOut(duration: 0.5)) {
-                            iconOpacities[animationCurrentIndex] = 0.0
-                        }
-    
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            animationCurrentIndex += 1
-                            animateNext()
-                        }
-                    }
-                }
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeInOut(duration: 0.8)) {
-                        isAnimatingSequence = true
-                        iconOpacities = Array(repeating: 0.0, count: 4)
-                        textOffsets = Array(repeating: 30.0, count: 4)
-                    }
-    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                        isAnimatingSequence = false
-                        startSequenceCycle()
-                    }
-                }
-            }
-        }
-    
-        animateNext()
-    }
-    
     var body: some View {
         ZStack {
             // Apple Books clean background
@@ -129,47 +86,84 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity)
                     
                     // Animated Hero Words with Icons
-                    VStack(spacing: 16) {
+                    ZStack {
                         let words = ["Scan", "Catalog", "Organize", "Discover"]
                         let icons = ["viewfinder", "books.vertical", "square.grid.2x2", "sparkles"]
                         let colors: [Color] = [Color(hex: "FF6B35"), Color(hex: "FF1493"), Color(hex: "00BFFF"), Color(hex: "32CD32")]
-                        HStack(spacing: 24) {
-                            ForEach(0..<4, id: \.self) { index in
-                                VStack(spacing: 8) {
-                                    Image(systemName: icons[index])
-                                        .font(.system(size: 28, weight: .bold))
-                                        .foregroundStyle(
-                                            LinearGradient(
-                                                colors: [colors[index], colors[index].opacity(0.7)],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
+                        
+                            // Current word with icon
+                            HStack(spacing: 12) {
+                                Image(systemName: icons[currentIndex])
+                                    .font(.system(size: 28, weight: .bold))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [colors[currentIndex], colors[currentIndex].opacity(0.7)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
                                         )
-                                        .opacity(iconOpacities[index])
-                                        .animation(.easeInOut(duration: 0.5), value: iconOpacities[index])
-                    
-                                    Text(words[index])
-                                        .font(.largeTitle.weight(.bold))
-                                        .foregroundStyle(
-                                            LinearGradient(
-                                                colors: [colors[index], colors[index].opacity(0.7)],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
+                                    )
+                                    .shadow(color: colors[currentIndex].opacity(0.3), radius: 10, x: 0, y: 0)
+
+                                Text(words[currentIndex])
+                                    .font(.largeTitle.weight(.bold))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [colors[currentIndex], colors[currentIndex].opacity(0.7)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
                                         )
-                                        .offset(y: textOffsets[index])
-                                        .animation(.easeInOut(duration: 0.5), value: textOffsets[index])
-                                }
+                                    )
+                                    .shadow(color: colors[currentIndex].opacity(0.3), radius: 10, x: 0, y: 0)
                             }
+                            .offset(y: currentOffset)
+                            .opacity(currentOpacity)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+                            .padding(.vertical, 20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(colors[currentIndex].opacity(0.05))
+                                    .blur(radius: 8)
+                            )
+                            
+                            // Next word with icon
+                            HStack(spacing: 12) {
+                                Image(systemName: icons[nextIndex])
+                                    .font(.system(size: 28, weight: .bold))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [colors[nextIndex], colors[nextIndex].opacity(0.7)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .shadow(color: colors[nextIndex].opacity(0.3), radius: 10, x: 0, y: 0)
+
+                                Text(words[nextIndex])
+                                    .font(.largeTitle.weight(.bold))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [colors[nextIndex], colors[nextIndex].opacity(0.7)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .shadow(color: colors[nextIndex].opacity(0.3), radius: 10, x: 0, y: 0)
+                            }
+                            .offset(y: nextOffset)
+                            .opacity(nextOpacity)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.horizontal, AppleBooksSpacing.space24)
+                            .padding(.vertical, 20)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(colors[nextIndex].opacity(0.05))
+                                    .blur(radius: 8)
+                            )
                         }
-                        .padding(.horizontal, 32)
-                        .multilineTextAlignment(.center)
-                        .rotationEffect(.degrees(Double(isAnimatingSequence ? 360 : 0)))
-                        .animation(.easeInOut(duration: 0.8), value: isAnimatingSequence)
-                    }
-                    .frame(height: 80)
-                    .frame(maxWidth: heroMaxWidth)
-                    .frame(maxWidth: .infinity)
+                        .frame(height: 80)
+                        .frame(maxWidth: heroMaxWidth)
+                        .frame(maxWidth: .infinity)
                     
                     // CTA Buttons
                     VStack(spacing: AppleBooksSpacing.space16) {
@@ -212,6 +206,24 @@ struct HomeView: View {
                     withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
                         floatingOffset = 20
                     }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
+                            withAnimation(.easeInOut(duration: 1.0)) {
+                                currentOffset = -50
+                                currentOpacity = 0
+                                nextOffset = 0
+                                nextOpacity = 1
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                currentIndex = nextIndex
+                                nextIndex = (nextIndex + 1) % 4
+                                currentOffset = 0
+                                nextOffset = 50
+                                currentOpacity = 1
+                                nextOpacity = 0
+                            }
+                        }
+                    }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                         flipTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: true) { _ in
                             withAnimation(.easeInOut(duration: 1.0)) {
@@ -219,11 +231,9 @@ struct HomeView: View {
                             }
                         }
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        startSequenceCycle()
-                    }
                 }
                 .onDisappear {
+                    timer?.invalidate()
                     flipTimer?.invalidate()
                 }
 
