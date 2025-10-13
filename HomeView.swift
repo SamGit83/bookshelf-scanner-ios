@@ -17,6 +17,8 @@ struct HomeView: View {
     @State private var nextOpacity: Double = 0
     @State private var nextIndex: Int = 1
     @State private var currentPage: Int = 0
+    @State private var currentIconScale: CGFloat = 1
+    @State private var nextIconScale: CGFloat = 0
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
     private var isIPad: Bool {
@@ -103,7 +105,8 @@ struct HomeView: View {
                                         )
                                     )
                                     .shadow(color: colors[currentIndex].opacity(0.3), radius: 10, x: 0, y: 0)
-
+                                    .scaleEffect(currentIconScale)
+    
                                 Text(words[currentIndex])
                                     .font(.largeTitle.weight(.bold))
                                     .foregroundStyle(
@@ -133,7 +136,8 @@ struct HomeView: View {
                                         )
                                     )
                                     .shadow(color: colors[nextIndex].opacity(0.3), radius: 10, x: 0, y: 0)
-
+                                    .scaleEffect(nextIconScale)
+    
                                 Text(words[nextIndex])
                                     .font(.largeTitle.weight(.bold))
                                     .foregroundStyle(
@@ -204,6 +208,11 @@ struct HomeView: View {
                                 nextOffset = 0
                                 nextOpacity = 1
                             }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(duration: 0.5)) {
+                                    nextIconScale = 1
+                                }
+                            }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                 currentIndex = nextIndex
                                 nextIndex = (nextIndex + 1) % 4
@@ -211,6 +220,8 @@ struct HomeView: View {
                                 nextOffset = 50
                                 currentOpacity = 1
                                 nextOpacity = 0
+                                currentIconScale = 1
+                                nextIconScale = 0
                             }
                         }
                     }
