@@ -267,10 +267,12 @@ struct CardStack: View {
         BulletPoint(icon: "heart.fill", text: "Pure reading enjoyment and discovery")
     ]
 
-    let cards: [(icon: String, title: String, cardType: CardType, bulletPoints: [BulletPoint])] = [
-        ("exclamationmark.triangle.fill", "Traditional Reading Struggles", .struggles, strugglesBulletPoints),
-        ("sparkles", "Enhanced Reading Experience", .enhancements, enhancementsBulletPoints)
-    ]
+    var cards: [(icon: String, title: String, cardType: CardType, bulletPoints: [BulletPoint])] {
+        [
+            ("exclamationmark.triangle.fill", "Traditional Reading Struggles", CardType.struggles, strugglesBulletPoints),
+            ("sparkles", "Enhanced Reading Experience", CardType.enhancements, enhancementsBulletPoints)
+        ]
+    }
 
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
