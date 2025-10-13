@@ -300,10 +300,10 @@ struct CardStack: View {
                     textScale: textScale
                 )
                 .frame(width: cardWidth, height: cardHeight)
-                .offset(y: isCurrent ? 0 : 20) // Only background cards have offset
-                .opacity(isCurrent ? 1.0 : 0.3) // Only background cards are dimmed
+                .offset(y: isCurrent ? 0 : 15) // Only background cards have offset
+                .opacity(isCurrent ? 1.0 : 0.5) // Only background cards are dimmed
                 .zIndex(isCurrent ? 2 : 1) // Current card always on top
-                .scaleEffect(isCurrent ? 1.0 : 0.95) // Slight scale for depth
+                .scaleEffect(isCurrent ? 1.0 : 0.97) // Slight scale for depth
             }
         }
         .frame(width: cardWidth, height: cardHeight + 20) // Account for stack offset
