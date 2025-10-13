@@ -120,11 +120,6 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal, AppleBooksSpacing.space24)
                             .padding(.vertical, 20)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(colors[currentIndex].opacity(0.05))
-                                    .blur(radius: 8)
-                            )
                             
                             // Next word with icon
                             HStack(spacing: 12) {
@@ -155,11 +150,6 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal, AppleBooksSpacing.space24)
                             .padding(.vertical, 20)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(colors[nextIndex].opacity(0.05))
-                                    .blur(radius: 8)
-                            )
                         }
                         .frame(height: 80)
                         .frame(maxWidth: heroMaxWidth)
