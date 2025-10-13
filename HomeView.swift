@@ -208,10 +208,8 @@ struct HomeView: View {
                                 nextOffset = 0
                                 nextOpacity = 1
                             }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(duration: 0.5)) {
-                                    nextIconScale = 1
-                                }
+                            withAnimation(.spring(duration: 1.0)) {
+                                nextIconScale = 1
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                 currentIndex = nextIndex
