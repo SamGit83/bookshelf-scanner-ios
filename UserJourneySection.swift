@@ -2,8 +2,6 @@ import SwiftUI
 
 struct UserJourneySection: View {
     @State private var animateSection = false
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    private var isIPad: Bool { horizontalSizeClass == .regular }
 
     let steps = [
         ("Scan Your Bookshelf", "Point your camera at your bookshelf and capture a photo", "camera.fill"),
@@ -26,46 +24,19 @@ struct UserJourneySection: View {
                 .animation(.spring().delay(0.1), value: animateSection)
 
             // Steps
-            Group {
-                if isIPad {
-                    // Use a responsive grid on iPad to reduce dead space
-                    LazyVGrid(
-                        columns: [
-                            GridItem(.flexible(), spacing: 24),
-                            GridItem(.flexible(), spacing: 24)
-                        ],
-                        spacing: 24
-                    ) {
-                        ForEach(0..<steps.count, id: \.self) { index in
-                            StepCard(
-                                stepNumber: index + 1,
-                                title: steps[index].0,
-                                description: steps[index].1,
-                                icon: steps[index].2,
-                                delay: Double(index) * 0.1,
-                                cardWidth: 340,
-                                cardHeight: 340
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 24)
-                } else {
-                    // Keep horizontal carousel on iPhone
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
-                            ForEach(0..<steps.count, id: \.self) { index in
-                                StepCard(
-                                    stepNumber: index + 1,
-                                    title: steps[index].0,
-                                    description: steps[index].1,
-                                    icon: steps[index].2,
-                                    delay: Double(index) * 0.1
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 20)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 20) {
+                    ForEach(0..<steps.count, id: \.self) { index in
+                        StepCard(
+                            stepNumber: index + 1,
+                            title: steps[index].0,
+                            description: steps[index].1,
+                            icon: steps[index].2,
+                            delay: Double(index) * 0.1
+                        )
                     }
                 }
+                .padding(.horizontal, 20)
             }
             .offset(y: animateSection ? 0 : 30)
             .opacity(animateSection ? 1 : 0)
@@ -100,8 +71,6 @@ struct StepCard: View {
     let description: String
     let icon: String
     let delay: Double
-    var cardWidth: CGFloat = 280
-    var cardHeight: CGFloat = 300
 
     @State private var animateCard = false
 
@@ -143,7 +112,7 @@ struct StepCard: View {
                     .lineLimit(3)
             }
             .padding(24)
-            .frame(width: cardWidth, height: cardHeight)
+            .frame(width: 280, height: 300)
         }
         .colorScheme(.light)
         .colorScheme(.light)

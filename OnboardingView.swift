@@ -1,7 +1,4 @@
 import SwiftUI
-#if canImport(UIKit)
-import UIKit
-#endif
 
 struct SubscriptionOption: Identifiable, Equatable {
     let id = UUID()
@@ -29,20 +26,7 @@ struct OnboardingView: View {
     }
     
     private var maxContentWidth: CGFloat {
-        if isIPad {
-            #if canImport(UIKit)
-            let screenWidth = UIScreen.main.bounds.width
-            #else
-            let screenWidth: CGFloat = 1024
-            #endif
-            return min(screenWidth - 160, 900) // wider card on iPad to reduce side dead space
-        } else {
-            return .infinity
-        }
-    }
-    
-    private var cardMinHeight: CGFloat? {
-        isIPad ? 560 : nil // taller card on iPad to reduce vertical dead space
+        isIPad ? 700 : .infinity
     }
 
     let subscriptionOptions: [SubscriptionOption] = [
@@ -113,10 +97,8 @@ struct OnboardingView: View {
                                     ForEach(0..<pages.count, id: \.self) { index in
                                         Circle()
                                             .fill(index == currentPage ? pages[currentPage].accentColor : AppleBooksColors.textTertiary)
-                                            .frame(
-                                                width: index == currentPage ? (isIPad ? 12 : 10) : (isIPad ? 10 : 8),
-                                                height: index == currentPage ? (isIPad ? 12 : 10) : (isIPad ? 10 : 8)
-                                            )
+                                            .frame(width: index == currentPage ? 10 : 8,
+                                                   height: index == currentPage ? 10 : 8)
                                             .animation(.easeInOut(duration: 0.3), value: currentPage)
                                     }
                                 }
@@ -125,21 +107,21 @@ struct OnboardingView: View {
                                 if currentPage < pages.count - 1 {
                                     // Icon
                                     Image(systemName: pages[currentPage].imageName)
-                                        .font(.system(size: isIPad ? 120 : 80, weight: .light))
+                                        .font(.system(size: 80, weight: .light))
                                         .foregroundColor(pages[currentPage].accentColor)
-                                        .frame(height: isIPad ? 160 : 120)
+                                        .frame(height: 120)
 
                                     // Text Content
                                     VStack(spacing: AppleBooksSpacing.space16) {
                                         Text(pages[currentPage].title)
-                                            .font(.system(size: isIPad ? 34 : 28, weight: .bold))
+                                            .font(.system(size: 28, weight: .bold))
                                             .foregroundColor(AppleBooksColors.text)
                                             .multilineTextAlignment(.center)
                                             .lineLimit(nil)
                                             .minimumScaleFactor(0.8)
 
                                         Text(pages[currentPage].description)
-                                            .font(.system(size: isIPad ? 18 : 16, weight: .regular))
+                                            .font(.system(size: 16, weight: .regular))
                                             .foregroundColor(AppleBooksColors.textSecondary)
                                             .multilineTextAlignment(.center)
                                             .lineLimit(nil)
@@ -157,7 +139,6 @@ struct OnboardingView: View {
                                 }
                             }
                         }
-                        .frame(minHeight: cardMinHeight)
                         .frame(maxWidth: maxContentWidth)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, horizontalPadding)
