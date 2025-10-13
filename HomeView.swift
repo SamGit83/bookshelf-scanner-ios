@@ -94,7 +94,7 @@ struct HomeView: View {
                         let colors: [Color] = [Color(hex: "FF6B35"), Color(hex: "FF1493"), Color(hex: "00BFFF"), Color(hex: "32CD32")]
                         
                             // Current word with icon
-                            HStack(spacing: 20) {
+                            HStack(spacing: 30) {
                                 Image(systemName: icons[currentIndex])
                                     .font(.system(size: 35, weight: .bold))
                                     .foregroundStyle(
@@ -125,7 +125,7 @@ struct HomeView: View {
                             .padding(.vertical, 20)
                             
                             // Next word with icon
-                            HStack(spacing: 20) {
+                            HStack(spacing: 30) {
                                 Image(systemName: icons[nextIndex])
                                     .font(.system(size: 35, weight: .bold))
                                     .foregroundStyle(
