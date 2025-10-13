@@ -117,9 +117,9 @@ struct HomeView: View {
                                         )
                                     )
                                     .shadow(color: colors[currentIndex].opacity(0.3), radius: 10, x: 0, y: 0)
+                                    .offset(y: currentOffset)
+                                    .opacity(currentOpacity)
                             }
-                            .offset(y: currentOffset)
-                            .opacity(currentOpacity)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal, AppleBooksSpacing.space24)
                             .padding(.vertical, 20)
@@ -148,9 +148,9 @@ struct HomeView: View {
                                         )
                                     )
                                     .shadow(color: colors[nextIndex].opacity(0.3), radius: 10, x: 0, y: 0)
+                                    .offset(y: nextOffset)
+                                    .opacity(nextOpacity)
                             }
-                            .offset(y: nextOffset)
-                            .opacity(nextOpacity)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal, AppleBooksSpacing.space24)
                             .padding(.vertical, 20)
