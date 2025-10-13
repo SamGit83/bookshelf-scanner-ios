@@ -5,45 +5,62 @@ struct HeroSection: View {
     @Binding var showSignup: Bool
     @State private var animateContent = false
     @State private var floatingOffset: CGFloat = 0
-    @State private var sequenceOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
+    @State private var iconOpacities: [CGFloat] = Array(repeating: 0.0, count: 4)
+    @State private var textOffsets: [CGFloat] = Array(repeating: 30.0, count: 4)
     @State private var isAnimatingSequence = false
+    @State private var currentIndex = 0
+
+    private let items = [
+        ("camera.fill", "Scan"),
+        ("books.vertical.fill", "catalog"),
+        ("list.bullet", "organize"),
+        ("magnifyingglass", "discover")
+    ]
     
     private func startSequenceCycle() {
-        sequenceOpacities = Array(repeating: 0.0, count: 4)
-        
-        withAnimation(.easeInOut(duration: 0.5)) {
-            sequenceOpacities[0] = 1.0
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            withAnimation(.easeInOut(duration: 0.5)) {
-                sequenceOpacities[1] = 1.0
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        iconOpacities = Array(repeating: 0.0, count: 4)
+        textOffsets = Array(repeating: 30.0, count: 4)
+        currentIndex = 0
+
+        func animateNext() {
+            if currentIndex < items.count {
                 withAnimation(.easeInOut(duration: 0.5)) {
-                    sequenceOpacities[2] = 1.0
+                    iconOpacities[currentIndex] = 1.0
                 }
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation(.easeInOut(duration: 0.5)) {
-                        sequenceOpacities[3] = 1.0
+                        textOffsets[currentIndex] = 0
                     }
-                    
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        withAnimation(.easeInOut(duration: 0.8)) {
-                            isAnimatingSequence = true
-                            sequenceOpacities = Array(repeating: 0.0, count: 4)
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            iconOpacities[currentIndex] = 0.0
                         }
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            isAnimatingSequence = false
-                            startSequenceCycle()
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            currentIndex += 1
+                            animateNext()
                         }
+                    }
+                }
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeInOut(duration: 0.8)) {
+                        isAnimatingSequence = true
+                        iconOpacities = Array(repeating: 0.0, count: 4)
+                        textOffsets = Array(repeating: 30.0, count: 4)
+                    }
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        isAnimatingSequence = false
+                        startSequenceCycle()
                     }
                 }
             }
         }
+
+        animateNext()
     }
 
     var body: some View {
@@ -87,17 +104,22 @@ struct HeroSection: View {
                 .animation(.spring().delay(0.2), value: animateContent)
             
             // Animated Sequence
-            VStack {
-                let words = ["Scan", "catalog", "organize", "discover"]
-                HStack(spacing: 12) {
+            VStack(spacing: 16) {
+                HStack(spacing: 24) {
                     ForEach(0..<4, id: \.self) { index in
-                        Text(words[index])
-                            .font(.subheadline.weight(.medium))
-                            .foregroundColor(.white)
-                            .shadow(color: .blue.opacity(0.4), radius: 10 * sequenceOpacities[index])
-                            .opacity(sequenceOpacities[index])
-                            .scaleEffect(sequenceOpacities[index])
-                            .animation(.easeInOut(duration: 0.5), value: sequenceOpacities[index])
+                        VStack(spacing: 8) {
+                            Image(systemName: items[index].0)
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                                .opacity(iconOpacities[index])
+                                .animation(.easeInOut(duration: 0.5), value: iconOpacities[index])
+
+                            Text(items[index].1)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundColor(.white)
+                                .offset(y: textOffsets[index])
+                                .animation(.easeInOut(duration: 0.5), value: textOffsets[index])
+                        }
                     }
                 }
                 .padding(.horizontal, 32)
