@@ -38,19 +38,25 @@ struct ReadersJourneySection: View {
                 CardStack(cardWidth: cardDimensions.width, cardHeight: cardDimensions.height, textScale: textScale)
                     .padding(.horizontal, horizontalPadding)
             }
-            .padding(.top, spacing.top)
         }
     }
     
     // Calculate card dimensions based on screen width
     private func calculateCardDimensions(for width: CGFloat) -> (width: CGFloat, height: CGFloat) {
+        // Responsive sizing tuned to reduce dead space on iPhone and better utilize width on iPad
         switch width {
         case ..<375: // iPhone SE, small devices
-            return (300, 340)
+            let w = max(300, width - 32)
+            return (w, max(360, w * 1.15))
         case 375..<430: // iPhone 13/14/15 standard
-            return (340, 380)
-        default: // iPhone Pro Max, iPad, larger devices
-            return (min(400, width - 40), 450)
+            let w = min(width - 32, 380)
+            return (w, max(440, w * 1.15)) // taller to fill space
+        case 430..<768: // Large iPhone/compact iPad split view
+            let w = min(width - 40, 420)
+            return (w, max(480, w * 1.12))
+        default: // iPad and larger devices
+            let w = min(width * 0.7, 700) // use ~70% of screen on iPad, capped
+            return (w, min(600, max(500, w * 0.9)))
         }
     }
     
@@ -61,8 +67,8 @@ struct ReadersJourneySection: View {
             return (0.9, 0.9)
         case 375..<430: // Standard devices
             return (1.0, 1.0)
-        default: // Large devices
-            return (1.1, 1.05)
+        default: // Large devices (iPad, Pro Max)
+            return (1.2, 1.12)
         }
     }
     
@@ -70,11 +76,11 @@ struct ReadersJourneySection: View {
     private func calculateSpacing(for width: CGFloat) -> (section: CGFloat, text: CGFloat, vertical: CGFloat, top: CGFloat) {
         switch width {
         case ..<375: // Small devices
-            return (16, 12, 8, 30)
+            return (16, 12, 8, 20)
         case 375..<430: // Standard devices
-            return (24, 20, 12, 50)
+            return (20, 16, 10, 24)
         default: // Large devices
-            return (32, 24, 16, 60)
+            return (28, 20, 12, 28)
         }
     }
     
@@ -84,9 +90,12 @@ struct ReadersJourneySection: View {
         case ..<375: // Small devices
             return 16
         case 375..<430: // Standard devices
+            return 20
+        case 430..<768: // Large iPhones
             return 24
-        default: // Large devices
-            return max(32, (width - 400) / 2)
+        default: // iPad and larger devices
+            let targetCardWidth = min(width * 0.7, 700)
+            return max(32, (width - targetCardWidth) / 2)
         }
     }
 }
