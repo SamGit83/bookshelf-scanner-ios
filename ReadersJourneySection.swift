@@ -35,7 +35,7 @@ struct ReadersJourneySection: View {
                     .padding(.vertical, spacing.vertical)
                     .padding(.top, spacing.text)
 
-                FlipCard(cardWidth: cardDimensions.width, cardHeight: cardDimensions.height, textScale: textScale)
+                CardStack(cardWidth: cardDimensions.width, cardHeight: cardDimensions.height, textScale: textScale)
                     .padding(.horizontal, horizontalPadding)
             }
             .padding(.top, spacing.top)
@@ -242,11 +242,11 @@ struct TransformationProgressIndicator: View {
         .frame(height: height)
     }
 }
-struct FlipCard: View {
-    @State private var flipped = false
+struct CardStack: View {
+    @State private var currentCardIndex = 0
     @State private var isPressed = false
     @State private var timer: Timer?
-    
+
     let cardWidth: CGFloat
     let cardHeight: CGFloat
     let textScale: (title: CGFloat, body: CGFloat)
@@ -267,11 +267,16 @@ struct FlipCard: View {
         BulletPoint(icon: "heart.fill", text: "Pure reading enjoyment and discovery")
     ]
 
+    let cards: [(icon: String, title: String, cardType: CardType, bulletPoints: [BulletPoint])] = [
+        ("exclamationmark.triangle.fill", "Traditional Reading Struggles", .struggles, strugglesBulletPoints),
+        ("sparkles", "Enhanced Reading Experience", .enhancements, enhancementsBulletPoints)
+    ]
+
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
             if !isPressed {
                 withAnimation(.easeInOut(duration: 0.6)) {
-                    flipped.toggle()
+                    currentCardIndex = (currentCardIndex + 1) % cards.count
                 }
             }
         }
@@ -279,33 +284,25 @@ struct FlipCard: View {
 
     var body: some View {
         ZStack {
-            // Front card - Traditional Reading Struggles (coral)
-            if !flipped {
+            // Background card (partially visible)
+            ForEach(0..<cards.count, id: \.self) { index in
+                let card = cards[index]
                 EnhancedJourneyCard(
-                    icon: "exclamationmark.triangle.fill",
-                    title: "Traditional Reading Struggles",
-                    cardType: .struggles,
-                    bulletPoints: strugglesBulletPoints,
+                    icon: card.icon,
+                    title: card.title,
+                    cardType: card.cardType,
+                    bulletPoints: card.bulletPoints,
                     textScale: textScale
                 )
-            }
-            
-            // Back card - Enhanced Reading Experience (green)
-            if flipped {
-                EnhancedJourneyCard(
-                    icon: "sparkles",
-                    title: "Enhanced Reading Experience",
-                    cardType: .enhancements,
-                    bulletPoints: enhancementsBulletPoints,
-                    textScale: textScale
-                )
-                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                .frame(width: cardWidth, height: cardHeight)
+                .offset(y: CGFloat(index - currentCardIndex) * 20) // Stack offset
+                .opacity(index == currentCardIndex ? 1.0 : 0.3) // Dim background cards
+                .zIndex(Double(cards.count - index)) // Ensure proper layering
             }
         }
-        .frame(width: cardWidth, height: cardHeight)
+        .frame(width: cardWidth, height: cardHeight + 20) // Account for stack offset
         .clipped()
         .layoutPriority(1)
-        .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
@@ -316,7 +313,7 @@ struct FlipCard: View {
                     isPressed = false
                     startTimer()
                     withAnimation(.easeInOut(duration: 0.6)) {
-                        flipped.toggle()
+                        currentCardIndex = (currentCardIndex + 1) % cards.count
                     }
                 }
         )
