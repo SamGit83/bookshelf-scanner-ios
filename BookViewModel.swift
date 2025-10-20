@@ -790,7 +790,7 @@ class BookViewModel: ObservableObject {
                                 var updatedBook = localBook
                                 
                                 if case .success(let recommendation) = result {
-                                    if let pageCount = recommendation.pageCount, pageCount > 0 {
+                                    if let pageCount = recommendation?.pageCount, pageCount > 0 {
                                         updatedBook.pageCount = pageCount
                                         updatedBook.totalPages = pageCount
                                         let hours = pageCount / 250
