@@ -181,10 +181,6 @@ struct CurrentlyReadingBookCard: View {
                                 Text("\(book.currentPage)")
                                     .font(.system(size: 10))
                                     .foregroundColor(.white)
-                                    .padding(8)
-                                    .background(AppleBooksColors.accent.opacity(0.8))
-                                    .clipShape(Circle())
-                                    .shadow(radius: 2)
                             } else {
                                 Image(systemName: "bookmark.fill")
                                     .font(.system(size: 16))
