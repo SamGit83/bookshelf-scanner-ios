@@ -187,6 +187,7 @@ struct ReadingProgressView: View {
                                             }.fill(AppleBooksColors.textTertiary)
                                         }
                                         VStack(spacing: AppleBooksSpacing.space4) {
+                                            print("DEBUG: totalPages = \(totalPages), currentPage = \(book.currentPage)")
                                             let progressPercentage = (totalPages != nil && totalPages! > 0) ? min(Int(round((Double(book.currentPage) / Double(totalPages!)) * 100)), 100) : 0
                                             Text("\(progressPercentage)%")
                                                 .font(AppleBooksTypography.displayLarge)
