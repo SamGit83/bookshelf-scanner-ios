@@ -168,7 +168,7 @@ struct ReadingProgressView: View {
                                             // Read pages sector
                                             Path { path in
                                                 path.move(to: center)
-                                                path.addArc(center: center, radius: radius, startAngle: .degrees(-90), endAngle: .degrees(-90 + 360 * progress), clockwise: false)
+                                                path.addArc(center: center, radius: radius, startAngle: .degrees(-90), endAngle: .degrees(-90.0 + 360.0 * progress), clockwise: false)
                                                 path.closeSubpath()
                                             }.fill(AppleBooksColors.success)
                                             // Remaining pages sector
