@@ -767,6 +767,72 @@ class BookViewModel: ObservableObject {
                     // Track book status change
                     AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
                     // Rely on Firestore listener for UI updates instead of redundant loadBooksPaginated
+                    
+                    if status == .currentlyReading {
+                        let needsGoogleFetch = book.pageCount == nil || (book.subGenre == nil || book.subGenre?.isEmpty == true)
+                        let needsAgeRating = book.ageRating == nil || book.ageRating?.isEmpty == true
+                        let needsEstimatedTime = book.estimatedReadingTime == nil || book.estimatedReadingTime?.isEmpty == true
+                        
+                        var localBook = book
+                        localBook.status = status
+                        
+                        if needsEstimatedTime && localBook.pageCount != nil && localBook.pageCount! > 0 {
+                            let hours = localBook.pageCount! / 250
+                            localBook.estimatedReadingTime = hours > 0 ? "\(hours) hours" : "Less than 1 hour"
+                            
+                            if !needsGoogleFetch && !needsAgeRating {
+                                self?.saveBookToFirestore(localBook)
+                            }
+                        }
+                        
+                        if needsGoogleFetch {
+                            self?.googleBooksService.fetchBookDetails(isbn: localBook.isbn, title: localBook.title, author: localBook.author) { result in
+                                var updatedBook = localBook
+                                
+                                if case .success(let recommendation) = result {
+                                    if let pageCount = recommendation.pageCount, pageCount > 0 {
+                                        updatedBook.pageCount = pageCount
+                                        updatedBook.totalPages = pageCount
+                                        let hours = pageCount / 250
+                                        updatedBook.estimatedReadingTime = hours > 0 ? "\(hours) hours" : "Less than 1 hour"
+                                    }
+                                    
+                                    if let subGenre = recommendation.genre, subGenre != "Unknown" && !subGenre.isEmpty {
+                                        updatedBook.subGenre = subGenre
+                                    }
+                                }
+                                
+                                // Handle age rating if needed
+                                if needsAgeRating {
+                                    self?.grokService.analyzeAgeRating(title: updatedBook.title ?? "", author: updatedBook.author ?? "", description: updatedBook.teaser ?? "", genre: updatedBook.genre) { ageResult in
+                                        var finalBook = updatedBook
+                                        
+                                        if case .success(let ageRating) = ageResult {
+                                            finalBook.ageRating = ageRating
+                                        } else {
+                                            finalBook.ageRating = "Unknown"
+                                        }
+                                        
+                                        self?.saveBookToFirestore(finalBook)
+                                    }
+                                } else {
+                                    self?.saveBookToFirestore(updatedBook)
+                                }
+                            }
+                        } else if needsAgeRating {
+                            self?.grokService.analyzeAgeRating(title: localBook.title ?? "", author: localBook.author ?? "", description: localBook.teaser ?? "", genre: localBook.genre) { ageResult in
+                                var finalBook = localBook
+                                
+                                if case .success(let ageRating) = ageResult {
+                                    finalBook.ageRating = ageRating
+                                } else {
+                                    finalBook.ageRating = "Unknown"
+                                }
+                                
+                                self?.saveBookToFirestore(finalBook)
+                            }
+                        }
+                    }
                 }
             }
         }
