@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -8,6 +9,9 @@ struct ReadingProgressBookCard: View {
     let book: Book
     let onTap: () -> Void
     let onMarkComplete: () -> Void
+
+    @State private var showBookmark = true
+    private let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
 
     private var progress: Double {
         guard let totalPages = book.totalPages, totalPages > 0 else { return 0 }
@@ -269,9 +273,13 @@ struct ReadingProgressBookCard: View {
                                 .background(AppleBooksColors.accent.opacity(0.8))
                                 .clipShape(Circle())
                                 .shadow(radius: 2)
+                                .opacity(showBookmark ? 1 : 0)
+                                .animation(.easeInOut(duration: 0.5), value: showBookmark)
                             Text("\(book.currentPage)")
                                 .font(.system(size: 10))
                                 .foregroundColor(.white)
+                                .opacity(showBookmark ? 0 : 1)
+                                .animation(.easeInOut(duration: 0.5), value: showBookmark)
                         }
                         .padding(8)
                     }
@@ -279,6 +287,9 @@ struct ReadingProgressBookCard: View {
                 Spacer()
             }
         )
+        .onReceive(timer) { _ in
+            showBookmark.toggle()
+        }
     }
 }
 

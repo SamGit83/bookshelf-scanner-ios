@@ -160,47 +160,44 @@ struct ReadingProgressView: View {
                                 VStack(spacing: AppleBooksSpacing.space16) {
                                     let totalPages = book.totalPages
                                     let progress: CGFloat = totalPages != nil ? min(CGFloat(book.currentPage) / CGFloat(totalPages!), 1.0) : 0.0
-                                    // Progress Circle
                                     ZStack {
-                                        Circle()
-                                            .stroke(AppleBooksColors.textTertiary, lineWidth: 8)
-                                            .frame(width: 140, height: 140)
-
-                                        Circle()
-                                            .trim(from: 0, to: progress)
-                                            .stroke(AppleBooksColors.success, lineWidth: 8)
-                                            .frame(width: 140, height: 140)
-                                            .rotationEffect(.degrees(-90))
-
+                                        if let totalPages = book.totalPages, totalPages > 0 {
+                                            let progress = min(CGFloat(book.currentPage) / CGFloat(totalPages), 1.0)
+                                            let center = CGPoint(x: 70, y: 70)
+                                            let radius: CGFloat = 70
+                                            // Read pages sector
+                                            Path { path in
+                                                path.move(to: center)
+                                                path.addArc(center: center, radius: radius, startAngle: .degrees(-90), endAngle: .degrees(-90 + 360 * progress), clockwise: false)
+                                                path.closeSubpath()
+                                            }.fill(AppleBooksColors.success)
+                                            // Remaining pages sector
+                                            Path { path in
+                                                path.move(to: center)
+                                                path.addArc(center: center, radius: radius, startAngle: .degrees(-90 + 360 * progress), endAngle: .degrees(270), clockwise: false)
+                                                path.closeSubpath()
+                                            }.fill(AppleBooksColors.textTertiary)
+                                        } else {
+                                            let center = CGPoint(x: 70, y: 70)
+                                            let radius: CGFloat = 70
+                                            Path { path in
+                                                path.move(to: center)
+                                                path.addArc(center: center, radius: radius, startAngle: .degrees(-90), endAngle: .degrees(270), clockwise: false)
+                                                path.closeSubpath()
+                                            }.fill(AppleBooksColors.textTertiary)
+                                        }
                                         VStack(spacing: AppleBooksSpacing.space4) {
-                                            Text("\(book.currentPage)")
+                                            let progressPercentage = (totalPages != nil && totalPages! > 0) ? Int((Double(book.currentPage) / Double(totalPages!)) * 100) : 0
+                                            Text("\(progressPercentage)%")
                                                 .font(AppleBooksTypography.displayLarge)
                                                 .foregroundColor(AppleBooksColors.text)
                                                 .fontWeight(.bold)
-
-                                            if totalPages != nil {
-                                                Text("of \(totalPages!)")
-                                                    .font(AppleBooksTypography.bodySmall)
-                                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                            } else {
-                                                Text("pages read")
-                                                    .font(AppleBooksTypography.bodySmall)
-                                                    .foregroundColor(AppleBooksColors.textSecondary)
-                                            }
+                                            Text("Pages Read")
+                                                .font(AppleBooksTypography.bodySmall)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
                                         }
                                     }
-
-                                    if totalPages != nil {
-                                        let progressPercentage = totalPages! > 0 ? Int((Double(book.currentPage) / Double(totalPages!)) * 100) : 0
-                                        Text("\(progressPercentage)% Complete")
-                                            .font(AppleBooksTypography.bodyLarge)
-                                            .foregroundColor(AppleBooksColors.success)
-                                            .fontWeight(.semibold)
-                                    } else {
-                                        Text("Set total pages to see progress")
-                                            .font(AppleBooksTypography.bodyLarge)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
-                                    }
+                                    .frame(width: 140, height: 140)
                                 }
                             }
                         }
@@ -213,7 +210,7 @@ struct ReadingProgressView: View {
                                 .foregroundColor(AppleBooksColors.text)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                            HStack(spacing: AppleBooksSpacing.space16) {
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AppleBooksSpacing.space16) {
                                 // Total Pages Read
                                 AppleBooksCard(
                                     cornerRadius: 12,
@@ -221,18 +218,20 @@ struct ReadingProgressView: View {
                                     shadowStyle: .subtle
                                 ) {
                                     VStack(spacing: AppleBooksSpacing.space8) {
-                                        Image(systemName: "book.pages")
-                                            .font(.system(size: 24))
-                                            .foregroundColor(AppleBooksColors.accent)
+                                        VStack(spacing: AppleBooksSpacing.space8) {
+                                            Image(systemName: "book.pages")
+                                                .font(.system(size: 24))
+                                                .foregroundColor(AppleBooksColors.accent)
 
-                                        Text("\(book.currentPage)")
-                                            .font(AppleBooksTypography.headlineMedium)
-                                            .foregroundColor(AppleBooksColors.text)
-                                            .fontWeight(.bold)
+                                            Text("\(book.currentPage)")
+                                                .font(AppleBooksTypography.headlineMedium)
+                                                .foregroundColor(AppleBooksColors.text)
+                                                .fontWeight(.bold)
 
-                                        Text("Pages Read")
-                                            .font(AppleBooksTypography.caption)
-                                            .foregroundColor(AppleBooksColors.textSecondary)
+                                            Text("Pages Read")
+                                                .font(AppleBooksTypography.caption)
+                                                .foregroundColor(AppleBooksColors.textSecondary)
+                                        }
                                     }
                                 }
 
@@ -257,9 +256,7 @@ struct ReadingProgressView: View {
                                             .foregroundColor(AppleBooksColors.textSecondary)
                                     }
                                 }
-                            }
 
-                            HStack(spacing: AppleBooksSpacing.space16) {
                                 // Average Session
                                 AppleBooksCard(
                                     cornerRadius: 12,
