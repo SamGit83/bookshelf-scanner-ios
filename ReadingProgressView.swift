@@ -63,15 +63,59 @@ struct ReadingProgressView: View {
                                         .frame(width: 80, height: 120)
                                         .cornerRadius(12)
                                         .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
-                                } else {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.gray.opacity(0.2))
-                                            .frame(width: 80, height: 120)
-                                        Image(systemName: "book.fill")
-                                            .font(.system(size: 32))
-                                            .foregroundColor(.gray)
+                                } else if let coverURL = book.coverImageURL,
+                                          let url = URL(string: coverURL) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(width: 80, height: 120)
+                                                .cornerRadius(12)
+                                                .overlay(
+                                                    ProgressView()
+                                                        .scaleEffect(0.5)
+                                                )
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 80, height: 120)
+                                                .cornerRadius(12)
+                                                .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 3)
+                                        case .failure:
+                                            Rectangle()
+                                                .fill(Color.red.opacity(0.3))
+                                                .frame(width: 80, height: 120)
+                                                .cornerRadius(12)
+                                                .overlay(
+                                                    VStack(spacing: 2) {
+                                                        Image(systemName: "xmark.circle")
+                                                            .foregroundColor(.red)
+                                                            .font(.system(size: 16))
+                                                        Text("Failed")
+                                                            .font(.system(size: 8))
+                                                            .foregroundColor(.red)
+                                                    }
+                                                )
+                                        @unknown default:
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(width: 80, height: 120)
+                                                .cornerRadius(12)
+                                        }
                                     }
+                                    .id(book.coverImageURL) // Force refresh when URL changes
+                                } else {
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(width: 80, height: 120)
+                                        .cornerRadius(12)
+                                        .overlay(
+                                            Text("No Cover")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        )
                                 }
 
                                 // Book Details
