@@ -37,6 +37,7 @@ class BookViewModel: ObservableObject {
     private let db = FirebaseConfig.shared.db
     private let rateLimiter = RateLimiter()
     private var listener: ListenerRegistration?
+    private var previousUserId: String?
 
     init() {
         setupAuthStateObserver()
@@ -49,7 +50,17 @@ class BookViewModel: ObservableObject {
         authStateCancellable = Auth.auth().publisher(for: \.currentUser)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.setupFirestoreListener()
+                guard let self = self else { return }
+                let currentUserId = FirebaseConfig.shared.currentUserId
+                // Only clear books on explicit logout, not on auth state changes during operations
+                if self.previousUserId != nil && currentUserId == nil {
+                    // User logged out explicitly
+                    self.books = []
+                    self.previousUserId = nil
+                } else if currentUserId != nil {
+                    self.previousUserId = currentUserId
+                }
+                self.setupFirestoreListener()
             }
     }
 
@@ -745,9 +756,9 @@ class BookViewModel: ObservableObject {
             }
             return
         }
-    
+
         let bookRef = db.collection("users").document(userId).collection("books").document(book.id.uuidString)
-    
+
         bookRef.updateData(["status": status.rawValue]) { [weak self] error in
             DispatchQueue.main.async {
                 if let error = error {
@@ -755,7 +766,7 @@ class BookViewModel: ObservableObject {
                 } else {
                     // Track book status change
                     AnalyticsManager.shared.trackBookStatusChanged(bookId: book.id.uuidString, fromStatus: book.status, toStatus: status)
-                    Task { await self?.loadBooksPaginated(page: 0) }
+                    // Rely on Firestore listener for UI updates instead of redundant loadBooksPaginated
                 }
             }
         }
@@ -967,9 +978,8 @@ class BookViewModel: ObservableObject {
 
     private func setupFirestoreListener() {
         guard let userId = FirebaseConfig.shared.currentUserId else {
-            print("DEBUG BookViewModel: setupFirestoreListener - user not authenticated (currentUserId is nil), setting books to empty")
-            // Do not load from cache for unauthenticated users to prevent showing books from previous sessions
-            self.books = []
+            print("DEBUG BookViewModel: setupFirestoreListener - user not authenticated (currentUserId is nil), keeping existing books")
+            // Keep existing books during auth state changes to prevent premature clearing
             return
         }
 
