@@ -811,6 +811,11 @@ class BookViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if let error = error {
                     self?.errorMessage = "Failed to delete book: \(error.localizedDescription)"
+                } else {
+                    // Remove from local array for immediate UI feedback
+                    if let self = self, let index = self.books.firstIndex(where: { $0.id == book.id }) {
+                        self.books.remove(at: index)
+                    }
                 }
             }
         }
