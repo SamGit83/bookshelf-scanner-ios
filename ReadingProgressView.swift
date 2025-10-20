@@ -18,6 +18,8 @@ struct ReadingProgressView: View {
         self.viewModel = viewModel
         _currentPage = State(initialValue: String(book.currentPage))
         print("DEBUG ReadingProgressView: init called with bookId: \(bookId)")
+        print("DEBUG ReadingProgressView: init called with curr page: \(book.currentPage)")
+        print("DEBUG ReadingProgressView: init called with tot pages: \(book.totalPages)")
     }
 
     var body: some View {
@@ -159,8 +161,6 @@ struct ReadingProgressView: View {
                             ) {
                                 VStack(spacing: AppleBooksSpacing.space16) {
                                     let totalPages = book.totalPages
-                                    print("DEBUG: book.totalPages = \(book.totalPages)")
-                                    print("DEBUG: book.currentPage = \(book.currentPage)")
                                     let progress: CGFloat = totalPages != nil ? min(CGFloat(book.currentPage) / CGFloat(totalPages!), 1.0) : 0.0
                                     ZStack {
                                         if let totalPages = book.totalPages, totalPages > 0 {
