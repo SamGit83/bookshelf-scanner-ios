@@ -797,7 +797,7 @@ class BookViewModel: ObservableObject {
                                         updatedBook.estimatedReadingTime = hours > 0 ? "\(hours) hours" : "Less than 1 hour"
                                     }
                                     
-                                    if let subGenre = recommendation.genre, subGenre != "Unknown" && !subGenre.isEmpty {
+                                    if let subGenre = recommendation?.genre, subGenre != "Unknown" && !subGenre.isEmpty {
                                         updatedBook.subGenre = subGenre
                                     }
                                 }
