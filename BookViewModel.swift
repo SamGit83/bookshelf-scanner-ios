@@ -816,6 +816,9 @@ class BookViewModel: ObservableObject {
                     if let self = self, let index = self.books.firstIndex(where: { $0.id == book.id }) {
                         self.books.remove(at: index)
                     }
+                    // Clear previous error messages and set success message
+                    self?.errorMessage = nil
+                    self?.successMessage = "Book '\(book.title ?? "Unknown")' has been deleted."
                 }
             }
         }
