@@ -10,7 +10,7 @@ struct ReadingProgressBookCard: View {
     let onTap: () -> Void
     let onMarkComplete: () -> Void
 
-    @State private var showBookmark = true
+    @State private var showPageNumber = false
     private let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
 
     private var progress: Double {
@@ -266,20 +266,23 @@ struct ReadingProgressBookCard: View {
                     Spacer()
                     if book.currentPage > 0 {
                         ZStack {
-                            Image(systemName: "bookmark.fill")
-                                .font(.system(size: 16))
-                                .foregroundColor(.white)
-                                .padding(8)
-                                .background(AppleBooksColors.accent.opacity(0.8))
-                                .clipShape(Circle())
-                                .shadow(radius: 2)
-                                .opacity(showBookmark ? 1 : 0)
-                                .animation(.easeInOut(duration: 0.5), value: showBookmark)
-                            Text("\(book.currentPage)")
-                                .font(.system(size: 10))
-                                .foregroundColor(.white)
-                                .opacity(showBookmark ? 0 : 1)
-                                .animation(.easeInOut(duration: 0.5), value: showBookmark)
+                            if showPageNumber {
+                                Text("\(book.currentPage)")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white)
+                                    .padding(8)
+                                    .background(AppleBooksColors.accent.opacity(0.8))
+                                    .clipShape(Circle())
+                                    .shadow(radius: 2)
+                            } else {
+                                Image(systemName: "bookmark.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.white)
+                                    .padding(8)
+                                    .background(AppleBooksColors.accent.opacity(0.8))
+                                    .clipShape(Circle())
+                                    .shadow(radius: 2)
+                            }
                         }
                         .padding(8)
                     }
@@ -288,7 +291,7 @@ struct ReadingProgressBookCard: View {
             }
         )
         .onReceive(timer) { _ in
-            showBookmark.toggle()
+            showPageNumber.toggle()
         }
     }
 }
