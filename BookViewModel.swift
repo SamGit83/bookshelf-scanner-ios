@@ -1569,4 +1569,3 @@ private func processBooksForMissingMetadata(_ booksToProcess: [Book], index: Int
         }
     }
 }
-}
