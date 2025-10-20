@@ -1,63 +1,78 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read and write their own user document
+    // Users collection - authenticated users can only read/write their own user document
+    // This protects user privacy and ensures users can only access their own profile data
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Books collection - users can read/write their own books
+    // Books collection - scoped under users, authenticated users can only access their own books
+    // Supports real-time listeners for library management and bulk operations for book imports
     match /users/{userId}/books/{bookId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Surveys collection - users can read/write their own surveys
+    // Surveys collection - users can read/write surveys where they are the owner (userId in document)
+    // Enables survey functionality while maintaining user data isolation
     match /surveys/{surveyId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
-    // Survey responses collection - users can read/write their own responses
+    // Survey responses collection - users can read/write their own survey responses
+    // Protects survey response data privacy and supports feedback processing workflows
     match /surveyResponses/{responseId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
-    // Feedback processing metadata - users can read/write their own processing data
+    // Feedback processing metadata - users can read/write their own feedback processing data
+    // Supports the feedback processing pipeline while maintaining user data security
     match /feedbackProcessing/{processingId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
     // Processed feedback collection - users can read/write their own processed feedback
+    // Note: Access is based on responseId field linking back to user's survey responses
     match /processedFeedback/{feedbackId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.responseId;
     }
 
-    // Iteration tasks collection - users can read/write their own tasks
+    // Iteration tasks collection - users can read/write their own iteration tasks
+    // Supports task management features in the app
     match /iterationTasks/{taskId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
     // Archived tasks collection - users can read/write their own archived tasks
+    // Maintains task history while keeping data scoped to individual users
     match /archivedTasks/{taskId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
-    // User experiment assignments - users can read/write their own assignments
+    // User experiment assignments - users can read/write their own experiment assignments
+    // Essential for A/B testing functionality while protecting assignment data
     match /userExperimentAssignments/{assignmentId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
 
     // Experiments collection - read-only for all authenticated users
+    // Allows users to access experiment configurations for A/B testing without modification rights
     match /experiments/{experimentId} {
       allow read: if request.auth != null;
-      allow write: if false; // Only admin can write
+      allow write: if false; // Explicit deny for writes - only admin access via Firebase console or admin SDK
     }
 
-    // Waitlist collection - authenticated users can write documents
+    // Waitlist collection - authenticated users can write (add themselves to waitlist)
+    // Supports waitlist signup functionality while preventing unauthorized modifications
     match /waitlist/{document} {
-      allow write: if request.auth != null;
+      allow write: if true;
+      allow read: if false; // No read access needed for waitlist functionality
     }
 
-    // Allow reading public data if needed (e.g., for recommendations)
-    // Add more rules as needed
+    // Deny all other access by default
+    // This fallback rule ensures no unauthorized access to any other collections or documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }

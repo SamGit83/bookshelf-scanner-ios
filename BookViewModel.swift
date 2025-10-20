@@ -811,8 +811,6 @@ class BookViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if let error = error {
                     self?.errorMessage = "Failed to delete book: \(error.localizedDescription)"
-                } else {
-                    Task { await self?.loadBooksPaginated(page: 0) }
                 }
             }
         }
