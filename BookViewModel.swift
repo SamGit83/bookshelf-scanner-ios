@@ -1327,7 +1327,6 @@ private func processBooksForMissingMetadata(_ booksToProcess: [Book], index: Int
         }
     }
 }
-    }
 
     private func updateLocalBook(_ updatedBook: Book) {
         DispatchQueue.main.async {
@@ -1551,13 +1550,11 @@ private func processBooksForMissingMetadata(_ booksToProcess: [Book], index: Int
             case .failure(let error):
                 print("DEBUG BookViewModel: Age rating analysis failed: \(error.localizedDescription) for \(recommendation.title), using Unknown")
                 bookToSave.ageRating = "Unknown"
-            }
             // Save to Firestore and update local array
             self?.saveBookToFirestore(bookToSave)
             self?.updateLocalBook(bookToSave)
             self?.successMessage = "Book added to your library."
             completion(.success(()))
-        }
         } else {
             // Rate limit exceeded, save with unknown age rating
             print("DEBUG BookViewModel: Rate limit exceeded, saving recommended book without age rating analysis: \(recommendation.title)")
@@ -1567,6 +1564,5 @@ private func processBooksForMissingMetadata(_ booksToProcess: [Book], index: Int
             updateLocalBook(bookToSave)
             successMessage = "Book added to your library."
             completion(.success(()))
-        }
     }
 }
