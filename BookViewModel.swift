@@ -1567,4 +1567,6 @@ private func processBooksForMissingMetadata(_ booksToProcess: [Book], index: Int
             successMessage = "Book added to your library."
             completion(.success(()))
         }
+    }
+}
 }
