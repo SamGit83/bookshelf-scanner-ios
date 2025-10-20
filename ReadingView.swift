@@ -95,22 +95,94 @@ struct ReadingProgressBookCard: View {
                     VStack(alignment: .leading, spacing: AppleBooksSpacing.space4) {
                         Text(book.title ?? "Unknown Title")
                             .font(AppleBooksTypography.bodyLarge)
+                            .bold()
                             .foregroundColor(AppleBooksColors.text)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
 
                         Text(book.author ?? "Unknown Author")
                             .font(AppleBooksTypography.caption)
-                            .foregroundColor(AppleBooksColors.textSecondary)
+                            .foregroundColor(AppleBooksColors.text)
 
-                        if let genre = book.genre {
-                            Text(genre)
-                                .font(AppleBooksTypography.captionBold)
-                                .foregroundColor(AppleBooksColors.accent)
-                                .padding(.horizontal, AppleBooksSpacing.space8)
+                        // Row 1: Page count, reading time, and age rating badges
+                        HStack(spacing: AppleBooksSpacing.space6) {
+                            // Page count badge
+                            let pageText = book.pageCount != nil ? "\(book.pageCount!) pages" : "Page count unavailable"
+                            Text(pageText)
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.promotional)
+                                .padding(.horizontal, AppleBooksSpacing.space6)
                                 .padding(.vertical, AppleBooksSpacing.space2)
-                                .background(AppleBooksColors.accent.opacity(0.1))
+                                .background(AppleBooksColors.promotional.opacity(0.1))
                                 .cornerRadius(4)
+
+                            // Reading time badge
+                            let readingText = book.estimatedReadingTime != nil ? book.estimatedReadingTime! : "Reading time unavailable"
+                            Text(readingText)
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(AppleBooksColors.success)
+                                .padding(.horizontal, AppleBooksSpacing.space6)
+                                .padding(.vertical, AppleBooksSpacing.space2)
+                                .background(AppleBooksColors.success.opacity(0.1))
+                                .cornerRadius(4)
+
+                            // Age rating badge
+                            if let ageRating = book.ageRating {
+                                let isChildren = ageRating.lowercased().contains("children") || ageRating.lowercased().contains("general")
+                                let isTeen = ageRating.lowercased().contains("teen")
+                                let isAdult = ageRating.lowercased().contains("adult") || ageRating.lowercased().contains("mature")
+                                let (bgColor, fgColor): (Color, Color) = {
+                                    if isChildren {
+                                        return (AppleBooksColors.success.opacity(0.1), AppleBooksColors.success)
+                                    } else if isTeen {
+                                        return (AppleBooksColors.accent.opacity(0.1), AppleBooksColors.accent)
+                                    } else if isAdult {
+                                        return (Color(hex: "FF9500").opacity(0.1), Color(hex: "FF9500"))
+                                    } else {
+                                        return (AppleBooksColors.card.opacity(0.8), AppleBooksColors.text)
+                                    }
+                                }()
+                                Text(ageRating)
+                                    .font(AppleBooksTypography.caption)
+                                    .foregroundColor(fgColor)
+                                    .padding(.horizontal, AppleBooksSpacing.space6)
+                                    .padding(.vertical, AppleBooksSpacing.space2)
+                                    .background(bgColor)
+                                    .cornerRadius(4)
+                            } else {
+                                Text("Unrated")
+                                    .font(AppleBooksTypography.caption)
+                                    .foregroundColor(AppleBooksColors.text)
+                                    .padding(.horizontal, AppleBooksSpacing.space6)
+                                    .padding(.vertical, AppleBooksSpacing.space2)
+                                    .background(AppleBooksColors.card.opacity(0.8))
+                                    .cornerRadius(4)
+                            }
+                        }
+
+                        // Row 2: Genre and sub-genre badges
+                        HStack(spacing: AppleBooksSpacing.space6) {
+                            if let genre = book.genre {
+                                Text(genre)
+                                    .font(AppleBooksTypography.captionBold)
+                                    .foregroundColor(AppleBooksColors.accent)
+                                    .padding(.horizontal, AppleBooksSpacing.space8)
+                                    .padding(.vertical, AppleBooksSpacing.space2)
+                                    .background(AppleBooksColors.accent.opacity(0.1))
+                                    .cornerRadius(4)
+                            }
+
+                            // Sub-genre badge
+                            let subGenreText = book.subGenre != nil ? book.subGenre! : "Sub-genre unavailable"
+                            Text(subGenreText)
+                                .font(AppleBooksTypography.caption)
+                                .foregroundColor(Color(hex: "B19CD9"))
+                                .padding(.horizontal, AppleBooksSpacing.space6)
+                                .padding(.vertical, AppleBooksSpacing.space2)
+                                .background(Color(hex: "B19CD9").opacity(0.1))
+                                .cornerRadius(4)
+
+                            Spacer()
                         }
                     }
 
@@ -171,6 +243,29 @@ struct ReadingProgressBookCard: View {
                 }
             }
         }
+        .overlay(
+            VStack {
+                HStack {
+                    Spacer()
+                    if book.currentPage > 0 {
+                        ZStack {
+                            Image(systemName: "bookmark.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white)
+                                .padding(8)
+                                .background(AppleBooksColors.accent.opacity(0.8))
+                                .clipShape(Circle())
+                                .shadow(radius: 2)
+                            Text("\(book.currentPage)")
+                                .font(.system(size: 10))
+                                .foregroundColor(.white)
+                        }
+                        .padding(8)
+                    }
+                }
+                Spacer()
+            }
+        )
     }
 }
 

@@ -1191,6 +1191,17 @@ class BookViewModel: ObservableObject {
                         self.processBooksForAgeRatings(Array(booksWithoutAgeRating), index: 0)
                     }
                 }
+
+                // Process missing metadata for books
+                let booksMissingMetadata = loadedBooks.filter {
+                    $0.pageCount == nil || $0.subGenre == nil || $0.subGenre?.isEmpty == true || $0.estimatedReadingTime == nil || $0.estimatedReadingTime?.isEmpty == true
+                }
+                if !booksMissingMetadata.isEmpty {
+                    print("DEBUG BookViewModel: Found \(booksMissingMetadata.count) books missing metadata, starting lazy fetch")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { // Slight delay after age ratings
+                        self.processBooksForMissingMetadata(Array(booksMissingMetadata), index: 0)
+                    }
+                }
             }
     }
 
@@ -1261,14 +1272,61 @@ class BookViewModel: ObservableObject {
             self?.updateLocalBook(updatedBook)
             print("DEBUG BookViewModel: analyzeAndSaveBook END for book: \(book.title ?? ""), timestamp: \(Date())")
         }
-        } else {
-            // Rate limit exceeded, save with unknown age rating
-            print("DEBUG BookViewModel: Rate limit exceeded, saving book without age rating analysis: \(book.title ?? "")")
+    } else {
+        // Rate limit exceeded, save with unknown age rating
+        print("DEBUG BookViewModel: Rate limit exceeded, saving book without age rating analysis: \(book.title ?? "")")
+        var updatedBook = book
+        updatedBook.ageRating = "Unknown"
+        saveBookToFirestore(updatedBook)
+        updateLocalBook(updatedBook)
+    }
+}
+
+private func processBooksForMissingMetadata(_ booksToProcess: [Book], index: Int) {
+    guard index < booksToProcess.count else {
+        print("DEBUG BookViewModel: Finished processing all books for missing metadata")
+        return
+    }
+
+    let book = booksToProcess[index]
+    print("DEBUG BookViewModel: Fetching missing metadata for existing book (\(index + 1)/\(booksToProcess.count)): \(book.title ?? "") by \(book.author ?? "")")
+
+    // Check rate limit before fetching
+    if rateLimiter.canMakeCall() {
+        rateLimiter.recordCall()
+        googleBooksService.fetchBookDetails(isbn: book.isbn, title: book.title, author: book.author) { [weak self] result in
             var updatedBook = book
-            updatedBook.ageRating = "Unknown"
-            saveBookToFirestore(updatedBook)
-            updateLocalBook(updatedBook)
+            
+            if case .success(let recommendation) = result {
+                if let pageCount = recommendation?.pageCount, pageCount > 0 {
+                    updatedBook.pageCount = pageCount
+                    updatedBook.totalPages = pageCount
+                    let hours = pageCount / 250
+                    updatedBook.estimatedReadingTime = hours > 0 ? "\(hours) hours" : "Less than 1 hour"
+                }
+                
+                if let subGenre = recommendation?.genre, !subGenre.isEmpty && subGenre != "Unknown" {
+                    updatedBook.subGenre = subGenre
+                }
+            }
+            
+            // Save updated book
+            self?.saveBookToFirestore(updatedBook)
+            self?.updateLocalBook(updatedBook)
+            
+            // Process next book after delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self?.processBooksForMissingMetadata(booksToProcess, index: index + 1)
+            }
         }
+    } else {
+        print("DEBUG BookViewModel: Rate limit exceeded, skipping metadata fetch for: \(book.title ?? "")")
+        // Process next book
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.processBooksForMissingMetadata(booksToProcess, index: index + 1)
+        }
+    }
+}
     }
 
     private func updateLocalBook(_ updatedBook: Book) {
